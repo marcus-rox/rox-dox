@@ -1,9 +1,24 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
 import pytest
+
+
+@pytest.fixture(scope="session")
+def plantuml_jar() -> Path:
+    repository_root = Path(__file__).resolve().parents[1]
+    configured_path = os.environ.get("ROX_DOX_PLANTUML_JAR")
+    jar = (
+        Path(configured_path)
+        if configured_path
+        else repository_root / "tools/plantuml.jar"
+    )
+    if not jar.is_file():
+        pytest.fail(f"PlantUML jar not found at {jar}; run scripts/fetch_plantuml.sh")
+    return jar
 
 
 @pytest.fixture
