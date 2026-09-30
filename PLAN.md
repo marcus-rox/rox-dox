@@ -7,6 +7,8 @@
 Marcus can start at the rox-core root page and, by clicking, reach any folder's block, schema,
 sequence and state diagrams with every element cited (SPEC R-1 to R-4).
 
+![rox-dox architecture: sources → authoring → build → output](docs/architecture.svg)
+
 ## Constraints
 
 - Diagrams are UML, with a soft limit of about 12 boxes per diagram. More than that is unreadable, and the CIAO study found generated diagrams to be the weakest output. Schema diagrams are exempt: they show every table the module touches, even 37 or more.
