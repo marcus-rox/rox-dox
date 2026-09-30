@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import date
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -38,6 +38,7 @@ class Node(Model):
     label: str
     source: Source
     link: str | None = None
+    kind: Literal["component", "store", "external", "queue"] = "component"
 
 
 class Edge(Model):

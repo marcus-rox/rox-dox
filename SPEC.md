@@ -107,6 +107,6 @@ None.
 | Requirement | Component | Test | Status |
 |---|---|---|---|
 | R-1 | page tree | — | unbound |
-| R-2 | page renderer | — | unbound |
+| R-2 | page renderer | `tests/conformance/test_r2_layout.py` | green |
 | R-3 | context panel | — | unbound |
-| R-4 | citation check | — | unbound |
+| R-4 | citation check | `tests/conformance/test_r4_citations.py` | green |
