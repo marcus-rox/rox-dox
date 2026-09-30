@@ -71,13 +71,11 @@ class BlockDiagram(Model):
         for edge in self.edges:
             if edge.src not in declared_nodes:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: "
-                    f"unknown node '{edge.src}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.src}'"
                 )
             if edge.dst not in declared_nodes:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: "
-                    f"unknown node '{edge.dst}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.dst}'"
                 )
         return self
 
@@ -107,8 +105,7 @@ class Sequence(Model):
         duplicate_id = _first_duplicate(participant_ids)
         if duplicate_id is not None:
             raise ValueError(
-                f"sequence '{self.title}': "
-                f"duplicate participant id '{duplicate_id}'"
+                f"sequence '{self.title}': duplicate participant id '{duplicate_id}'"
             )
 
         for step_number, step in enumerate(self.steps, start=1):
@@ -241,9 +238,7 @@ class Page(Model):
     notion: list[NotionDoc]
 
 
-def _claim_sources(
-    claims: list[Claim], section: str
-) -> list[tuple[str, Source]]:
+def _claim_sources(claims: list[Claim], section: str) -> list[tuple[str, Source]]:
     return [
         (f"TLDR {section}: {claim.text[:60]}", source)
         for claim in claims
@@ -257,12 +252,9 @@ def page_sources(page: Page) -> list[tuple[str, Source]]:
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
     sources.extend((("TLDR table", source) for source in page.tldr.table.sources))
     sources.extend(_claim_sources(page.tldr.notes, "note"))
+    sources.extend((f"block node {node.id}", node.source) for node in page.block.nodes)
     sources.extend(
-        (f"block node {node.id}", node.source) for node in page.block.nodes
-    )
-    sources.extend(
-        (f"block edge {edge.src}->{edge.dst}", edge.source)
-        for edge in page.block.edges
+        (f"block edge {edge.src}->{edge.dst}", edge.source) for edge in page.block.edges
     )
 
     for sequence in page.sequences:
