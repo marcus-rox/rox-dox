@@ -220,10 +220,10 @@ class Related(Model):
 
 
 class NotionDoc(Model):
-    title: str
+    title: str = Field(min_length=1)
     url: str
     last_edited: date
-    excerpt: str
+    excerpt: str = Field(min_length=1, max_length=600)
 
 
 class Page(Model):

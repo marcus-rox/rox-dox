@@ -139,7 +139,7 @@ def test_notion_doc_url_requires_notion_host(
     problems = page_problems(page, repo)
 
     assert len(problems) == 1
-    assert "Notion doc 'Design notes'" in problems[0]
+    assert "notion 'Design notes'" in problems[0]
     assert "https://example.com/x" in problems[0]
 
 

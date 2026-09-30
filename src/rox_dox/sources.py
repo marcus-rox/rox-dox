@@ -127,7 +127,7 @@ def page_problems(page: Page, repo: Path) -> list[str]:
         )
 
     for notion_doc in page.notion:
-        problem = _notion_problem(f"Notion doc '{notion_doc.title}'", notion_doc.url)
+        problem = _notion_problem(f"notion '{notion_doc.title}'", notion_doc.url)
         if problem is not None:
             problems.append(problem)
 

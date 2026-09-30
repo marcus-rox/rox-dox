@@ -15,6 +15,7 @@ from rox_dox.diagrams import (
 from rox_dox.links import page_href, source_url
 from rox_dox.model import (
     Claim,
+    NotionDoc,
     Page,
     Related,
     Sequence,
@@ -67,6 +68,29 @@ body {
 }
 #context {
   grid-area: aside;
+}
+#context > h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+#context > h2:not(:first-child) {
+  margin-top: 1.25rem;
+}
+.notion-doc + .notion-doc {
+  padding-top: 0.75rem;
+  border-top: 1px solid #e2e7ee;
+}
+.notion-doc h3 {
+  margin: 0.5rem 0;
+  overflow-wrap: anywhere;
+}
+.context-meta {
+  margin: 0;
+  color: #667085;
+  font-size: 0.85rem;
+}
+.notion-doc blockquote {
+  margin: 0.5rem 0 1rem;
 }
 .page-main {
   grid-area: main;
@@ -681,6 +705,29 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
     )
 
 
+def _notion_doc_html(document: NotionDoc) -> str:
+    last_edited = document.last_edited.isoformat()
+    return (
+        '<article class="notion-doc">'
+        f"<h3>{_anchor(document.url, document.title)}</h3>"
+        f'<p class="context-meta">Last edited <time datetime="{last_edited}">'
+        f"{last_edited}</time></p>"
+        f"<blockquote>{_escape(document.excerpt)}</blockquote>"
+        "</article>"
+    )
+
+
+def _context_panel_html(page: Page) -> str:
+    notion_content = "".join(_notion_doc_html(document) for document in page.notion)
+    if not notion_content:
+        notion_content = '<p class="empty">No related Notion pages.</p>'
+    return (
+        '<aside id="context" aria-label="Context">'
+        f"<h2>Notion</h2>{notion_content}"
+        '<h2>Slack</h2><p class="empty">Not yet available.</p></aside>'
+    )
+
+
 def render_page(
     page: Page,
     *,
@@ -711,6 +758,6 @@ def render_page(
         f'<body><div class="page-shell">{_site_nav_html(tree, page)}'
         f'<main class="page-main">{_breadcrumbs_html(tree, page)}'
         f"{page_header}{sections}</main>"
-        '<aside id="context" aria-label="Context"></aside></div></body></html>'
+        f"{_context_panel_html(page)}</div></body></html>"
     )
     return _offline_html(document)
