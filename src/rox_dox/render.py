@@ -24,6 +24,7 @@ from rox_dox.model import (
 )
 from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.schema import Table
+from rox_dox.tree import SiteTree
 
 
 PAGE_CSS = """\
@@ -42,9 +43,66 @@ body {
   line-height: 1.6;
 }
 .page-shell {
-  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 320px;
+  grid-template-areas: "nav main aside";
+  align-items: start;
+  gap: 1rem;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+}
+#site-nav, #context {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid #e2e7ee;
+  border-radius: 14px;
+  background: #fff;
+}
+#site-nav {
+  grid-area: nav;
+}
+#context {
+  grid-area: aside;
+}
+.page-main {
+  grid-area: main;
+  min-width: 0;
+}
+.page-tree, .page-tree ul {
+  margin: 0;
+  padding-left: 1rem;
+  list-style: none;
+}
+.page-tree {
+  padding-left: 0;
+}
+.page-tree li {
+  margin: 0.25rem 0;
+}
+.page-tree summary {
+  cursor: pointer;
+}
+.page-tree a {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.page-tree a.current {
+  background: #E8F0FE;
+  color: #182230;
+  font-weight: 700;
+}
+.breadcrumbs {
+  margin: 0.25rem 0 1rem;
+  color: #667085;
+}
+.breadcrumbs a {
+  margin-right: 0.4rem;
 }
 .page-header {
   margin-bottom: 1.5rem;
@@ -64,6 +122,9 @@ h1, h2, h3 {
   margin: 0.5rem 0 0;
   color: #667085;
   overflow-wrap: anywhere;
+}
+.submodules {
+  margin: 0.5rem 0 0;
 }
 section {
   margin: 1rem 0;
@@ -156,12 +217,27 @@ th {
   color: #667085;
   font-style: italic;
 }
+blockquote {
+  margin: 0.75rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid #e2e7ee;
+  color: #475467;
+}
 .related-list li {
   overflow-wrap: anywhere;
 }
-@media (max-width: 640px) {
+@media (max-width: 1100px) {
   .page-shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "nav"
+      "main"
+      "aside";
     padding: 1rem 0.75rem 2rem;
+  }
+  #site-nav, #context {
+    position: static;
+    max-height: none;
   }
   .page-header, section {
     padding: 1rem;
@@ -529,21 +605,92 @@ def _related_section(page: Page, *, repo_url: str) -> str:
     return _section("related", "Related", f'<ul class="related-list">{items}</ul>')
 
 
+def _page_link(tree: SiteTree, from_id: str, to_id: str) -> str:
+    return _anchor(page_href(from_id, to_id), tree.pages[to_id].title)
+
+
+def _current_page_link(tree: SiteTree, from_id: str, page_id: str) -> str:
+    return (
+        f'<a class="current" aria-current="page" '
+        f'href="{_escape(page_href(from_id, page_id))}">'
+        f"{_escape(tree.pages[page_id].title)}</a>"
+    )
+
+
+def _tree_item(
+    tree: SiteTree,
+    current_id: str,
+    page_id: str,
+    ancestors: set[str],
+) -> str:
+    link = (
+        _current_page_link(tree, current_id, page_id)
+        if page_id == current_id
+        else _page_link(tree, current_id, page_id)
+    )
+    child_ids = tree.children_of(page_id)
+    if not child_ids:
+        return f"<li>{link}</li>"
+
+    expanded = page_id == tree.root or page_id in ancestors or page_id == current_id
+    open_attribute = " open" if expanded else ""
+    items = "".join(
+        _tree_item(tree, current_id, child_id, ancestors) for child_id in child_ids
+    )
+    return (
+        f"<li><details{open_attribute}><summary>{link}</summary>"
+        f"<ul>{items}</ul></details></li>"
+    )
+
+
+def _site_nav_html(tree: SiteTree, page: Page) -> str:
+    ancestors = set(tree.ancestors(page.id))
+    root_item = _tree_item(tree, page.id, tree.root, ancestors)
+    return (
+        '<nav id="site-nav" aria-label="Site navigation">'
+        f'<ul class="page-tree">{root_item}</ul></nav>'
+    )
+
+
+def _breadcrumbs_html(tree: SiteTree, page: Page) -> str:
+    ancestors = tree.ancestors(page.id)
+    links = [_page_link(tree, page.id, ancestor) for ancestor in ancestors]
+    links.append(_escape(page.title))
+    trail = ' <span aria-hidden="true">›</span> '.join(links)
+    return f'<nav class="breadcrumbs" aria-label="Breadcrumbs">{trail}</nav>'
+
+
+def _submodules_html(tree: SiteTree, page: Page) -> str:
+    child_ids = tree.children_of(page.id)
+    if not child_ids:
+        return ""
+    links = ", ".join(_page_link(tree, page.id, child_id) for child_id in child_ids)
+    return f'<p class="submodules"><strong>Submodules:</strong> {links}</p>'
+
+
+def _page_header_html(tree: SiteTree, page: Page) -> str:
+    covers = ", ".join(f"<code>{_escape(path)}</code>" for path in page.paths)
+    return (
+        '<header class="page-header">'
+        f"<h1>{_escape(page.title)}</h1>"
+        f'<p class="page-meta">Page ID: <code>{_escape(page.id)}</code>'
+        f" · verified at <code>{_escape(page.commit[:10])}</code></p>"
+        f'<p class="page-meta">Covers: {covers}</p>'
+        f"{_submodules_html(tree, page)}"
+        "</header>"
+    )
+
+
 def render_page(
     page: Page,
     *,
+    tree: SiteTree,
     repo_url: str,
     tables: Mapping[str, Table],
     jar: Path,
 ) -> str:
     emit_diagram_warnings(page)
-    page_header = (
-        '<header class="page-header">'
-        f"<h1>{_escape(page.title)}</h1>"
-        f'<p class="page-meta">Page ID: <code>{_escape(page.id)}</code>'
-        f" · verified at <code>{_escape(page.commit[:10])}</code></p>"
-        "</header>"
-    )
+    page_header = _page_header_html(tree, page)
     sections = "".join(
         [
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
@@ -561,6 +708,9 @@ def render_page(
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{_escape(page.title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
-        f'<body><main class="page-shell">{page_header}{sections}</main></body></html>'
+        f'<body><div class="page-shell">{_site_nav_html(tree, page)}'
+        f'<main class="page-main">{_breadcrumbs_html(tree, page)}'
+        f"{page_header}{sections}</main>"
+        '<aside id="context" aria-label="Context"></aside></div></body></html>'
     )
     return _offline_html(document)

@@ -13,6 +13,7 @@ from rox_dox.plantuml import DiagramError
 from rox_dox.render import render_page
 from rox_dox.schema import Table, extract_tables
 from rox_dox.sources import page_problems
+from rox_dox.tree import build_tree, tree_problems
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -51,6 +52,7 @@ def _load_pages(pages_dir: Path) -> list[tuple[Path, Page | None, str | None]]:
 def _check_pages(pages_dir: Path, repo: Path) -> int:
     pages = _load_pages(pages_dir)
     problems_found = False
+    valid_pages = []
     for page_file, page, load_error in pages:
         if load_error is not None:
             print(f"{page_file}: {load_error}")
@@ -58,10 +60,15 @@ def _check_pages(pages_dir: Path, repo: Path) -> int:
             continue
         if page is None:
             continue
+        valid_pages.append(page)
 
         for problem in page_problems(page, repo):
             print(f"{page_file}: {problem}")
             problems_found = True
+
+    for problem in tree_problems(valid_pages):
+        print(f"{pages_dir}: {problem}")
+        problems_found = True
 
     if problems_found:
         return 1
@@ -83,6 +90,7 @@ def _build_pages(args: argparse.Namespace) -> int:
     output_paths: dict[Path, Path] = {}
     table_cache: dict[tuple[Path, str], dict[str, Table]] = {}
     table_errors: dict[tuple[Path, str], str] = {}
+    valid_pages = []
 
     for page_file, page, load_error in _load_pages(args.pages_dir):
         if load_error is not None:
@@ -90,6 +98,7 @@ def _build_pages(args: argparse.Namespace) -> int:
             continue
         if page is None:
             continue
+        valid_pages.append(page)
 
         citation_problems = page_problems(page, args.repo)
         problems.extend((page_file, problem) for problem in citation_problems)
@@ -144,17 +153,21 @@ def _build_pages(args: argparse.Namespace) -> int:
             output_paths[output_path] = page_file
             pages_to_render.append((page_file, page, tables, output_path))
 
+    problems.extend((args.pages_dir, problem) for problem in tree_problems(valid_pages))
+
     if problems:
         for page_file, problem in problems:
             print(f"{page_file}: {problem}")
         return 1
 
+    tree = build_tree(valid_pages)
     rendered_pages: list[tuple[Path, str]] = []
     render_problems: list[tuple[Path, str]] = []
     for page_file, page, tables, output_path in pages_to_render:
         try:
             rendered = render_page(
                 page,
+                tree=tree,
                 repo_url=args.repo_url,
                 tables=tables,
                 jar=args.plantuml_jar,

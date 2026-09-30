@@ -36,6 +36,30 @@ def test_missing_source_file_is_reported(
     assert "pkg/missing.py" in problems[0]
 
 
+def test_page_path_must_be_a_git_tree(
+    git_repo: tuple[Path, str], page_data: dict[str, object]
+) -> None:
+    repo, _ = git_repo
+    page_data["paths"] = ["pkg/a.py"]
+    page = Page.model_validate(page_data)
+
+    problems = page_problems(page, repo)
+
+    assert problems == [f"path 'pkg/a.py' is not a folder at {page.commit[:8]}"]
+
+
+def test_missing_page_path_is_reported(
+    git_repo: tuple[Path, str], page_data: dict[str, object]
+) -> None:
+    repo, _ = git_repo
+    page_data["paths"] = ["pkg/missing"]
+    page = Page.model_validate(page_data)
+
+    problems = page_problems(page, repo)
+
+    assert problems == [f"path 'pkg/missing' is not a folder at {page.commit[:8]}"]
+
+
 def test_source_range_cannot_start_after_end(
     git_repo: tuple[Path, str], page_data: dict[str, object]
 ) -> None:

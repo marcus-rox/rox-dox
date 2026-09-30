@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import os
 import subprocess
 from pathlib import Path
@@ -26,11 +27,13 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
     repo = tmp_path / "source-repo"
     repo.mkdir()
     (repo / "pkg").mkdir()
+    (repo / "pkg" / "sub").mkdir()
     source_file = repo / "pkg" / "a.py"
     source_file.write_text(
         "\n".join(f"line {line_number}" for line_number in range(1, 11)) + "\n",
         encoding="utf-8",
     )
+    (repo / "pkg" / "sub" / "b.py").write_text("leaf source\n", encoding="utf-8")
     models_dir = repo / "models"
     models_dir.mkdir()
     (models_dir / "user.py").write_text(
@@ -52,7 +55,15 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
 
     subprocess.run(["git", "init", str(repo)], check=True, capture_output=True)
     subprocess.run(
-        ["git", "-C", str(repo), "add", "pkg/a.py", "models/user.py"],
+        [
+            "git",
+            "-C",
+            str(repo),
+            "add",
+            "pkg/a.py",
+            "pkg/sub/b.py",
+            "models/user.py",
+        ],
         check=True,
         capture_output=True,
     )
@@ -80,6 +91,7 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
         "title": "Rox Core",
         "commit": commit,
         "parent": None,
+        "paths": ["."],
         "tldr": {
             "summary": [{"text": "Handles requests.", "sources": [code_source]}],
             "key_points": [],
@@ -153,3 +165,32 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
         "related": [],
         "notion": [],
     }
+
+
+@pytest.fixture
+def site_pages(page_data: dict[str, object]) -> list[dict[str, object]]:
+    root = copy.deepcopy(page_data)
+    root["title"] = "rox-core"
+    root["notion"] = [
+        {
+            "title": "API guide",
+            "url": "https://www.notion.so/rox/API-guide-123",
+            "last_edited": "2026-06-10",
+            "excerpt": "Reference material for the public API.",
+        }
+    ]
+
+    child = copy.deepcopy(page_data)
+    child["id"] = "rox-core/pkg"
+    child["title"] = "pkg"
+    child["parent"] = "rox-core"
+    child["paths"] = ["pkg"]
+    child["block"]["nodes"][0]["link"] = "rox-core/pkg/sub"
+
+    leaf = copy.deepcopy(page_data)
+    leaf["id"] = "rox-core/pkg/sub"
+    leaf["title"] = "sub"
+    leaf["parent"] = "rox-core/pkg"
+    leaf["paths"] = ["pkg/sub"]
+
+    return [root, child, leaf]

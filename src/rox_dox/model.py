@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import date
+from pathlib import PurePosixPath
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class Model(BaseModel):
@@ -230,6 +231,7 @@ class Page(Model):
     title: str
     commit: str
     parent: str | None
+    paths: list[str] = Field(min_length=1)
     tldr: Tldr
     block: BlockDiagram
     data: DataModel
@@ -237,6 +239,20 @@ class Page(Model):
     states: list[StateMachine]
     related: list[Related]
     notion: list[NotionDoc]
+
+    @field_validator("paths")
+    @classmethod
+    def validate_paths(cls, paths: list[str]) -> list[str]:
+        for path in paths:
+            parsed = PurePosixPath(path)
+            if (
+                not path
+                or path.endswith("/")
+                or parsed.is_absolute()
+                or ".." in parsed.parts
+            ):
+                raise ValueError(f"path '{path}' is not repo-relative")
+        return paths
 
 
 def _claim_sources(claims: list[Claim], section: str) -> list[tuple[str, Source]]:

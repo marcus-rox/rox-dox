@@ -7,6 +7,7 @@ from pathlib import Path
 from rox_dox.model import Page
 from rox_dox.render import render_page
 from rox_dox.schema import extract_tables
+from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 SECTION_IDS = [
@@ -47,6 +48,7 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
     tables = extract_tables(repo, commit)
     document = render_page(
         page,
+        tree=build_tree([page]),
         repo_url=REPO_URL,
         tables=tables,
         jar=plantuml_jar,
@@ -114,7 +116,13 @@ def test_empty_sections_remain_with_explanatory_message(
     payload["related"] = []
     page = Page.model_validate(payload)
 
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert re.findall(r'<section id="([^"]+)">', document) == SECTION_IDS
     for section_id in ("block", "schema", "sequences", "states", "related"):

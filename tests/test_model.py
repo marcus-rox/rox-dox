@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 
@@ -80,3 +81,18 @@ def test_related_item_requires_exactly_one_target(
 
     with pytest.raises(ValidationError, match="exactly one of page or url"):
         Page.model_validate(page_data)
+
+
+@pytest.mark.parametrize(
+    "paths",
+    [[], [""], ["/absolute"], ["pkg/../private"], ["pkg/"]],
+)
+def test_page_paths_must_be_nonempty_and_repo_relative(
+    page_data: dict[str, object],
+    paths: list[str],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["paths"] = paths
+
+    with pytest.raises(ValidationError):
+        Page.model_validate(payload)
