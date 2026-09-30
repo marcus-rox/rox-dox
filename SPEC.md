@@ -1,4 +1,4 @@
-# rox-docs — specification
+# rox-dox — specification
 
 **Status · 2026-09-30 · 4 requirements, 4 unbound (nothing built yet).**
 
@@ -26,7 +26,7 @@ click into a module worth making, so `R-1` green with `R-2` red is a tree of emp
 A researcher without production access needs to understand what rox-core does, what it
 stores and how its parts talk, starting from one overview page and clicking into modules and
 submodules for progressively more detail. The docs are self-contained HTML pages in the
-Rox-AI/rox-docs repository, regenerated when someone runs the generator.
+marcus-rox/rox-dox repository, regenerated when someone runs the generator.
 
 ## Requirements
 
