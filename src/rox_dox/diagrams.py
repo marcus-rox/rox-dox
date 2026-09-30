@@ -26,6 +26,11 @@ skinparam cloudBackgroundColor #F3E8FD
 skinparam cloudBorderColor #8B4FD1
 skinparam queueBackgroundColor #E7F6EC
 skinparam queueBorderColor #2F9E5B
+skinparam participantBackgroundColor #E8F0FE
+skinparam participantBorderColor #3B6FD8
+skinparam sequenceLifeLineBorderColor #9AA4B2
+skinparam stateBackgroundColor #E8F0FE
+skinparam stateBorderColor #3B6FD8
 skinparam classBackgroundColor #E8F0FE
 skinparam classHeaderBackgroundColor #E8F0FE
 skinparam classBorderColor #3B6FD8"""
@@ -119,6 +124,7 @@ def schema_plantuml(
         "nosql",
     )
     lines = _diagram_header(smetana=True)
+    lines.extend(["hide circle", "hide empty methods"])
     for table_name in page.data.sql_tables:
         table = tables[table_name]
         alias = sql_aliases[table_name]

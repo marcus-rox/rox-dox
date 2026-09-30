@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -105,7 +106,7 @@ def _build_pages(args: argparse.Namespace) -> int:
                 problems.append((page_file, table_errors[cache_key]))
             else:
                 tables = table_cache[cache_key]
-                for table_name in page.data.sql_tables:
+                for table_name in dict.fromkeys(page.data.sql_tables):
                     if table_name not in tables:
                         problems.append(
                             (
@@ -113,6 +114,14 @@ def _build_pages(args: argparse.Namespace) -> int:
                                 f"SQL table '{table_name}' not found at "
                                 f"commit {page.commit[:10]}",
                             )
+                        )
+                    elif tables[table_name].duplicate_paths:
+                        duplicate_paths = ", ".join(tables[table_name].duplicate_paths)
+                        print(
+                            f"warning: {page_file}: SQL table '{table_name}' also "
+                            f"declared in {duplicate_paths}; using "
+                            f"{tables[table_name].source.path}",
+                            file=sys.stderr,
                         )
 
         output_path = _page_output_path(args.out, page)

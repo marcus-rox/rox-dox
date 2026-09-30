@@ -93,6 +93,34 @@ def test_related_page_links_are_relative_and_external_targets_link_out(
     assert '<a href="https://www.notion.so/rox/Foo-123">[1]</a>' in document
 
 
+def test_empty_key_points_show_module_placeholder(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    page = _empty_page(page_data)
+    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+
+    assert (
+        '<h3>Key Points</h3><p class="empty">Nothing to show for this module.</p>'
+        in document
+    )
+
+
+def test_empty_notes_show_module_placeholder(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["tldr"]["notes"] = []
+    page = _empty_page(payload)
+    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+
+    assert (
+        '<h3>Interesting Notes</h3><p class="empty">Nothing to show for this module.</p>'
+        in document
+    )
+
+
 def test_page_text_is_html_escaped(
     page_data: dict[str, object],
     plantuml_jar: Path,

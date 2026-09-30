@@ -139,8 +139,11 @@ def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
     source = schema_plantuml(page, repo_url=REPO_URL, tables=tables)
     svg = render_svg(source, plantuml_jar)
 
+    assert "hide circle" in source
+    assert "hide empty methods" in source
     assert "id: Integer <<PK>>" in source
     assert "user_id: Integer <<FK>>" in source
+    assert all(marker in svg for marker in ("PK", "FK", "redis"))
     assert "sql_1 --> sql_0" in source
     assert "  key" in source
     assert "  value" in source
@@ -186,6 +189,7 @@ def test_sequence_diagram_autonumbers_and_links_participants_and_steps(
 
     assert "autonumber" in source
     assert "!pragma layout smetana" not in source
+    assert all(color in svg for color in ("#E8F0FE", "#3B6FD8", "#9AA4B2"))
     assert {
         source_url(
             participant.source,
@@ -223,6 +227,7 @@ def test_state_diagram_links_states_initial_arrow_and_transitions(
         commit=commit,
     )
     assert f"[*] --> state_0 : [[{first_state_url}" in source
+    assert all(color in svg for color in ("#E8F0FE", "#3B6FD8"))
     assert {
         source_url(state.source, repo_url=REPO_URL, commit=commit)
         for state in page.states[0].states

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import subprocess
-import sys
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -25,6 +24,7 @@ class Table(SchemaModel):
     name: str
     columns: list[Column]
     source: CodeSource
+    duplicate_paths: list[str] = []
 
 
 def _call_name(expression: ast.expr) -> str | None:
@@ -206,11 +206,9 @@ def extract_tables(repo: Path, commit: str) -> dict[str, Table]:
 
         for table in file_tables:
             if table.name in tables:
-                print(
-                    f"warning: duplicate SQL table '{table.name}' in {path}; "
-                    f"keeping {tables[table.name].source.path}",
-                    file=sys.stderr,
-                )
+                kept_table = tables[table.name]
+                if path != kept_table.source.path:
+                    kept_table.duplicate_paths.append(path)
                 continue
             tables[table.name] = table
     return tables

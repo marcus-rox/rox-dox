@@ -252,15 +252,25 @@ def _tldr_html(page: Page, *, repo_url: str) -> str:
         f"<p>{_claim_text(claim, page=page, repo_url=repo_url)}</p>"
         for claim in page.tldr.summary
     )
+    key_points = (
+        _claim_list(page.tldr.key_points, page=page, repo_url=repo_url)
+        if page.tldr.key_points
+        else f'<p class="empty">{EMPTY_MESSAGE}</p>'
+    )
+    notes = (
+        _claim_list(page.tldr.notes, page=page, repo_url=repo_url)
+        if page.tldr.notes
+        else f'<p class="empty">{EMPTY_MESSAGE}</p>'
+    )
     return (
         "<h3>Summary</h3>"
         f"{summary}"
         "<h3>Key Points</h3>"
-        f"{_claim_list(page.tldr.key_points, page=page, repo_url=repo_url)}"
+        f"{key_points}"
         "<h3>Table</h3>"
         f"{_table_html(page, repo_url=repo_url)}"
         "<h3>Interesting Notes</h3>"
-        f"{_claim_list(page.tldr.notes, page=page, repo_url=repo_url)}"
+        f"{notes}"
     )
 
 
