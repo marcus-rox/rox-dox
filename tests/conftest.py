@@ -16,10 +16,28 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
         "\n".join(f"line {line_number}" for line_number in range(1, 11)) + "\n",
         encoding="utf-8",
     )
+    models_dir = repo / "models"
+    models_dir.mkdir()
+    (models_dir / "user.py").write_text(
+        "from sqlalchemy import Column, ForeignKey, Integer, String\n"
+        "from sqlalchemy.orm import Mapped, mapped_column\n"
+        "\n"
+        "class User:\n"
+        '    __tablename__ = "users"\n'
+        "    id = Column(Integer, primary_key=True)\n"
+        "    email = Column(String)\n"
+        "\n"
+        "class Session:\n"
+        '    __tablename__ = "sessions"\n'
+        "    id = Column(Integer, primary_key=True)\n"
+        '    user_id = Column("user_id", Integer, ForeignKey("users.id"))\n'
+        "    token: Mapped[str] = mapped_column()\n",
+        encoding="utf-8",
+    )
 
     subprocess.run(["git", "init", str(repo)], check=True, capture_output=True)
     subprocess.run(
-        ["git", "-C", str(repo), "add", "pkg/a.py"],
+        ["git", "-C", str(repo), "add", "pkg/a.py", "models/user.py"],
         check=True,
         capture_output=True,
     )
@@ -71,7 +89,17 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
                 }
             ],
         },
-        "data": {},
+        "data": {
+            "sql_tables": ["users", "sessions"],
+            "nosql": [
+                {
+                    "name": "cache",
+                    "kind": "redis",
+                    "fields": ["key", "value"],
+                    "source": code_source,
+                }
+            ],
+        },
         "sequences": [
             {
                 "title": "send message",

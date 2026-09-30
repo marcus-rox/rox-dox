@@ -1,0 +1,216 @@
+from __future__ import annotations
+
+import ast
+import subprocess
+import sys
+from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
+
+from rox_dox.model import CodeSource
+
+
+class SchemaModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class Column(SchemaModel):
+    name: str
+    type: str
+    primary_key: bool = False
+    foreign_key: str | None = None
+
+
+class Table(SchemaModel):
+    name: str
+    columns: list[Column]
+    source: CodeSource
+
+
+def _call_name(expression: ast.expr) -> str | None:
+    if isinstance(expression, ast.Name):
+        return expression.id
+    if isinstance(expression, ast.Attribute):
+        return expression.attr
+    return None
+
+
+def _assignment(
+    statement: ast.stmt,
+) -> tuple[str, ast.expr | None, ast.expr | None] | None:
+    if isinstance(statement, ast.Assign):
+        value = statement.value
+        for target in statement.targets:
+            if isinstance(target, ast.Name):
+                return target.id, value, None
+    elif isinstance(statement, ast.AnnAssign) and isinstance(
+        statement.target, ast.Name
+    ):
+        return statement.target.id, statement.value, statement.annotation
+    return None
+
+
+def _table_name(class_node: ast.ClassDef) -> str | None:
+    for statement in class_node.body:
+        assignment = _assignment(statement)
+        if assignment is None:
+            continue
+        name, value, _ = assignment
+        if (
+            name == "__tablename__"
+            and isinstance(value, ast.Constant)
+            and isinstance(value.value, str)
+        ):
+            return value.value
+    return None
+
+
+def _mapped_annotation_type(annotation: ast.expr | None) -> str | None:
+    if (
+        isinstance(annotation, ast.Subscript)
+        and _call_name(annotation.value) == "Mapped"
+    ):
+        return ast.unparse(annotation.slice)
+    return None
+
+
+def _column_type(call: ast.Call, annotation: ast.expr | None) -> str:
+    for argument in call.args:
+        if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
+            continue
+        if isinstance(argument, ast.Call) and _call_name(argument.func) == "ForeignKey":
+            continue
+        return ast.unparse(argument)
+    return _mapped_annotation_type(annotation) or "?"
+
+
+def _foreign_key_target(call: ast.Call) -> str | None:
+    arguments = [*call.args, *(keyword.value for keyword in call.keywords)]
+    for argument in arguments:
+        for node in ast.walk(argument):
+            if not isinstance(node, ast.Call) or _call_name(node.func) != "ForeignKey":
+                continue
+            for target in node.args:
+                if isinstance(target, ast.Constant) and isinstance(target.value, str):
+                    return target.value
+    return None
+
+
+def _column(class_statement: ast.stmt) -> Column | None:
+    assignment = _assignment(class_statement)
+    if assignment is None:
+        return None
+    attribute_name, value, annotation = assignment
+    if not isinstance(value, ast.Call) or _call_name(value.func) not in {
+        "Column",
+        "mapped_column",
+    }:
+        return None
+
+    explicit_name = next(
+        (
+            argument.value
+            for argument in value.args
+            if isinstance(argument, ast.Constant) and isinstance(argument.value, str)
+        ),
+        attribute_name,
+    )
+    primary_key = any(
+        keyword.arg == "primary_key"
+        and isinstance(keyword.value, ast.Constant)
+        and keyword.value.value is True
+        for keyword in value.keywords
+    )
+    return Column(
+        name=explicit_name,
+        type=_column_type(value, annotation),
+        primary_key=primary_key,
+        foreign_key=_foreign_key_target(value),
+    )
+
+
+def _tables_in_file(source: str, path: str) -> list[Table]:
+    module = ast.parse(source, filename=path)
+    classes = sorted(
+        (node for node in ast.walk(module) if isinstance(node, ast.ClassDef)),
+        key=lambda node: node.lineno,
+    )
+    tables = []
+    for class_node in classes:
+        name = _table_name(class_node)
+        if name is None:
+            continue
+        tables.append(
+            Table(
+                name=name,
+                columns=[
+                    column
+                    for statement in class_node.body
+                    if (column := _column(statement)) is not None
+                ],
+                source=CodeSource(
+                    path=path,
+                    lines=(
+                        class_node.lineno,
+                        class_node.end_lineno or class_node.lineno,
+                    ),
+                ),
+            )
+        )
+    return tables
+
+
+def extract_tables(repo: Path, commit: str) -> dict[str, Table]:
+    candidates = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "grep",
+            "-l",
+            "__tablename__",
+            commit,
+            "--",
+            "*.py",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if candidates.returncode not in (0, 1):
+        raise RuntimeError(
+            f"could not search Python files at {commit}: {candidates.stderr.strip()}"
+        )
+
+    paths = sorted(
+        line.partition(":")[2] for line in candidates.stdout.splitlines() if ":" in line
+    )
+    tables: dict[str, Table] = {}
+    for path in paths:
+        file_result = subprocess.run(
+            ["git", "-C", str(repo), "show", f"{commit}:{path}"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if file_result.returncode != 0:
+            raise RuntimeError(
+                f"could not read {path} at {commit}: {file_result.stderr.strip()}"
+            )
+        try:
+            file_tables = _tables_in_file(file_result.stdout, path)
+        except SyntaxError as error:
+            raise RuntimeError(
+                f"could not parse {path} at {commit}: {error}"
+            ) from error
+
+        for table in file_tables:
+            if table.name in tables:
+                print(
+                    f"warning: duplicate SQL table '{table.name}' in {path}; "
+                    f"keeping {tables[table.name].source.path}",
+                    file=sys.stderr,
+                )
+                continue
+            tables[table.name] = table
+    return tables
