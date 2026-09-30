@@ -48,7 +48,9 @@ def render_svg(source: str, jar: Path) -> str:
                 (line.strip() for line in svg.splitlines() if "Syntax Error" in line),
                 "",
             )
-            diagnostic = error_line or f"PlantUML exited with status {result.returncode}"
+            diagnostic = (
+                error_line or f"PlantUML exited with status {result.returncode}"
+            )
         raise DiagramError(diagnostic)
 
     return XML_PROLOG_PATTERN.sub("", svg, count=1)

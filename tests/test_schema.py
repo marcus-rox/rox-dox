@@ -1,8 +1,10 @@
+import json
 import subprocess
 from pathlib import Path
 
 import pytest
 
+from rox_dox.cli import main
 from rox_dox.schema import extract_tables
 
 
@@ -74,3 +76,38 @@ def test_duplicate_table_name_keeps_first_path_and_warns(
 
     assert tables["users"].source.path == "models/user.py"
     assert "duplicate SQL table 'users'" in capsys.readouterr().err
+
+
+def test_build_fails_when_sql_table_is_missing(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pages_dir = tmp_path / "pages"
+    pages_dir.mkdir()
+    output_dir = tmp_path / "site"
+    data = page_data["data"]
+    assert isinstance(data, dict)
+    data["sql_tables"] = ["missing_table"]
+    (pages_dir / "root.json").write_text(json.dumps(page_data), encoding="utf-8")
+
+    exit_code = main(
+        [
+            "build",
+            str(pages_dir),
+            "--repo",
+            str(git_repo[0]),
+            "--repo-url",
+            "https://github.com/Rox-AI/rox-core",
+            "--out",
+            str(output_dir),
+            "--plantuml-jar",
+            str(plantuml_jar),
+        ]
+    )
+
+    assert exit_code == 1
+    assert "SQL table 'missing_table' not found" in capsys.readouterr().out
+    assert not output_dir.exists()

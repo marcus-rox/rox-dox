@@ -22,7 +22,7 @@ from rox_dox.model import (
     StateMachine,
     page_sources,
 )
-from rox_dox.plantuml import render_svg
+from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.schema import Table
 
 
@@ -348,10 +348,14 @@ def _diagram_card(
     repo_url: str,
     jar: Path,
 ) -> str:
+    try:
+        diagram_markup = _diagram_markup(source, jar=jar)
+    except DiagramError as error:
+        raise DiagramError(f"{title}: {error}") from error
     return (
         '<article class="diagram-card">'
         f"<h3>{_escape(title)}</h3>"
-        f"{_diagram_markup(source, jar=jar)}"
+        f"{diagram_markup}"
         f"{_sources_details(elements, page=page, repo_url=repo_url)}"
         "</article>"
     )

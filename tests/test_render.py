@@ -86,6 +86,11 @@ def test_related_page_links_are_relative_and_external_targets_link_out(
     assert page_href("a/b", "a/c/d") == "c/d.html"
     assert '<a href="c/d.html">Nested sibling</a>' in document
     assert '<a href="https://docs.example.test/guide">External guide</a>' in document
+    assert (
+        '<a href="https://github.com/Rox-AI/rox-core/blob/'
+        f'{page.commit}/pkg/a.py#L1-L3">[1]</a>'
+    ) in document
+    assert '<a href="https://www.notion.so/rox/Foo-123">[1]</a>' in document
 
 
 def test_page_text_is_html_escaped(
