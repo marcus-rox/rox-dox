@@ -17,8 +17,13 @@ from tqdm import tqdm
 ROX_CORE_URL = "https://github.com/Rox-AI/rox-core"
 PUBLISH_REMOTE = "https://github.com/marcus-rox/rox-dox.git"
 PUBLISH_API = "https://api.github.com/repos/marcus-rox/rox-dox/pulls"
-ASKPASS_PATH = "/home/ubuntu/.askpass-roxdox"
 TOKEN_ENV = "MARCUS_ROX_DOX_GITHUB_TOKEN"
+ASKPASS_SCRIPT = """#!/bin/sh
+case "$1" in
+Username*) echo x-access-token ;;
+*) printf '%s\\n' "$MARCUS_ROX_DOX_GITHUB_TOKEN" ;;
+esac
+"""
 STEP_NAMES = (
     "resolve commit",
     "write pin",
@@ -374,6 +379,47 @@ class GitHubPublisher:
                 diagnostic or f"{command[0]} exited with status {result.returncode}"
             )
 
+    def _push_branch(self, branch: str, *, delete: bool = False) -> None:
+        if not self.token:
+            raise RuntimeError(f"{TOKEN_ENV} is required to push a branch")
+        askpass_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                prefix="rox-dox-askpass-",
+                delete=False,
+            ) as askpass:
+                askpass.write(ASKPASS_SCRIPT)
+                askpass_path = Path(askpass.name)
+            askpass_path.chmod(0o700)
+
+            environment = os.environ.copy()
+            environment[TOKEN_ENV] = self.token
+            environment.update(
+                {
+                    "GIT_ASKPASS": str(askpass_path),
+                    "GIT_TERMINAL_PROMPT": "0",
+                    "GIT_CONFIG_GLOBAL": "/dev/null",
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                }
+            )
+            command = [
+                "git",
+                "-c",
+                "credential.helper=",
+                "push",
+                PUBLISH_REMOTE,
+            ]
+            if delete:
+                command.extend(["--delete", branch])
+            else:
+                command.append(branch)
+            self._git(command, env=environment)
+        finally:
+            if askpass_path is not None:
+                askpass_path.unlink(missing_ok=True)
+
     def publish(self, report: Mapping[str, object]) -> str:
         if not self.token:
             raise RuntimeError(f"{TOKEN_ENV} is required to open a pull request")
@@ -386,20 +432,7 @@ class GitHubPublisher:
         self._git(["git", "switch", "-c", branch])
         self._git(["git", "add", "--", "pages", "features"])
         self._git(["git", "commit", "-m", f"Rebuild docs at rox-core {short_commit}"])
-        environment = os.environ.copy()
-        environment["GIT_ASKPASS"] = ASKPASS_PATH
-        environment["GIT_TERMINAL_PROMPT"] = "0"
-        self._git(
-            [
-                "git",
-                "-c",
-                "credential.helper=",
-                "push",
-                PUBLISH_REMOTE,
-                branch,
-            ],
-            env=environment,
-        )
+        self._push_branch(branch)
         return self._open_pull_request(branch, short_commit, report)
 
     def _open_pull_request(

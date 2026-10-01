@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
+import stat
 import subprocess
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 import rox_dox.cli as cli
-from rox_dox.rebuild import resolve_commit, run_rebuild
+from rox_dox.rebuild import GitHubPublisher, TOKEN_ENV, resolve_commit, run_rebuild
 
 COMMIT = "a" * 40
 
@@ -45,6 +47,34 @@ class RootFailureRunner:
         if any("feature_map.py" in argument for argument in command):
             return subprocess.CompletedProcess(command, 0, "", "")
         raise AssertionError(f"unexpected command: {command}")
+
+
+class PublisherPushRunner:
+    def __init__(self, token: str) -> None:
+        self.token = token
+        self.command: list[str] = []
+        self.environment: dict[str, str] = {}
+        self.askpass_path: Path | None = None
+        self.askpass_content = ""
+        self.askpass_mode: int | None = None
+
+    def __call__(
+        self,
+        command: list[str],
+        **options: object,
+    ) -> subprocess.CompletedProcess[str]:
+        self.command = command
+        environment = options.get("env")
+        assert isinstance(environment, Mapping)
+        self.environment = dict(environment)
+
+        askpass_path = Path(self.environment["GIT_ASKPASS"])
+        assert askpass_path.is_file()
+        self.askpass_path = askpass_path
+        self.askpass_content = askpass_path.read_text(encoding="utf-8")
+        self.askpass_mode = stat.S_IMODE(askpass_path.stat().st_mode)
+        assert self.token not in self.askpass_content
+        return subprocess.CompletedProcess(command, 0, "", "")
 
 
 def _fixed_clock() -> datetime:
@@ -163,3 +193,34 @@ def test_rebuild_skips_steps_depending_on_failed_root_page(
     assert not any(
         "rox-dox" in argument for command in runner.commands for argument in command
     )
+
+
+def test_publisher_push_uses_temporary_askpass_and_isolated_git_config(
+    tmp_path: Path,
+) -> None:
+    token = "test-token-not-in-askpass"
+    branch = "devin/123-push-probe"
+    runner = PublisherPushRunner(token)
+    publisher = GitHubPublisher(
+        tmp_path,
+        token=token,
+        unix_timestamp=123,
+        command_runner=runner,
+    )
+
+    publisher._push_branch(branch)
+
+    assert runner.command[1:4] == ["-c", "credential.helper=", "push"]
+    assert runner.command[-1] == branch
+    assert runner.environment["GIT_TERMINAL_PROMPT"] == "0"
+    assert runner.environment["GIT_CONFIG_GLOBAL"] == "/dev/null"
+    assert runner.environment["GIT_CONFIG_NOSYSTEM"] == "1"
+    assert runner.environment[TOKEN_ENV] == token
+    assert "Username*) echo x-access-token" in runner.askpass_content
+    assert 'printf \'%s\\n\' "$MARCUS_ROX_DOX_GITHUB_TOKEN"' in (
+        runner.askpass_content
+    )
+    assert runner.askpass_mode == 0o700
+    assert token not in runner.askpass_content
+    assert runner.askpass_path is not None
+    assert not runner.askpass_path.exists()
