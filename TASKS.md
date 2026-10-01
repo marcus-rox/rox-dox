@@ -12,8 +12,8 @@ The folder-tree tasks are in TASKS_deprecated.md.
 | 3 | Every folder in the Explorer opens a docs page | R-7, R-6 | Next step 2 | 1, 2 | High |
 | 4 | The Notion panel is removed from every page | R-3 (retired) | Decided: no Notion on pages | — | Medium |
 | 5 | Sequences & outreach has a domain page and a page per feature | R-5, R-9, R-2, R-4 | Next step 2 | 1, 2, 3, 4 | High |
-| 6 | The other nine domains have feature maps and pages | R-5, R-6, R-9, R-2, R-4 | Next step 3 | 5 | Medium |
-| 7 | One unattended weekly run rebuilds the site as a rox-dox PR | R-8 | Next step 3 | 5 | Medium |
+| 6 | Every remaining domain has a feature map and pages | R-5, R-6, R-9, R-2, R-4 | Next step 3 | 5 | Medium |
+| 7 | One unattended daily run rebuilds the site as a rox-dox PR | R-8 | Next step 3 | 5 | Medium |
 
 Priority is inferred from each plan step's position; the plan gives none explicitly.
 
@@ -71,7 +71,7 @@ In scope:
 
 Out of scope:
 - Writing any page (Task 5).
-- The other nine domains (Task 6).
+- The other domains (Task 6).
 - Choosing a fixed child count: overlap decides (PLAN.md, Decided).
 - Deciding when a feature is a leaf (PLAN.md, Open; Task 5).
 
@@ -189,7 +189,7 @@ one feature in a few clicks.
 ## Context
 
 Today the left panel's tree mirrors rox-core folders (PLAN_deprecated.md). The feature tree
-replaces it: level 1 is the ten schema domains, below them the features (PLAN.md, Decided,
+replaces it: level 1 is the schema domains the root shows, however many there are, below them the features (PLAN.md, Decided,
 Figure 1). A feature page covers files from several distant folders.
 
 ## Scope
@@ -646,8 +646,8 @@ here: spot checks sample, they don't prove every element.
 
 - Design: PLAN.md — Next step 2, Constraints 2 and 4, Decided
 - Technical specification: SPEC.md — R-2, R-4, R-5, R-9
-- Related issues: Task 1; Task 2; Task 3; Task 4; Task 6 — The other nine domains have
-  feature maps and pages; Task 7 — One unattended weekly run rebuilds the site as a rox-dox PR
+- Related issues: Task 1; Task 2; Task 3; Task 4; Task 6 — Every remaining domain has a
+  feature map and pages; Task 7 — One unattended daily run rebuilds the site as a rox-dox PR
 
 ## Delivery
 
@@ -659,7 +659,7 @@ here: spot checks sample, they don't prove every element.
 
 ---
 
-# Task 6 — The other nine domains have feature maps and pages
+# Task 6 — Every remaining domain has a feature map and pages
 
 **Satisfies:** R-5, R-6, R-9, R-2, R-4.
 
@@ -670,13 +670,13 @@ outreach is, so that I can find any part of rox-core from the root.
 
 ## Context
 
-Task 5 proves the procedure on one domain. This task applies it to the other nine (PLAN.md,
-Next step 3), and decides where code that touches no table goes.
+Task 5 proves the procedure on one domain. This task applies it to every other domain the root shows,
+however many there are (PLAN.md, Next step 3), and decides where code that touches no table goes.
 
 ## Scope
 
 In scope:
-- Feature maps (Task 1's command) for the other nine domains, each reviewed by Marcus.
+- Feature maps (Task 1's command) for every other domain, each reviewed by Marcus.
 - Domain and feature pages for each, authored as in Task 5.
 - A home for code that touches no table, if Task 1 shows there is enough of it.
 
@@ -686,13 +686,17 @@ Out of scope:
 
 ## Requirements
 
+- The set of domain pages is read from the root's domain grouping at the documented commit,
+  never from a fixed list or count.
 - Every domain has an accepted feature map and pages meeting Task 5's requirements.
 - Every in-scope rox-core file is on a feature page or on the uncovered-files page.
 - Code that touches no table has a decided home, reviewed by Marcus.
 
 ## Acceptance criteria
 
-- Given each of the nine domains, when its feature map is reviewed, then Marcus accepts it.
+- Given each remaining domain, when its feature map is reviewed, then Marcus accepts it.
+- Given a root grouping with one domain added or removed, when the site is rebuilt, then
+  there is exactly one domain page per domain the root shows.
 - Given each new page, when it is built, then it meets every acceptance criterion of Task 5.
 - Given the whole site, when every in-scope file is checked, then each one is on a feature
   page or on the uncovered-files page.
@@ -756,7 +760,7 @@ Dependencies and constraints.
 
 - Design: PLAN.md — Next step 3, Open
 - Technical specification: SPEC.md — R-2, R-4, R-5, R-6, R-9
-- Related issues: Task 1; Task 5; Task 7 — One unattended weekly run rebuilds the site as a
+- Related issues: Task 1; Task 5; Task 7 — One unattended daily run rebuilds the site as a
   rox-dox PR
 
 ## Delivery
@@ -765,17 +769,17 @@ Dependencies and constraints.
 - Priority: Medium (inferred)
 - Estimate: TBD (PLAN.md gives 1–2 sessions for Next step 3 as a whole)
 - Sprint: TBD
-- Parent epic: Next step 3 — All ten domains plus the scheduled run
+- Parent epic: Next step 3 — Every domain plus the scheduled run
 
 ---
 
-# Task 7 — One unattended weekly run rebuilds the site as a rox-dox PR
+# Task 7 — One unattended daily run rebuilds the site as a rox-dox PR
 
 **Satisfies:** R-8.
 
 ## User story
 
-As a weekly scheduled Devin run, I want one command and one written procedure that rebuild the
+As a daily scheduled Devin run, I want one command and one written procedure that rebuild the
 feature maps and every page at the latest rox-core `main` and open a rox-dox PR from a new
 branch, so that Marcus gets up-to-date docs without asking.
 
@@ -791,7 +795,7 @@ In scope:
   site at one named rox-core commit.
 - A skill that tells the scheduled run how to rewrite pages whose cited code changed, using
   generate-rox-docs.
-- A weekly schedule that runs it and opens a rox-dox PR from a new branch.
+- A schedule that runs it daily at 00:00 UTC and opens a rox-dox PR from a new branch.
 - No PR when any page fails, with the failing pages named.
 
 Out of scope:
@@ -804,7 +808,7 @@ Out of scope:
 - A run pins one rox-core commit, the latest `main` at its start, and every page names it.
 - A successful run opens one rox-dox PR from a new branch carrying the rebuilt site.
 - A run with any failing page opens no PR and reports every failing page.
-- The schedule runs weekly with no human step before the PR.
+- The schedule runs daily at 00:00 UTC with no human step before the PR.
 - Conformance tests for R-8 are drafted for Marcus to accept.
 
 ## Acceptance criteria
@@ -813,7 +817,7 @@ Out of scope:
   branch and every page in it names the same commit.
 - Given a run in which one page fails its build, when it ends, then no PR is opened and the
   failing page is named.
-- Given the schedule, when a week passes, then a run starts and finishes with no human step.
+- Given the schedule, when 00:00 UTC passes, then a run starts and finishes with no human step.
 - Given the drafted `test_r8_*` conformance tests, when Marcus accepts them, then they are
   committed and pass.
 - Errors and edge cases: a stale citation after rox-core changes is rewritten from the new code
@@ -828,7 +832,7 @@ Out of scope:
 - Appropriate automated and manual tests pass.
 - Accessibility, security, and performance requirements are met.
 - Documentation, analytics, and release notes are updated where applicable.
-- The change is merged to rox-dox `main`, the weekly schedule is active, and its first run has
+- The change is merged to rox-dox `main`, the daily schedule is active, and its first run has
   opened a rox-dox PR.
 - No unresolved critical defects remain.
 
@@ -849,7 +853,7 @@ are wrong."
 publish only pages that passed their build.
 
 **Premises:**
-1. A weekly run starts and finishes with no human step — source: this task's Acceptance
+1. A daily run starts and finishes with no human step — source: this task's Acceptance
    criteria.
 2. A run with a failing page opens no PR and names the page — source: this task's Acceptance
    criteria.
@@ -873,7 +877,7 @@ and the page is wrong, which is why Premise 3 is an assumption.
 
 - Design: PLAN.md — Next step 3, Decided, Figure 2
 - Technical specification: SPEC.md — R-8
-- Related issues: Task 5; Task 6 — The other nine domains have feature maps and pages
+- Related issues: Task 5; Task 6 — Every remaining domain has a feature map and pages
 
 ## Delivery
 
@@ -881,4 +885,4 @@ and the page is wrong, which is why Premise 3 is an assumption.
 - Priority: Medium (inferred)
 - Estimate: TBD (PLAN.md gives 1–2 sessions for Next step 3 as a whole)
 - Sprint: TBD
-- Parent epic: Next step 3 — All ten domains plus the scheduled run
+- Parent epic: Next step 3 — Every domain plus the scheduled run

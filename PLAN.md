@@ -47,14 +47,14 @@ from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
    page and diagram skills, linked through the left panel. *Falsifier:* Marcus can't tell from a
    feature page what it stores and how it runs, or a spot check contradicts the code. *Cost:*
    about 1 session.
-3. **All ten domains plus the scheduled run.** One command regenerates the tree and every page
-   at the latest `main`; a weekly schedule runs it. *Falsifier:* an unattended run fails, or
+3. **Every domain plus the scheduled run.** One command regenerates the tree and every page
+   at the latest `main`; a schedule runs it daily at 00:00 UTC. *Falsifier:* an unattended run fails, or
    spot-checked pages are wrong. *Cost:* 1–2 sessions, mostly agent time.
 
 ## Decided
 
-- **Feature tree, not folder tree.** Level 1 is the ten schema domains the root already shows;
-  the root page stays as it is.
+- **Feature tree, not folder tree.** Level 1 is whatever schema domains the root shows at the run's
+  commit (ten today), so the count follows rox-core; the root page stays as it is.
 - **One algorithm at every level:** take the page's code, group it by overlap, make each group a
   child page, and repeat on each child until it is a leaf.
 - **Overlap decides the number of children; there is no cap.**
