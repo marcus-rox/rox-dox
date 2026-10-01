@@ -4,7 +4,7 @@ import copy
 import re
 from xml.etree import ElementTree
 
-from rox_dox.block_svg import ARROW_COLOR, CHANNEL_ARROW_COLOR, block_svg
+from rox_dox.block_svg import ARROW_COLOR, block_svg
 from rox_dox.links import page_href, source_url
 from rox_dox.model import Page
 from rox_dox.render import PAGE_CSS
@@ -81,7 +81,7 @@ def test_block_elements_show_labels_and_link_to_their_sources(
     svg = block_svg(page, repo_url=REPO_URL)
     links = _anchors(svg)
     expected = [
-        ("Backend", page.block.groups[0].source),
+        ("BACKEND", page.block.groups[0].source),
         ("Workers", page.block.groups[1].source),
         ("API", page.block.nodes[0].source),
         ("Worker A", page.block.nodes[1].source),
@@ -91,8 +91,20 @@ def test_block_elements_show_labels_and_link_to_their_sources(
 
     for label, source in expected:
         expected_href = source_url(source, repo_url=REPO_URL, commit=page.commit)
-        assert any(label in text and href == expected_href for href, text in links)
+        assert any(label in text and href == expected_href for href, text in links), (
+            f"missing source link for {label!r}: {links!r}"
+        )
         assert label in svg
+
+    root = ElementTree.fromstring(svg)
+    edge_label = next(
+        anchor
+        for anchor in root.iter(f"{SVG_NAMESPACE}a")
+        if "calls worker" in "".join(anchor.itertext())
+    )
+    assert edge_label.find(f"{SVG_NAMESPACE}rect").attrib["class"] == (
+        "edge-label-background"
+    )
 
 
 def test_node_links_use_relative_page_href(page_data: dict[str, object]) -> None:
@@ -114,7 +126,7 @@ def test_nested_groups_render_as_sections_inside_their_parent_column(
     section = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}rect")
-        if element.attrib.get("stroke-dasharray") == "4 3"
+        if element.attrib.get("class") == "group-boundary"
     )
     worker_title = next(
         element
@@ -132,7 +144,26 @@ def test_nested_groups_render_as_sections_inside_their_parent_column(
     assert section_y < worker_y < section_bottom
 
 
-def test_top_level_columns_are_numbered_in_group_order(
+def test_group_boundaries_use_transparent_dashed_uml_style(
+    page_data: dict[str, object],
+) -> None:
+    root = ElementTree.fromstring(
+        block_svg(_page(_grouped_page_data(page_data)), repo_url=REPO_URL)
+    )
+    boundary = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "group-boundary"
+    )
+
+    assert boundary.attrib["fill"] == "none"
+    assert boundary.attrib["stroke"] == "#9ca3af"
+    assert boundary.attrib["stroke-width"] == "1.25"
+    assert boundary.attrib["stroke-dasharray"] == "6 4"
+    assert boundary.attrib["rx"] == "6"
+
+
+def test_top_level_columns_use_unnumbered_uppercase_captions(
     page_data: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(page_data)
@@ -145,9 +176,10 @@ def test_top_level_columns_are_numbered_in_group_order(
     payload["block"]["nodes"][1]["group"] = "second"
     svg = block_svg(_page(payload), repo_url=REPO_URL)
 
-    assert "1 · First" in svg
-    assert "2 · Second" in svg
-    assert svg.index("1 · First") < svg.index("2 · Second")
+    assert "FIRST" in svg
+    assert "SECOND" in svg
+    assert "1 · First" not in svg
+    assert "2 · Second" not in svg
 
 
 def test_block_svg_has_explicit_dimensions_and_is_not_width_constrained(
@@ -169,7 +201,7 @@ def test_block_svg_has_explicit_dimensions_and_is_not_width_constrained(
     )
 
 
-def test_skipped_column_edges_use_the_channel_color(
+def test_skipped_column_edges_use_dashed_channel_styling(
     page_data: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(page_data)
@@ -211,37 +243,153 @@ def test_skipped_column_edges_use_the_channel_color(
         if "marker-end" in element.attrib
     ]
 
-    assert [path.attrib["stroke"] for path in edge_paths] == [
-        ARROW_COLOR,
-        CHANNEL_ARROW_COLOR,
-    ]
+    assert [path.attrib["stroke"] for path in edge_paths] == [ARROW_COLOR] * 2
+    assert "stroke-dasharray" not in edge_paths[0].attrib
+    assert edge_paths[1].attrib["stroke-dasharray"] == "4 3"
+    assert all(path.attrib["stroke-width"] == "1.5" for path in edge_paths)
+    assert [path.attrib["d"].count("L") for path in edge_paths] == [3, 5]
 
 
-def test_node_kinds_and_multiline_labels_render(page_data: dict[str, object]) -> None:
+def test_component_uses_a_white_uml_class_box(page_data: dict[str, object]) -> None:
     payload = copy.deepcopy(page_data)
     nodes = payload["block"]["nodes"]
     nodes[0].update({"label": 'API "primary"\nroute', "kind": "component"})
-    nodes[1].update({"label": "Cache", "kind": "store"})
-    nodes.extend(
-        [
-            {
-                "id": "external",
-                "label": "External",
-                "kind": "external",
-                "source": {"path": "pkg/a.py", "lines": [2, 3]},
-            },
-            {
-                "id": "queue",
-                "label": "Queue",
-                "kind": "queue",
-                "source": {"path": "pkg/a.py", "lines": [3, 4]},
-            },
-        ]
+    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    shape = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "component-shape"
     )
-    svg = block_svg(_page(payload), repo_url=REPO_URL)
-    root = ElementTree.fromstring(svg)
     rendered = "".join(root.itertext())
 
+    assert shape.attrib["fill"] == "#ffffff"
+    assert shape.attrib["stroke"] == "#1f2937"
+    assert shape.attrib["rx"] == "4"
+    assert any(
+        element.attrib.get("class") == "component-divider"
+        for element in root.iter(f"{SVG_NAMESPACE}line")
+    )
     assert 'API "primary"' in rendered
     assert "route" in rendered
-    assert all(color in svg for color in ("#f5f8fe", "#fff8ef", "#fbf5ff", "#f1faf4"))
+
+
+def test_long_component_text_wraps_within_card_bounds(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"][0].update(
+        {
+            "label": "A deliberately long service title that must wrap cleanly",
+            "kind": "component",
+            "details": [
+                {
+                    "text": (
+                        "Operational details wrap inside the card without overlapping "
+                        "its lower border."
+                    ),
+                    "sources": [{"path": "pkg/a.py", "lines": [1, 2]}],
+                }
+            ],
+        }
+    )
+    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    node_group = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "block-node block-kind-component"
+    )
+    shape = next(
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "component-shape"
+    )
+    card_top = float(shape.attrib["y"])
+    card_bottom = card_top + float(shape.attrib["height"])
+    text_groups = [
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") in {"card-title", "card-detail"}
+    ]
+
+    assert len(text_groups) == 2
+    for group in text_groups:
+        for text in group.iter(f"{SVG_NAMESPACE}text"):
+            line = text.text or ""
+            width = len(line) * float(text.attrib["font-size"]) * 0.62
+            assert width <= float(shape.attrib["width"]) - 2 * 14
+            assert card_top < float(text.attrib["y"]) < card_bottom
+
+
+def test_store_renders_as_a_vertical_cylinder_without_kind_tag(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"][0].update({"label": "Cache", "kind": "store"})
+    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    node_group = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "block-node block-kind-store"
+    )
+    shape = next(
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}path")
+        if element.attrib.get("class") == "store-shape"
+    )
+
+    assert "A" in shape.attrib["d"]
+    assert shape.attrib["fill"] == "#eff6ff"
+    assert shape.attrib["stroke"] == "#1e40af"
+    assert any(
+        element.attrib.get("class") == "store-lid-front"
+        for element in node_group.iter(f"{SVG_NAMESPACE}path")
+    )
+    assert "STORE" not in "".join(node_group.itertext())
+
+
+def test_queue_renders_as_a_horizontal_cylinder(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"][0].update({"label": "Queue", "kind": "queue"})
+    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    shape = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}path")
+        if element.attrib.get("class") == "queue-shape"
+    )
+
+    assert "A" in shape.attrib["d"]
+    assert shape.attrib["fill"] == "#f0fdf4"
+    assert shape.attrib["stroke"] == "#166534"
+    assert any(
+        element.attrib.get("class") == "queue-cap-left" and element.attrib["rx"] == "10"
+        for element in root.iter(f"{SVG_NAMESPACE}ellipse")
+    )
+    assert any(
+        element.attrib.get("class") == "queue-cap-right"
+        for element in root.iter(f"{SVG_NAMESPACE}ellipse")
+    )
+
+
+def test_external_uses_a_dashed_stereotype_box(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"][0].update({"label": "External", "kind": "external"})
+    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    shape = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "external-shape"
+    )
+
+    assert shape.attrib["fill"] == "#ffffff"
+    assert shape.attrib["stroke"] == "#6b7280"
+    assert shape.attrib["stroke-dasharray"] == "6 4"
+    assert "«external»" in "".join(root.itertext())
+
+
+def test_related_disclosure_markers_are_unicode_glyphs() -> None:
+    assert 'content: "▸ ";' in PAGE_CSS
+    assert 'content: "▾ ";' in PAGE_CSS
+    assert "\u0015BE" not in PAGE_CSS
+    assert "\u0000A0" not in PAGE_CSS

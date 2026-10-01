@@ -380,12 +380,6 @@ th {
 .block-svg a:hover text {
   text-decoration: underline;
 }
-.block-svg .edge-label {
-  paint-order: stroke;
-  stroke: #fff;
-  stroke-width: 4px;
-  stroke-linejoin: round;
-}
 .schema-legend {
   margin: 0 0 0.75rem;
   color: #475467;
@@ -483,11 +477,11 @@ blockquote {
   margin-bottom: 0.75rem;
 }
 #related summary h2::before {
-  content: "\25B8\00A0";
+  content: "▸ ";
   color: #6b7686;
 }
 #related details[open] summary h2::before {
-  content: "\25BE\00A0";
+  content: "▾ ";
 }
 @media (max-width: 1100px) {
   .page-shell {

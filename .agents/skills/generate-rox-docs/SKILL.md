@@ -62,6 +62,17 @@ names, or NoSQL store names. Items in each list retain their authored order; omi
 placed in a trailing column. Without an explicit layout, the renderer balances items across
 `ceil(sqrt(n))` columns while preserving authored order within placements.
 
+### Block diagram visual language
+
+Block diagrams use white component rectangles with 1.5px `#1f2937` strokes, centered bold
+titles, dividers and bulleted details; stores are `#eff6ff` vertical cylinders with `#1e40af`
+strokes, and queues/streams are `#f0fdf4` horizontal cylinders with `#166534` strokes. Third
+parties use white dashed `#6b7280` boxes with an `«external»` stereotype; groups are
+transparent dashed `#9ca3af` UML boundaries. Use `component` for services, clients and workers,
+`store` for databases and caches, `queue` for queues and streams, and `external` for third
+parties. Keep cited edge labels on white rounded backgrounds, use solid `#374151` arrows for
+ordinary routes and dashed `4 3` arrows for long-channel routes, and include the shape legend.
+
 rox-core mostly does **not** declare foreign keys: many are commented out
 (`# ForeignKey("task_run.run_id")`) or omitted on purpose ("no foreign key to avoid locking the
 organization row"). The extractor only sees declared `ForeignKey(...)`, so supported implicit
