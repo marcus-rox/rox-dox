@@ -278,7 +278,7 @@ def test_block_figure_edges_must_reference_declared_node_or_group(
         Page.model_validate(payload)
 
 
-def test_node_details_are_limited_to_six(
+def test_node_details_are_limited_to_seven(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -294,8 +294,15 @@ def test_node_details_are_limited_to_six(
         }
         for detail_number in range(1, 8)
     ]
+    Page.model_validate(page_data)
+    node["details"].append(
+        {
+            "text": "Detail 8",
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    )
 
-    with pytest.raises(ValidationError, match="block node 'api' has 7 details"):
+    with pytest.raises(ValidationError, match="block node 'api' has 8 details"):
         Page.model_validate(page_data)
 
 

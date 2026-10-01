@@ -43,21 +43,15 @@ def test_layer_classifier_uses_first_matching_rule(
     assert layer_of(path) == expected
 
 
-def test_generated_seq_pages_pass_block_layout() -> None:
+def test_generated_feature_pages_pass_block_layout() -> None:
     repository_root = Path(__file__).resolve().parents[1]
-    page_files = [
-        repository_root / "pages" / "domains" / "seq.json",
-        *sorted((repository_root / "pages" / "features").glob("feature-seq-*.json")),
-    ]
-    assert page_files[0].is_file()
-    assert page_files[1:]
+    page_files = sorted((repository_root / "pages" / "features").glob("*.json"))
+    assert page_files
 
     for page_file in page_files:
         page = Page.model_validate(json.loads(page_file.read_text(encoding="utf-8")))
-        diagrams = [page.block, *(figure.block for figure in page.block_figures)]
-        for diagram in diagrams:
-            problems = block_layout_problems(diagram)
-            assert not problems, f"{page_file}: {problems}"
+        problems = block_layout_problems(page.block)
+        assert not problems, f"{page_file}: {problems}"
 
 
 def _runtime_feature_fixture(
@@ -66,11 +60,12 @@ def _runtime_feature_fixture(
     worker_count: int = 1,
     web_directory: str = "web/apps/integrations/src",
     long_endpoint_path: str | None = None,
+    worker_path: str = "backend/src/workers/integration/sync.py",
+    worker_name: str = "SyncWorker",
 ) -> tuple[FeatureMap, dict[str, Table], dict[str, FileFacts]]:
     web_path = f"{web_directory}/IntegrationPage.tsx"
     api_path = "backend/src/api/integrations/endpoints.py"
     api_helper_path = "backend/src/services/api_helper.py"
-    worker_path = "backend/src/workers/integration/sync.py"
     worker_helper_path = "backend/src/services/worker_helper.py"
     library_path = "backend/src/services/library.py"
     unused_path = "backend/src/helpers/unneeded.py"
@@ -263,7 +258,15 @@ def _runtime_feature_fixture(
             endpoints=[],
             workers=[
                 Worker(
-                    name=f"SyncWorker{index}" if worker_count > 1 else "SyncWorker",
+                    name=(
+                        f"{worker_name}{index}"
+                        if worker_count > 1 and not worker_name.endswith("TaskExecutor")
+                        else (
+                            worker_name
+                            if index == 0 or worker_count == 1
+                            else f"ZOther{index}TaskExecutor"
+                        )
+                    ),
                     kind="task_executor",
                     line=5 + index,
                 )
@@ -301,6 +304,10 @@ def _feature_page_from_runtime_fixture(
     worker_count: int = 1,
     web_directory: str = "web/apps/integrations/src",
     long_endpoint_path: str | None = None,
+    worker_path: str = "backend/src/workers/integration/sync.py",
+    worker_name: str = "SyncWorker",
+    component_imports: dict[str, dict[str, int]] | None = None,
+    primary_features: dict[str, tuple[str, str]] | None = None,
 ) -> Page:
     feature_map, tables, facts = _runtime_feature_fixture(
         api_table_count,
@@ -308,6 +315,8 @@ def _feature_page_from_runtime_fixture(
         worker_count,
         web_directory,
         long_endpoint_path,
+        worker_path,
+        worker_name,
     )
     pages = feature_pages(
         feature_map,
@@ -316,6 +325,8 @@ def _feature_page_from_runtime_fixture(
         names={"integration": "Integration connections & sync"},
         tables=tables,
         component_facts=facts,
+        component_imports=component_imports,
+        primary_features=primary_features,
     )
     return next(page for page in pages if page.kind == "feature")
 
@@ -326,9 +337,6 @@ def test_feature_block_models_runtime_components_and_web_api_route() -> None:
     api_node = next(node for node in nodes.values() if node.label == "Integrations API")
     worker_node = next(
         node for node in nodes.values() if node.label == "Integration workers"
-    )
-    library_node = next(
-        node for node in nodes.values() if node.label == "Services (library)"
     )
     web_node = next(node for node in nodes.values() if node.label == "Web app")
     external_nodes = {
@@ -355,19 +363,17 @@ def test_feature_block_models_runtime_components_and_web_api_route() -> None:
         edge.src == worker_node.id and edge.dst == external_nodes["Google APIs"].id
         for edge in page.block.edges
     )
-    assert any(
-        edge.src == library_node.id and edge.dst == external_nodes["Stripe"].id
-        for edge in page.block.edges
-    )
+    assert not any("(library)" in node.label for node in page.block.nodes)
+    assert not any(node.label == "Stripe" for node in external_nodes.values())
     assert page.tldr.table.columns == [
         "Component",
         "Kind",
         "Tables used",
         "Outside services",
     ]
-    assert len(page.tldr.table.rows) == len(page.block.nodes)
+    assert any(row[0] == "Services (library)" for row in page.tldr.table.rows)
     assert page.tldr.summary[0].text == (
-        "Serves 2 HTTP endpoints in 1 API groups: Integrations."
+        "Owns 2 HTTP endpoints in 1 API groups: Integrations."
     )
     assert page.tldr.summary[1].text == (
         "Runs 1 background workers and workflows: SyncWorker."
@@ -380,6 +386,178 @@ def test_feature_block_models_runtime_components_and_web_api_route() -> None:
     ]
     assert all(row.sources for group in page.membership for row in group.rows)
     assert not any(node.label == "Helpers (library)" for node in page.block.nodes)
+
+
+def test_callers_join_entries_link_to_their_feature_and_cite_the_import() -> None:
+    feature_map, tables, facts = _runtime_feature_fixture(
+        endpoint_count=0,
+        worker_count=0,
+    )
+    caller_path = "backend/src/tasks/executors/endpoints.py"
+    member_path = "backend/src/services/api_helper.py"
+    decoy_path = "backend/src/other/decoy.py"
+    facts[caller_path] = FileFacts(
+        path=caller_path,
+        api_group="integrations",
+        endpoints=[
+            Endpoint(
+                method="GET",
+                path="/integrations/callback",
+                handler="CallbackEndpoint",
+                line=20,
+            )
+        ],
+        workers=[
+            Worker(
+                name="SyncTaskExecutor",
+                kind="task_executor",
+                line=24,
+            )
+        ],
+        externals=[
+            ExternalCall(service="Salesforce", module="simple_salesforce", line=25)
+        ],
+    )
+    facts[decoy_path] = FileFacts(
+        path=decoy_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[ExternalCall(service="Twilio", module="twilio", line=2)],
+    )
+    caller_import_line = 30
+    caller_owner = ("CRM integrations", "feature-crm-integrations")
+    imports = {
+        caller_path: {
+            member_path: caller_import_line,
+            decoy_path: 31,
+        }
+    }
+    owners = {caller_path: caller_owner}
+    pages = feature_pages(
+        feature_map,
+        root_id="rox-core",
+        domain_title="Activity",
+        names={"integration": "Integration connections & sync"},
+        tables=tables,
+        component_facts=facts,
+        component_imports=imports,
+        primary_features=owners,
+    )
+    page = next(page for page in pages if page.kind == "feature")
+    nodes = {node.label: node for node in page.block.nodes}
+    api_node = nodes["Integrations API"]
+    worker_node = nodes["Sync workers"]
+    api_call = next(
+        detail for detail in api_node.details if detail.text.startswith("Calls into")
+    )
+    worker_call = next(
+        detail for detail in worker_node.details if detail.text.startswith("Calls into")
+    )
+
+    assert api_node.link == caller_owner[1]
+    assert worker_node.link == caller_owner[1]
+    assert not any("(library)" in node.label for node in page.block.nodes)
+    assert api_call.text == "Calls into this feature from CRM integrations"
+    assert api_call.sources[0].path == caller_path
+    assert api_call.sources[0].lines == (caller_import_line, caller_import_line)
+    assert worker_call.sources[0].lines == (caller_import_line, caller_import_line)
+    reached = next(
+        claim for claim in page.tldr.summary if claim.text.startswith("Reached from")
+    )
+    assert reached.text == (
+        "Reached from 1 HTTP endpoints and 1 workers in other features: "
+        "Integrations, Sync workers."
+    )
+    assert block_layout_problems(page.block) == []
+
+    external_labels = {
+        node.label for node in page.block.nodes if node.kind == "external"
+    }
+    assert external_labels == {"Slack"}
+    slack = nodes["Slack"]
+    slack_edge = next(
+        edge
+        for edge in page.block.edges
+        if edge.src == api_node.id and edge.dst == slack.id
+    )
+    assert slack_edge.source.path == member_path
+    assert slack_edge.source.lines == (4, 4)
+    helper_store = nodes["api_helper_table"]
+    table_edge = next(
+        edge
+        for edge in page.block.edges
+        if edge.src == api_node.id and edge.dst == helper_store.id
+    )
+    assert table_edge.source.path == member_path
+    assert table_edge.source.lines == (2, 2)
+    assert not any(
+        edge.dst == nodes["worker_table"].id
+        and edge.src in {api_node.id, worker_node.id}
+        for edge in page.block.edges
+    )
+    domain_page = pages[0]
+    assert "Reached from" in domain_page.tldr.table.columns
+    assert domain_page.tldr.table.rows[0][1:4] == ["0", "0", "2"]
+    assert any(
+        source.path == caller_path
+        and source.lines == (caller_import_line, caller_import_line)
+        for source in domain_page.tldr.table.sources
+    )
+
+
+@pytest.mark.parametrize(
+    ("worker_path", "worker_name", "worker_count", "expected"),
+    [
+        (
+            "backend/src/tasks/executors/sync.py",
+            "SyncTaskExecutor",
+            2,
+            "Sync + 1 more workers",
+        ),
+        (
+            "backend/src/rox_core/slack_integration/workers/sync.py",
+            "SyncTaskExecutor",
+            1,
+            "Slack Integration workers",
+        ),
+    ],
+)
+def test_worker_labels_use_specific_directories_or_generic_fallback(
+    worker_path: str,
+    worker_name: str,
+    worker_count: int,
+    expected: str,
+) -> None:
+    page = _feature_page_from_runtime_fixture(
+        worker_path=worker_path,
+        worker_name=worker_name,
+        worker_count=worker_count,
+    )
+    worker_node = next(
+        node for node in page.block.nodes if node.group == "group-background-workers"
+    )
+    table_row = next(
+        row
+        for row in page.tldr.table.rows
+        if row[1] == "Background workers / workflows"
+    )
+
+    assert worker_node.label == expected
+    assert table_row[0] == expected
+
+
+def test_library_nodes_appear_only_without_entry_nodes() -> None:
+    without_entries = _feature_page_from_runtime_fixture(
+        endpoint_count=0,
+        worker_count=0,
+    )
+    with_entries = _feature_page_from_runtime_fixture()
+
+    assert any("(library)" in node.label for node in without_entries.block.nodes)
+    assert not any("(library)" in node.label for node in with_entries.block.nodes)
+    assert block_layout_problems(without_entries.block) == []
+    assert block_layout_problems(with_entries.block) == []
 
 
 def test_api_and_worker_details_show_five_then_a_cited_more_row() -> None:

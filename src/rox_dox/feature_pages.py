@@ -60,6 +60,24 @@ LAYER_LABELS: dict[Layer, str] = {
 }
 ROUTE_FILENAMES = {"routes.py", "router.py", "views.py", "endpoints.py"}
 WORKER_SEGMENTS = {"tasks", "temporal", "workers", "executors", "cron", "jobs"}
+GENERIC_SEGMENTS = {
+    "backend",
+    "src",
+    "tasks",
+    "task",
+    "executors",
+    "executor",
+    "workers",
+    "worker",
+    "temporal",
+    "activities",
+    "activity",
+    "workflows",
+    "workflow",
+    "jobs",
+    "job",
+    "cron",
+}
 
 
 def layer_of(path: str) -> Layer:
@@ -96,6 +114,25 @@ class _FeatureBlock:
     diagram: BlockDiagram
     tables_by_node: Mapping[str, tuple[str, ...]]
     services_by_node: Mapping[str, tuple[str, ...]]
+    callers: tuple[_Caller, ...]
+    library_rows: tuple[_LibraryRow, ...]
+
+
+@dataclass(frozen=True)
+class _Caller:
+    path: str
+    targets: tuple[str, ...]
+    import_sources: tuple[CodeSource, ...]
+    owner_name: str | None
+    owner_page: str | None
+
+
+@dataclass(frozen=True)
+class _LibraryRow:
+    label: str
+    tables: tuple[str, ...]
+    services: tuple[str, ...]
+    sources: tuple[CodeSource, ...]
 
 
 def _component_slug(value: str) -> str:
@@ -119,6 +156,38 @@ def _feature_facts(
         )
         for file in feature.files
     }
+
+
+def _feature_callers(
+    feature: Feature,
+    component_facts: Mapping[str, FileFacts],
+    component_imports: Mapping[str, Mapping[str, int]],
+    primary_features: Mapping[str, tuple[str, str]],
+) -> tuple[_Caller, ...]:
+    member_paths = {file.path for file in feature.files}
+    callers = []
+    for path, imports in sorted(component_imports.items()):
+        if path in member_paths:
+            continue
+        facts = component_facts.get(path)
+        if facts is None or not (facts.endpoints or facts.workers):
+            continue
+        targets = tuple(sorted(set(imports) & member_paths))
+        if not targets:
+            continue
+        owner = primary_features.get(path)
+        callers.append(
+            _Caller(
+                path=path,
+                targets=targets,
+                import_sources=tuple(
+                    _source(path, imports[target]) for target in targets
+                ),
+                owner_name=owner[0] if owner else None,
+                owner_page=owner[1] if owner else None,
+            )
+        )
+    return tuple(callers)
 
 
 def _runtime_records(
@@ -164,6 +233,76 @@ def _runtime_records(
         ),
     )
     return endpoints, workers, externals
+
+
+def _worker_label(
+    directory: str,
+    records: list[tuple[str, Worker]],
+    family: str,
+) -> str:
+    label_family = "workers" if family == "task_executor" else "workflows"
+    for segment in reversed(PurePosixPath(directory).parts):
+        parts = [
+            part
+            for part in segment.lower().replace("-", "_").split("_")
+            if part and part not in GENERIC_SEGMENTS
+        ]
+        if parts:
+            return f"{_humanize('_'.join(parts))} {label_family}"
+    first_name = min(records, key=lambda item: (item[1].name, item[0], item[1].line))[
+        1
+    ].name
+    base_name = re.sub(r"(TaskExecutor|Executor|Workflow|Activity)$", "", first_name)
+    label = _humanize(base_name or first_name)
+    more = len(records) - 1
+    if more:
+        label = f"{label} + {more} more"
+    return f"{label} {label_family}"
+
+
+def _caller_detail(callers: list[_Caller]) -> Claim:
+    origins = sorted({caller.owner_name or "outside any feature" for caller in callers})
+    text = f"Calls into this feature from {', '.join(origins)}"
+    sources = _unique_sources(
+        [source for caller in callers for source in caller.import_sources]
+    )
+    return Claim(
+        text=_bounded_detail_text(text),
+        sources=sources,
+    )
+
+
+def _caller_records(
+    callers: Collection[_Caller],
+    component_facts: Mapping[str, FileFacts],
+) -> tuple[list[tuple[str, Endpoint]], list[tuple[str, Worker]]]:
+    facts = {caller.path: component_facts[caller.path] for caller in callers}
+    endpoints, workers, _ = _runtime_records(facts)
+    return endpoints, workers
+
+
+def _caller_groups(
+    endpoints: list[tuple[str, Endpoint]],
+    workers: list[tuple[str, Worker]],
+    component_facts: Mapping[str, FileFacts],
+) -> list[str]:
+    groups = {
+        _humanize(component_facts[path].api_group or PurePosixPath(path).stem)
+        for path, _ in endpoints
+    }
+    worker_groups: defaultdict[tuple[str, str], list[tuple[str, Worker]]] = defaultdict(
+        list
+    )
+    for path, worker in workers:
+        family = "task_executor" if worker.kind == "task_executor" else "temporal"
+        worker_groups[(PurePosixPath(path).parent.as_posix(), family)].append(
+            (path, worker)
+        )
+    groups.update(
+        _worker_label(directory, records, family)
+        for (directory, family), records in sorted(worker_groups.items())
+    )
+    return sorted(groups)
 
 
 def _bounded_details(
@@ -293,6 +432,28 @@ def _feature_tldr(
     files = feature.files
     facts = _feature_facts(feature, component_facts)
     endpoints, workers, externals = _runtime_records(facts)
+    other_feature_callers = [
+        caller for caller in block.callers if caller.owner_name is not None
+    ]
+    caller_endpoints, caller_workers = _caller_records(
+        other_feature_callers,
+        component_facts,
+    )
+    caller_endpoints = list(
+        {
+            (path, endpoint.method, endpoint.path, endpoint.handler, endpoint.line): (
+                path,
+                endpoint,
+            )
+            for path, endpoint in caller_endpoints
+        }.values()
+    )
+    caller_workers = list(
+        {
+            (path, worker.kind, worker.name, worker.line): (path, worker)
+            for path, worker in caller_workers
+        }.values()
+    )
     summary = []
     endpoints_by_group: defaultdict[str, list[tuple[str, Endpoint]]] = defaultdict(list)
     for path, endpoint in endpoints:
@@ -317,11 +478,31 @@ def _feature_tldr(
         summary.append(
             Claim(
                 text=(
-                    f"Serves {len(endpoints)} HTTP endpoints in "
+                    f"Owns {len(endpoints)} HTTP endpoints in "
                     f"{len(endpoints_by_group)} API groups: "
                     f"{', '.join(_humanize(group) for group in sorted(endpoints_by_group))}."
                 ),
                 sources=_unique_sources(endpoint_sources),
+            )
+        )
+    if caller_endpoints or caller_workers:
+        caller_sources = [
+            *[_source(path, endpoint.line) for path, endpoint in caller_endpoints],
+            *[_source(path, worker.line) for path, worker in caller_workers],
+            *[
+                source
+                for caller in other_feature_callers
+                for source in caller.import_sources
+            ],
+        ]
+        summary.append(
+            Claim(
+                text=(
+                    f"Reached from {len(caller_endpoints)} HTTP endpoints and "
+                    f"{len(caller_workers)} workers in other features: "
+                    f"{', '.join(_caller_groups(caller_endpoints, caller_workers, component_facts))}."
+                ),
+                sources=_unique_sources(caller_sources),
             )
         )
     if workers:
@@ -434,6 +615,16 @@ def _feature_tldr(
             for edge in block.diagram.edges
             if edge.src == node.id or edge.dst == node.id
         )
+    for library in block.library_rows:
+        rows.append(
+            [
+                library.label,
+                "Library code",
+                ", ".join(library.tables) or "—",
+                ", ".join(library.services) or "—",
+            ]
+        )
+        row_sources.extend(library.sources)
     return Tldr(
         summary=summary,
         key_points=key_points,
@@ -469,14 +660,23 @@ def _feature_block(
     feature: Feature,
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
+    component_imports: Mapping[str, Mapping[str, int]],
+    primary_features: Mapping[str, tuple[str, str]],
 ) -> _FeatureBlock:
     fallback = tables[feature.id].source
     feature_file_by_path = {file.path: file for file in feature.files}
     facts = _feature_facts(feature, component_facts)
+    callers = _feature_callers(
+        feature,
+        component_facts,
+        component_imports,
+        primary_features,
+    )
     nodes = []
     component_files: dict[str, set[str]] = {}
     component_roles: dict[str, str] = {}
     entry_files: dict[str, set[str]] = {}
+    entry_starts: dict[str, set[str]] = {}
     api_files: dict[str, set[str]] = {}
     used_ids: set[str] = set()
 
@@ -523,11 +723,23 @@ def _feature_block(
         component_roles[web_id] = "web"
 
     api_records: defaultdict[str, list[tuple[str, Endpoint]]] = defaultdict(list)
+    api_member_paths: defaultdict[str, set[str]] = defaultdict(set)
+    api_callers: defaultdict[str, list[_Caller]] = defaultdict(list)
     for path, file_facts in facts.items():
         if not file_facts.endpoints:
             continue
         group = file_facts.api_group or PurePosixPath(path).stem
         api_records[group].extend((path, endpoint) for endpoint in file_facts.endpoints)
+        api_member_paths[group].add(path)
+    for caller in callers:
+        caller_facts = component_facts[caller.path]
+        if not caller_facts.endpoints:
+            continue
+        group = caller_facts.api_group or PurePosixPath(caller.path).stem
+        api_records[group].extend(
+            (caller.path, endpoint) for endpoint in caller_facts.endpoints
+        )
+        api_callers[group].append(caller)
     api_nodes: dict[str, str] = {}
     for api_group in sorted(api_records):
         records = sorted(
@@ -549,53 +761,95 @@ def _feature_block(
             ],
             "endpoints",
         )
+        group_callers = api_callers[api_group]
+        if group_callers:
+            details.append(_caller_detail(group_callers))
         component_id = node_id("api", api_group)
-        api_paths = {path for path, _ in records}
+        api_paths = api_member_paths[api_group]
         api_nodes[api_group] = component_id
-        api_files[component_id] = api_paths
+        api_files[component_id] = api_paths | {caller.path for caller in group_callers}
         entry_files[component_id] = api_paths
+        entry_starts[component_id] = api_paths | {
+            target for caller in group_callers for target in caller.targets
+        }
+        caller_only = not api_paths
+        caller_link = next(
+            (
+                caller.owner_page
+                for caller in sorted(group_callers, key=lambda item: item.path)
+                if caller.owner_page is not None
+            ),
+            None,
+        )
         nodes.append(
             Node(
                 id=component_id,
                 label=f"{_humanize(api_group)} API",
                 source=details[0].sources[0],
+                link=caller_link if caller_only else None,
                 group="group-http-api",
                 details=details,
             )
         )
-        component_files[component_id] = api_paths
+        component_files[component_id] = set(api_paths)
         component_roles[component_id] = "entry"
 
     worker_records: defaultdict[tuple[str, str], list[tuple[str, Worker]]] = (
         defaultdict(list)
     )
+    worker_member_paths: defaultdict[tuple[str, str], set[str]] = defaultdict(set)
+    worker_callers: defaultdict[tuple[str, str], list[_Caller]] = defaultdict(list)
     for path, file_facts in facts.items():
         directory = PurePosixPath(path).parent.as_posix()
         for worker in file_facts.workers:
             family = "task_executor" if worker.kind == "task_executor" else "temporal"
             worker_records[(directory, family)].append((path, worker))
+            worker_member_paths[(directory, family)].add(path)
+    for caller in callers:
+        caller_facts = component_facts[caller.path]
+        directory = PurePosixPath(caller.path).parent.as_posix()
+        for worker in caller_facts.workers:
+            family = "task_executor" if worker.kind == "task_executor" else "temporal"
+            key = (directory, family)
+            worker_records[key].append((caller.path, worker))
+            worker_callers[key].append(caller)
     for (directory, family), records in sorted(worker_records.items()):
         records.sort(key=lambda item: (item[1].name, item[0], item[1].line))
-        label_family = "workers" if family == "task_executor" else "workflows"
         group_name = "group-background-workers"
         component_id = node_id(family, directory)
-        component_files_for_node = {path for path, _ in records}
+        component_files_for_node = worker_member_paths[(directory, family)]
         details = _bounded_details(
             [(worker.name, _source(path, worker.line)) for path, worker in records],
             "workers" if family == "task_executor" else "workflows",
         )
+        group_callers = worker_callers[(directory, family)]
+        if group_callers:
+            details.append(_caller_detail(group_callers))
+        caller_only = not component_files_for_node
+        caller_link = next(
+            (
+                caller.owner_page
+                for caller in sorted(group_callers, key=lambda item: item.path)
+                if caller.owner_page is not None
+            ),
+            None,
+        )
         nodes.append(
             Node(
                 id=component_id,
-                label=f"{_humanize(PurePosixPath(directory).name)} {label_family}",
+                label=_worker_label(directory, records, family),
                 source=details[0].sources[0],
+                link=caller_link if caller_only else None,
                 group=group_name,
                 details=details,
             )
         )
-        component_files[component_id] = component_files_for_node
+        component_files[component_id] = set(component_files_for_node)
         component_roles[component_id] = "entry"
         entry_files[component_id] = component_files_for_node
+        entry_starts[component_id] = set(component_files_for_node) | {
+            target for caller in group_callers for target in caller.targets
+        }
 
     entry_ids_by_path: defaultdict[str, set[str]] = defaultdict(set)
     for component_id, paths in entry_files.items():
@@ -614,13 +868,16 @@ def _feature_block(
             ):
                 call_edges[evidence.path].add(evidence.to)
     reached_by_entry: dict[str, set[str]] = {}
-    for component_id, own_files in entry_files.items():
+    for component_id, own_files in entry_starts.items():
         reached = set(own_files)
         pending = sorted(own_files)
         cursor = 0
         while cursor < len(pending):
             current = pending[cursor]
             cursor += 1
+            owners = entry_ids_by_path.get(current, set())
+            if owners and component_id not in owners:
+                continue
             for target in sorted(call_edges[current]):
                 owners = entry_ids_by_path.get(target, set())
                 if owners and component_id not in owners:
@@ -633,6 +890,7 @@ def _feature_block(
         set().union(*reached_by_entry.values()) if reached_by_entry else set()
     )
 
+    library_rows = []
     library_files: defaultdict[str, list[FeatureFile]] = defaultdict(list)
     for path in sorted(feature_paths - reached_from_entries):
         if path.startswith("backend/"):
@@ -662,11 +920,31 @@ def _feature_block(
             _source(path, external.line) for path, external in external_records
         )
         source = min(sources, key=lambda item: (item.path, item.lines[0]))
+        library_row = _LibraryRow(
+            label=f"{_humanize(PurePosixPath(directory).name)} (library)",
+            tables=tuple(
+                sorted(
+                    {
+                        evidence.table
+                        for file in files
+                        for evidence in file.evidence
+                        if evidence.kind == "table" and evidence.table in feature.tables
+                    }
+                )
+            ),
+            services=tuple(
+                sorted({external.service for _, external in external_records})
+            ),
+            sources=tuple(_unique_sources(sources)),
+        )
+        if entry_files:
+            library_rows.append(library_row)
+            continue
         component_id = node_id("library", directory)
         nodes.append(
             Node(
                 id=component_id,
-                label=f"{_humanize(PurePosixPath(directory).name)} (library)",
+                label=library_row.label,
                 source=source,
                 group="group-library-code",
             )
@@ -959,6 +1237,8 @@ def _feature_block(
         diagram=diagram,
         tables_by_node=table_uses_by_node,
         services_by_node=service_uses_by_node,
+        callers=callers,
+        library_rows=tuple(library_rows),
     )
 
 
@@ -1123,6 +1403,8 @@ def _feature_page(
     names: Mapping[str, str],
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
+    component_imports: Mapping[str, Mapping[str, int]],
+    primary_features: Mapping[str, tuple[str, str]],
 ) -> Page:
     title = _feature_name(feature, names)
     domain_id = f"domain-{feature_map.domain}"
@@ -1161,7 +1443,13 @@ def _feature_page(
                 ),
             )
         )
-    block = _feature_block(feature, tables, component_facts)
+    block = _feature_block(
+        feature,
+        tables,
+        component_facts,
+        component_imports,
+        primary_features,
+    )
     return Page(
         id=page_id,
         title=title,
@@ -1438,6 +1726,8 @@ def _domain_tldr(
     names: Mapping[str, str],
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
+    component_imports: Mapping[str, Mapping[str, int]],
+    primary_features: Mapping[str, tuple[str, str]],
 ) -> Tldr:
     table_names = sorted(
         {table for feature in feature_map.features for table in feature.tables}
@@ -1448,10 +1738,36 @@ def _domain_tldr(
     web_sources = {}
     external_records = {}
     feature_metrics = {}
+    reached_metrics = {}
+    reached_sources = []
     for feature in feature_map.features:
         facts = _feature_facts(feature, component_facts)
         endpoints, workers, externals = _runtime_records(facts)
         feature_metrics[feature.id] = (endpoints, workers, externals)
+        callers = _feature_callers(
+            feature,
+            component_facts,
+            component_imports,
+            primary_features,
+        )
+        caller_endpoints, caller_workers = _caller_records(callers, component_facts)
+        unique_caller_endpoints = {
+            (path, endpoint.method, endpoint.path, endpoint.handler, endpoint.line)
+            for path, endpoint in caller_endpoints
+        }
+        unique_caller_workers = {
+            (path, worker.kind, worker.name, worker.line)
+            for path, worker in caller_workers
+        }
+        reached_metrics[feature.id] = len(unique_caller_endpoints) + len(
+            unique_caller_workers
+        )
+        for path, endpoint in caller_endpoints:
+            reached_sources.append(_source(path, endpoint.line))
+        for path, worker in caller_workers:
+            reached_sources.append(_source(path, worker.line))
+        for caller in callers:
+            reached_sources.extend(caller.import_sources)
         for path, endpoint in endpoints:
             endpoint_records[
                 (path, endpoint.method, endpoint.path, endpoint.handler, endpoint.line)
@@ -1521,7 +1837,7 @@ def _domain_tldr(
     ]
     rows = []
     links = []
-    row_sources = []
+    row_sources = list(reached_sources)
     for row_number, feature in enumerate(feature_map.features):
         endpoints, workers, externals = feature_metrics[feature.id]
         services = sorted({external.service for _, external in externals})
@@ -1530,6 +1846,7 @@ def _domain_tldr(
                 _feature_name(feature, names),
                 str(len(endpoints)),
                 str(len(workers)),
+                str(reached_metrics[feature.id]),
                 str(len(feature.tables)),
                 ", ".join(services) or "—",
             ]
@@ -1603,7 +1920,14 @@ def _domain_tldr(
         summary=summary,
         key_points=key_points,
         table=SummaryTable(
-            columns=["Feature", "Endpoints", "Workers", "Tables", "Outside services"],
+            columns=[
+                "Feature",
+                "Endpoints",
+                "Workers",
+                "Reached from",
+                "Tables",
+                "Outside services",
+            ],
             rows=rows,
             links=links,
             sources=_unique_sources([*row_sources, *table_sources]),
@@ -1663,6 +1987,8 @@ def _domain_page(
     names: Mapping[str, str],
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
+    component_imports: Mapping[str, Mapping[str, int]],
+    primary_features: Mapping[str, tuple[str, str]],
 ) -> Page:
     domain_page_id = f"domain-{feature_map.domain}"
     primary_paths = sorted(
@@ -1687,7 +2013,14 @@ def _domain_page(
         commit=feature_map.commit,
         parent=root_id,
         paths=primary_paths,
-        tldr=_domain_tldr(feature_map, names, tables, component_facts),
+        tldr=_domain_tldr(
+            feature_map,
+            names,
+            tables,
+            component_facts,
+            component_imports,
+            primary_features,
+        ),
         block=block,
         block_figures=figures,
         data=_domain_data(feature_map, names, tables),
@@ -1711,8 +2044,12 @@ def feature_pages(
     names: Mapping[str, str],
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts] | None = None,
+    component_imports: Mapping[str, Mapping[str, int]] | None = None,
+    primary_features: Mapping[str, tuple[str, str]] | None = None,
 ) -> list[Page]:
     runtime_facts = component_facts or {}
+    runtime_imports = component_imports or {}
+    primary_feature_owners = primary_features or {}
     pages = [
         _domain_page(
             feature_map,
@@ -1721,6 +2058,8 @@ def feature_pages(
             names=names,
             tables=tables,
             component_facts=runtime_facts,
+            component_imports=runtime_imports,
+            primary_features=primary_feature_owners,
         )
     ]
     pages.extend(
@@ -1731,6 +2070,8 @@ def feature_pages(
             names=names,
             tables=tables,
             component_facts=runtime_facts,
+            component_imports=runtime_imports,
+            primary_features=primary_feature_owners,
         )
         for feature in feature_map.features
     )

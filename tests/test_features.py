@@ -223,6 +223,40 @@ def test_relative_imports_resolve_for_packages_and_modules(
     assert import_evidence.line == 1
 
 
+def test_runtime_caller_imports_use_the_feature_graph_and_import_lines(
+    tmp_path: Path,
+) -> None:
+    caller_path = "backend/src/rox_core/api/caller.py"
+    member_path = "backend/src/rox_core/integrations/member.py"
+    sources = {
+        "backend/src/rox_core/__init__.py": "",
+        "backend/src/rox_core/api/__init__.py": "",
+        "backend/src/rox_core/integrations/__init__.py": "",
+        caller_path: (
+            "from rox_core.integrations.member import handle\n"
+            "\n"
+            "def callback():\n"
+            "    return handle()\n"
+        ),
+        member_path: "def handle():\n    return None\n",
+        "backend/src/rox_core/tests/ignored.py": (
+            "from rox_core.integrations.member import handle\n"
+        ),
+        "backend/src/rox_core/migrations/ignored.py": (
+            "from rox_core.integrations.member import handle\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+
+    graph, unparseable = _parse_graph(_snapshot(repo, commit), {}, set())
+
+    assert unparseable == 0
+    assert graph[caller_path].imports == [member_path]
+    assert graph[caller_path].import_lines[member_path] == 1
+    assert "backend/src/rox_core/tests/ignored.py" not in graph
+    assert "backend/src/rox_core/migrations/ignored.py" not in graph
+
+
 def test_called_by_pass_does_not_cascade(tmp_path: Path) -> None:
     sources = {
         "backend/src/pkg/a.py": (

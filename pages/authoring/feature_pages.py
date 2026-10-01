@@ -5,7 +5,7 @@ from pathlib import Path
 import rox_core_domains
 from rox_dox.components import extract_file_facts
 from rox_dox.feature_pages import feature_pages
-from rox_dox.features import FeatureMap
+from rox_dox.features import FeatureMap, _parse_graph, _snapshot
 from rox_dox.schema import extract_tables
 
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
@@ -38,26 +38,47 @@ def main() -> None:
     }
     tables_by_commit = {}
     components_by_commit = {}
+    imports_by_commit = {}
     generated = []
     for feature_map in feature_maps:
         if feature_map.commit not in tables_by_commit:
             tables_by_commit[feature_map.commit] = extract_tables(
                 repo, feature_map.commit
             )
-            source_paths = sorted(
-                {
-                    file.path
-                    for candidate in feature_maps
-                    if candidate.commit == feature_map.commit
-                    for feature in candidate.features
-                    for file in feature.files
-                }
-            )
+            snapshot = _snapshot(repo, feature_map.commit)
+            graph, _ = _parse_graph(snapshot, {}, set())
+            source_paths = sorted(graph)
             components_by_commit[feature_map.commit] = extract_file_facts(
                 repo,
                 feature_map.commit,
                 source_paths,
             )
+            imports_by_commit[feature_map.commit] = {
+                path: {
+                    imported: graph_file.import_lines[imported]
+                    for imported in graph_file.imports
+                }
+                for path, graph_file in sorted(graph.items())
+            }
+
+    primary_features = {}
+    for candidate in feature_maps:
+        for feature in candidate.features:
+            display_name = names.get(candidate.domain, {}).get(feature.id)
+            if display_name is None:
+                display_name = " ".join(
+                    part.capitalize()
+                    for part in feature.id.replace("-", "_").split("_")
+                )
+            page_id = f"feature-{candidate.domain}-{feature.id.replace('_', '-')}"
+            for file in feature.files:
+                if file.primary and (
+                    file.path not in primary_features
+                    or page_id < primary_features[file.path][1]
+                ):
+                    primary_features[file.path] = (display_name, page_id)
+
+    for feature_map in feature_maps:
         generated.extend(
             feature_pages(
                 feature_map,
@@ -66,6 +87,8 @@ def main() -> None:
                 names=names.get(feature_map.domain, {}),
                 tables=tables_by_commit[feature_map.commit],
                 component_facts=components_by_commit[feature_map.commit],
+                component_imports=imports_by_commit[feature_map.commit],
+                primary_features=primary_features,
             )
         )
 

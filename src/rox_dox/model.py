@@ -47,7 +47,7 @@ class MembershipGroup(Model):
     rows: list[MembershipRow]
 
 
-_MAX_NODE_DETAILS = 6
+_MAX_NODE_DETAILS = 7
 _MAX_NODE_DETAIL_TEXT_LENGTH = 90
 
 
