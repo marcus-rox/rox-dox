@@ -1,0 +1,1391 @@
+{
+ "id": "feature-crm-entity-user",
+ "title": "Entity User (+3 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  ".agents/skills/preview-envs/SKILL.md",
+  "backend/src/agent_framework/data_interface/org_chart/live.py",
+  "backend/src/chat/routes/conversation/router.py",
+  "backend/src/chat/routes/conversation/static_site_grant.py",
+  "backend/src/chat/routes/events/business.py",
+  "backend/src/chat/server/fastapi_app.py",
+  "backend/src/ext_integrations/email_integration/microsoft_org_wide_outlook_service.py",
+  "backend/src/ext_integrations/ms_teams/user_sync_service.py",
+  "backend/src/rox_core/api/api_access/management_apis/business.py",
+  "backend/src/rox_core/api/circleback/business.py",
+  "backend/src/rox_core/api/circleback/dto.py",
+  "backend/src/rox_core/api/prospect_lists/default_lists_backfill_job.py",
+  "backend/src/rox_core/api/prospect_lists/default_views_business.py",
+  "backend/src/rox_core/api/prospect_lists/default_views_modes.py",
+  "backend/src/rox_core/api/salesforce_enrichment/graph_users.py",
+  "backend/src/rox_core/api/tab/business.py",
+  "backend/src/rox_core/api/transcript_v2/service.py",
+  "backend/src/rox_core/api/user/is_cold_pending_setup_backfill_job.py",
+  "backend/src/rox_customer/batch/models/v4/entity/generated/user.py",
+  "backend/src/rox_customer/batch/models/v4/entity/user.py",
+  "backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py",
+  "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+  "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+  "backend/src/tasks/executors/embed_user_preferences.py",
+  "backend/src/tasks/executors/user_company.py",
+  "backend/src/util/hmac_signature.py",
+  "backend/src/workflow/execution_graph/packages/rox_actions/rox_transcript.py",
+  "backend/src/workflow/triggers/handlers/global_new_user_created.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: entity_user, entity_user_cdc, entity_user_staging.",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+      "lines": [
+       61,
+       63
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+      "lines": [
+       71,
+       76
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+      "lines": [
+       66,
+       68
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: HTTP routes: 4, Background workers: 5, Business logic: 30, Models: 4, Agent skills: 1.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/conversation/router.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/digest_generation.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": ".agents/skills/preview-envs/SKILL.md",
+      "lines": [
+       267,
+       267
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "HTTP routes: backend/src/chat/routes/conversation (2), backend/src/chat/routes/events (1), backend/src/rox_core/api/data_extraction (1).",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/conversation/router.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/events/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/data_extraction/endpoints.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (5).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/digest_generation.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/prospect_lists (3), backend/src/rox_core/api/circleback (2), backend/src/util (2).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/default_lists_backfill_job.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/circleback/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/circleback/business.py",
+      "lines": [
+       28,
+       28
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_customer/batch/models/v4/entity (1), backend/src/rox_customer/batch/models/v4/entity/generated (1), backend/src/rox_customer/real_time/models/entity (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Agent skills: .agents/skills/preview-envs (1).",
+    "sources": [
+     {
+      "path": ".agents/skills/preview-envs/SKILL.md",
+      "lines": [
+       267,
+       267
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     ".agents/skills/preview-envs/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references backend/src/chat/server/fastapi_app.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/org_chart/live.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/chat/routes/conversation/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/chat/routes/conversation/static_site_grant.py; imports backend/src/chat/server/fastapi_app.py; uses entity_user"
+    ],
+    [
+     "backend/src/chat/routes/conversation/static_site_grant.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/chat/routes/conversation/router.py"
+    ],
+    [
+     "backend/src/chat/routes/events/business.py",
+     "HTTP routes",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/chat/server/fastapi_app.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/routes/conversation/router.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/microsoft_org_wide_outlook_service.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/ext_integrations/ms_teams/user_sync_service.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/api_access/management_apis/business.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/circleback/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/circleback/dto.py; imports backend/src/rox_core/api/transcript_v2/service.py; imports backend/src/util/hmac_signature.py; uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/circleback/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/circleback/business.py"
+    ],
+    [
+     "backend/src/rox_core/api/prospect_lists/default_lists_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/prospect_lists/default_views_business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/prospect_lists/default_views_modes.py; uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/prospect_lists/default_views_modes.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/prospect_lists/default_views_business.py"
+    ],
+    [
+     "backend/src/rox_core/api/salesforce_enrichment/graph_users.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/real_time/models/entity/generated/user.py; uses entity_user; uses graph"
+    ],
+    [
+     "backend/src/rox_core/api/tab/business.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/transcript_v2/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/circleback/business.py; imports backend/src/workflow/execution_graph/packages/rox_actions/rox_transcript.py; uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/user/is_cold_pending_setup_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_customer/batch/models/v4/entity/generated/user.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_customer/batch/models/v4/entity/user.py; imports backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py"
+    ],
+    [
+     "backend/src/rox_customer/batch/models/v4/entity/user.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_customer/batch/models/v4/entity/generated/user.py; imports backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py; uses entity_user"
+    ],
+    [
+     "backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/batch/models/v4/entity/generated/user.py; imports backend/src/rox_customer/batch/models/v4/entity/user.py; uses entity_user; uses graph"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/salesforce_enrichment/graph_users.py; imports backend/src/rox_customer/real_time/models/entity/user_dao.py; uses entity_user"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_customer/real_time/models/entity/generated/user.py; uses entity_user"
+    ],
+    [
+     "backend/src/tasks/executors/embed_user_preferences.py",
+     "Background workers",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/tasks/executors/user_company.py",
+     "Background workers",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/util/hmac_signature.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/circleback/business.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/rox_actions/rox_transcript.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/transcript_v2/service.py"
+    ],
+    [
+     "backend/src/workflow/triggers/handlers/global_new_user_created.py",
+     "Business logic",
+     "Primary",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/org_user/live.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/calendar_metrics.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/ext_integrations/call_recorders/ms_teams/live_sync_service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/transcript_v2/service.py; uses entity_user"
+    ],
+    [
+     "backend/src/research/tracing/braintrust.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_colleague_origin_backfill_job.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/alerts/insight_gen_scheduler.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/alerts/processors/pre_meeting_briefings_processor.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/data_extraction/endpoints.py",
+     "HTTP routes",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/data_mock/business.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/feature_flags/business.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+     "Business logic",
+     "Shared",
+     "uses entity_user; uses graph"
+    ],
+    [
+     "backend/src/tasks/executors/digest_generation.py",
+     "Background workers",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/tasks/executors/integration.py",
+     "Background workers",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/tasks/executors/pre_meeting_briefings.py",
+     "Background workers",
+     "Shared",
+     "uses entity_user"
+    ],
+    [
+     "backend/src/util/org_cache.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_customer/real_time/models/entity/user_dao.py; uses entity_user"
+    ]
+   ],
+   "sources": [
+    {
+     "path": ".agents/skills/preview-envs/SKILL.md",
+     "lines": [
+      267,
+      267
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      81,
+      81
+     ]
+    },
+    {
+     "path": "backend/src/chat/server/fastapi_app.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/events/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/microsoft_org_wide_outlook_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/ms_teams/user_sync_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/management_apis/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/circleback/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/circleback/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/circleback/business.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/circleback/business.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/default_lists_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/default_views_business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/default_views_business.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/graph_users.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/graph_users.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tab/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/transcript_v2/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/rox_actions/rox_transcript.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/is_cold_pending_setup_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/user_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/embed_user_preferences.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_company.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/global_new_user_created.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/org_user/live.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_metrics.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/call_recorders/ms_teams/live_sync_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/call_recorders/ms_teams/live_sync_service.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "backend/src/research/tracing/braintrust.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_colleague_origin_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/alerts/insight_gen_scheduler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/alerts/processors/pre_meeting_briefings_processor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_extraction/endpoints.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_mock/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/feature_flags/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/digest_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/integration.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/pre_meeting_briefings.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/util/org_cache.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/util/org_cache.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 15 files with Entity Organization (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/agent_framework/data_interface/org_user/live.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Graph (+6 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Erd Mapping (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes / Background workers / Business logic / Models / Agent skills",
+    "source": {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      61,
+      63
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/chat/routes/conversation — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/conversation/router.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/chat/routes/events — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/events/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/data_extraction — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/data_extraction/endpoints.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/digest_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 5 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/digest_generation.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/prospect_lists — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/default_lists_backfill_job.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/circleback — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/circleback/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/util — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/circleback/business.py",
+        "lines": [
+         28,
+         28
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/data_interface/org_chart — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/data_interface/org_user — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/data_interface/org_user/live.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/chat/server — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/server/fastapi_app.py",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_customer/batch/models/v4/entity — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/batch/models/v4/entity/generated — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/user_dao.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/real_time/models/entity/generated — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+        "lines": [
+         61,
+         61
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "skills",
+    "label": "Agent skills",
+    "source": {
+     "path": ".agents/skills/preview-envs/SKILL.md",
+     "lines": [
+      267,
+      267
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": ".agents/skills/preview-envs — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/preview-envs/SKILL.md",
+        "lines": [
+         267,
+         267
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-entity_user",
+    "label": "entity_user",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      61,
+      63
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-entity_user_cdc",
+    "label": "entity_user_cdc",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      71,
+      76
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-entity_user_staging",
+    "label": "entity_user_staging",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      66,
+      68
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (4)",
+    "source": {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/graph_users.py",
+     "lines": [
+      15,
+      15
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "routes",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/chat/server/fastapi_app.py",
+     "lines": [
+      23,
+      23
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "store-entity_user",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-entity_user",
+    "label": "uses (5)",
+    "source": {
+     "path": "backend/src/tasks/executors/digest_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-entity_user",
+    "label": "uses (25)",
+    "source": {
+     "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-entity_user",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/user.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "entity_user",
+   "entity_user_cdc",
+   "entity_user_staging"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "entity_user",
+    "dst": "entity_user_cdc",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      71,
+      71
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "entity_user",
+    "dst": "entity_user_staging",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      66,
+      66
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "entity_user_cdc",
+    "dst": "entity_user_staging",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+     "lines": [
+      66,
+      66
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_customer/real_time/models/entity/generated/user.py",
+    "lines": [
+     61,
+     63
+    ]
+   }
+  },
+  {
+   "label": "Entity Organization (+3 tables)",
+   "page": "feature-crm-entity-organization",
+   "source": {
+    "path": "backend/src/agent_framework/data_interface/org_user/live.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Graph (+6 tables)",
+   "page": "feature-crm-graph",
+   "source": {
+    "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Erd Mapping (+3 tables)",
+   "page": "feature-crm-erd-mapping",
+   "source": {
+    "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

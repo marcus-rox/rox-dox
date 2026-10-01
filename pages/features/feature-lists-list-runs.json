@@ -1,0 +1,1371 @@
+{
+ "id": "feature-lists-list-runs",
+ "title": "List Runs",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-lists",
+ "paths": [
+  "backend/src/enrichment/executors/base.py",
+  "backend/src/enrichment/executors/campaign_add_executor.py",
+  "backend/src/enrichment/executors/clever_column_executor.py",
+  "backend/src/enrichment/executors/factory.py",
+  "backend/src/enrichment/executors/formula_evaluator.py",
+  "backend/src/enrichment/executors/formula_executor.py",
+  "backend/src/enrichment/executors/promote_column_executor.py",
+  "backend/src/enrichment/executors/run_condition.py",
+  "backend/src/enrichment/models/flow_config.py",
+  "backend/src/enrichment/post_validation_flow_config.py",
+  "backend/src/rox_core/api/enrichment/dto.py",
+  "backend/src/rox_core/api/enrichment/endpoints.py",
+  "backend/src/rox_core/models/lists/list_runs.py",
+  "backend/src/tasks/executors/prospect_list_csv_export.py",
+  "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+  "backend/src/tasks/executors/selection_change_backfill_worker.py",
+  "backend/src/temporal/activities/enrichment/company_preflight.py",
+  "backend/src/temporal/activities/enrichment/enqueue_cc_cell.py",
+  "backend/src/temporal/activities/enrichment/planning.py",
+  "backend/src/temporal/workers/enrichment_worker.py",
+  "backend/src/temporal/workflows/csv_import_workflow.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentLauncher.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentOptions.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ActiveCsvImportBadge.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/FormulaModal.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/useEnrichmentPolling.ts",
+  "web/apps/web/src/app/hooks/react-query/generated/enrichment/enrichment.ts",
+  "web/apps/web/src/app/hooks/react-query/orgDefaultProviderPriority.ts",
+  "web/apps/web/src/app/hooks/react-query/useProviderPriorityAvailableEnrichments.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListColumnRunStatus.ts",
+  "web/packages/internal-api/src/generated/core/enrichment/enrichment.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: list_runs.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/lists/list_runs.py",
+      "lines": [
+       17,
+       71
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 17, HTTP routes: 1, Background workers: 16, Business logic: 2, Models: 2.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       14,
+       14
+      ]
+     },
+     {
+      "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/enrichment/post_validation_flow_config.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/enrichment/executors/factory.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2 (3), web/apps/web/src/lib/roxList/hooks (3), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks (2).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ActiveCsvImportBadge.tsx",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+      "lines": [
+       56,
+       56
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentLauncher.ts",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/enrichment (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/enrichment/executors (8), backend/src/tasks/executors (3), backend/src/temporal/activities/enrichment (3).",
+    "sources": [
+     {
+      "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/company_preflight.py",
+      "lines": [
+       13,
+       13
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/enrichment (1), backend/src/rox_core/api/enrichment (1).",
+    "sources": [
+     {
+      "path": "backend/src/enrichment/post_validation_flow_config.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/dto.py",
+      "lines": [
+       12,
+       12
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/enrichment/models (1), backend/src/rox_core/models/lists (1).",
+    "sources": [
+     {
+      "path": "backend/src/enrichment/executors/factory.py",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/lists/list_runs.py",
+      "lines": [
+       17,
+       17
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/enrichment/executors/base.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/campaign_add_executor.py; imports backend/src/enrichment/executors/clever_column_executor.py; imports backend/src/enrichment/executors/factory.py; imports backend/src/enrichment/executors/formula_executor.py; imports backend/src/enrichment/executors/promote_column_executor.py"
+    ],
+    [
+     "backend/src/enrichment/executors/campaign_add_executor.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/base.py; imports backend/src/temporal/activities/enrichment/planning.py; imports backend/src/enrichment/executors/factory.py"
+    ],
+    [
+     "backend/src/enrichment/executors/clever_column_executor.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/base.py; imports backend/src/temporal/activities/enrichment/enqueue_cc_cell.py; imports backend/src/temporal/activities/enrichment/planning.py; imports backend/src/enrichment/executors/factory.py"
+    ],
+    [
+     "backend/src/enrichment/executors/factory.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/base.py; imports backend/src/enrichment/executors/campaign_add_executor.py; imports backend/src/enrichment/executors/clever_column_executor.py; imports backend/src/enrichment/executors/formula_executor.py; imports backend/src/enrichment/executors/promote_column_executor.py"
+    ],
+    [
+     "backend/src/enrichment/executors/formula_evaluator.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/temporal/activities/enrichment/planning.py"
+    ],
+    [
+     "backend/src/enrichment/executors/formula_executor.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/factory.py; imports backend/src/enrichment/executors/base.py; imports backend/src/temporal/activities/enrichment/planning.py"
+    ],
+    [
+     "backend/src/enrichment/executors/promote_column_executor.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/factory.py; imports backend/src/enrichment/executors/base.py; imports backend/src/temporal/activities/enrichment/planning.py"
+    ],
+    [
+     "backend/src/enrichment/executors/run_condition.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/temporal/activities/enrichment/planning.py"
+    ],
+    [
+     "backend/src/enrichment/models/flow_config.py",
+     "Models",
+     "Primary",
+     "imports backend/src/enrichment/executors/factory.py; imports backend/src/enrichment/post_validation_flow_config.py; imports backend/src/rox_core/api/enrichment/dto.py; imports backend/src/rox_core/api/enrichment/endpoints.py"
+    ],
+    [
+     "backend/src/enrichment/post_validation_flow_config.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/models/flow_config.py"
+    ],
+    [
+     "backend/src/rox_core/api/enrichment/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/models/flow_config.py; imports backend/src/rox_core/api/enrichment/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/enrichment/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/enrichment/models/flow_config.py; imports backend/src/rox_core/api/enrichment/dto.py"
+    ],
+    [
+     "backend/src/rox_core/models/lists/list_runs.py",
+     "Models",
+     "Primary",
+     "imports backend/src/tasks/executors/prospect_list_csv_export.py; imports backend/src/tasks/executors/selection_change_backfill_coordinator.py; imports backend/src/tasks/executors/selection_change_backfill_worker.py; imports backend/src/temporal/activities/enrichment/planning.py; uses list_runs"
+    ],
+    [
+     "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/lists/list_runs.py; uses list_runs"
+    ],
+    [
+     "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/lists/list_runs.py; uses list_runs"
+    ],
+    [
+     "backend/src/tasks/executors/selection_change_backfill_worker.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/lists/list_runs.py; uses list_runs"
+    ],
+    [
+     "backend/src/temporal/activities/enrichment/company_preflight.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/temporal/activities/enrichment/planning.py; imports backend/src/temporal/workers/enrichment_worker.py; imports backend/src/temporal/workflows/csv_import_workflow.py"
+    ],
+    [
+     "backend/src/temporal/activities/enrichment/enqueue_cc_cell.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/clever_column_executor.py; imports backend/src/temporal/activities/enrichment/planning.py; imports backend/src/temporal/workers/enrichment_worker.py"
+    ],
+    [
+     "backend/src/temporal/activities/enrichment/planning.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/executors/campaign_add_executor.py; imports backend/src/enrichment/executors/clever_column_executor.py; imports backend/src/enrichment/executors/formula_executor.py; imports backend/src/enrichment/executors/promote_column_executor.py; imports backend/src/enrichment/executors/run_condition.py"
+    ],
+    [
+     "backend/src/temporal/workers/enrichment_worker.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/temporal/activities/enrichment/company_preflight.py; imports backend/src/temporal/activities/enrichment/enqueue_cc_cell.py; imports backend/src/temporal/activities/enrichment/planning.py; imports backend/src/temporal/workflows/csv_import_workflow.py"
+    ],
+    [
+     "backend/src/temporal/workflows/csv_import_workflow.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/temporal/workers/enrichment_worker.py; imports backend/src/temporal/activities/enrichment/company_preflight.py; imports backend/src/temporal/activities/enrichment/planning.py"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentLauncher.ts",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentOptions.ts"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentOptions.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ActiveCsvImportBadge.tsx",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/FormulaModal.tsx",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/useEnrichmentPolling.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/enrichment/enrichment.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/orgDefaultProviderPriority.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/useProviderPriorityAvailableEnrichments.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/lib/roxList/hooks/useRoxListColumnRunStatus.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/enrichment/enrichment.ts",
+     "Web screens",
+     "Primary",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+     "Web screens",
+     "Shared",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CampaignFlowModal.tsx",
+     "Web screens",
+     "Shared",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag enrichment"
+    ],
+    [
+     "web/apps/web/src/lib/roxList/hooks/useRoxListColumnActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag enrichment"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/clever_column_executor.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/formula_executor.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/promote_column_executor.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/clever_column_executor.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/clever_column_executor.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/planning.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/formula_executor.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/promote_column_executor.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/run_condition.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/post_validation_flow_config.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/dto.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/lists/list_runs.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/selection_change_backfill_worker.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/planning.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/selection_change_backfill_worker.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/company_preflight.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workers/enrichment_worker.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/enqueue_cc_cell.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workers/enrichment_worker.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workers/enrichment_worker.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workers/enrichment_worker.py",
+     "lines": [
+      73,
+      73
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentLauncher.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentOptions.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ActiveCsvImportBadge.tsx",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/FormulaModal.tsx",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/useEnrichmentPolling.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/enrichment/enrichment.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/orgDefaultProviderPriority.ts",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/useProviderPriorityAvailableEnrichments.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnRunStatus.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/enrichment/enrichment.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CampaignFlowModal.tsx",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnActions.tsx",
+     "lines": [
+      36,
+      36
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 2 files with Column Metadata (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
+      "lines": [
+       52,
+       52
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 7 files with Prospect List Csv Upload Request.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       105,
+       105
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Column Alert (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       105,
+       105
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 2 files with Rox List Column Metadata (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/research/endpoints.py",
+      "lines": [
+       54,
+       54
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic",
+    "source": {
+     "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    }
+   },
+   {
+    "id": "group-layer-models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      23,
+      23
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/list_runs.py",
+     "lines": [
+      17,
+      71
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2 — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ActiveCsvImportBadge.tsx",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/lib/roxList/hooks — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+        "lines": [
+         56,
+         56
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/hooks/useEnrichmentLauncher.ts",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+        "lines": [
+         3,
+         3
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/app/hooks/react-query — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/hooks/react-query/orgDefaultProviderPriority.ts",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/enrichment — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/enrichment/executors — 8 files",
+      "sources": [
+       {
+        "path": "backend/src/enrichment/executors/campaign_add_executor.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/tasks/executors — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/activities/enrichment — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/company_preflight.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/workers — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workers/enrichment_worker.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/workflows — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+        "lines": [
+         28,
+         28
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/enrichment/post_validation_flow_config.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/enrichment — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/enrichment/post_validation_flow_config.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/enrichment — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/dto.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/enrichment/executors/factory.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-models",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/enrichment/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/enrichment/executors/factory.py",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/models/lists — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/lists/list_runs.py",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-list_runs",
+    "label": "list_runs",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/list_runs.py",
+     "lines": [
+      17,
+      71
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/enrichment/post_validation_flow_config.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "models",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-list_runs",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-list_runs",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/list_runs.py",
+     "lines": [
+      17,
+      17
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "list_runs"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Lists, tabs, columns & insights",
+   "page": "domain-lists",
+   "source": {
+    "path": "backend/src/rox_core/models/lists/list_runs.py",
+    "lines": [
+     17,
+     71
+    ]
+   }
+  },
+  {
+   "label": "Column Metadata (+2 tables)",
+   "page": "feature-lists-column-metadata",
+   "source": {
+    "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
+    "lines": [
+     52,
+     52
+    ]
+   }
+  },
+  {
+   "label": "Prospect List Csv Upload Request",
+   "page": "feature-lists-prospect-list-csv-upload-request",
+   "source": {
+    "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+    "lines": [
+     105,
+     105
+    ]
+   }
+  },
+  {
+   "label": "Column Alert (+2 tables)",
+   "page": "feature-lists-column-alert",
+   "source": {
+    "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+    "lines": [
+     105,
+     105
+    ]
+   }
+  },
+  {
+   "label": "Rox List Column Metadata (+4 tables)",
+   "page": "feature-lists-rox-list-column-metadata",
+   "source": {
+    "path": "backend/src/research/endpoints.py",
+    "lines": [
+     54,
+     54
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

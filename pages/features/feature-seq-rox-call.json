@@ -1,0 +1,2009 @@
+{
+ "id": "feature-seq-rox-call",
+ "title": "Calls & dialer",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-seq",
+ "paths": [
+  "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/call_context.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/dto.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/metrics.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/screener_detection.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py",
+  "backend/src/rox_core/api/agents/outreach/dialer/webhook_bp.py",
+  "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+  "backend/src/rox_core/api/governance/ownership/call_ownership_resolver.py",
+  "backend/src/rox_core/models/rox_phone_number.py",
+  "backend/src/rox_core/models/twilio_call.py",
+  "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+  "backend/src/tasks/executors/twilio_recording_download.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailHeader.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailView.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListResetButton.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/OutreachDialListsView.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListBatchActions.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListRowSelectionActions.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/phoneReports/useCallAnalyticsCampaignBreakdown.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/CallDispositionsSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/DispositionRows.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/MachineEventMappings.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/RecordVoicemailDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailList.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailsSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/AddPhoneNumberDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/ReleasePhoneNumberDialog.tsx",
+  "web/apps/web/src/app/hooks/react-query/generated/dialer/dialer.ts",
+  "web/apps/web/src/app/hooks/react-query/generated/twilio-webhook-v2/twilio-webhook-v2.ts",
+  "web/apps/web/src/components/contacts/useContactDialListAction.tsx",
+  "web/apps/web/src/components/dialer/DialListSelectionDialog.tsx",
+  "web/apps/web/src/components/outreach/GenerateEmptyDialListButton.tsx",
+  "web/apps/web/src/components/outreach/dialer/CallRecordingPlayback.tsx",
+  "web/apps/web/src/components/outreach/dialer/OutreachDialerCallerId.tsx",
+  "web/apps/web/src/components/outreach/dialer/OutreachDialerControls.tsx",
+  "web/apps/web/src/components/outreach/dialer/OutreachDialerOutcomeChips.tsx",
+  "web/apps/web/src/components/outreach/dialer/useCallDispositionOptions.ts",
+  "web/apps/web/src/components/outreach/dialer/useDialer.ts",
+  "web/apps/web/src/components/outreach/dialer/useInboundCalls.ts",
+  "web/apps/web/src/components/outreach/dialer/useIncomingCallContact.ts",
+  "web/apps/web/src/components/outreach/useGenerateEmptyDialList.ts",
+  "web/apps/web/src/components/sequenceBuilder/campaignEditor/CampaignVoicemailDropRow.tsx",
+  "web/apps/web/src/contexts/DialerContext.tsx",
+  "web/apps/web/src/contexts/PowerDialerContext.tsx",
+  "web/packages/internal-api/src/generated/core/dialer/dialer.ts",
+  "web/packages/internal-api/src/generated/core/twilio-webhook-v2/twilio-webhook-v2.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: rox_call, rox_phone_number, twilio_call.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       135,
+       778
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/rox_phone_number.py",
+      "lines": [
+       39,
+       278
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/twilio_call.py",
+      "lines": [
+       24,
+       108
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 39, HTTP routes: 1, Background workers: 2, Business logic: 20, Models: 3.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+      "lines": [
+       60,
+       60
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/components/outreach/dialer (8), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists (6), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions (3).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/components/outreach/dialer/CallRecordingPlayback.tsx",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailHeader.tsx",
+      "lines": [
+       19,
+       19
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/agents/outreach/dialer (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+      "lines": [
+       60,
+       60
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (2).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/agents/outreach/dialer (15), backend/src/agent_evals_v2 (1), backend/src/ext_integrations/twilio_integration (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+      "lines": [
+       47,
+       47
+      ]
+     },
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+      "lines": [
+       681,
+       681
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (3).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/call_context.py; imports backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py; imports backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/call_context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/rox_core/models/twilio_call.py; uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py; imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py; imports backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/metrics.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/models/rox_phone_number.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py; uses rox_call; uses rox_phone_number"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py; imports backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py; imports backend/src/rox_core/models/rox_phone_number.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/models/rox_phone_number.py; uses rox_call; uses rox_phone_number"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/models/rox_phone_number.py; uses rox_phone_number"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/tasks/executors/backfill_rox_call_recordings.py; imports backend/src/tasks/executors/twilio_recording_download.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/screener_detection.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py; imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/call_context.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/rox_core/api/agents/outreach/dialer/webhook_bp.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/endpoints.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/models/twilio_call.py; uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/webhook_bp.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "uses rox_call; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/governance/ownership/call_ownership_resolver.py",
+     "Business logic",
+     "Primary",
+     "uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/models/rox_phone_number.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py; imports backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py; uses rox_phone_number"
+    ],
+    [
+     "backend/src/rox_core/models/twilio_call.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py; imports backend/src/rox_core/api/agents/outreach/dialer/v2_business.py; imports backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py; imports backend/src/tasks/executors/backfill_rox_call_recordings.py; imports backend/src/tasks/executors/twilio_recording_download.py"
+    ],
+    [
+     "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py; imports backend/src/rox_core/models/twilio_call.py; uses rox_call; uses twilio_call"
+    ],
+    [
+     "backend/src/tasks/executors/twilio_recording_download.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py; imports backend/src/rox_core/models/twilio_call.py; uses rox_call; uses twilio_call"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailHeader.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailView.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListResetButton.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/OutreachDialListsView.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListBatchActions.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListRowSelectionActions.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/phoneReports/useCallAnalyticsCampaignBreakdown.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/CallDispositionsSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/DispositionRows.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/MachineEventMappings.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/RecordVoicemailDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailList.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailsSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/AddPhoneNumberDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/ReleasePhoneNumberDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/dialer/dialer.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/twilio-webhook-v2/twilio-webhook-v2.ts",
+     "Web screens",
+     "Primary",
+     "route tag twilio-webhook-v2"
+    ],
+    [
+     "web/apps/web/src/components/contacts/useContactDialListAction.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/dialer/DialListSelectionDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/GenerateEmptyDialListButton.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/outreach/useGenerateEmptyDialList.ts"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/CallRecordingPlayback.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/OutreachDialerCallerId.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/OutreachDialerControls.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/OutreachDialerOutcomeChips.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/outreach/dialer/useCallDispositionOptions.ts"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/useCallDispositionOptions.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/useDialer.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/useInboundCalls.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/useIncomingCallContact.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/outreach/useGenerateEmptyDialList.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/components/sequenceBuilder/campaignEditor/CampaignVoicemailDropRow.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/contexts/DialerContext.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/outreach/dialer/useDialer.ts; imports web/apps/web/src/components/outreach/dialer/useInboundCalls.ts"
+    ],
+    [
+     "web/apps/web/src/contexts/PowerDialerContext.tsx",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/dialer/dialer.ts",
+     "Web screens",
+     "Primary",
+     "route tag dialer"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/twilio-webhook-v2/twilio-webhook-v2.ts",
+     "Web screens",
+     "Primary",
+     "route tag twilio-webhook-v2"
+    ],
+    [
+     "backend/src/agent_evals_v2/crm_writeback.py",
+     "Business logic",
+     "Shared",
+     "uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/ext_integrations/twilio_integration/twilio_shim.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/metrics.py; imports backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py"
+    ],
+    [
+     "backend/src/rox_core/api/writeback/business.py",
+     "Business logic",
+     "Shared",
+     "uses rox_call"
+    ],
+    [
+     "backend/src/rox_core/models/rox_call.py",
+     "Models",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py; imports backend/src/rox_core/api/agents/outreach/dialer/dto.py; imports backend/src/rox_core/api/agents/outreach/dialer/metrics.py; imports backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py; imports backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActionsDataTable.tsx",
+     "Web screens",
+     "Shared",
+     "route tag dialer"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/SequenceBatchActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag dialer"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+     "lines": [
+      681,
+      681
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/recording_download_business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      107,
+      107
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      110,
+      110
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      114,
+      114
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      128,
+      128
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/metrics.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_metrics.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/pool_replenisher.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/twilio_recording_download.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      57,
+      57
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/webhook_bp.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      132,
+      132
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/voicemail_business.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/ownership/call_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/rox_phone_number.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      72,
+      72
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/twilio_recording_download.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      167,
+      167
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailHeader.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailView.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListResetButton.tsx",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/OutreachDialListsView.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListBatchActions.tsx",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/useDialListRowSelectionActions.tsx",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/phoneReports/useCallAnalyticsCampaignBreakdown.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/CallDispositionsSection.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/DispositionRows.tsx",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/MachineEventMappings.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/RecordVoicemailDialog.tsx",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailList.tsx",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/VoicemailsSection.tsx",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/AddPhoneNumberDialog.tsx",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/ReleasePhoneNumberDialog.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/dialer/dialer.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_endpoints.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/twilio-webhook-v2/twilio-webhook-v2.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/contacts/useContactDialListAction.tsx",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/dialer/DialListSelectionDialog.tsx",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/GenerateEmptyDialListButton.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/CallRecordingPlayback.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/OutreachDialerCallerId.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/OutreachDialerControls.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/OutreachDialerOutcomeChips.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/useCallDispositionOptions.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/useDialer.ts",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/useInboundCalls.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/useIncomingCallContact.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/useGenerateEmptyDialList.ts",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/sequenceBuilder/campaignEditor/CampaignVoicemailDropRow.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/DialerContext.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/DialerContext.tsx",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/DialerContext.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/PowerDialerContext.tsx",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/dialer/dialer.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/twilio-webhook-v2/twilio-webhook-v2.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+     "lines": [
+      678,
+      678
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      75,
+      75
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      124,
+      124
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      125,
+      125
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/writeback/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/dto.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/metrics.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/phone_number_health.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActionsDataTable.tsx",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/SequenceBatchActions.tsx",
+     "lines": [
+      41,
+      41
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 3 files with Campaigns & sequence builds.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/campaigns/endpoints.py",
+      "lines": [
+       115,
+       115
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 4 files with Sequences, tasks & email sending.",
+    "sources": [
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Dial lists.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+      "lines": [
+       678,
+       678
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Call dispositions & sequence exports.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 2 files with Voicemail drops.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+      "lines": [
+       13,
+       13
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic / Models",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_call.py",
+     "lines": [
+      135,
+      778
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/components/outreach/dialer — 8 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/outreach/dialer/CallRecordingPlayback.tsx",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists — 6 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/dialLists/DialListDetailHeader.tsx",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+        "lines": [
+         34,
+         34
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/CallDispositions/CallDispositionsSection.tsx",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/Voicemails/RecordVoicemailDialog.tsx",
+        "lines": [
+         24,
+         24
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/DialerSettings/phoneNumbers/AddPhoneNumberDialog.tsx",
+        "lines": [
+         31,
+         31
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/dialer — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+        "lines": [
+         60,
+         60
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/dialer — 15 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+        "lines": [
+         47,
+         47
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_evals_v2 — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_evals_v2/crm_writeback.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/twilio_integration — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+        "lines": [
+         681,
+         681
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/entities/lead — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/governance/ownership — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/governance/ownership/call_ownership_resolver.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/writeback — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/writeback/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+        "lines": [
+         16,
+         16
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-rox_call",
+    "label": "rox_call",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_call.py",
+     "lines": [
+      135,
+      778
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-rox_phone_number",
+    "label": "rox_phone_number",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_phone_number.py",
+     "lines": [
+      39,
+      278
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-twilio_call",
+    "label": "twilio_call",
+    "source": {
+     "path": "backend/src/rox_core/models/twilio_call.py",
+     "lines": [
+      24,
+      108
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (6)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+     "lines": [
+      17,
+      17
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (5)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      60,
+      60
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      15,
+      15
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-rox_call",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-twilio_call",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-rox_call",
+    "label": "uses (9)",
+    "source": {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-rox_phone_number",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-rox_phone_number",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_phone_number.py",
+     "lines": [
+      39,
+      39
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "rox_call",
+   "rox_phone_number",
+   "twilio_call"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "rox_call",
+    "dst": "rox_phone_number",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/org_country_rebalancer.py",
+     "lines": [
+      264,
+      264
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "rox_call",
+    "dst": "twilio_call",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/v2_business.py",
+     "lines": [
+      406,
+      406
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Sequences & outreach",
+   "page": "domain-seq",
+   "source": {
+    "path": "backend/src/rox_core/models/rox_call.py",
+    "lines": [
+     135,
+     778
+    ]
+   }
+  },
+  {
+   "label": "Campaigns & sequence builds",
+   "page": "feature-seq-campaign-request",
+   "source": {
+    "path": "backend/src/rox_core/api/agents/outreach/campaigns/endpoints.py",
+    "lines": [
+     115,
+     115
+    ]
+   }
+  },
+  {
+   "label": "Sequences, tasks & email sending",
+   "page": "feature-seq-sequence",
+   "source": {
+    "path": "backend/src/agent_evals_v2/crm_writeback.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Dial lists",
+   "page": "feature-seq-dial-list",
+   "source": {
+    "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+    "lines": [
+     678,
+     678
+    ]
+   }
+  },
+  {
+   "label": "Call dispositions & sequence exports",
+   "page": "feature-seq-call-disposition-label",
+   "source": {
+    "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+    "lines": [
+     16,
+     16
+    ]
+   }
+  },
+  {
+   "label": "Voicemail drops",
+   "page": "feature-seq-voicemail-drop",
+   "source": {
+    "path": "backend/src/rox_core/api/agents/outreach/dialer/call_reconciler.py",
+    "lines": [
+     13,
+     13
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

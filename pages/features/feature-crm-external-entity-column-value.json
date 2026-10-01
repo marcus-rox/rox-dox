@@ -1,0 +1,902 @@
+{
+ "id": "feature-crm-external-entity-column-value",
+ "title": "External Entity Column Value (+4 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  "backend/src/rox_core/api/column_value_mirror/dao.py",
+  "backend/src/rox_core/api/column_value_mirror/module.py",
+  "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+  "backend/src/rox_core/api/data_controller/spark_executor.py",
+  "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+  "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+  "backend/src/rox_customer/real_time/models/entity/column_value.py",
+  "backend/src/tasks/executors/_backfill_signal.py",
+  "backend/src/temporal/workflows/_backfill_common.py",
+  "backend/src/unified_data/renderers/eav_value_tables.py",
+  "backend/src/unified_data/renderers/registry/source_type_registry.py",
+  "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+  "backend/src/unified_data/renderers/source_renderers/shared/rollup.py",
+  "backend/src/unified_data/renderers/value_columns.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: external_entity_column_value, external_entity_column_value_cdc, external_entity_column_value_staging, external_entity_column_version.",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+      "lines": [
+       606,
+       661
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+      "lines": [
+       708,
+       713
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+      "lines": [
+       664,
+       705
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+      "lines": [
+       552,
+       566
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Background workers: 2, Business logic: 11, Models: 1.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/_backfill_signal.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Background workers: backend/src/tasks/executors (1), backend/src/temporal/workflows (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/_backfill_signal.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/_backfill_common.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/column_value_mirror (2), backend/src/rox_core/api/data_controller (2), backend/src/rox_core/api/entities/column_values (2).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+      "lines": [
+       36,
+       36
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_customer/real_time/models/entity (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/real_time/models/entity/column_value.py; imports backend/src/unified_data/renderers/value_columns.py; imports backend/src/rox_core/api/column_value_mirror/module.py"
+    ],
+    [
+     "backend/src/rox_core/api/column_value_mirror/module.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/column_value_mirror/dao.py"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; uses external_entity_column_value; uses external_entity_column_value_staging; uses external_entity_column_version"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py; imports backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; uses erd_mapping; uses external_entity_column_version"
+    ],
+    [
+     "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/data_controller/single_column_refresh.py; imports backend/src/rox_core/api/data_controller/spark_executor.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; imports backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py; uses erd_mapping"
+    ],
+    [
+     "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/data_controller/spark_executor.py; imports backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; uses external_entity_column_value; uses external_entity_column_value_cdc"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/column_value_mirror/dao.py; imports backend/src/rox_core/api/data_controller/single_column_refresh.py; imports backend/src/rox_core/api/data_controller/spark_executor.py; imports backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py; imports backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py"
+    ],
+    [
+     "backend/src/tasks/executors/_backfill_signal.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_customer/real_time/models/entity/column_value.py"
+    ],
+    [
+     "backend/src/temporal/workflows/_backfill_common.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_customer/real_time/models/entity/column_value.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/eav_value_tables.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py; imports backend/src/unified_data/renderers/value_columns.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/registry/source_type_registry.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py; imports backend/src/unified_data/renderers/source_renderers/shared/rollup.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/eav_value_tables.py; imports backend/src/unified_data/renderers/registry/source_type_registry.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; uses external_entity_column_value"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/shared/rollup.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/registry/source_type_registry.py; imports backend/src/rox_customer/real_time/models/entity/column_value.py; imports backend/src/unified_data/renderers/value_columns.py; uses external_entity_column_value"
+    ],
+    [
+     "backend/src/unified_data/renderers/value_columns.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/column_value_mirror/dao.py; imports backend/src/unified_data/renderers/source_renderers/shared/rollup.py; imports backend/src/unified_data/renderers/eav_value_tables.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      52,
+      52
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_value_mirror/module.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/_backfill_common.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/eav_value_tables.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/value_columns.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/registry/source_type_registry.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/registry/source_type_registry.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/rollup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/rollup.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/rollup.py",
+     "lines": [
+      71,
+      71
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 1 files with Erd Mapping (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Data Controller Column Values Snapshot.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+      "lines": [
+       17,
+       17
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      36,
+      36
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      606,
+      661
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/_backfill_signal.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/workflows — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/_backfill_common.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/column_value_mirror — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+        "lines": [
+         36,
+         36
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/data_controller — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/entities/column_values — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/eav_value_tables.py",
+        "lines": [
+         16,
+         16
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers/source_renderers/shared — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers/registry — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/registry/source_type_registry.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+        "lines": [
+         36,
+         36
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-external_entity_column_value",
+    "label": "external_entity_column_value",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      606,
+      661
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-external_entity_column_value_cdc",
+    "label": "external_entity_column_value_cdc",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      708,
+      713
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-external_entity_column_value_staging",
+    "label": "external_entity_column_value_staging",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      664,
+      705
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-external_entity_column_version",
+    "label": "external_entity_column_version",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      552,
+      566
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (7)",
+    "source": {
+     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "lines": [
+      36,
+      36
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-external_entity_column_value",
+    "label": "uses (4)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-external_entity_column_value_cdc",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-external_entity_column_value_staging",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-external_entity_column_version",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "external_entity_column_value",
+   "external_entity_column_value_cdc",
+   "external_entity_column_value_staging",
+   "external_entity_column_version"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "external_entity_column_value",
+    "dst": "external_entity_column_value_cdc",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      708,
+      708
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "external_entity_column_value",
+    "dst": "external_entity_column_value_staging",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      664,
+      664
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "external_entity_column_value",
+    "dst": "external_entity_column_version",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      552,
+      552
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "external_entity_column_value_cdc",
+    "dst": "external_entity_column_value_staging",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      664,
+      664
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "external_entity_column_value_cdc",
+    "dst": "external_entity_column_version",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      552,
+      552
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "external_entity_column_value_staging",
+    "dst": "external_entity_column_version",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      552,
+      552
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+    "lines": [
+     606,
+     661
+    ]
+   }
+  },
+  {
+   "label": "Erd Mapping (+3 tables)",
+   "page": "feature-crm-erd-mapping",
+   "source": {
+    "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Data Controller Column Values Snapshot",
+   "page": "feature-crm-data-controller-column-values-snapshot",
+   "source": {
+    "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+    "lines": [
+     17,
+     17
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

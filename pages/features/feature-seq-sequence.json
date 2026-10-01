@@ -1,0 +1,4330 @@
+{
+ "id": "feature-seq-sequence",
+ "title": "Sequences, tasks & email sending",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-seq",
+ "paths": [
+  ".agents/skills/crm-writeback-harness/SKILL.md",
+  ".agents/skills/graph-test-harness/SKILL.md",
+  ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+  ".agents/skills/modal-apps/SKILL.md",
+  "backend/src/agent_evals_v2/crm_writeback.py",
+  "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+  "backend/src/agent_evals_v2/crm_writeback_seed.py",
+  "backend/src/agent_framework/command_sdk/agents/tools/emails.py",
+  "backend/src/agent_framework/data_interface/campaign/dto.py",
+  "backend/src/agent_framework/modules/contact_intel_v2/dto.py",
+  "backend/src/agent_framework/modules/document_intel/ask_docs_question_v2.py",
+  "backend/src/agent_framework/modules/private_data_intel/extract/chunk_allocation.py",
+  "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+  "backend/src/agent_framework/modules/private_data_intel/extract/filter_chunks.py",
+  "backend/src/chat/routes/cells/runtime.py",
+  "backend/src/ext_integrations/calendar_integration/definitions.py",
+  "backend/src/ext_integrations/email_integration/email_data_store.py",
+  "backend/src/ext_integrations/email_integration/email_types.py",
+  "backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py",
+  "backend/src/ext_integrations/email_integration/utils.py",
+  "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+  "backend/src/outreach/auto_reply_agent_executor.py",
+  "backend/src/outreach/context_utils.py",
+  "backend/src/outreach/dto.py",
+  "backend/src/outreach/ghost_variants.py",
+  "backend/src/outreach/outreach_agent_dto.py",
+  "backend/src/outreach/outreach_agent_executor.py",
+  "backend/src/outreach/outreach_agent_utils.py",
+  "backend/src/outreach/reward_model.py",
+  "backend/src/outreach/seqregen_cell/auto_reply.py",
+  "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+  "backend/src/outreach/seqregen_cell/context.py",
+  "backend/src/outreach/seqregen_cell/events.py",
+  "backend/src/outreach/seqregen_cell/policy.py",
+  "backend/src/outreach/seqregen_cell/runner.py",
+  "backend/src/outreach/seqregen_cell/tools.py",
+  "backend/src/outreach/unified_column_data.py",
+  "backend/src/rox_core/api/agents/outreach/dto.py",
+  "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+  "backend/src/rox_core/api/agents/outreach/enrollment/identity.py",
+  "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+  "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+  "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+  "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_bounce_origin_backfill_job.py",
+  "backend/src/rox_core/api/agents/outreach/sequence/sequence_has_li_url_backfill_job.py",
+  "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+  "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+  "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+  "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py",
+  "backend/src/rox_core/api/column_metadata/column_metadata.py",
+  "backend/src/rox_core/api/data_mock/dto.py",
+  "backend/src/rox_core/api/email_integration/dto.py",
+  "backend/src/rox_core/api/sequence_policy/policy_utils.py",
+  "backend/src/rox_core/api/writeback/business.py",
+  "backend/src/rox_core/models/channel.py",
+  "backend/src/rox_core/models/rox_email.py",
+  "backend/src/rox_core/models/sequence.py",
+  "backend/src/rox_core/models/sequence_email_reply.py",
+  "backend/src/rox_core/models/sequence_task.py",
+  "backend/src/rox_core/models/status_tracking_base.py",
+  "backend/src/rox_customer/real_time/models/integration/email_message.py",
+  "backend/src/tasks/executors/crm_write_back.py",
+  "backend/src/tasks/executors/email.py",
+  "backend/src/tasks/executors/email_scheduler_per_sender.py",
+  "backend/src/tasks/executors/enrich_email_and_phone.py",
+  "backend/src/tasks/executors/orum_schema_sync.py",
+  "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+  "backend/src/tasks/executors/regenerate_sequence_task.py",
+  "backend/src/tasks/executors/table_cleanup.py",
+  "backend/src/tasks/utils/rox_person_utils.py",
+  "backend/src/util/name_parse.py",
+  "backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py",
+  "backend/src/workflow/agentflow/tools/campaigns/dto.py",
+  "backend/src/workflow/execution_graph/email_body_format.py",
+  "backend/src/workflow/execution_graph/packages/email/__init__.py",
+  "backend/src/workflow/execution_graph/packages/email/email.py",
+  "backend/src/workflow/triggers/handlers/sequence_email_sent.py",
+  "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+  "web/apps/app-platform/jc-sequence-tasks/src/routes/index.tsx",
+  "web/apps/app-platform/penguin-sequence-tasks/src/routes/index.tsx",
+  "web/apps/app-platform/reducto-follow-ups/src/routes/index.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/components/step/contactCard/useInvalidateCampaignSequences.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useSequenceStepActions.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useStepInstructionsSave.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/data/useOutboundAgentSequences.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/prospects/hooks/useSequenceProspectRows.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/CampaignDownloadCSVButton.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutboundAutopilotCard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutreachSelectedCampaignView.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/BookMeetingActionCard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/SendReplyActionCard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/useDeleteSequenceWithOptimisticUpdate.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+  "web/apps/web/src/app/hooks/react-query/generated/sequence/sequence.ts",
+  "web/apps/web/src/app/hooks/react-query/sequences/campaignMemberships.ts",
+  "web/apps/web/src/app/hooks/react-query/sequences/sequences.ts",
+  "web/apps/web/src/app/hooks/react-query/sequences/useAdvanceStepTasks.ts",
+  "web/apps/web/src/components/email/outreach/OutreachGhostsDevModal.tsx",
+  "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
+  "web/apps/web/src/components/homeV3/hooks/useOutboundSection.ts",
+  "web/apps/web/src/components/homeV3/hooks/useSequenceSummaryStats.ts",
+  "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
+  "web/apps/web/src/components/outreach/SequenceUpdateEmailDialog.tsx",
+  "web/apps/web/src/components/outreach/dialer/useContactPhoneMutations.ts",
+  "web/apps/web/src/components/sequenceBuilder/SequenceBuildVisualization.tsx",
+  "web/packages/internal-api/src/generated/core/sequence/sequence.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: rox_email, rox_email_event, sequence, sequence_email_reply, sequence_task.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       76,
+       434
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       437,
+       476
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence.py",
+      "lines": [
+       503,
+       910
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_email_reply.py",
+      "lines": [
+       63,
+       339
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       291,
+       963
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 46, HTTP routes: 2, Background workers: 11, Business logic: 70, Models: 7, Agent skills: 4.",
+    "sources": [
+     {
+      "path": "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+      "lines": [
+       15,
+       15
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/cells/runtime.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/crm_write_back.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/channel.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/components/outreach (5), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach (3), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView (3).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/invalidateCampaignQueries.ts",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/CampaignDownloadCSVButton.tsx",
+      "lines": [
+       13,
+       13
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/chat/routes/cells (1), backend/src/rox_core/api/agents/outreach/sequence (1).",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/cells/runtime.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (10), backend/src/tasks/utils (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/crm_write_back.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/tasks/utils/rox_person_utils.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/outreach (9), backend/src/outreach/seqregen_cell (9), backend/src/rox_core/api/agents/outreach/sequence (7).",
+    "sources": [
+     {
+      "path": "backend/src/outreach/auto_reply_agent_executor.py",
+      "lines": [
+       38,
+       38
+      ]
+     },
+     {
+      "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+      "lines": [
+       35,
+       35
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (6), backend/src/rox_customer/real_time/models/integration (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/channel.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+      "lines": [
+       105,
+       105
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Agent skills: .agents/skills/crm-writeback-harness (1), .agents/skills/graph-test-harness (1), .agents/skills/how-to-debug-outreach-traces (1).",
+    "sources": [
+     {
+      "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": ".agents/skills/graph-test-harness/SKILL.md",
+      "lines": [
+       59,
+       59
+      ]
+     },
+     {
+      "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+      "lines": [
+       118,
+       118
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     ".agents/skills/crm-writeback-harness/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references tasks/executors/crm_write_back.py; references backend/src/tasks/executors/crm_write_back.py"
+    ],
+    [
+     ".agents/skills/graph-test-harness/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references tasks/executors/crm_write_back.py"
+    ],
+    [
+     ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references outreach/ghost_variants.py"
+    ],
+    [
+     ".agents/skills/modal-apps/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references backend/src/outreach/reward_model.py"
+    ],
+    [
+     "backend/src/agent_evals_v2/crm_writeback.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence_task.py; uses rox_call; uses rox_email"
+    ],
+    [
+     "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/definitions.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/agent_evals_v2/crm_writeback_seed.py"
+    ],
+    [
+     "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback.py; imports backend/src/agent_evals_v2/crm_writeback_activity_seed.py; imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/emails.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/email_integration/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/campaign/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/contact_intel_v2/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/email_integration/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/document_intel/ask_docs_question_v2.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/seqregen_cell/tools.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/extract/chunk_allocation.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/modules/private_data_intel/extract/extract.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/modules/private_data_intel/extract/chunk_allocation.py; imports backend/src/agent_framework/modules/private_data_intel/extract/filter_chunks.py; imports backend/src/rox_core/api/email_integration/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/extract/filter_chunks.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/modules/private_data_intel/extract/extract.py"
+    ],
+    [
+     "backend/src/chat/routes/cells/runtime.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/outreach/seqregen_cell/runner.py"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/definitions.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback_activity_seed.py; imports backend/src/ext_integrations/email_integration/email_types.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/ext_integrations/email_integration/utils.py; imports backend/src/rox_core/api/email_integration/dto.py; imports backend/src/rox_core/models/rox_email.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/email_types.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/definitions.py; imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/rox_customer/real_time/models/integration/email_message.py; imports backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py; imports backend/src/ext_integrations/email_integration/utils.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/ext_integrations/email_integration/utils.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py; imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_customer/real_time/models/integration/email_message.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/rox_core/api/email_integration/dto.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/tasks/executors/crm_write_back.py; uses rox_email"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py; imports backend/src/rox_core/api/column_metadata/column_metadata.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/column_metadata/column_metadata.py; imports backend/src/rox_core/api/email_integration/dto.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/executors/crm_write_back.py"
+    ],
+    [
+     "backend/src/outreach/auto_reply_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/outreach/unified_column_data.py"
+    ],
+    [
+     "backend/src/outreach/context_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/dto.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py"
+    ],
+    [
+     "backend/src/outreach/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/seqregen_cell/context.py"
+    ],
+    [
+     "backend/src/outreach/ghost_variants.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/tasks/executors/regenerate_sequence_task.py"
+    ],
+    [
+     "backend/src/outreach/outreach_agent_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/ghost_variants.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/outreach/outreach_agent_utils.py"
+    ],
+    [
+     "backend/src/outreach/outreach_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/context_utils.py; imports backend/src/outreach/dto.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_utils.py"
+    ],
+    [
+     "backend/src/outreach/outreach_agent_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/reward_model.py; imports backend/src/outreach/seqregen_cell/auto_reply.py"
+    ],
+    [
+     "backend/src/outreach/reward_model.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/tasks/executors/regenerate_sequence_task.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/sequence_policy/policy_utils.py; imports backend/src/rox_core/models/sequence.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/rox_core/models/rox_email.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/context_utils.py; imports backend/src/outreach/dto.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/outreach/unified_column_data.py; imports backend/src/util/name_parse.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/events.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence_email_reply.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/policy.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/outreach/seqregen_cell/runner.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/runner.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/routes/cells/runtime.py; imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_utils.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/seqregen_cell/runner.py; imports backend/src/agent_framework/modules/document_intel/ask_docs_question_v2.py"
+    ],
+    [
+     "backend/src/outreach/unified_column_data.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/seqregen_cell/context.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/campaign/dto.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/policy.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses sequence; uses sequence_task"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/enrollment/identity.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/rox_core/api/agents/outreach/sequence/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/ghost_variants.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/email_integration/dto.py; imports backend/src/rox_core/models/channel.py; imports backend/src/rox_core/models/sequence.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/doc.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_bounce_origin_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence_email_reply.py; uses sequence_email_reply"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/sequence_has_li_url_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses sequence; uses sequence_task"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py; imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/campaign/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/rox_core/api/column_metadata/column_metadata.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py; imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/rox_core/api/data_mock/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/email_integration/email_types.py"
+    ],
+    [
+     "backend/src/rox_core/api/email_integration/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/emails.py; imports backend/src/agent_framework/modules/contact_intel_v2/dto.py; imports backend/src/agent_framework/modules/private_data_intel/extract/extract.py; imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py"
+    ],
+    [
+     "backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/executors/regenerate_sequence_task.py"
+    ],
+    [
+     "backend/src/rox_core/api/writeback/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence_task.py; uses rox_call; uses rox_email; uses sequence_task"
+    ],
+    [
+     "backend/src/rox_core/models/channel.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/rox_core/models/rox_email.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback.py; imports backend/src/agent_evals_v2/crm_writeback_activity_seed.py; imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/ext_integrations/email_integration/utils.py"
+    ],
+    [
+     "backend/src/rox_core/models/sequence.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback_activity_seed.py; imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/agent_framework/data_interface/campaign/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_email_reply.py",
+     "Models",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/events.py"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_task.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback.py; imports backend/src/agent_evals_v2/crm_writeback_activity_seed.py; imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py"
+    ],
+    [
+     "backend/src/rox_core/models/status_tracking_base.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/integration/email_message.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_evals_v2/crm_writeback_seed.py; imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/ext_integrations/email_integration/utils.py; imports backend/src/rox_core/models/rox_email.py"
+    ],
+    [
+     "backend/src/tasks/executors/crm_write_back.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py; imports backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py"
+    ],
+    [
+     "backend/src/tasks/executors/email.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/email_integration/email_data_store.py; imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py"
+    ],
+    [
+     "backend/src/tasks/executors/email_scheduler_per_sender.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/tasks/executors/email.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/rox_email.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/tasks/executors/orum_schema_sync.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses campaign_request; uses sequence; uses sequence_task"
+    ],
+    [
+     "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/utils/rox_person_utils.py; uses campaign_request"
+    ],
+    [
+     "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/ghost_variants.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/rox_core/api/agents/outreach/dto.py"
+    ],
+    [
+     "backend/src/tasks/executors/table_cleanup.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/rox_email.py; uses rox_email; uses rox_email_event"
+    ],
+    [
+     "backend/src/tasks/utils/rox_person_utils.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/tasks/executors/enrich_email_and_phone.py; imports backend/src/tasks/executors/people_search_outreach_coordinator.py; imports backend/src/rox_core/models/sequence.py; uses sequence"
+    ],
+    [
+     "backend/src/util/name_parse.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/campaign/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/workflow/agentflow/tools/campaigns/dto.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/tools/campaigns/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/email_body_format.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/email/email.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/email/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/email/email.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/email/email.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/email/__init__.py; imports backend/src/workflow/execution_graph/email_body_format.py; imports backend/src/rox_core/models/rox_email.py; uses rox_email"
+    ],
+    [
+     "backend/src/workflow/triggers/handlers/sequence_email_sent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses sequence; uses sequence_task"
+    ],
+    [
+     "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/app-platform/jc-sequence-tasks/src/routes/index.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/app-platform/penguin-sequence-tasks/src/routes/index.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/app-platform/reducto-follow-ups/src/routes/index.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/components/step/contactCard/useInvalidateCampaignSequences.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useSequenceStepActions.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useStepInstructionsSave.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/data/useOutboundAgentSequences.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/prospects/hooks/useSequenceProspectRows.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/CampaignDownloadCSVButton.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutboundAutopilotCard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutreachSelectedCampaignView.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/BookMeetingActionCard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/SendReplyActionCard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/useDeleteSequenceWithOptimisticUpdate.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/sequence/sequence.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/sequences/campaignMemberships.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/sequences/sequences.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/sequences/useAdvanceStepTasks.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/email/outreach/OutreachGhostsDevModal.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/homeV3/hooks/useOutboundSection.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/homeV3/hooks/useSequenceSummaryStats.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/SequenceUpdateEmailDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/useContactPhoneMutations.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/sequenceBuilder/SequenceBuildVisualization.tsx",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/sequence/sequence.ts",
+     "Web screens",
+     "Primary",
+     "route tag sequence"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/finalize.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/outreach/seqregen_cell/context.py; imports backend/src/outreach/seqregen_cell/policy.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py"
+    ],
+    [
+     "backend/src/outreach/seqregen_cell/sweeper.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/outreach/seqregen_cell/events.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses sequence; uses sequence_auto_reply_task"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/models/rox_email.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/enrollment/persist.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/policy.py; imports backend/src/outreach/seqregen_cell/runner.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py; imports backend/src/tasks/executors/email.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py; imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/legacy_email_step_type_backfill_job.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence_task.py; uses sequence_build_step; uses sequence_task"
+    ],
+    [
+     "backend/src/rox_core/api/email_integration/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py; imports backend/src/rox_core/api/email_integration/dto.py; imports backend/src/rox_core/models/rox_email.py"
+    ],
+    [
+     "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence.py; uses rox_call; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/entities/tags/service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/tasks/executors/linkedin_scheduler.py",
+     "Background workers",
+     "Shared",
+     "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/executors/email_scheduler_per_sender.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/tasks/executors/orum_task_sync.py",
+     "Background workers",
+     "Shared",
+     "imports backend/src/tasks/executors/orum_schema_sync.py; imports backend/src/rox_core/models/channel.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/executors/email_scheduler_per_sender.py"
+    ],
+    [
+     "web/apps/app-platform/sequences-sysadmin/src/lib/paginatedSysAdmin.ts",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/prospects/hooks/useSequenceToggle.ts",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/invalidateCampaignQueries.ts",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreach-utils.ts",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/SequenceBatchActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/useCampaignBatchActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/UpdateSequenceStatusActionCard.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/OutboundAgentConfigProvider.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/OutboundAgentNew.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/yourOutboundAgents/useOutboundAgentCardData.ts",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/command/panel/CampaignConfigPanel/CampaignConfigPanel.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/homeV4/components/widgets/OutreachStats.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/SequenceCompanyDataChangedDialog.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/SequenceContactExcludedDialog.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/SequenceRegenerateConfirmationDialog.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/components/outreach/dialer/OutreachPhoneTaskEditor.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ],
+    [
+     "web/apps/web/src/contexts/OutreachContext.tsx",
+     "Web screens",
+     "Shared",
+     "route tag sequence"
+    ]
+   ],
+   "sources": [
+    {
+     "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "lines": [
+      118,
+      118
+     ]
+    },
+    {
+     "path": ".agents/skills/modal-apps/SKILL.md",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": ".agents/skills/modal-apps/SKILL.md",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_activity_seed.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      89,
+      89
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      96,
+      96
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/emails.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/campaign/dto.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/campaign/dto.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/campaign/dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/contact_intel_v2/dto.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/tools.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/cells/runtime.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/definitions.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_types.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/utils.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/outlook_rate_limited_client.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/utils.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/utils.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/hubspot/activities_writeback_engine.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_metadata/column_metadata.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+     "lines": [
+      79,
+      79
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+     "lines": [
+      113,
+      113
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+     "lines": [
+      115,
+      115
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/outreach/context_utils.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/outreach/ghost_variants.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_dto.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_dto.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_dto.py",
+     "lines": [
+      240,
+      240
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/outreach/reward_model.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/outreach/reward_model.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      1149,
+      1149
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      71,
+      71
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      73,
+      73
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      66,
+      66
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/events.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/policy.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/policy.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/policy.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/policy.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      68,
+      68
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      78,
+      78
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      66,
+      66
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/identity.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/identity.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/doc.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/dto.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      67,
+      67
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_bounce_origin_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_bounce_origin_backfill_job.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_has_li_url_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_has_li_url_backfill_job.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_has_li_url_backfill_job.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "lines": [
+      50,
+      50
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/dto.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_metadata/column_metadata.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_metadata/column_metadata.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_mock/dto.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      83,
+      83
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/writeback/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/writeback/business.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/writeback/business.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/channel.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_task.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      72,
+      72
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      85,
+      85
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_task.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      50,
+      50
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      79,
+      79
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      80,
+      80
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      2960,
+      2960
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email_scheduler_per_sender.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email_scheduler_per_sender.py",
+     "lines": [
+      50,
+      50
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email_scheduler_per_sender.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email_scheduler_per_sender.py",
+     "lines": [
+      62,
+      62
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      62,
+      62
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_schema_sync.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_schema_sync.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_schema_sync.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "lines": [
+      73,
+      73
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "lines": [
+      83,
+      83
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
+     "lines": [
+      88,
+      88
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/table_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/table_cleanup.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+     "lines": [
+      77,
+      77
+     ]
+    },
+    {
+     "path": "backend/src/tasks/utils/rox_person_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/utils/rox_person_utils.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_executor.py",
+     "lines": [
+      74,
+      74
+     ]
+    },
+    {
+     "path": "backend/src/outreach/outreach_agent_executor.py",
+     "lines": [
+      73,
+      73
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      78,
+      78
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/campaigns/campaign_tools.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/email/email.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/email/__init__.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/email/email.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/email/email.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/sequence_email_sent.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/sequence_email_sent.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/sequence_email_sent.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      104,
+      104
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/jc-sequence-tasks/src/routes/index.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/penguin-sequence-tasks/src/routes/index.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/reducto-follow-ups/src/routes/index.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/components/step/contactCard/useInvalidateCampaignSequences.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useSequenceStepActions.ts",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/configures/hooks/useStepInstructionsSave.ts",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/data/useOutboundAgentSequences.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/prospects/hooks/useSequenceProspectRows.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/CampaignDownloadCSVButton.tsx",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutboundAutopilotCard.tsx",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/OutreachSelectedCampaignView.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/BookMeetingActionCard.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/SendReplyActionCard.tsx",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/useDeleteSequenceWithOptimisticUpdate.ts",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/sequence/sequence.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/sequences/campaignMemberships.ts",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/sequences/sequences.ts",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/sequences/useAdvanceStepTasks.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/email/outreach/OutreachGhostsDevModal.tsx",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/homeV3/hooks/useOutboundSection.ts",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/homeV3/hooks/useSequenceSummaryStats.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/SequenceUpdateEmailDialog.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/useContactPhoneMutations.ts",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/sequenceBuilder/SequenceBuildVisualization.tsx",
+     "lines": [
+      70,
+      70
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/sequence/sequence.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/finalize.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/finalize.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/finalize.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/finalize.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/finalize.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/sweeper.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/sweeper.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/sweeper.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/sweeper.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "lines": [
+      88,
+      88
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "lines": [
+      103,
+      103
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "lines": [
+      188,
+      188
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/persist.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/persist.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/policy.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/runner.py",
+     "lines": [
+      81,
+      81
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/iteration/service.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/legacy_email_step_type_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/legacy_email_step_type_backfill_job.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      68,
+      68
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "lines": [
+      62,
+      62
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/context.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/email_integration/business.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/email_integration/business.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/tags/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/tags/service.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      106,
+      106
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_schema_sync.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_task_sync.py",
+     "lines": [
+      101,
+      101
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_task_sync.py",
+     "lines": [
+      103,
+      103
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_task_sync.py",
+     "lines": [
+      104,
+      104
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/orum_task_sync.py",
+     "lines": [
+      118,
+      118
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/sequences-sysadmin/src/lib/paginatedSysAdmin.ts",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/agents/outbound/[uuid]/prospects/hooks/useSequenceToggle.ts",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/invalidateCampaignQueries.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreach-utils.ts",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/SequenceBatchActions.tsx",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/useCampaignBatchActions.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/UpdateSequenceStatusActionCard.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/OutboundAgentConfigProvider.tsx",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/OutboundAgentNew.tsx",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/yourOutboundAgents/useOutboundAgentCardData.ts",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/panel/CampaignConfigPanel/CampaignConfigPanel.tsx",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/homeV4/components/widgets/OutreachStats.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/SequenceCompanyDataChangedDialog.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/SequenceContactExcludedDialog.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/SequenceRegenerateConfirmationDialog.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/outreach/dialer/OutreachPhoneTaskEditor.tsx",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/OutreachContext.tsx",
+     "lines": [
+      56,
+      56
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 36 files with Campaigns & sequence builds.",
+    "sources": [
+     {
+      "path": "backend/src/agent_framework/data_interface/campaign/live.py",
+      "lines": [
+       18,
+       18
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 4 files with Calls & dialer.",
+    "sources": [
+     {
+      "path": "backend/src/agent_evals_v2/crm_writeback.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Call dispositions & sequence exports.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/orum_pull_sync.py",
+      "lines": [
+       101,
+       101
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with LinkedIn messages & connections.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Task audit, ghost feedback & LinkedIn replies.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Sequence agent cells.",
+    "sources": [
+     {
+      "path": "backend/src/outreach/seqregen_cell/finalize.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Auto-replies.",
+    "sources": [
+     {
+      "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 5 files with Sequence agent actions.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Ghost tasks (suggested steps).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/cells/runtime.py",
+     "lines": [
+      12,
+      12
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic / Models / Agent skills",
+    "source": {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      13,
+      13
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      76,
+      434
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/app-platform/gitlab-reporting/src/routes/index.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/components/outreach — 5 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/invalidateCampaignQueries.ts",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachCampaignsView/CampaignDownloadCSVButton.tsx",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachTableSidePanel/SequenceAgentActionCard/BookMeetingActionCard.tsx",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+        "lines": [
+         21,
+         21
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/app/hooks/react-query/sequences — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/hooks/react-query/sequences/campaignMemberships.ts",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/cells/runtime.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/chat/routes/cells — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/cells/runtime.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/sequence — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 10 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/crm_write_back.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/tasks/utils — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/utils/rox_person_utils.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/outreach — 9 files",
+      "sources": [
+       {
+        "path": "backend/src/outreach/auto_reply_agent_executor.py",
+        "lines": [
+         38,
+         38
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/outreach/seqregen_cell — 9 files",
+      "sources": [
+       {
+        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+        "lines": [
+         35,
+         35
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/sequence — 7 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+        "lines": [
+         16,
+         16
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/email_integration — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/email_integration/email_data_store.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_evals_v2 — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_evals_v2/crm_writeback.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/modules/private_data_intel/extract — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/modules/private_data_intel/extract/extract.py",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/channel.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/channel.py",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/real_time/models/integration — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
+        "lines": [
+         105,
+         105
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "skills",
+    "label": "Agent skills",
+    "source": {
+     "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": ".agents/skills/crm-writeback-harness — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/crm-writeback-harness/SKILL.md",
+        "lines": [
+         3,
+         3
+        ]
+       }
+      ]
+     },
+     {
+      "text": ".agents/skills/graph-test-harness — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/graph-test-harness/SKILL.md",
+        "lines": [
+         59,
+         59
+        ]
+       }
+      ]
+     },
+     {
+      "text": ".agents/skills/how-to-debug-outreach-traces — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+        "lines": [
+         118,
+         118
+        ]
+       }
+      ]
+     },
+     {
+      "text": ".agents/skills/modal-apps — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/modal-apps/SKILL.md",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-rox_email",
+    "label": "rox_email",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      76,
+      434
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-rox_email_event",
+    "label": "rox_email_event",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      437,
+      476
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence",
+    "label": "sequence",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence.py",
+     "lines": [
+      503,
+      910
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence_email_reply",
+    "label": "sequence_email_reply",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_email_reply.py",
+     "lines": [
+      63,
+      339
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence_task",
+    "label": "sequence_task",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task.py",
+     "lines": [
+      291,
+      963
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (69)",
+    "source": {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      42,
+      42
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (4)",
+    "source": {
+     "path": "backend/src/chat/routes/cells/runtime.py",
+     "lines": [
+      12,
+      12
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (12)",
+    "source": {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      13,
+      13
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (24)",
+    "source": {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      59,
+      59
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-rox_email",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/table_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-rox_email_event",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/table_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-sequence",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-sequence_task",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/orum_schema_sync.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-rox_email",
+    "label": "uses (4)",
+    "source": {
+     "path": "backend/src/agent_evals_v2/crm_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-sequence",
+    "label": "uses (12)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-sequence_email_reply",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/sequence_email_reply_bounce_origin_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-sequence_task",
+    "label": "uses (5)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/duplicate_sequence_cleanup_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "rox_email",
+   "rox_email_event",
+   "sequence",
+   "sequence_email_reply",
+   "sequence_task"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "rox_email",
+    "dst": "rox_email_event",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      1381,
+      1381
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "rox_email",
+    "dst": "rox_email_event",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      446,
+      446
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "rox_email",
+    "dst": "rox_email_event",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_email.py",
+     "lines": [
+      437,
+      437
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "rox_email",
+    "dst": "sequence_email_reply",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/tasks/executors/crm_write_back.py",
+     "lines": [
+      661,
+      661
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "rox_email",
+    "dst": "sequence_task",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "lines": [
+      2634,
+      2634
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "sequence",
+    "dst": "sequence_task",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      3146,
+      3146
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "sequence",
+    "dst": "sequence_task",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task.py",
+     "lines": [
+      383,
+      383
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "sequence_email_reply",
+    "dst": "sequence_task",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/business.py",
+     "lines": [
+      5046,
+      5046
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Sequences & outreach",
+   "page": "domain-seq",
+   "source": {
+    "path": "backend/src/rox_core/models/sequence.py",
+    "lines": [
+     503,
+     910
+    ]
+   }
+  },
+  {
+   "label": "Campaigns & sequence builds",
+   "page": "feature-seq-campaign-request",
+   "source": {
+    "path": "backend/src/agent_framework/data_interface/campaign/live.py",
+    "lines": [
+     18,
+     18
+    ]
+   }
+  },
+  {
+   "label": "Calls & dialer",
+   "page": "feature-seq-rox-call",
+   "source": {
+    "path": "backend/src/agent_evals_v2/crm_writeback.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Call dispositions & sequence exports",
+   "page": "feature-seq-call-disposition-label",
+   "source": {
+    "path": "backend/src/tasks/executors/orum_pull_sync.py",
+    "lines": [
+     101,
+     101
+    ]
+   }
+  },
+  {
+   "label": "LinkedIn messages & connections",
+   "page": "feature-seq-rox-linkedin-message",
+   "source": {
+    "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Task audit, ghost feedback & LinkedIn replies",
+   "page": "feature-seq-sequence-task-audit",
+   "source": {
+    "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+    "lines": [
+     16,
+     16
+    ]
+   }
+  },
+  {
+   "label": "Sequence agent cells",
+   "page": "feature-seq-sequence-agent-cell",
+   "source": {
+    "path": "backend/src/outreach/seqregen_cell/finalize.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Auto-replies",
+   "page": "feature-seq-sequence-auto-reply-task",
+   "source": {
+    "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Sequence agent actions",
+   "page": "feature-seq-sequence-agent-action",
+   "source": {
+    "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Ghost tasks (suggested steps)",
+   "page": "feature-seq-sequence-task-ghost",
+   "source": {
+    "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

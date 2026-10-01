@@ -1,0 +1,1252 @@
+{
+ "id": "feature-crm-graph-cdc",
+ "title": "Graph Cdc (+3 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  "backend/src/data_store/graph/v4/datum_processor.py",
+  "backend/src/data_store/graph/v4/diff_computer.py",
+  "backend/src/data_store/graph/v4/generic_sync.py",
+  "backend/src/data_store/graph/v4/sync_hooks.py",
+  "backend/src/rox_core/api/graph/business.py",
+  "backend/src/rox_core/api/graph/erd/business.py",
+  "backend/src/rox_core/api/graph/erd/endpoints.py",
+  "backend/src/rox_core/api/graph/erd/onboarding_telemetry.py",
+  "backend/src/rox_core/models/graph_version.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/syncedObjects/SalesforceSyncedObjectsSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/useSalesforceSetupPromotion.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/AccountAssignmentStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/useAccountAssignmentDraft.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/ConfigureFieldsContent.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/OnboardingFieldMappingRow.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/sfdcSetupWizard/SfdcSetupWizard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/testSyncStep/useTestSync.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/GraphOnboard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/ErdRelationshipsSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/IntegrationSeedingSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useDataSources.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useErdData.ts",
+  "web/apps/web/src/app/hooks/react-query/generated/graph-erd/graph-erd.ts",
+  "web/apps/web/src/components/ui/SideNav/teamsSetup/useTeamsSetupSteps.ts",
+  "web/packages/internal-api/src/generated/core/graph-erd/graph-erd.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: entity_link_cdc, graph_cdc, graph_version.",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+      "lines": [
+       112,
+       126
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+      "lines": [
+       202,
+       217
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/graph_version.py",
+      "lines": [
+       18,
+       78
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 17, HTTP routes: 1, Business logic: 7, Models: 3, Agent skills: 1.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/data_store/graph/v4/datum_processor.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/graph_version.py",
+      "lines": [
+       18,
+       18
+      ]
+     },
+     {
+      "path": ".agents/skills/graph-test-harness/SKILL.md",
+      "lines": [
+       58,
+       58
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep (2), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep (2), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components (2).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/AccountAssignmentStep.tsx",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/ConfigureFieldsContent.tsx",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/ErdRelationshipsSection.tsx",
+      "lines": [
+       19,
+       19
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/graph/erd (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+      "lines": [
+       9,
+       9
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/data_store/graph/v4 (4), backend/src/rox_core/api/graph/erd (2), backend/src/rox_core/api/graph (1).",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/v4/datum_processor.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/graph/erd/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/graph/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_customer/real_time/models/entity (2), backend/src/rox_core/models (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+      "lines": [
+       65,
+       65
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/graph_version.py",
+      "lines": [
+       18,
+       18
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Agent skills: .agents/skills/graph-test-harness (1).",
+    "sources": [
+     {
+      "path": ".agents/skills/graph-test-harness/SKILL.md",
+      "lines": [
+       58,
+       58
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/data_store/graph/v4/datum_processor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/diff_computer.py; imports backend/src/data_store/graph/v4/generic_sync.py; imports backend/src/data_store/graph/v4/sync_hooks.py; imports backend/src/rox_core/api/graph/business.py; uses entity_link"
+    ],
+    [
+     "backend/src/data_store/graph/v4/diff_computer.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/datum_processor.py; imports backend/src/data_store/graph/v4/generic_sync.py; uses entity_link; uses entity_link_cdc; uses graph"
+    ],
+    [
+     "backend/src/data_store/graph/v4/generic_sync.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/diff_computer.py; imports backend/src/data_store/graph/v4/datum_processor.py; imports backend/src/data_store/graph/v4/sync_hooks.py"
+    ],
+    [
+     "backend/src/data_store/graph/v4/sync_hooks.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/generic_sync.py; imports backend/src/data_store/graph/v4/datum_processor.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/datum_processor.py; imports backend/src/rox_core/models/graph_version.py; uses entity_link_cdc; uses entity_organization; uses graph_cdc"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/graph/erd/onboarding_telemetry.py; imports backend/src/rox_core/api/graph/erd/endpoints.py; uses entity_organization; uses graph; uses graph_cdc"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/graph/erd/business.py; imports backend/src/rox_core/api/graph/erd/onboarding_telemetry.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_telemetry.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/graph/erd/business.py; imports backend/src/rox_core/api/graph/erd/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/models/graph_version.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/graph/business.py; uses graph_version"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/syncedObjects/SalesforceSyncedObjectsSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/useSalesforceSetupPromotion.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/AccountAssignmentStep.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/useAccountAssignmentDraft.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/ConfigureFieldsContent.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/OnboardingFieldMappingRow.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/sfdcSetupWizard/SfdcSetupWizard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/testSyncStep/useTestSync.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/GraphOnboard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/ErdRelationshipsSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/IntegrationSeedingSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useDataSources.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useErdData.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/graph-erd/graph-erd.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/apps/web/src/components/ui/SideNav/teamsSetup/useTeamsSetupSteps.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/graph-erd/graph-erd.ts",
+     "Web screens",
+     "Primary",
+     "route tag graph-erd"
+    ],
+    [
+     ".agents/skills/graph-test-harness/SKILL.md",
+     "Agent skills",
+     "Shared",
+     "references data_store/graph/v4/diff_computer.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "Models",
+     "Shared",
+     "imports backend/src/data_store/graph/v4/datum_processor.py; imports backend/src/data_store/graph/v4/diff_computer.py; uses entity_link; uses entity_link_cdc"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "Models",
+     "Shared",
+     "imports backend/src/data_store/graph/v4/datum_processor.py; imports backend/src/data_store/graph/v4/diff_computer.py; imports backend/src/rox_core/api/graph/erd/business.py; uses graph; uses graph_cdc"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/generic_sync.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/sync_hooks.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/generic_sync.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/business.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      102,
+      102
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      64,
+      64
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/graph_version.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      74,
+      74
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/syncedObjects/SalesforceSyncedObjectsSection.tsx",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/useSalesforceSetupPromotion.ts",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/AccountAssignmentStep.tsx",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/useAccountAssignmentDraft.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/ConfigureFieldsContent.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/OnboardingFieldMappingRow.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/sfdcSetupWizard/SfdcSetupWizard.tsx",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/testSyncStep/useTestSync.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/GraphOnboard.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/ErdRelationshipsSection.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/IntegrationSeedingSection.tsx",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useDataSources.ts",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useErdData.ts",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/graph-erd/graph-erd.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/ui/SideNav/teamsSetup/useTeamsSetupSteps.ts",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/graph-erd/graph-erd.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      65,
+      65
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      112,
+      112
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      132,
+      132
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "lines": [
+      202,
+      202
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 1 files with Entity Organization (+3 tables).",
+    "sources": [
+     {
+      "path": ".agents/skills/graph-test-harness/SKILL.md",
+      "lines": [
+       58,
+       58
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Graph (+6 tables).",
+    "sources": [
+     {
+      "path": ".agents/skills/graph-test-harness/SKILL.md",
+      "lines": [
+       58,
+       58
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Erd Mapping (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/graph/erd/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Erd Onboarding Proposal (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/graph/erd/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 2 files with Entity Link Staging (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/v4/datum_processor.py",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+     "lines": [
+      8,
+      8
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models / Agent skills",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      112,
+      126
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "…/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/accountAssignmentStep/AccountAssignmentStep.tsx",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/sfdcSettings/sfdcWizard/configureFieldsStep/ConfigureFieldsContent.tsx",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/components/ErdRelationshipsSection.tsx",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/org-graphs/onboard/hooks/useDataSources.ts",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/Salesforce/useSalesforceGraphSetupStatus.ts",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/integrationCards/salesforceDrawer/crm/useSalesforceSetupPromotion.ts",
+        "lines": [
+         4,
+         4
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/graph/erd — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/data_store/graph/v4 — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/data_store/graph/v4/datum_processor.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/graph/erd — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/graph/erd/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/graph — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/graph/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/graph_version.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_customer/real_time/models/entity — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+        "lines": [
+         65,
+         65
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/graph_version.py",
+        "lines": [
+         18,
+         18
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "skills",
+    "label": "Agent skills",
+    "source": {
+     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": ".agents/skills/graph-test-harness — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/graph-test-harness/SKILL.md",
+        "lines": [
+         58,
+         58
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-entity_link_cdc",
+    "label": "entity_link_cdc",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      112,
+      126
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-graph_cdc",
+    "label": "graph_cdc",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "lines": [
+      202,
+      217
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-graph_version",
+    "label": "graph_version",
+    "source": {
+     "path": "backend/src/rox_core/models/graph_version.py",
+     "lines": [
+      18,
+      78
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/business.py",
+     "lines": [
+      41,
+      41
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-entity_link_cdc",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/diff_computer.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-graph_cdc",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-entity_link_cdc",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      112,
+      112
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-graph_cdc",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "lines": [
+      202,
+      202
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-graph_version",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/graph_version.py",
+     "lines": [
+      18,
+      18
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "entity_link_cdc",
+   "graph_cdc",
+   "graph_version"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+    "lines": [
+     202,
+     217
+    ]
+   }
+  },
+  {
+   "label": "Entity Organization (+3 tables)",
+   "page": "feature-crm-entity-organization",
+   "source": {
+    "path": ".agents/skills/graph-test-harness/SKILL.md",
+    "lines": [
+     58,
+     58
+    ]
+   }
+  },
+  {
+   "label": "Graph (+6 tables)",
+   "page": "feature-crm-graph",
+   "source": {
+    "path": ".agents/skills/graph-test-harness/SKILL.md",
+    "lines": [
+     58,
+     58
+    ]
+   }
+  },
+  {
+   "label": "Erd Mapping (+3 tables)",
+   "page": "feature-crm-erd-mapping",
+   "source": {
+    "path": "backend/src/rox_core/api/graph/erd/business.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Erd Onboarding Proposal (+4 tables)",
+   "page": "feature-crm-erd-onboarding-proposal",
+   "source": {
+    "path": "backend/src/rox_core/api/graph/erd/business.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Entity Link Staging (+2 tables)",
+   "page": "feature-crm-entity-link-staging",
+   "source": {
+    "path": "backend/src/data_store/graph/v4/datum_processor.py",
+    "lines": [
+     21,
+     21
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

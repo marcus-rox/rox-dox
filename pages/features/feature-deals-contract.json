@@ -1,0 +1,1268 @@
+{
+ "id": "feature-deals-contract",
+ "title": "Contract (+6 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-deals",
+ "paths": [
+  "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+  "backend/src/agent_framework/data_interface/rql/dto.py",
+  "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+  "backend/src/rox_core/api/rql/dto.py",
+  "backend/src/rox_core/models/contract.py",
+  "backend/src/rox_core/models/contract_bundle.py",
+  "backend/src/rox_core/models/contract_document.py",
+  "backend/src/rox_core/models/contract_document_clause.py",
+  "backend/src/rox_core/models/contract_document_link.py",
+  "backend/src/rox_core/models/contract_document_party.py",
+  "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+  "backend/src/unified_data/catalog_object_base.py",
+  "backend/src/unified_data/renderers/base_object/base.py",
+  "backend/src/unified_data/renderers/base_object/filters.py",
+  "backend/src/unified_data/renderers/base_object/models.py",
+  "backend/src/unified_data/renderers/base_object/plugins/account.py",
+  "backend/src/unified_data/renderers/base_object/plugins/base.py",
+  "backend/src/unified_data/renderers/base_object/plugins/own_resource.py",
+  "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+  "backend/src/unified_data/renderers/base_object/projections.py",
+  "backend/src/unified_data/renderers/base_object/render.py",
+  "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+  "backend/src/unified_data/renderers/page.py",
+  "backend/src/unified_data/renderers/source_renderers/core/postgres_join_chain.py",
+  "backend/src/unified_data/renderers/source_renderers/shared/entity_table.py",
+  "backend/src/workflow/agentflow/rql_tools.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: contract, contract_bundle, contract_document, contract_document_clause, contract_document_link, contract_document_party.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/contract.py",
+      "lines": [
+       40,
+       116
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract_bundle.py",
+      "lines": [
+       26,
+       68
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract_document.py",
+      "lines": [
+       26,
+       76
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract_document_clause.py",
+      "lines": [
+       21,
+       61
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract_document_link.py",
+      "lines": [
+       21,
+       74
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract_document_party.py",
+      "lines": [
+       20,
+       74
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Background workers: 1, Business logic: 18, Models: 7.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+      "lines": [
+       41,
+       41
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+      "lines": [
+       19,
+       19
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/contract.py",
+      "lines": [
+       40,
+       40
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Background workers: backend/src/tasks/executors (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/unified_data/renderers/base_object (4), backend/src/unified_data/renderers/base_object/plugins (4), backend/src/unified_data/renderers (2).",
+    "sources": [
+     {
+      "path": "backend/src/unified_data/renderers/base_object/base.py",
+      "lines": [
+       21,
+       21
+      ]
+     },
+     {
+      "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (6), backend/src/unified_data/renderers/base_object (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/contract.py",
+      "lines": [
+       40,
+       40
+      ]
+     },
+     {
+      "path": "backend/src/unified_data/renderers/base_object/models.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/rql/dto.py; imports backend/src/rox_core/api/rql/dto.py; imports backend/src/workflow/agentflow/rql_tools.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/rql/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/rql.py; imports backend/src/workflow/agentflow/rql_tools.py"
+    ],
+    [
+     "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/contract.py; imports backend/src/rox_core/models/contract_bundle.py; uses contract; uses contract_bundle"
+    ],
+    [
+     "backend/src/rox_core/api/rql/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/rql.py; imports backend/src/unified_data/catalog_object_base.py; imports backend/src/workflow/agentflow/rql_tools.py"
+    ],
+    [
+     "backend/src/rox_core/models/contract.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py; imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract"
+    ],
+    [
+     "backend/src/rox_core/models/contract_bundle.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py; imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract_bundle"
+    ],
+    [
+     "backend/src/rox_core/models/contract_document.py",
+     "Models",
+     "Primary",
+     "imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract_document"
+    ],
+    [
+     "backend/src/rox_core/models/contract_document_clause.py",
+     "Models",
+     "Primary",
+     "imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract_document_clause"
+    ],
+    [
+     "backend/src/rox_core/models/contract_document_link.py",
+     "Models",
+     "Primary",
+     "imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract_document_link"
+    ],
+    [
+     "backend/src/rox_core/models/contract_document_party.py",
+     "Models",
+     "Primary",
+     "imports backend/src/tasks/executors/backfill_contract_tables_from_bq.py; imports backend/src/unified_data/catalog_object_base.py; uses contract_document_party"
+    ],
+    [
+     "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/contract.py; imports backend/src/rox_core/models/contract_bundle.py; imports backend/src/rox_core/models/contract_document.py; imports backend/src/rox_core/models/contract_document_clause.py; imports backend/src/rox_core/models/contract_document_link.py"
+    ],
+    [
+     "backend/src/unified_data/catalog_object_base.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/rql/dto.py; imports backend/src/rox_core/models/contract.py; imports backend/src/rox_core/models/contract_bundle.py; imports backend/src/rox_core/models/contract_document.py; imports backend/src/rox_core/models/contract_document_clause.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/base.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/filters.py; imports backend/src/unified_data/renderers/base_object/models.py; imports backend/src/unified_data/renderers/base_object/plugins/base.py; imports backend/src/unified_data/renderers/base_object/projections.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/filters.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/base_object/base.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/models.py",
+     "Models",
+     "Primary",
+     "imports backend/src/unified_data/renderers/base_object/base.py; imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/plugins/account.py; imports backend/src/unified_data/renderers/base_object/plugins/base.py; imports backend/src/unified_data/renderers/base_object/plugins/own_resource.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/plugins/account.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/models.py; imports backend/src/unified_data/renderers/base_object/plugins/base.py; imports backend/src/unified_data/renderers/base_object/render.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/plugins/base.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/base_object/base.py; imports backend/src/unified_data/renderers/base_object/plugins/account.py; imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/models.py; imports backend/src/unified_data/renderers/base_object/plugins/own_resource.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/plugins/own_resource.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/models.py; imports backend/src/unified_data/renderers/base_object/plugins/base.py; imports backend/src/unified_data/renderers/base_object/render.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/models.py; imports backend/src/unified_data/renderers/base_object/plugins/base.py; imports backend/src/unified_data/renderers/base_object/projections.py; imports backend/src/unified_data/renderers/base_object/render.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/projections.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/base_object/base.py; imports backend/src/unified_data/renderers/base_object/plugins/parent_account.py; imports backend/src/unified_data/catalog_object_base.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/base_object/render.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/base_object/base.py; imports backend/src/unified_data/renderers/base_object/plugins/account.py; imports backend/src/unified_data/renderers/base_object/plugins/own_resource.py; imports backend/src/unified_data/renderers/base_object/plugins/parent_account.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py; imports backend/src/unified_data/renderers/page.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/page.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/renderers/foreign_key_pushdown.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/core/postgres_join_chain.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/shared/entity_table.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/unified_data/catalog_object_base.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/rql_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/rql.py; imports backend/src/agent_framework/data_interface/rql/dto.py; imports backend/src/rox_core/api/rql/dto.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/rql_tools.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/rql_tools.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/rql/dto.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/rql_tools.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_bundle.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_clause.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      45,
+      45
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_party.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_object_base.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/base.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/base.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/base.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/base.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/base.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/models.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/base.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/own_resource.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/render.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/base.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/own_resource.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/own_resource.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/render.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/plugins/parent_account.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/render.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/projections.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/render.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/base_object/render.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/core/postgres_join_chain.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_table.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/contract.py",
+      "lines": [
+       40,
+       116
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      41,
+      41
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "lines": [
+      19,
+      19
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      116
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+        "lines": [
+         41,
+         41
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/unified_data/renderers/base_object — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/base_object/base.py",
+        "lines": [
+         21,
+         21
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers/base_object/plugins — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/foreign_key_pushdown.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/command_sdk/agents/tools — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/data_interface/rql — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/hierarchy — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/contract.py",
+        "lines": [
+         40,
+         40
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/unified_data/renderers/base_object — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/renderers/base_object/models.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-contract",
+    "label": "contract",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      116
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-contract_bundle",
+    "label": "contract_bundle",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_bundle.py",
+     "lines": [
+      26,
+      68
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-contract_document",
+    "label": "contract_document",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document.py",
+     "lines": [
+      26,
+      76
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-contract_document_clause",
+    "label": "contract_document_clause",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_clause.py",
+     "lines": [
+      21,
+      61
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-contract_document_link",
+    "label": "contract_document_link",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      21,
+      74
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-contract_document_party",
+    "label": "contract_document_party",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_party.py",
+     "lines": [
+      20,
+      74
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (11)",
+    "source": {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/unified_data/renderers/base_object/models.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (5)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      41,
+      41
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-contract",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-contract_bundle",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      40
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract_bundle",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_bundle.py",
+     "lines": [
+      26,
+      26
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract_document",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document.py",
+     "lines": [
+      26,
+      26
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract_document_clause",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_clause.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract_document_link",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-contract_document_party",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_party.py",
+     "lines": [
+      20,
+      20
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "contract",
+   "contract_bundle",
+   "contract_document",
+   "contract_document_clause",
+   "contract_document_link",
+   "contract_document_party"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "contract",
+    "dst": "contract_bundle",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      297,
+      297
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "contract",
+    "dst": "contract_bundle",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      82,
+      82
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "contract",
+    "dst": "contract_document_link",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      57,
+      57
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "contract_document",
+    "dst": "contract_document_clause",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_clause.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "contract_document",
+    "dst": "contract_document_link",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      50,
+      50
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "contract_document",
+    "dst": "contract_document_party",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/contract_document_party.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    "kind": "enforced"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Deals, quotes & contracts",
+   "page": "domain-deals",
+   "source": {
+    "path": "backend/src/rox_core/models/contract.py",
+    "lines": [
+     40,
+     116
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

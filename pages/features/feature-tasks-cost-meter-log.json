@@ -1,0 +1,1168 @@
+{
+ "id": "feature-tasks-cost-meter-log",
+ "title": "Cost Meter Log (+5 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-tasks",
+ "paths": [
+  "backend/src/agent_framework/httpx/http_client.py",
+  "backend/src/agents_core/rxa/engines/embedding_engine.py",
+  "backend/src/agents_core/rxa/engines/llmengine.py",
+  "backend/src/agents_core/rxa/engines/llmresponse.py",
+  "backend/src/agents_core/rxa/models/api_models.py",
+  "backend/src/chat/routes/testing/router_dto.py",
+  "backend/src/data_store/artifact_vector_store/file_processor.py",
+  "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+  "backend/src/data_store/reducto_types.py",
+  "backend/src/data_store/reducto_utils.py",
+  "backend/src/enrichment/pricing/provider_outcomes.py",
+  "backend/src/enrichment/services/enrichment_service.py",
+  "backend/src/enrichment/services/firmographics_domain_resolver.py",
+  "backend/src/public_api/routes/enrichment/service.py",
+  "backend/src/research/tools/search_providers/tavily.py",
+  "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py",
+  "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/perplexity_people_search.py",
+  "backend/src/rox_core/api/metering/cost_calculator.py",
+  "backend/src/rox_core/api/metering/recording.py",
+  "backend/src/rox_core/api/metering/usage_meter.py",
+  "backend/src/rox_core/models/cost_meter.py",
+  "backend/src/rox_core/sor/search/semantic_search_service.py",
+  "backend/src/shim_layer/redis_shim/async_redis_queue.py",
+  "backend/src/util/cost_meter_utils.py",
+  "backend/src/workflow/execution_graph/packages/code/__init__.py",
+  "backend/src/workflow/execution_graph/packages/code/_code_providers/__init__.py",
+  "backend/src/workflow/execution_graph/packages/code/_code_providers/utils.py",
+  "backend/src/workflow/execution_graph/packages/code/code.py",
+  "backend/src/workflow/execution_graph/packages/rox_actions/enrichment.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: cost_meter_log, data_extraction_cost_meter_log, extraction_task_status, insight_cost_meter_log, task_params_log.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       46,
+       133
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       136,
+       150
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/data_extraction_task_status.py",
+      "lines": [
+       21,
+       122
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       153,
+       171
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       334,
+       355
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: HTTP routes: 2, Business logic: 25, Models: 2.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/testing/router_dto.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/httpx/http_client.py",
+      "lines": [
+       27,
+       27
+      ]
+     },
+     {
+      "path": "backend/src/agents_core/rxa/models/api_models.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "HTTP routes: backend/src/chat/routes/testing (1), backend/src/public_api/routes/enrichment (1).",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/testing/router_dto.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/public_api/routes/enrichment/service.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/agents_core/rxa/engines (3), backend/src/rox_core/api/metering (3), backend/src/data_store (2).",
+    "sources": [
+     {
+      "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/metering/cost_calculator.py",
+      "lines": [
+       27,
+       27
+      ]
+     },
+     {
+      "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
+      "lines": [
+       5,
+       5
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/agents_core/rxa/models (1), backend/src/rox_core/models (1).",
+    "sources": [
+     {
+      "path": "backend/src/agents_core/rxa/models/api_models.py",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       46,
+       46
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/agent_framework/httpx/http_client.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/metering/recording.py; imports backend/src/research/tools/search_providers/tavily.py"
+    ],
+    [
+     "backend/src/agents_core/rxa/engines/embedding_engine.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/metering/recording.py; imports backend/src/util/cost_meter_utils.py; imports backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py; imports backend/src/rox_core/sor/search/semantic_search_service.py"
+    ],
+    [
+     "backend/src/agents_core/rxa/engines/llmengine.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/llmresponse.py; imports backend/src/agents_core/rxa/models/api_models.py; imports backend/src/rox_core/api/metering/recording.py; imports backend/src/util/cost_meter_utils.py; imports backend/src/rox_core/api/alerts/processors/people_search_processor/utils/perplexity_people_search.py"
+    ],
+    [
+     "backend/src/agents_core/rxa/engines/llmresponse.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/llmengine.py; imports backend/src/agents_core/rxa/models/api_models.py"
+    ],
+    [
+     "backend/src/agents_core/rxa/models/api_models.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/llmengine.py; imports backend/src/agents_core/rxa/engines/llmresponse.py"
+    ],
+    [
+     "backend/src/chat/routes/testing/router_dto.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/util/cost_meter_utils.py"
+    ],
+    [
+     "backend/src/data_store/artifact_vector_store/file_processor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/reducto_types.py; imports backend/src/data_store/reducto_utils.py; imports backend/src/rox_core/api/metering/recording.py"
+    ],
+    [
+     "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/cost_meter.py; uses cost_meter_log; uses data_extraction_cost_meter_log; uses extraction_task_status; uses insight_cost_meter_log"
+    ],
+    [
+     "backend/src/data_store/reducto_types.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/artifact_vector_store/file_processor.py"
+    ],
+    [
+     "backend/src/data_store/reducto_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/artifact_vector_store/file_processor.py"
+    ],
+    [
+     "backend/src/enrichment/pricing/provider_outcomes.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/util/cost_meter_utils.py; imports backend/src/enrichment/services/enrichment_service.py; imports backend/src/enrichment/services/firmographics_domain_resolver.py"
+    ],
+    [
+     "backend/src/enrichment/services/enrichment_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/pricing/provider_outcomes.py; imports backend/src/rox_core/models/cost_meter.py; imports backend/src/shim_layer/redis_shim/async_redis_queue.py; imports backend/src/enrichment/services/firmographics_domain_resolver.py; imports backend/src/public_api/routes/enrichment/service.py"
+    ],
+    [
+     "backend/src/enrichment/services/firmographics_domain_resolver.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/pricing/provider_outcomes.py; imports backend/src/enrichment/services/enrichment_service.py"
+    ],
+    [
+     "backend/src/public_api/routes/enrichment/service.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/enrichment/services/enrichment_service.py"
+    ],
+    [
+     "backend/src/research/tools/search_providers/tavily.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/httpx/http_client.py; imports backend/src/rox_core/api/metering/recording.py"
+    ],
+    [
+     "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/embedding_engine.py"
+    ],
+    [
+     "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/perplexity_people_search.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/llmengine.py"
+    ],
+    [
+     "backend/src/rox_core/api/metering/cost_calculator.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/util/cost_meter_utils.py; imports backend/src/rox_core/api/metering/recording.py"
+    ],
+    [
+     "backend/src/rox_core/api/metering/recording.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/httpx/http_client.py; imports backend/src/agents_core/rxa/engines/embedding_engine.py; imports backend/src/agents_core/rxa/engines/llmengine.py; imports backend/src/data_store/artifact_vector_store/file_processor.py; imports backend/src/research/tools/search_providers/tavily.py"
+    ],
+    [
+     "backend/src/rox_core/api/metering/usage_meter.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/util/cost_meter_utils.py"
+    ],
+    [
+     "backend/src/rox_core/models/cost_meter.py",
+     "Models",
+     "Primary",
+     "imports backend/src/data_store/cold_storage_store/cold_storage_store.py; imports backend/src/enrichment/services/enrichment_service.py; imports backend/src/util/cost_meter_utils.py; uses cost_meter_log; uses data_extraction_cost_meter_log"
+    ],
+    [
+     "backend/src/rox_core/sor/search/semantic_search_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/embedding_engine.py"
+    ],
+    [
+     "backend/src/shim_layer/redis_shim/async_redis_queue.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/services/enrichment_service.py"
+    ],
+    [
+     "backend/src/util/cost_meter_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agents_core/rxa/engines/embedding_engine.py; imports backend/src/agents_core/rxa/engines/llmengine.py; imports backend/src/chat/routes/testing/router_dto.py; imports backend/src/enrichment/pricing/provider_outcomes.py; imports backend/src/rox_core/api/metering/cost_calculator.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/code/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/code/code.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/code/_code_providers/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/code/_code_providers/utils.py; imports backend/src/workflow/execution_graph/packages/code/code.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/code/_code_providers/utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/code/_code_providers/__init__.py; imports backend/src/workflow/execution_graph/packages/code/code.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/code/code.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/code/__init__.py; imports backend/src/util/cost_meter_utils.py; imports backend/src/workflow/execution_graph/packages/code/_code_providers/__init__.py; imports backend/src/workflow/execution_graph/packages/code/_code_providers/utils.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/rox_actions/enrichment.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/services/enrichment_service.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/agent_framework/httpx/http_client.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/search_providers/tavily.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/sor/search/semantic_search_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/perplexity_people_search.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/pricing/provider_outcomes.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/services/enrichment_service.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/services/firmographics_domain_resolver.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/services/enrichment_service.py",
+     "lines": [
+      85,
+      85
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/services/enrichment_service.py",
+     "lines": [
+      91,
+      91
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/services/firmographics_domain_resolver.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/enrichment/service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/search_providers/tavily.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/cost_calculator.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/recording.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/usage_meter.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      136,
+      136
+     ]
+    },
+    {
+     "path": "backend/src/util/cost_meter_utils.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/code/__init__.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/code/_code_providers/__init__.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/code/code.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/code/code.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/code/code.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/rox_actions/enrichment.py",
+     "lines": [
+      42,
+      42
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/cost_meter.py",
+      "lines": [
+       46,
+       133
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/agent_framework/httpx/http_client.py",
+     "lines": [
+      27,
+      27
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      133
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/chat/routes/testing — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/testing/router_dto.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/public_api/routes/enrichment — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/routes/enrichment/service.py",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_framework/httpx/http_client.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/agents_core/rxa/engines — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/metering — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/metering/cost_calculator.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/data_store — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/enrichment/services — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/enrichment/services/enrichment_service.py",
+        "lines": [
+         35,
+         35
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/workflow/execution_graph/packages/code — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/execution_graph/packages/code/__init__.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/agents_core/rxa/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/agents_core/rxa/models/api_models.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/cost_meter.py",
+        "lines": [
+         46,
+         46
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-cost_meter_log",
+    "label": "cost_meter_log",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      133
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-data_extraction_cost_meter_log",
+    "label": "data_extraction_cost_meter_log",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      136,
+      150
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-extraction_task_status",
+    "label": "extraction_task_status",
+    "source": {
+     "path": "backend/src/rox_core/models/data_extraction_task_status.py",
+     "lines": [
+      21,
+      122
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-insight_cost_meter_log",
+    "label": "insight_cost_meter_log",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      153,
+      171
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-task_params_log",
+    "label": "task_params_log",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      334,
+      355
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
+     "lines": [
+      2,
+      2
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      8,
+      8
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-cost_meter_log",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-data_extraction_cost_meter_log",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-extraction_task_status",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-insight_cost_meter_log",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-cost_meter_log",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      46
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-data_extraction_cost_meter_log",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      136,
+      136
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "cost_meter_log",
+   "data_extraction_cost_meter_log",
+   "extraction_task_status",
+   "insight_cost_meter_log",
+   "task_params_log"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "cost_meter_log",
+    "dst": "data_extraction_cost_meter_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      136,
+      136
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "cost_meter_log",
+    "dst": "insight_cost_meter_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      153,
+      153
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "cost_meter_log",
+    "dst": "task_params_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      334,
+      334
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "data_extraction_cost_meter_log",
+    "dst": "extraction_task_status",
+    "label": "commented_fk",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      145,
+      145
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "data_extraction_cost_meter_log",
+    "dst": "extraction_task_status",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/util/cost_meter_utils.py",
+     "lines": [
+      784,
+      784
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "data_extraction_cost_meter_log",
+    "dst": "insight_cost_meter_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      153,
+      153
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "data_extraction_cost_meter_log",
+    "dst": "task_params_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      334,
+      334
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "insight_cost_meter_log",
+    "dst": "task_params_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      334,
+      334
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Background tasks, jobs & metering",
+   "page": "domain-tasks",
+   "source": {
+    "path": "backend/src/rox_core/models/cost_meter.py",
+    "lines": [
+     46,
+     133
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

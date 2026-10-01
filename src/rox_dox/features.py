@@ -179,6 +179,28 @@ def _is_excluded(path: str) -> bool:
     )
 
 
+def _is_deployment_path(path: str) -> bool:
+    return (
+        path.startswith(_DEPLOYMENT_ROOTS)
+        or "/Dockerfile" in path
+        or path.startswith("Dockerfile")
+        or ("/" not in path and path.endswith((".yml", ".yaml")))
+    )
+
+
+def is_excluded_path(path: str) -> bool:
+    return _is_excluded(path)
+
+
+def is_feature_path(path: str) -> bool:
+    return not _is_excluded(path) and (
+        (path.startswith("backend/src/") and path.endswith(".py"))
+        or (path.startswith("web/") and path.endswith((".ts", ".tsx")))
+        or _is_deployment_path(path)
+        or path.startswith(".agents/skills/")
+    )
+
+
 def _git_tree(repo: Path, commit: str) -> list[tuple[str, str]]:
     result = subprocess.run(
         [
@@ -243,17 +265,7 @@ def _snapshot(repo: Path, commit: str) -> _Snapshot:
     selected = []
     all_paths = {path for path, _ in tree}
     for path, object_id in tree:
-        excluded = _is_excluded(path)
-        backend = path.startswith("backend/src/") and path.endswith(".py")
-        web = path.startswith("web/") and path.endswith((".ts", ".tsx"))
-        deployment = (
-            path.startswith(_DEPLOYMENT_ROOTS)
-            or "/Dockerfile" in path
-            or path.startswith("Dockerfile")
-            or ("/" not in path and path.endswith((".yml", ".yaml")))
-        )
-        skill = path.startswith(".agents/skills/")
-        if not excluded and (backend or web or deployment or skill):
+        if is_feature_path(path):
             selected.append((path, object_id))
     return _Snapshot(_git_blobs(repo, selected), all_paths)
 
@@ -916,6 +928,58 @@ def _validate_evidence(
                     )
 
 
+def _prepare_feature_maps(
+    repo: Path,
+    commit: str,
+    domain_tables: Mapping[str, Collection[str]],
+) -> tuple[
+    _Snapshot,
+    dict[str, Table],
+    dict[str, _GraphFile],
+    int,
+    dict[str, list[str]],
+    dict[str, DomainReason],
+]:
+    snapshot = _snapshot(repo, commit)
+    tables = extract_tables(repo, commit)
+    all_domain_tables = {table for names in domain_tables.values() for table in names}
+    graph, parse_counts = _parse_graph(snapshot, tables, all_domain_tables)
+    domains, domain_reasons = _domain_scope(graph, domain_tables)
+    return snapshot, tables, graph, parse_counts, domains, domain_reasons
+
+
+def build_feature_maps(
+    repo: Path,
+    commit: str,
+    domain_tables: Mapping[str, Collection[str]],
+    *,
+    threshold: float = 0.25,
+) -> dict[str, FeatureMap]:
+    snapshot, tables, graph, parse_counts, domains, domain_reasons = (
+        _prepare_feature_maps(repo, commit, domain_tables)
+    )
+    return {
+        domain: _build_feature_map(
+            repo,
+            commit,
+            domain_tables,
+            snapshot,
+            tables,
+            graph,
+            parse_counts,
+            domains,
+            domain_reasons,
+            domain,
+            threshold=threshold,
+        )
+        for domain in tqdm(
+            sorted(domain_tables),
+            desc="Building domain feature maps",
+            unit="domain",
+        )
+    }
+
+
 def build_feature_map(
     repo: Path,
     commit: str,
@@ -926,12 +990,39 @@ def build_feature_map(
 ) -> FeatureMap:
     if domain not in domain_tables:
         raise ValueError(f"unknown domain '{domain}'")
-    snapshot = _snapshot(repo, commit)
-    tables = extract_tables(repo, commit)
+    snapshot, tables, graph, parse_counts, domains, domain_reasons = (
+        _prepare_feature_maps(repo, commit, domain_tables)
+    )
+    return _build_feature_map(
+        repo,
+        commit,
+        domain_tables,
+        snapshot,
+        tables,
+        graph,
+        parse_counts,
+        domains,
+        domain_reasons,
+        domain,
+        threshold=threshold,
+    )
+
+
+def _build_feature_map(
+    repo: Path,
+    commit: str,
+    domain_tables: Mapping[str, Collection[str]],
+    snapshot: _Snapshot,
+    tables: dict[str, Table],
+    graph: dict[str, _GraphFile],
+    parse_counts: int,
+    domains: dict[str, list[str]],
+    domain_reasons: dict[str, DomainReason],
+    domain: str,
+    *,
+    threshold: float,
+) -> FeatureMap:
     domain_table_names = sorted(set(domain_tables[domain]))
-    all_domain_tables = {table for names in domain_tables.values() for table in names}
-    graph, parse_counts = _parse_graph(snapshot, tables, all_domain_tables)
-    domains, domain_reasons = _domain_scope(graph, domain_tables)
     domain_files = sorted(path for path in domains if domain in domains[path])
     touch = {
         path: graph[path].tables & set(domain_table_names) for path in domain_files
@@ -1195,13 +1286,7 @@ def build_feature_map(
     deployment_paths = {
         path
         for path in snapshot.files
-        if not _is_excluded(path)
-        and (
-            path.startswith(_DEPLOYMENT_ROOTS)
-            or "/Dockerfile" in path
-            or path.startswith("Dockerfile")
-            or ("/" not in path and path.endswith((".yml", ".yaml")))
-        )
+        if not _is_excluded(path) and _is_deployment_path(path)
     }
     skill_paths = {
         path

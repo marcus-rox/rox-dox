@@ -382,10 +382,17 @@ class DataModel(Model):
         return self
 
 
+class SummaryTableLink(Model):
+    row: int = Field(ge=0)
+    column: int = Field(ge=0)
+    page: str
+
+
 class SummaryTable(Model):
     columns: list[str]
     rows: list[list[str]]
     sources: list[Source] = Field(min_length=1)
+    links: list[SummaryTableLink] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_rows(self) -> SummaryTable:
@@ -394,6 +401,16 @@ class SummaryTable(Model):
                 raise ValueError(
                     f"TLDR table row {row_number} has {len(row)} cells; "
                     f"expected {len(self.columns)} columns"
+                )
+        positions = [(link.row, link.column) for link in self.links]
+        duplicate = _first_duplicate([f"{row}:{column}" for row, column in positions])
+        if duplicate is not None:
+            raise ValueError(f"TLDR table has duplicate page link at {duplicate}")
+        for row, column in positions:
+            if row >= len(self.rows) or column >= len(self.columns):
+                raise ValueError(
+                    f"TLDR table page link at row {row}, column {column} "
+                    "is outside the table"
                 )
         return self
 
@@ -428,9 +445,10 @@ class NotionDoc(Model):
 class Page(Model):
     id: str
     title: str
+    kind: Literal["root", "domain", "feature"] | None = None
     commit: str
     parent: str | None
-    paths: list[str] = Field(min_length=1)
+    paths: list[str]
     tldr: Tldr
     block: BlockDiagram
     block_figures: list[BlockFigure] = Field(default_factory=list)
@@ -453,6 +471,12 @@ class Page(Model):
             ):
                 raise ValueError(f"path '{path}' is not repo-relative")
         return paths
+
+    @model_validator(mode="after")
+    def validate_paths_nonempty(self) -> Page:
+        if not self.paths and self.kind != "domain":
+            raise ValueError("page paths must not be empty")
+        return self
 
     @model_validator(mode="after")
     def validate_block_figures(self) -> Page:

@@ -220,6 +220,29 @@ def test_domain_schema_relations_use_kind_styles_and_key_endpoints(
     assert "schema-edge:hover path { stroke-width: 2.8; }" in svg
 
 
+def test_table_level_relations_connect_sql_table_headers(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions",
+            "dst": "users",
+            "label": "uses",
+            "kind": "enforced",
+            "source": SOURCE,
+        }
+    ]
+    page = _page(payload)
+
+    svg = schema_svg(page, repo_url=REPO_URL, tables=extract_tables(repo, commit))
+
+    assert "sessions → users: uses (enforced)" in svg
+    assert 'stroke="#2563eb" stroke-width="1.6"' in svg
+
+
 def test_domain_key_row_truncates_long_relation_column_lists(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],

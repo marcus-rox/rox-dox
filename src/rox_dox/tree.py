@@ -73,39 +73,111 @@ def tree_problems(pages: list[Page]) -> list[str]:
                 problems.append(
                     f"related '{related.label}': link to missing page '{related.page}'"
                 )
+        for domain in page.data.domains:
+            if domain.page is not None and domain.page not in page_ids:
+                problems.append(
+                    f"schema domain '{domain.id}': link to missing page '{domain.page}'"
+                )
+            elif domain.page is not None:
+                expected_kind = {"root": "domain", "domain": "feature"}.get(page.kind)
+                target_kind = pages_by_id[domain.page].kind
+                if expected_kind is not None and target_kind != expected_kind:
+                    problems.append(
+                        f"schema domain '{domain.id}': page '{domain.page}' has "
+                        f"kind '{target_kind or 'unspecified'}'; expected "
+                        f"'{expected_kind}'"
+                    )
+        for link in page.tldr.table.links:
+            if link.page not in page_ids:
+                problems.append(f"TLDR table: link to missing page '{link.page}'")
 
     for page in pages:
         if page.parent is None:
             if page.paths != ["."]:
                 problems.append(f"root page '{page.id}' paths must be exactly ['.']")
+            if page.kind not in {None, "root"}:
+                problems.append(
+                    f"root page '{page.id}' has kind '{page.kind}'; expected 'root'"
+                )
             continue
         parent = pages_by_id.get(page.parent)
         if parent is None:
             continue
-        for path in page.paths:
-            if not any(
-                parent_path == "."
-                or path == parent_path
-                or path.startswith(f"{parent_path}/")
-                for parent_path in parent.paths
-            ):
-                problems.append(
-                    f"page '{page.id}' path '{path}' is outside parent "
-                    f"'{page.parent}' paths"
-                )
+        if page.kind == "root":
+            problems.append(
+                f"page '{page.id}' has kind 'root' but parent '{page.parent}' "
+                f"has kind '{parent.kind or 'unspecified'}'"
+            )
+        elif page.kind == "domain" and parent.kind != "root":
+            problems.append(
+                f"page '{page.id}' has kind 'domain' but parent '{page.parent}' "
+                f"has kind '{parent.kind or 'unspecified'}'; domains require a root parent"
+            )
+        elif page.kind == "feature" and parent.kind != "domain":
+            problems.append(
+                f"page '{page.id}' has kind 'feature' but parent '{page.parent}' "
+                f"has kind '{parent.kind or 'unspecified'}'; features require a domain parent"
+            )
+        if not (page.kind == "feature" and parent.kind == "domain"):
+            for path in page.paths:
+                if not any(
+                    parent_path == "."
+                    or path == parent_path
+                    or path.startswith(f"{parent_path}/")
+                    for parent_path in parent.paths
+                ):
+                    problems.append(
+                        f"page '{page.id}' path '{path}' is outside parent "
+                        f"'{page.parent}' paths"
+                    )
 
     paths_by_owner: dict[str, list[Page]] = {}
     for page in pages:
         for path in page.paths:
             owners = paths_by_owner.setdefault(path, [])
-            if owners and all(owner is not page for owner in owners):
+            unrelated_owners = [
+                owner
+                for owner in owners
+                if owner is not page
+                and not (
+                    page.kind in {"domain", "feature"}
+                    and owner.kind in {"domain", "feature"}
+                )
+                and not _is_ancestor(owner.id, page.id, pages_by_id)
+                and not _is_ancestor(page.id, owner.id, pages_by_id)
+            ]
+            if unrelated_owners:
                 problems.append(
                     f"path '{path}' is claimed by both page "
-                    f"'{owners[0].id}' and page '{page.id}'"
+                    f"'{unrelated_owners[0].id}' and page '{page.id}'"
                 )
             owners.append(page)
 
+    children_by_id = {page_id: [] for page_id in page_ids}
+    for page in pages:
+        if page.parent in children_by_id:
+            children_by_id[page.parent].append(page)
+    for page in pages:
+        if page.kind == "feature" and children_by_id[page.id]:
+            problems.append(f"feature page '{page.id}' must be a leaf")
+
     return problems
+
+
+def _is_ancestor(
+    ancestor_id: str,
+    descendant_id: str,
+    pages_by_id: dict[str, Page],
+) -> bool:
+    seen = set()
+    parent_id = pages_by_id[descendant_id].parent
+    while parent_id is not None and parent_id not in seen:
+        if parent_id == ancestor_id:
+            return True
+        seen.add(parent_id)
+        parent = pages_by_id.get(parent_id)
+        parent_id = parent.parent if parent is not None else None
+    return False
 
 
 def build_tree(pages: list[Page]) -> SiteTree:

@@ -1,0 +1,2314 @@
+{
+ "id": "feature-crm-erd-mapping",
+ "title": "Erd Mapping (+3 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  "backend/src/agent_evals_v2/graph_output.py",
+  "backend/src/agent_framework/data_interface/column/dto.py",
+  "backend/src/agent_framework/data_interface/crm_field/live.py",
+  "backend/src/data_store/graph/store.py",
+  "backend/src/data_store/graph/v4/data_type_fetcher.py",
+  "backend/src/data_store/graph/v4/util.py",
+  "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+  "backend/src/ext_integrations/integration/crm/hubspot/parser.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/base.py",
+  "backend/src/graph_harness/rows.py",
+  "backend/src/orchestrator/customer_cache.py",
+  "backend/src/research/clever_column/column_config_dtos.py",
+  "backend/src/research/clever_column/endpoint_dtos.py",
+  "backend/src/research/clever_column/executor_service.py",
+  "backend/src/research/research_agent/cell_value_agent.py",
+  "backend/src/research/research_agent/contact_research_agent_executor.py",
+  "backend/src/research/tools/agent_context.py",
+  "backend/src/research/tools/web_search.py",
+  "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+  "backend/src/rox_core/api/account/dto.py",
+  "backend/src/rox_core/api/account/filter_compiler.py",
+  "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+  "backend/src/rox_core/api/agents/column_data_fetcher.py",
+  "backend/src/rox_core/api/crm_field/business.py",
+  "backend/src/rox_core/api/crm_field/crm_field_service.py",
+  "backend/src/rox_core/api/crm_field/endpoints.py",
+  "backend/src/rox_core/api/crm_field/sync.py",
+  "backend/src/rox_core/api/data_controller/business.py",
+  "backend/src/rox_core/api/data_controller/campaign_member_fields.py",
+  "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+  "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+  "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py",
+  "backend/src/rox_core/api/graph/erd/service.py",
+  "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+  "backend/src/rox_core/api/query/dto.py",
+  "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+  "backend/src/rox_core/crm_profiles/dynamics.py",
+  "backend/src/rox_core/crm_profiles/profile.py",
+  "backend/src/rox_core/crm_profiles/registry.py",
+  "backend/src/rox_core/crm_profiles/salesforce.py",
+  "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+  "backend/src/rox_core/models/column_metadata.py",
+  "backend/src/rox_core/models/crm_field.py",
+  "backend/src/rox_core/models/erd_mapping.py",
+  "backend/src/rox_customer/graph/v4/jobs/context.py",
+  "backend/src/rox_customer/graph/v4/jobs/graph_refresh.py",
+  "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+  "backend/src/rox_customer/real_time/erd/query.py",
+  "backend/src/util/boot_marks.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: crm_field, erd_mapping, external_column_mapping.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/crm_field.py",
+      "lines": [
+       22,
+       443
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/erd_mapping.py",
+      "lines": [
+       11,
+       80
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+      "lines": [
+       213,
+       368
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: HTTP routes: 1, Background workers: 3, Business logic: 52, Models: 5.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/agent_evals_v2/graph_output.py",
+      "lines": [
+       19,
+       19
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+      "lines": [
+       333,
+       333
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/crm_field (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/rox_customer/graph/v4/jobs (3).",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/graph/erd (8), backend/src/rox_core/api/account (6), backend/src/rox_core/crm_profiles (4).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/graph/erd/business.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/crm_profiles/dynamics.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (5).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+      "lines": [
+       333,
+       333
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/agent_evals_v2/graph_output.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/graph_harness/rows.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/column/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/crm_field/live.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/business.py"
+    ],
+    [
+     "backend/src/data_store/graph/store.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/graph_output.py; imports backend/src/data_store/graph/v4/data_type_fetcher.py; imports backend/src/data_store/graph/v4/util.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/models/erd_mapping.py"
+    ],
+    [
+     "backend/src/data_store/graph/v4/data_type_fetcher.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/rox_core/models/erd_mapping.py; imports backend/src/rox_core/api/crm_field/sync.py; uses erd_mapping"
+    ],
+    [
+     "backend/src/data_store/graph/v4/util.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/store.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/crm_profiles/dynamics.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/models/erd_mapping.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/hubspot/parser.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/sync.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/base.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/integrations/salesforce_writeback_service.py"
+    ],
+    [
+     "backend/src/graph_harness/rows.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_evals_v2/graph_output.py"
+    ],
+    [
+     "backend/src/orchestrator/customer_cache.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py"
+    ],
+    [
+     "backend/src/research/clever_column/column_config_dtos.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/endpoint_dtos.py; imports backend/src/research/clever_column/executor_service.py; imports backend/src/research/research_agent/cell_value_agent.py; imports backend/src/research/research_agent/contact_research_agent_executor.py; imports backend/src/research/tools/agent_context.py"
+    ],
+    [
+     "backend/src/research/clever_column/endpoint_dtos.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/column_config_dtos.py"
+    ],
+    [
+     "backend/src/research/clever_column/executor_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/column_config_dtos.py; imports backend/src/research/research_agent/contact_research_agent_executor.py"
+    ],
+    [
+     "backend/src/research/research_agent/cell_value_agent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/column_config_dtos.py"
+    ],
+    [
+     "backend/src/research/research_agent/contact_research_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/executor_service.py; imports backend/src/research/clever_column/column_config_dtos.py; imports backend/src/research/tools/web_search.py"
+    ],
+    [
+     "backend/src/research/tools/agent_context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/column_config_dtos.py; imports backend/src/research/tools/web_search.py"
+    ],
+    [
+     "backend/src/research/tools/web_search.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/research_agent/contact_research_agent_executor.py; imports backend/src/research/clever_column/column_config_dtos.py; imports backend/src/research/tools/agent_context.py"
+    ],
+    [
+     "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/base.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/models/erd_mapping.py"
+    ],
+    [
+     "backend/src/rox_core/api/account/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/models/erd_mapping.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/account/filter_compiler.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/models/erd_mapping.py"
+    ],
+    [
+     "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/crm_profiles/profile.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/column/dto.py; imports backend/src/orchestrator/customer_cache.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/api/query/dto.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py"
+    ],
+    [
+     "backend/src/rox_core/api/crm_field/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/crm_field/live.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/models/erd_mapping.py; imports backend/src/rox_customer/real_time/erd/query.py"
+    ],
+    [
+     "backend/src/rox_core/api/crm_field/crm_field_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py; imports backend/src/rox_core/api/crm_field/business.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py"
+    ],
+    [
+     "backend/src/rox_core/api/crm_field/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/business.py; imports backend/src/rox_core/api/crm_field/sync.py"
+    ],
+    [
+     "backend/src/rox_core/api/crm_field/sync.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/endpoints.py; imports backend/src/data_store/graph/v4/data_type_fetcher.py; imports backend/src/ext_integrations/integration/crm/hubspot/parser.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/service.py"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column/column_config_dtos.py; imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/data_controller/campaign_member_fields.py; imports backend/src/rox_core/api/graph/erd/service.py"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/campaign_member_fields.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/data_controller/business.py; imports backend/src/rox_core/models/erd_mapping.py; uses erd_mapping"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_template_loader.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/crm_profiles/registry.py; imports backend/src/rox_core/models/crm_field.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_template_loader.py; imports backend/src/rox_core/crm_profiles/profile.py; imports backend/src/rox_core/crm_profiles/registry.py; imports backend/src/rox_core/models/crm_field.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py; imports backend/src/rox_core/crm_profiles/profile.py; imports backend/src/rox_core/crm_profiles/registry.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py; imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py; imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/sync.py"
+    ],
+    [
+     "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/base.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/models/crm_field.py; uses crm_field"
+    ],
+    [
+     "backend/src/rox_core/api/query/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py"
+    ],
+    [
+     "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py; imports backend/src/rox_core/models/column_metadata.py; imports backend/src/rox_core/models/crm_field.py; uses crm_field"
+    ],
+    [
+     "backend/src/rox_core/crm_profiles/dynamics.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/crm_profiles/profile.py; imports backend/src/rox_core/crm_profiles/registry.py"
+    ],
+    [
+     "backend/src/rox_core/crm_profiles/profile.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_template_loader.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/crm_profiles/dynamics.py"
+    ],
+    [
+     "backend/src/rox_core/crm_profiles/registry.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/data_controller/business.py; imports backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_template_loader.py; imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
+    ],
+    [
+     "backend/src/rox_core/crm_profiles/salesforce.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py; imports backend/src/rox_core/crm_profiles/registry.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/crm_profiles/profile.py"
+    ],
+    [
+     "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/data_controller/business.py; imports backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py; imports backend/src/rox_core/models/column_metadata.py"
+    ],
+    [
+     "backend/src/rox_core/models/column_metadata.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py; imports backend/src/rox_core/models/crm_field.py"
+    ],
+    [
+     "backend/src/rox_core/models/crm_field.py",
+     "Models",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py; imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py"
+    ],
+    [
+     "backend/src/rox_core/models/erd_mapping.py",
+     "Models",
+     "Primary",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/data_store/graph/v4/data_type_fetcher.py; imports backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py; imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/account/dto.py"
+    ],
+    [
+     "backend/src/rox_customer/graph/v4/jobs/context.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py"
+    ],
+    [
+     "backend/src/rox_customer/graph/v4/jobs/graph_refresh.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/util/boot_marks.py; imports backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py"
+    ],
+    [
+     "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_customer/graph/v4/jobs/graph_refresh.py; imports backend/src/data_store/graph/store.py; imports backend/src/rox_customer/graph/v4/jobs/context.py; imports backend/src/util/boot_marks.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/erd/query.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/business.py; imports backend/src/data_store/graph/store.py"
+    ],
+    [
+     "backend/src/util/boot_marks.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/graph/v4/jobs/graph_refresh.py; imports backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py"
+    ],
+    [
+     "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/models/erd_mapping.py; uses erd_mapping; uses erd_relationship"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py; imports backend/src/rox_core/models/column_metadata.py; imports backend/src/rox_core/models/crm_field.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/column_metadata.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py; imports backend/src/rox_core/api/agents/column_data_fetcher.py; uses external_column_mapping"
+    ],
+    [
+     "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/models/crm_field.py; imports backend/src/rox_core/api/account/account_assignment_preview_service.py; uses crm_field"
+    ],
+    [
+     "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/crm_profiles/profile.py; imports backend/src/rox_core/models/erd_mapping.py; uses entity_user; uses erd_mapping; uses erd_relationship"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/data_controller/business.py; imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/models/erd_mapping.py; imports backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/rox_core/api/agents/column_data_fetcher.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/graph/erd/onboarding_template_loader.py; imports backend/src/rox_core/api/graph/erd/service.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/dto.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/data_store/graph/v4/util.py; imports backend/src/rox_core/api/crm_field/business.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/crm_profiles/profile.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/account/account_assignment_preview_service.py; imports backend/src/rox_core/api/account/dto.py; imports backend/src/rox_core/api/account/filter_compiler.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/crm_profiles/profile.py"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py; imports backend/src/rox_core/api/data_controller/business.py; imports backend/src/rox_core/api/data_controller/campaign_member_fields.py; imports backend/src/rox_core/api/graph/erd/service.py"
+    ],
+    [
+     "backend/src/rox_core/api/organizations/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/data_store/graph/store.py; imports backend/src/rox_core/api/crm_field/crm_field_service.py; imports backend/src/rox_core/api/integrations/salesforce_writeback_service.py; imports backend/src/rox_core/models/column_data_fetcher_mapping.py; imports backend/src/rox_core/models/column_metadata.py"
+    ],
+    [
+     "backend/src/rox_core/models/erd_relationship.py",
+     "Models",
+     "Shared",
+     "imports backend/src/rox_core/api/graph/erd/service.py; imports backend/src/rox_core/models/erd_mapping.py; uses erd_mapping; uses erd_relationship"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/agent_evals_v2/graph_output.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/agent_evals_v2/graph_output.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/column/dto.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/crm_field/live.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/data_type_fetcher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/data_type_fetcher.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/sync.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
+     "lines": [
+      53,
+      53
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/sync.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column/endpoint_dtos.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column/executor_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/cell_value_agent.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/contact_research_agent_executor.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/agent_context.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column/executor_service.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/contact_research_agent_executor.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/web_search.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/web_search.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/dto.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/dto.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/filter_compiler.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/filter_compiler.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/filter_compiler.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/filter_compiler.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/business.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/business.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/business.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/crm_field_service.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/sync.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/sync.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/campaign_member_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/campaign_member_fields.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_relationship_inference_service.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/query/dto.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/dynamics.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/dynamics.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/registry.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/service.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      53,
+      53
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/registry.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/registry.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/salesforce.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/salesforce.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+     "lines": [
+      333,
+      333
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/crm_field_service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/column_metadata.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/column_metadata.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/erd/query.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "lines": [
+      75,
+      75
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "lines": [
+      79,
+      79
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+     "lines": [
+      80,
+      80
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+     "lines": [
+      439,
+      439
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      107,
+      107
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/business.py",
+     "lines": [
+      112,
+      112
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/util.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_field/business.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/dto.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/dto.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_account_assignment_service.py",
+     "lines": [
+      53,
+      53
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/business.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/campaign_member_fields.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      360,
+      360
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/business.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/business.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/business.py",
+     "lines": [
+      92,
+      92
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/business.py",
+     "lines": [
+      93,
+      93
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/service.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 1 files with Entity Organization (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/agent_evals_v2/graph_output.py",
+      "lines": [
+       19,
+       19
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 5 files with Graph (+6 tables).",
+    "sources": [
+     {
+      "path": "backend/src/agent_framework/data_interface/column/dto.py",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Entity User (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Graph Cdc (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/graph/erd/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 4 files with Erd Onboarding Proposal (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/store.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with External Entity Column Value (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 5 files with Erd Relationship.",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/store.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Relationships.",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/store.py",
+      "lines": [
+       360,
+       360
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes / Background workers",
+    "source": {
+     "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/agent_evals_v2/graph_output.py",
+     "lines": [
+      19,
+      19
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/crm_field.py",
+     "lines": [
+      22,
+      443
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/crm_field — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_customer/graph/v4/jobs — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_evals_v2/graph_output.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/graph/erd — 8 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/graph/erd/business.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/account — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/crm_profiles — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/crm_profiles/dynamics.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/data_store/graph/v4 — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/data_store/graph/v4/data_type_fetcher.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/research/clever_column — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/research/clever_column/endpoint_dtos.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/crm_field — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/crm_field/business.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+     "lines": [
+      333,
+      333
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 5 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+        "lines": [
+         333,
+         333
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-crm_field",
+    "label": "crm_field",
+    "source": {
+     "path": "backend/src/rox_core/models/crm_field.py",
+     "lines": [
+      22,
+      443
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-erd_mapping",
+    "label": "erd_mapping",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_mapping.py",
+     "lines": [
+      11,
+      80
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-external_column_mapping",
+    "label": "external_column_mapping",
+    "source": {
+     "path": "backend/src/rox_core/models/column_data_fetcher_mapping.py",
+     "lines": [
+      213,
+      368
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (32)",
+    "source": {
+     "path": "backend/src/data_store/graph/store.py",
+     "lines": [
+      26,
+      26
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/crm_field/endpoints.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-crm_field",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-erd_mapping",
+    "label": "uses (4)",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/data_type_fetcher.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-external_column_mapping",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-erd_mapping",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "crm_field",
+   "erd_mapping",
+   "external_column_mapping"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "crm_field",
+    "dst": "erd_mapping",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/models/column_metadata.py",
+     "lines": [
+      612,
+      612
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "crm_field",
+    "dst": "erd_mapping",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/crm_field.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "crm_field",
+    "dst": "external_column_mapping",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
+     "lines": [
+      79,
+      79
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "erd_mapping",
+    "dst": "external_column_mapping",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/models/column_metadata.py",
+     "lines": [
+      607,
+      607
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_core/models/erd_mapping.py",
+    "lines": [
+     11,
+     80
+    ]
+   }
+  },
+  {
+   "label": "Entity Organization (+3 tables)",
+   "page": "feature-crm-entity-organization",
+   "source": {
+    "path": "backend/src/agent_evals_v2/graph_output.py",
+    "lines": [
+     19,
+     19
+    ]
+   }
+  },
+  {
+   "label": "Graph (+6 tables)",
+   "page": "feature-crm-graph",
+   "source": {
+    "path": "backend/src/agent_framework/data_interface/column/dto.py",
+    "lines": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "label": "Entity User (+3 tables)",
+   "page": "feature-crm-entity-user",
+   "source": {
+    "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Graph Cdc (+3 tables)",
+   "page": "feature-crm-graph-cdc",
+   "source": {
+    "path": "backend/src/rox_core/api/graph/erd/business.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Erd Onboarding Proposal (+4 tables)",
+   "page": "feature-crm-erd-onboarding-proposal",
+   "source": {
+    "path": "backend/src/data_store/graph/store.py",
+    "lines": [
+     16,
+     16
+    ]
+   }
+  },
+  {
+   "label": "External Entity Column Value (+4 tables)",
+   "page": "feature-crm-external-entity-column-value",
+   "source": {
+    "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Erd Relationship",
+   "page": "feature-crm-erd-relationship",
+   "source": {
+    "path": "backend/src/data_store/graph/store.py",
+    "lines": [
+     14,
+     14
+    ]
+   }
+  },
+  {
+   "label": "Relationships",
+   "page": "feature-crm-relationships",
+   "source": {
+    "path": "backend/src/data_store/graph/store.py",
+    "lines": [
+     360,
+     360
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

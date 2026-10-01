@@ -1,0 +1,3253 @@
+{
+ "id": "feature-tenancy-enterprise-subscription",
+ "title": "Enterprise Subscription (+13 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-tenancy",
+ "paths": [
+  "backend/src/data_ingestion/fivetran_shim.py",
+  "backend/src/data_store/cache_store.py",
+  "backend/src/enrichment/util/enrichment_output_util.py",
+  "backend/src/enrichment/util/input_checksum.py",
+  "backend/src/orchestrator/orchestrator.py",
+  "backend/src/public_api/routes/prospects/billing.py",
+  "backend/src/public_api/routes/prospects/service.py",
+  "backend/src/rox_core/api/agent_actions/dao.py",
+  "backend/src/rox_core/api/billing/access_service.py",
+  "backend/src/rox_core/api/billing/action_carry_over.py",
+  "backend/src/rox_core/api/billing/business.py",
+  "backend/src/rox_core/api/billing/contract_rates_service.py",
+  "backend/src/rox_core/api/billing/dao.py",
+  "backend/src/rox_core/api/billing/dto.py",
+  "backend/src/rox_core/api/billing/endpoints.py",
+  "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+  "backend/src/rox_core/api/billing/stripe_event_handler.py",
+  "backend/src/rox_core/api/cost_meter/business.py",
+  "backend/src/rox_core/api/metering/action_pricing_service.py",
+  "backend/src/rox_core/api/metering/cc_pricing.py",
+  "backend/src/rox_core/dao/util.py",
+  "backend/src/rox_core/models/downgrade_request.py",
+  "backend/src/rox_core/models/payment_processor_customer.py",
+  "backend/src/rox_core/models/plan.py",
+  "backend/src/rox_core/models/purchased_actions.py",
+  "backend/src/rox_core/models/starter_action_grant.py",
+  "backend/src/rox_core/models/subscription.py",
+  "backend/src/shim_layer/redis_shim/auth.py",
+  "backend/src/shim_layer/redis_shim/dto.py",
+  "backend/src/shim_layer/redis_shim/redis.py",
+  "backend/src/shim_layer/redis_shim/redis_action_reservation.py",
+  "backend/src/shim_layer/stripe_shim/dto.py",
+  "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+  "backend/src/tasks/executors/cancel_subscriptions.py",
+  "backend/src/tasks/executors/replenish_user_limits.py",
+  "backend/src/tasks/executors/update_subscriptions.py",
+  "backend/src/temporal/activities/enrichment/billing.py",
+  "backend/src/temporal/activities/enrichment/dto.py",
+  "backend/src/temporal/workflows/webhook_waiter.py",
+  "backend/src/util/data_stage.py",
+  "backend/src/util/org_config_utils.py",
+  "backend/src/util/reservation_utils.py",
+  "backend/src/util/subscription_action_utils.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/ResetUserLimitsMenu.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitEnforcementToggle.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitPeriodToggle.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadCard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/BuyActionsDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/onDemand.utils.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/useUserLimitEnforcement.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/auth0/AddAgentActionsDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/AssignSubscriptionForm.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreatePlanForm.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreateSubscriptionForms.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/EnterpriseSubscription.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesEditor.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesForm.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/RenewalSection.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/page.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/update-actions/UpdateActions.tsx",
+  "web/apps/web/src/app/hooks/react-query/billing.ts",
+  "web/apps/web/src/app/hooks/react-query/generated/billing/billing.ts",
+  "web/apps/web/src/components/billing/ChangePlan.tsx",
+  "web/apps/web/src/components/billing/PaymentForm.tsx",
+  "web/apps/web/src/components/billing/PendingPlanChangeBanner.tsx",
+  "web/apps/web/src/components/billing/billingTab/BillingHistoryView.tsx",
+  "web/apps/web/src/components/billing/billingTab/CancelPlanDialog.tsx",
+  "web/apps/web/src/components/billing/billingTab/PlanSummaryCard.tsx",
+  "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
+  "web/apps/web/src/components/billing/changePlan/RenewPlanStep.tsx",
+  "web/apps/web/src/components/billing/changePlan/UpgradePlanStep.tsx",
+  "web/apps/web/src/components/billing/plansTab/ChangeTeamsPlan.tsx",
+  "web/apps/web/src/components/billing/useAutoReloadPendingPayment.ts",
+  "web/apps/web/src/components/billing/useBillingPortalRedirect.ts",
+  "web/apps/web/src/components/billing/useInvalidateTeamsBilling.ts",
+  "web/apps/web/src/components/billing/useIsContractEnterprise.ts",
+  "web/apps/web/src/components/billing/useIsEnterpriseEntitled.ts",
+  "web/apps/web/src/components/billing/useOrgBilledSubscription.ts",
+  "web/apps/web/src/components/billing/useOrgPlanSummary.ts",
+  "web/apps/web/src/components/billing/usePendingPlanChange.ts",
+  "web/apps/web/src/components/billing/usePlanCheckout.ts",
+  "web/apps/web/src/components/billing/useTeamsCancellationState.ts",
+  "web/apps/web/src/components/billing/useTeamsSubscription.ts",
+  "web/apps/web/src/components/csvUpload/contactsCSVUpload/contactsCSVUploadSteps/ContactsCSVUploadFileSelectionStep.tsx",
+  "web/packages/internal-api/src/generated/core/billing/billing.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: auto_reload_config, downgrade_request, enterprise_subscription, payment_processor_customer, payment_processor_organization, plan, purchased_actions_log, remaining_agents_change_log, starter_action_grant, subscription, subscription_change_log, subscription_schedule, user_limit_subscription.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       213,
+       272
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/downgrade_request.py",
+      "lines": [
+       20,
+       158
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       610,
+       828
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/payment_processor_customer.py",
+      "lines": [
+       20,
+       84
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/payment_processor_customer.py",
+      "lines": [
+       87,
+       139
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/plan.py",
+      "lines": [
+       121,
+       280
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       31,
+       210
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       559,
+       607
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/starter_action_grant.py",
+      "lines": [
+       14,
+       47
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       108,
+       421
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       440,
+       556
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       1082,
+       1157
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       831,
+       1079
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 47, HTTP routes: 3, Background workers: 7, Business logic: 30, Models: 6.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/public_api/routes/prospects/billing.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/orchestrator/orchestrator.py",
+      "lines": [
+       28,
+       28
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/downgrade_request.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/components/billing (14), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription (9), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing (6).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/public_api/routes/prospects (2), backend/src/rox_core/api/billing (1).",
+    "sources": [
+     {
+      "path": "backend/src/public_api/routes/prospects/billing.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/billing/endpoints.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (4), backend/src/temporal/activities/enrichment (2), backend/src/temporal/workflows (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/billing.py",
+      "lines": [
+       26,
+       26
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/webhook_waiter.py",
+      "lines": [
+       27,
+       27
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/billing (8), backend/src/shim_layer/redis_shim (4), backend/src/util (4).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/access_service.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/shim_layer/redis_shim/redis.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/orchestrator/orchestrator.py",
+      "lines": [
+       82,
+       82
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (6).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/downgrade_request.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/data_ingestion/fivetran_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/orchestrator/orchestrator.py"
+    ],
+    [
+     "backend/src/data_store/cache_store.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/shim_layer/redis_shim/redis.py; imports backend/src/orchestrator/orchestrator.py"
+    ],
+    [
+     "backend/src/enrichment/util/enrichment_output_util.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/util/input_checksum.py; imports backend/src/temporal/activities/enrichment/billing.py; imports backend/src/temporal/activities/enrichment/dto.py; imports backend/src/temporal/workflows/webhook_waiter.py"
+    ],
+    [
+     "backend/src/enrichment/util/input_checksum.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/enrichment/util/enrichment_output_util.py"
+    ],
+    [
+     "backend/src/orchestrator/orchestrator.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_ingestion/fivetran_shim.py; imports backend/src/data_store/cache_store.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/shim_layer/redis_shim/redis.py; imports backend/src/util/data_stage.py"
+    ],
+    [
+     "backend/src/public_api/routes/prospects/billing.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/models/subscription.py; imports backend/src/util/subscription_action_utils.py; imports backend/src/public_api/routes/prospects/service.py; uses enterprise_subscription; uses organization"
+    ],
+    [
+     "backend/src/public_api/routes/prospects/service.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/public_api/routes/prospects/billing.py"
+    ],
+    [
+     "backend/src/rox_core/api/agent_actions/dao.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/subscription.py; imports backend/src/rox_core/api/billing/business.py; uses enterprise_subscription; uses organization; uses rox_feature_actions"
+    ],
+    [
+     "backend/src/rox_core/api/billing/access_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/rox_core/api/billing/business.py; uses enterprise_subscription; uses organization"
+    ],
+    [
+     "backend/src/rox_core/api/billing/action_carry_over.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/org_billed_subscription_service.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py; imports backend/src/shim_layer/stripe_shim/stripe_shim.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/orchestrator/orchestrator.py; imports backend/src/rox_core/api/agent_actions/dao.py; imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/api/billing/action_carry_over.py; imports backend/src/rox_core/api/billing/dao.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/rox_core/api/metering/action_pricing_service.py; uses enterprise_subscription; uses plan"
+    ],
+    [
+     "backend/src/rox_core/api/billing/dao.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/dao/util.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/rox_core/api/billing/org_billed_subscription_service.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/rox_core/api/billing/endpoints.py; imports backend/src/rox_core/api/billing/org_billed_subscription_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/dto.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py; imports backend/src/shim_layer/stripe_shim/stripe_shim.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/action_carry_over.py; imports backend/src/rox_core/api/billing/dao.py; imports backend/src/rox_core/api/billing/dto.py; imports backend/src/rox_core/models/payment_processor_customer.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/endpoints.py; imports backend/src/rox_core/api/billing/action_carry_over.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/dao.py; imports backend/src/rox_core/api/billing/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/cost_meter/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/subscription.py; imports backend/src/util/subscription_action_utils.py; imports backend/src/tasks/executors/update_subscriptions.py; uses enterprise_subscription; uses user_limit_subscription"
+    ],
+    [
+     "backend/src/rox_core/api/metering/action_pricing_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/contract_rates_service.py; imports backend/src/rox_core/api/metering/cc_pricing.py"
+    ],
+    [
+     "backend/src/rox_core/api/metering/cc_pricing.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/metering/action_pricing_service.py"
+    ],
+    [
+     "backend/src/rox_core/dao/util.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/dao.py"
+    ],
+    [
+     "backend/src/rox_core/models/downgrade_request.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py; uses downgrade_request"
+    ],
+    [
+     "backend/src/rox_core/models/payment_processor_customer.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/org_billed_subscription_service.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py; uses payment_processor_customer; uses payment_processor_organization"
+    ],
+    [
+     "backend/src/rox_core/models/plan.py",
+     "Models",
+     "Primary",
+     "imports backend/src/orchestrator/orchestrator.py; imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/contract_rates_service.py; imports backend/src/rox_core/api/billing/dto.py"
+    ],
+    [
+     "backend/src/rox_core/models/purchased_actions.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; uses purchased_actions_log; uses auto_reload_config"
+    ],
+    [
+     "backend/src/rox_core/models/starter_action_grant.py",
+     "Models",
+     "Primary",
+     "uses starter_action_grant"
+    ],
+    [
+     "backend/src/rox_core/models/subscription.py",
+     "Models",
+     "Primary",
+     "imports backend/src/orchestrator/orchestrator.py; imports backend/src/public_api/routes/prospects/billing.py; imports backend/src/rox_core/api/agent_actions/dao.py; imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/api/billing/business.py"
+    ],
+    [
+     "backend/src/shim_layer/redis_shim/auth.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/shim_layer/redis_shim/redis.py"
+    ],
+    [
+     "backend/src/shim_layer/redis_shim/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/shim_layer/redis_shim/redis_action_reservation.py; imports backend/src/util/reservation_utils.py"
+    ],
+    [
+     "backend/src/shim_layer/redis_shim/redis.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/cache_store.py; imports backend/src/orchestrator/orchestrator.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/shim_layer/redis_shim/auth.py; imports backend/src/shim_layer/redis_shim/redis_action_reservation.py"
+    ],
+    [
+     "backend/src/shim_layer/redis_shim/redis_action_reservation.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/shim_layer/redis_shim/dto.py; imports backend/src/shim_layer/redis_shim/redis.py; imports backend/src/util/reservation_utils.py"
+    ],
+    [
+     "backend/src/shim_layer/stripe_shim/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/shim_layer/stripe_shim/stripe_shim.py"
+    ],
+    [
+     "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/billing/endpoints.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py; imports backend/src/rox_core/api/billing/action_carry_over.py; imports backend/src/rox_core/api/billing/dto.py"
+    ],
+    [
+     "backend/src/tasks/executors/cancel_subscriptions.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; uses plan; uses subscription"
+    ],
+    [
+     "backend/src/tasks/executors/replenish_user_limits.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; uses enterprise_subscription; uses plan"
+    ],
+    [
+     "backend/src/tasks/executors/update_subscriptions.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/util/subscription_action_utils.py; imports backend/src/rox_core/api/cost_meter/business.py; uses organization"
+    ],
+    [
+     "backend/src/temporal/activities/enrichment/billing.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/util/enrichment_output_util.py; imports backend/src/rox_core/models/subscription.py; imports backend/src/temporal/activities/enrichment/dto.py; imports backend/src/util/subscription_action_utils.py; imports backend/src/temporal/workflows/webhook_waiter.py"
+    ],
+    [
+     "backend/src/temporal/activities/enrichment/dto.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/util/enrichment_output_util.py; imports backend/src/temporal/activities/enrichment/billing.py; imports backend/src/temporal/workflows/webhook_waiter.py"
+    ],
+    [
+     "backend/src/temporal/workflows/webhook_waiter.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/enrichment/util/enrichment_output_util.py; imports backend/src/temporal/activities/enrichment/billing.py; imports backend/src/temporal/activities/enrichment/dto.py"
+    ],
+    [
+     "backend/src/util/data_stage.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/orchestrator/orchestrator.py"
+    ],
+    [
+     "backend/src/util/org_config_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py; uses enterprise_subscription; uses organization; uses plan"
+    ],
+    [
+     "backend/src/util/reservation_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/subscription.py; imports backend/src/shim_layer/redis_shim/dto.py; imports backend/src/shim_layer/redis_shim/redis.py; imports backend/src/shim_layer/redis_shim/redis_action_reservation.py; imports backend/src/util/subscription_action_utils.py"
+    ],
+    [
+     "backend/src/util/subscription_action_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/routes/prospects/billing.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/api/cost_meter/business.py; imports backend/src/tasks/executors/update_subscriptions.py; imports backend/src/temporal/activities/enrichment/billing.py"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/hooks/react-query/billing.ts; imports web/apps/web/src/components/billing/billingTab/PlanSummaryCard.tsx; imports web/apps/web/src/components/billing/useTeamsSubscription.ts"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/ResetUserLimitsMenu.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitEnforcementToggle.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/useUserLimitEnforcement.ts"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitPeriodToggle.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadCard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadSection.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/BuyActionsDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/onDemand.utils.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/useUserLimitEnforcement.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/auth0/AddAgentActionsDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/AssignSubscriptionForm.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreatePlanForm.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreateSubscriptionForms.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/AssignSubscriptionForm.tsx; imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreatePlanForm.tsx"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/EnterpriseSubscription.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesEditor.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesForm.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/RenewalSection.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx; imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreatePlanForm.tsx"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/page.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/EnterpriseSubscription.tsx"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/update-actions/UpdateActions.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/billing.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/billing/billing.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/app/hooks/react-query/billing.ts; imports web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx; imports web/apps/web/src/components/billing/changePlan/RenewPlanStep.tsx; imports web/apps/web/src/components/billing/changePlan/UpgradePlanStep.tsx; imports web/apps/web/src/components/billing/PaymentForm.tsx"
+    ],
+    [
+     "web/apps/web/src/components/billing/PaymentForm.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/PendingPlanChangeBanner.tsx",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/billing/usePendingPlanChange.ts"
+    ],
+    [
+     "web/apps/web/src/components/billing/billingTab/BillingHistoryView.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/billingTab/CancelPlanDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/billingTab/PlanSummaryCard.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/changePlan/RenewPlanStep.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/changePlan/UpgradePlanStep.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/plansTab/ChangeTeamsPlan.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useAutoReloadPendingPayment.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useBillingPortalRedirect.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useInvalidateTeamsBilling.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useIsContractEnterprise.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useIsEnterpriseEntitled.ts",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/billing/useIsContractEnterprise.ts"
+    ],
+    [
+     "web/apps/web/src/components/billing/useOrgBilledSubscription.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useOrgPlanSummary.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/usePendingPlanChange.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/usePlanCheckout.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/billing/useTeamsCancellationState.ts",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/billing/useOrgBilledSubscription.ts"
+    ],
+    [
+     "web/apps/web/src/components/billing/useTeamsSubscription.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/apps/web/src/components/csvUpload/contactsCSVUpload/contactsCSVUploadSteps/ContactsCSVUploadFileSelectionStep.tsx",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/billing/billing.ts",
+     "Web screens",
+     "Primary",
+     "route tag billing"
+    ],
+    [
+     "backend/src/rox_core/api/agent_state/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/api/billing/business.py; imports backend/src/rox_core/models/subscription.py; uses user_limit_subscription"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/starter_action_grant.py; imports backend/src/orchestrator/orchestrator.py; imports backend/src/rox_core/api/billing/stripe_event_handler.py"
+    ],
+    [
+     "backend/src/tasks/executors/send_invoices.py",
+     "Background workers",
+     "Shared",
+     "imports backend/src/rox_core/api/agent_actions/dao.py; imports backend/src/rox_core/api/billing/access_service.py; imports backend/src/rox_core/api/billing/dto.py; imports backend/src/rox_core/models/plan.py; imports backend/src/rox_core/models/subscription.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/data_store/cache_store.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/util/enrichment_output_util.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/util/enrichment_output_util.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/util/enrichment_output_util.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      82,
+      82
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/access_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/access_service.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/access_service.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/action_pricing_service.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/dao.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/dao.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/dto.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/dto.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      118,
+      118
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/org_billed_subscription_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/cost_meter/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/cost_meter/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/cost_meter/business.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/action_pricing_service.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      90,
+      90
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      92,
+      92
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "lines": [
+      87,
+      87
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      187,
+      187
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      93,
+      93
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      94,
+      94
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      213,
+      213
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      188,
+      188
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      101,
+      101
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/redis_shim/redis.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/redis_shim/redis_action_reservation.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/util/reservation_utils.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      115,
+      115
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/redis_shim/redis_action_reservation.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/util/reservation_utils.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      117,
+      117
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      118,
+      118
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      61,
+      61
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/util/reservation_utils.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/util/reservation_utils.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/util/reservation_utils.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      164,
+      164
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      121,
+      121
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/ResetUserLimitsMenu.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitEnforcementToggle.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/UserLimitPeriodToggle.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadCard.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadDialog.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadSection.tsx",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/BuyActionsDialog.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/onDemand.utils.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/useUserLimitEnforcement.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/auth0/AddAgentActionsDialog.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/AssignSubscriptionForm.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreatePlanForm.tsx",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreateSubscriptionForms.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/CreateSubscriptionForms.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/EnterpriseSubscription.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesEditor.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/PlanRatesForm.tsx",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/RenewalSection.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/RenewalSection.tsx",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/page.tsx",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/update-actions/UpdateActions.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/billing.ts",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/billing/billing.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/PaymentForm.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/PendingPlanChangeBanner.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/billingTab/BillingHistoryView.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/billingTab/CancelPlanDialog.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/billingTab/PlanSummaryCard.tsx",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/changePlan/RenewPlanStep.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/changePlan/UpgradePlanStep.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/plansTab/ChangeTeamsPlan.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useAutoReloadPendingPayment.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useBillingPortalRedirect.ts",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useInvalidateTeamsBilling.ts",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useIsContractEnterprise.ts",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useIsEnterpriseEntitled.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useOrgBilledSubscription.ts",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useOrgPlanSummary.ts",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/usePendingPlanChange.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/usePlanCheckout.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useTeamsCancellationState.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/useTeamsSubscription.ts",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/csvUpload/contactsCSVUpload/contactsCSVUploadSteps/ContactsCSVUploadFileSelectionStep.tsx",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/billing/billing.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      66,
+      66
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      99,
+      99
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      211,
+      211
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/stripe_event_handler.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 5 files with Organization (+5 tables).",
+    "sources": [
+     {
+      "path": "backend/src/agent_evals_v2/eval_org_teardown.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Auth0 Role (+8 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Organization Config (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Auth0 Invitation.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/auth0/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic / Models",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      610,
+      828
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/components/billing — 14 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription — 9 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing — 6 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand — 5 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadCard.tsx",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/components/billing/billingTab — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/billing/billingTab/BillingHistoryView.tsx",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/components/billing/changePlan — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
+        "lines": [
+         15,
+         15
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/public_api/routes/prospects — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/routes/prospects/billing.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/billing — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/activities/enrichment — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/billing.py",
+        "lines": [
+         26,
+         26
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/temporal/workflows — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/webhook_waiter.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/orchestrator/orchestrator.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/billing — 8 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/access_service.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/shim_layer/redis_shim — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/shim_layer/redis_shim/redis.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/util — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/orchestrator/orchestrator.py",
+        "lines": [
+         82,
+         82
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/enrichment/util — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/enrichment/util/enrichment_output_util.py",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/metering — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/metering/action_pricing_service.py",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/shim_layer/stripe_shim — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/business.py",
+        "lines": [
+         117,
+         117
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/downgrade_request.py",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-tables",
+    "label": "Tables (13)",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      610,
+      828
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": [
+     {
+      "text": "auto_reload_config — 11 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/purchased_actions.py",
+        "lines": [
+         213,
+         272
+        ]
+       }
+      ]
+     },
+     {
+      "text": "downgrade_request — 13 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/downgrade_request.py",
+        "lines": [
+         20,
+         158
+        ]
+       }
+      ]
+     },
+     {
+      "text": "enterprise_subscription — 23 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/subscription.py",
+        "lines": [
+         610,
+         828
+        ]
+       }
+      ]
+     },
+     {
+      "text": "payment_processor_customer — 5 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/payment_processor_customer.py",
+        "lines": [
+         20,
+         84
+        ]
+       }
+      ]
+     },
+     {
+      "text": "payment_processor_organization — 4 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/payment_processor_customer.py",
+        "lines": [
+         87,
+         139
+        ]
+       }
+      ]
+     },
+     {
+      "text": "plan — 14 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/plan.py",
+        "lines": [
+         121,
+         280
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (16)",
+    "source": {
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
+     "lines": [
+      43,
+      43
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "workers",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/enrichment/util/enrichment_output_util.py",
+     "lines": [
+      31,
+      31
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (5)",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      19,
+      19
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "models",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      11,
+      11
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (10)",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      2,
+      2
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (8)",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      3,
+      3
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-tables",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-tables",
+    "label": "uses (5)",
+    "source": {
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-tables",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-tables",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      213,
+      213
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      20,
+      20
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "lines": [
+      20,
+      20
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "lines": [
+      87,
+      87
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      31,
+      31
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "auto_reload_config",
+   "downgrade_request",
+   "enterprise_subscription",
+   "payment_processor_customer",
+   "payment_processor_organization",
+   "plan",
+   "purchased_actions_log",
+   "remaining_agents_change_log",
+   "starter_action_grant",
+   "subscription",
+   "subscription_change_log",
+   "subscription_schedule",
+   "user_limit_subscription"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "auto_reload_config",
+    "dst": "purchased_actions_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "downgrade_request",
+    "dst": "payment_processor_customer",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "downgrade_request",
+    "dst": "plan",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      52,
+      52
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "payment_processor_organization",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      630,
+      630
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "plan",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/access_service.py",
+     "lines": [
+      201,
+      201
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "plan",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      637,
+      637
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "remaining_agents_change_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      559,
+      559
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      108,
+      108
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "subscription_change_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      440,
+      440
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "subscription_schedule",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      1082,
+      1082
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "user_limit_subscription",
+    "label": "commented_fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      868,
+      868
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "enterprise_subscription",
+    "dst": "user_limit_subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      831,
+      831
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "payment_processor_customer",
+    "dst": "payment_processor_organization",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "lines": [
+      87,
+      87
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "payment_processor_customer",
+    "dst": "subscription",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      127,
+      127
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "plan",
+    "dst": "subscription",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      135,
+      135
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "plan",
+    "dst": "subscription_change_log",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      461,
+      461
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "remaining_agents_change_log",
+    "dst": "subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      108,
+      108
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "remaining_agents_change_log",
+    "dst": "subscription_change_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      440,
+      440
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "remaining_agents_change_log",
+    "dst": "subscription_schedule",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      1082,
+      1082
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "remaining_agents_change_log",
+    "dst": "user_limit_subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      831,
+      831
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription",
+    "dst": "subscription_change_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      440,
+      440
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription",
+    "dst": "subscription_schedule",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      1082,
+      1082
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription",
+    "dst": "user_limit_subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      831,
+      831
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription_change_log",
+    "dst": "subscription_schedule",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      1082,
+      1082
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription_change_log",
+    "dst": "user_limit_subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      831,
+      831
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "subscription_schedule",
+    "dst": "user_limit_subscription",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/subscription.py",
+     "lines": [
+      831,
+      831
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Tenancy: orgs, users, auth & billing",
+   "page": "domain-tenancy",
+   "source": {
+    "path": "backend/src/rox_core/models/subscription.py",
+    "lines": [
+     610,
+     828
+    ]
+   }
+  },
+  {
+   "label": "Organization (+5 tables)",
+   "page": "feature-tenancy-organization",
+   "source": {
+    "path": "backend/src/agent_evals_v2/eval_org_teardown.py",
+    "lines": [
+     11,
+     11
+    ]
+   }
+  },
+  {
+   "label": "Auth0 Role (+8 tables)",
+   "page": "feature-tenancy-auth0-role",
+   "source": {
+    "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+    "lines": [
+     26,
+     26
+    ]
+   }
+  },
+  {
+   "label": "Organization Config (+4 tables)",
+   "page": "feature-tenancy-organization-config",
+   "source": {
+    "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
+    "lines": [
+     34,
+     34
+    ]
+   }
+  },
+  {
+   "label": "Auth0 Invitation",
+   "page": "feature-tenancy-auth0-invitation",
+   "source": {
+    "path": "backend/src/rox_core/api/auth0/business.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

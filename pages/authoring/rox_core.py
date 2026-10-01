@@ -75,6 +75,8 @@ RSS = "backend/src/shim_layer/redis_shim/redis_stream_shim.py"
 COMPOSE = "backend/docker-compose-infra.yaml"
 ASCII = "ascii_architecture.md"
 
+s_testpaths = S("backend/tests_agent/pytest.ini", "testpaths = .")
+
 s_targets_case = S(EP, 'case "$DEPLOY_TARGET" in', "esac")
 s_listener_mode = S(
     EP,
@@ -1051,6 +1053,10 @@ tldr = {
             s_localstack,
             s_temporal_srv,
         ),
+        C(
+            "Tests and migrations are not documented on this site.",
+            s_testpaths,
+        ),
     ],
 }
 
@@ -1806,6 +1812,7 @@ for domain_id, title, _, key_tables in rox_core_domains.DOMAINS:
         "title": title,
         "tables": domain_tables[domain_id],
         "key_tables": key_tables,
+        "page": f"domain-{domain_id}",
     }
     if domain_id == "tenancy":
         domain["notes"] = [
@@ -2756,6 +2763,7 @@ block_figures = [
 page = {
     "id": "rox-core",
     "title": "rox-core",
+    "kind": "root",
     "commit": COMMIT,
     "parent": None,
     "paths": ["."],

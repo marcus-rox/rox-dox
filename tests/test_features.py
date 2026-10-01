@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
+from rox_dox import features as feature_module
 from rox_dox.features import (
     FeatureMap,
     _domain_scope,
@@ -11,6 +12,7 @@ from rox_dox.features import (
     _parse_graph,
     _snapshot,
     build_feature_map,
+    build_feature_maps,
 )
 from rox_dox.schema import extract_tables
 
@@ -449,3 +451,31 @@ def test_feature_map_is_deterministic(tmp_path: Path) -> None:
     )
 
     assert _dump(first) == _dump(second)
+
+
+def test_build_feature_maps_reuses_shared_graph_and_scope(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo, commit = _commit_sources(tmp_path, _base_sources())
+    domain_tables = {"seq": ["campaign", "sequence"]}
+    counts = {"_snapshot": 0, "_parse_graph": 0, "_domain_scope": 0}
+
+    for name in counts:
+        original = getattr(feature_module, name)
+
+        def tracked(*args, _name=name, _original=original, **kwargs):
+            counts[_name] += 1
+            return _original(*args, **kwargs)
+
+        monkeypatch.setattr(feature_module, name, tracked)
+
+    feature_maps = build_feature_maps(repo, commit, domain_tables)
+
+    assert counts == {"_snapshot": 1, "_parse_graph": 1, "_domain_scope": 1}
+    assert feature_maps["seq"] == build_feature_map(
+        repo,
+        commit,
+        domain_tables,
+        "seq",
+    )

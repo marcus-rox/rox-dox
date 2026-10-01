@@ -1,0 +1,988 @@
+{
+ "id": "feature-crm-sfdc-governance-sync-state",
+ "title": "Sfdc Governance Sync State",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/full_sweep.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/phases.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/task_queue.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/tier_metadata.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/statement_timing.py",
+  "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+  "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+  "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+  "backend/src/tasks/executors/sfdc_governance_sync.py",
+  "backend/src/tasks/executors/sfdc_governance_translation.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: sfdc_governance_sync_state.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+      "lines": [
+       73,
+       158
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Background workers: 3, Business logic: 18, Models: 1.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Background workers: backend/src/tasks/executors (3).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+      "lines": [
+       5,
+       5
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/ext_integrations/integration/crm/salesforce/governance (9), backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile (6), backend/src/ext_integrations/integration/crm/salesforce/governance/translate (2).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+      "lines": [
+       11,
+       11
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/statement_timing.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models/governance/integrations/sfdc (1).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; uses sfdc_governance_sync_state"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py; imports backend/src/tasks/executors/sfdc_governance_reconcile.py; imports backend/src/tasks/executors/sfdc_governance_sync.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/tier_metadata.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/tier_metadata.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/full_sweep.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/full_sweep.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; imports backend/src/tasks/executors/sfdc_governance_reconcile.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/tier_metadata.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/phases.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py; imports backend/src/tasks/executors/sfdc_governance_reconcile.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/full_sweep.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/tasks/executors/sfdc_governance_sync.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_queue.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/tasks/executors/sfdc_governance_reconcile.py; imports backend/src/tasks/executors/sfdc_governance_sync.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/phases.py; imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/task_queue.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py; imports backend/src/tasks/executors/sfdc_governance_sync.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/tier_metadata.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/statement_timing.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/task_queue.py"
+    ],
+    [
+     "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+     "Models",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py"
+    ],
+    [
+     "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py"
+    ],
+    [
+     "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py"
+    ],
+    [
+     "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py; imports backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/governance_metrics.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/log_context.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/full_sweep.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/gates.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/get_deleted.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/run_opening.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sqs_retry.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/task_payloads.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/task_queue.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/service.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "lines": [
+      57,
+      57
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/statement_timing.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/translation_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      27,
+      27
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+      "lines": [
+       73,
+       158
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+     "lines": [
+      73,
+      158
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/ext_integrations/integration/crm/salesforce/governance — 9 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/dto.py",
+        "lines": [
+         11,
+         11
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/translate/statement_timing.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/fetch/bulk_query.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-models",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models/governance/integrations/sfdc — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+        "lines": [
+         21,
+         21
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-sfdc_governance_sync_state",
+    "label": "sfdc_governance_sync_state",
+    "source": {
+     "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+     "lines": [
+      73,
+      158
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (7)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (15)",
+    "source": {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-sfdc_governance_sync_state",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/cleanup_handler.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "sfdc_governance_sync_state"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_sync_state.py",
+    "lines": [
+     73,
+     158
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

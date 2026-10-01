@@ -1,0 +1,1197 @@
+{
+ "id": "feature-people-org-chart-person",
+ "title": "Org Chart Person (+3 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-people",
+ "paths": [
+  "backend/src/chat/routes/org_chart/router.py",
+  "backend/src/rox_core/api/org_chart/business.py",
+  "backend/src/rox_core/api/org_chart/dto.py",
+  "backend/src/rox_core/api/org_chart/endpoints.py",
+  "backend/src/rox_core/api/org_chart/org_chart_generation_service.py",
+  "backend/src/rox_core/api/org_chart/service.py",
+  "backend/src/rox_core/models/org_chart.py",
+  "backend/src/tasks/executors/org_chart_generation.py",
+  "backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py",
+  "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+  "web/apps/web/src/app/hooks/react-query/generated/org-chart/org-chart.ts",
+  "web/apps/web/src/components/contacts/orgChart/useLegacyContactOrgChartAction.tsx",
+  "web/apps/web/src/components/orgChart/ManagerCell.tsx",
+  "web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx",
+  "web/apps/web/src/components/orgChart/hooks/useNodeGeneration.ts",
+  "web/apps/web/src/components/orgChart/hooks/usePolling.ts",
+  "web/apps/web/src/components/orgChart/hooks/useRestoreFromCache.ts",
+  "web/apps/web/src/components/orgChart/orgChartAddRelationship.utils.ts",
+  "web/apps/web/src/components/orgChartV3/add/hooks/useAddFlowGeneration.ts",
+  "web/apps/web/src/components/orgChartV3/add/hooks/useGeneratedRowsAutoSave.ts",
+  "web/apps/web/src/components/orgChartV3/contexts/AddFlowProvider.tsx",
+  "web/apps/web/src/components/orgChartV3/hooks/useGenerationsList.ts",
+  "web/packages/internal-api/src/generated/core/org-chart/org-chart.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: org_chart, org_chart_generate_response, org_chart_person.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       24,
+       118
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       133,
+       200
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       203,
+       301
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 17, HTTP routes: 2, Background workers: 1, Business logic: 6, Models: 1.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+      "lines": [
+       20,
+       20
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/org_chart/router.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_chart_generation.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/org_chart/business.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       24,
+       24
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/components/orgChart/hooks (5), web/apps/web/src/components/orgChart (3), web/apps/web/src/components/orgChartV3/add/hooks (2).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "web/apps/web/src/components/orgChart/AddRelationshipDrawerContext.tsx",
+      "lines": [
+       19,
+       19
+      ]
+     },
+     {
+      "path": "web/apps/web/src/components/orgChartV3/add/hooks/useAddFlowGeneration.ts",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/chat/routes/org_chart (1), backend/src/rox_core/api/org_chart (1).",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/org_chart/router.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/org_chart_generation.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/org_chart (4), backend/src/workflow/execution_graph/packages/agent_outputs (2).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/org_chart/business.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       24,
+       24
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/chat/routes/org_chart/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/org_chart/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/api/org_chart/service.py; imports backend/src/rox_core/api/org_chart/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/org_chart/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/routes/org_chart/router.py; imports backend/src/rox_core/api/org_chart/business.py; imports backend/src/rox_core/models/org_chart.py; imports backend/src/rox_core/api/org_chart/endpoints.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/org_chart/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/business.py; imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/org_chart/org_chart_generation_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/routes/org_chart/router.py; imports backend/src/rox_core/api/org_chart/endpoints.py; imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/models/org_chart.py; imports backend/src/tasks/executors/org_chart_generation.py"
+    ],
+    [
+     "backend/src/rox_core/api/org_chart/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/business.py; imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/models/org_chart.py; imports backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py; uses org_chart"
+    ],
+    [
+     "backend/src/rox_core/models/org_chart.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py; imports backend/src/rox_core/api/org_chart/service.py; imports backend/src/tasks/executors/org_chart_generation.py; uses org_chart"
+    ],
+    [
+     "backend/src/tasks/executors/org_chart_generation.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/models/org_chart.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py; uses org_chart_generate_response"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py; imports backend/src/rox_core/api/org_chart/dto.py; imports backend/src/rox_core/api/org_chart/org_chart_generation_service.py; imports backend/src/rox_core/api/org_chart/service.py; uses org_chart_person"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/org-chart/org-chart.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/contacts/orgChart/useLegacyContactOrgChartAction.tsx",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/ManagerCell.tsx",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/hooks/useNodeGeneration.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/hooks/usePolling.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/hooks/useRestoreFromCache.ts",
+     "Web screens",
+     "Primary",
+     "imports web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx; imports web/apps/web/src/components/orgChart/hooks/useNodeGeneration.ts"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/orgChartAddRelationship.utils.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChartV3/add/hooks/useAddFlowGeneration.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChartV3/add/hooks/useGeneratedRowsAutoSave.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChartV3/contexts/AddFlowProvider.tsx",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChartV3/hooks/useGenerationsList.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/org-chart/org-chart.ts",
+     "Web screens",
+     "Primary",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+     "Web screens",
+     "Shared",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/command/panel/OrgChartPanel.tsx",
+     "Web screens",
+     "Shared",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/AddRelationshipDrawerContext.tsx",
+     "Web screens",
+     "Shared",
+     "route tag org-chart"
+    ],
+    [
+     "web/apps/web/src/components/orgChart/hooks/useGenerationActions.tsx",
+     "Web screens",
+     "Shared",
+     "route tag org-chart"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/chat/routes/org_chart/router.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/org_chart/router.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/org_chart_generation_service.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/org_chart_generation_service.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      119,
+      119
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/service.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/org-chart/org-chart.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/contacts/orgChart/useLegacyContactOrgChartAction.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/ManagerCell.tsx",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/useNodeGeneration.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/usePolling.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/useRestoreFromCache.ts",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/useRestoreFromCache.ts",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/orgChartAddRelationship.utils.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChartV3/add/hooks/useAddFlowGeneration.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChartV3/add/hooks/useGeneratedRowsAutoSave.ts",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChartV3/contexts/AddFlowProvider.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChartV3/hooks/useGenerationsList.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/org-chart/org-chart.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/panel/OrgChartPanel.tsx",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/AddRelationshipDrawerContext.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/orgChart/hooks/useGenerationActions.tsx",
+     "lines": [
+      6,
+      6
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 4 files with Rox Company (+4 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes / Background workers",
+    "source": {
+     "path": "backend/src/chat/routes/org_chart/router.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/rox_core/api/org_chart/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      24,
+      118
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/components/orgChart/hooks — 5 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/orgChart/hooks/NodeGenerationCacheContext.tsx",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/components/orgChart — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/orgChart/AddRelationshipDrawerContext.tsx",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/components/orgChartV3/add/hooks — 2 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/orgChartV3/add/hooks/useAddFlowGeneration.ts",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/app/hooks/react-query/generated/org-chart — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/hooks/react-query/generated/org-chart/org-chart.ts",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/components/command/panel — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/components/command/panel/OrgChartPanel.tsx",
+        "lines": [
+         24,
+         24
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/org_chart/router.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/chat/routes/org_chart — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/org_chart/router.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/org_chart — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+        "lines": [
+         11,
+         11
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/org_chart_generation.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/rox_core/api/org_chart/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/org_chart — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/org_chart/business.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/workflow/execution_graph/packages/agent_outputs — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/execution_graph/packages/agent_outputs/__init__.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/org_chart.py",
+        "lines": [
+         24,
+         24
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-org_chart",
+    "label": "org_chart",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      24,
+      118
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-org_chart_generate_response",
+    "label": "org_chart_generate_response",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      133,
+      200
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-org_chart_person",
+    "label": "org_chart_person",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      203,
+      301
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/rox_core/api/org_chart/dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (5)",
+    "source": {
+     "path": "backend/src/chat/routes/org_chart/router.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      8,
+      8
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-org_chart_generate_response",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/org_chart_generation.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-org_chart",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/org_chart/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-org_chart_person",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/workflow/execution_graph/packages/agent_outputs/org_chart.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-org_chart",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      24,
+      24
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "org_chart",
+   "org_chart_generate_response",
+   "org_chart_person"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "org_chart",
+    "dst": "org_chart_generate_response",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      133,
+      133
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "org_chart",
+    "dst": "org_chart_person",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
+     "lines": [
+      742,
+      742
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "org_chart",
+    "dst": "org_chart_person",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      222,
+      222
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "org_chart",
+    "dst": "org_chart_person",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      203,
+      203
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "org_chart_generate_response",
+    "dst": "org_chart_person",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/org_chart.py",
+     "lines": [
+      203,
+      203
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Companies & people",
+   "page": "domain-people",
+   "source": {
+    "path": "backend/src/rox_core/models/org_chart.py",
+    "lines": [
+     203,
+     301
+    ]
+   }
+  },
+  {
+   "label": "Rox Company (+4 tables)",
+   "page": "feature-people-rox-company",
+   "source": {
+    "path": "backend/src/rox_core/api/org_chart/endpoints.py",
+    "lines": [
+     38,
+     38
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

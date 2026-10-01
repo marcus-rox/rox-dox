@@ -1,0 +1,1226 @@
+{
+ "id": "feature-activity-calendar-event",
+ "title": "Calendar Event (+4 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-activity",
+ "paths": [
+  "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+  "backend/src/agent_framework/command_sdk/agents/tools/meetings.py",
+  "backend/src/agent_framework/modules/private_data_intel/chunking/chunker.py",
+  "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
+  "backend/src/agent_framework/modules/private_data_intel/search/search.py",
+  "backend/src/chat/routes/events/dto.py",
+  "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+  "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+  "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+  "backend/src/outreach/tools/calendar.py",
+  "backend/src/outreach/tools/context.py",
+  "backend/src/research/tools/meetings.py",
+  "backend/src/research/tools/search.py",
+  "backend/src/rox_core/api/entities/event/dto.py",
+  "backend/src/rox_core/api/entities/event_v2/dto.py",
+  "backend/src/rox_core/api/entities/event_v2/helpers.py",
+  "backend/src/rox_core/api/events/dto.py",
+  "backend/src/rox_core/api/people/contact_events_dto.py",
+  "backend/src/rox_core/models/public_calendar_event.py",
+  "backend/src/rox_core/models/public_calendar_event_attendee.py",
+  "backend/src/rox_core/models/public_unified_adhoc_event.py",
+  "backend/src/rox_core/models/public_unified_calendar_event.py",
+  "backend/src/rox_customer/real_time/models/integration/unified_adhoc_event.py",
+  "backend/src/rox_customer/real_time/models/integration/unified_calendar_event.py",
+  "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+  "backend/src/workflow/execution_graph/packages/email/email_read.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: calendar_event, calendar_event_attendee, unified_adhoc_event, unified_calendar_event.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/public_calendar_event.py",
+      "lines": [
+       13,
+       140
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
+      "lines": [
+       20,
+       100
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
+      "lines": [
+       14,
+       97
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/public_unified_calendar_event.py",
+      "lines": [
+       14,
+       139
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: HTTP routes: 1, Background workers: 1, Business logic: 19, Models: 6.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/events/dto.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/public_calendar_event.py",
+      "lines": [
+       13,
+       13
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "HTTP routes: backend/src/chat/routes/events (1).",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/events/dto.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/generic_backfill (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/ext_integrations/calendar_integration (3), backend/src/agent_framework/command_sdk/agents/tools (2), backend/src/agent_framework/modules/private_data_intel/search (2).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (4), backend/src/rox_customer/real_time/models/integration (2).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/public_calendar_event.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/meetings.py; imports backend/src/agent_framework/modules/private_data_intel/chunking/chunker.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/meetings.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/extract.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/chunking/chunker.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/extract.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event_v2/dto.py; imports backend/src/agent_framework/modules/private_data_intel/search/search.py; imports backend/src/research/tools/search.py"
+    ],
+    [
+     "backend/src/agent_framework/modules/private_data_intel/search/search.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/modules/private_data_intel/search/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py; imports backend/src/research/tools/search.py"
+    ],
+    [
+     "backend/src/chat/routes/events/dto.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; imports backend/src/rox_core/models/public_unified_adhoc_event.py; imports backend/src/rox_core/models/public_unified_calendar_event.py; imports backend/src/rox_customer/real_time/models/integration/unified_adhoc_event.py; imports backend/src/rox_customer/real_time/models/integration/unified_calendar_event.py"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/public_calendar_event.py; imports backend/src/rox_core/models/public_calendar_event_attendee.py; imports backend/src/rox_core/models/public_unified_calendar_event.py; imports backend/src/rox_customer/real_time/models/integration/unified_calendar_event.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/rox_agents/meeting_public_id_backfill_job.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_interface.py; imports backend/src/rox_core/models/public_calendar_event.py; imports backend/src/rox_core/models/public_calendar_event_attendee.py; imports backend/src/rox_core/models/public_unified_calendar_event.py"
+    ],
+    [
+     "backend/src/outreach/tools/calendar.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/tools/context.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/outreach/tools/context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/outreach/tools/calendar.py"
+    ],
+    [
+     "backend/src/research/tools/meetings.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py; imports backend/src/research/tools/search.py"
+    ],
+    [
+     "backend/src/research/tools/search.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/modules/private_data_intel/search/dto.py; imports backend/src/agent_framework/modules/private_data_intel/search/search.py; imports backend/src/research/tools/meetings.py"
+    ],
+    [
+     "backend/src/rox_core/api/entities/event/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/meetings.py; imports backend/src/outreach/tools/calendar.py; imports backend/src/research/tools/meetings.py; imports backend/src/rox_core/models/public_calendar_event.py; imports backend/src/rox_core/models/public_unified_adhoc_event.py"
+    ],
+    [
+     "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/extract.py; imports backend/src/agent_framework/command_sdk/agents/tools/meetings.py; imports backend/src/agent_framework/modules/private_data_intel/search/dto.py; imports backend/src/agent_framework/modules/private_data_intel/search/search.py; imports backend/src/chat/routes/events/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/entities/event_v2/helpers.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/events/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/people/contact_events_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/rox_core/models/public_calendar_event.py",
+     "Models",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/calendar_event_interface.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py; uses calendar_event"
+    ],
+    [
+     "backend/src/rox_core/models/public_calendar_event_attendee.py",
+     "Models",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/calendar_event_interface.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; uses calendar_event_attendee"
+    ],
+    [
+     "backend/src/rox_core/models/public_unified_adhoc_event.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/rox_agents/meeting_public_id_backfill_job.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py; imports backend/src/tasks/generic_backfill/meeting_public_id_resolution.py; uses unified_adhoc_event"
+    ],
+    [
+     "backend/src/rox_core/models/public_unified_calendar_event.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/rox_agents/meeting_public_id_backfill_job.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_interface.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/integration/unified_adhoc_event.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/rox_agents/meeting_public_id_backfill_job.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py; imports backend/src/tasks/generic_backfill/meeting_public_id_resolution.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/integration/unified_calendar_event.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/rox_agents/meeting_public_id_backfill_job.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_interface.py; imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/api/entities/event_v2/dto.py"
+    ],
+    [
+     "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/public_unified_adhoc_event.py; imports backend/src/rox_core/models/public_unified_calendar_event.py; imports backend/src/rox_customer/real_time/models/integration/unified_adhoc_event.py; imports backend/src/rox_customer/real_time/models/integration/unified_calendar_event.py; uses unified_adhoc_event"
+    ],
+    [
+     "backend/src/workflow/execution_graph/packages/email/email_read.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/event/dto.py"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/ext_integrations/calendar_integration/calendar_event_service.py; imports backend/src/rox_core/api/entities/event/dto.py; imports backend/src/rox_core/models/public_calendar_event.py; uses calendar_event"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/meetings.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/meetings.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/search/search.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/search.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/modules/private_data_intel/search/search.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/search.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/events/dto.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_interface.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/outreach/tools/calendar.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/outreach/tools/calendar.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/outreach/tools/calendar.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/meetings.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/meetings.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/search.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event/dto.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event/dto.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/helpers.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/helpers.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/events/dto.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/contact_events_dto.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event/dto.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "lines": [
+      45,
+      45
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event/dto.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_event_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event/dto.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/dto.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/workflow/execution_graph/packages/email/email_read.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      49,
+      49
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 1 files with Note.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Calendar Event Metadata.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/events/dto.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      140
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/events/dto.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/chat/routes/events — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/events/dto.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/generic_backfill — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/ext_integrations/calendar_integration — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/command_sdk/agents/tools — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/modules/private_data_intel/search — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/outreach/tools — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/outreach/tools/calendar.py",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/research/tools — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/research/tools/meetings.py",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/entities/event_v2 — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
+        "lines": [
+         35,
+         35
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-models",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/public_calendar_event.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/real_time/models/integration — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+        "lines": [
+         36,
+         36
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-calendar_event",
+    "label": "calendar_event",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      140
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-calendar_event_attendee",
+    "label": "calendar_event_attendee",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
+     "lines": [
+      20,
+      100
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-unified_adhoc_event",
+    "label": "unified_adhoc_event",
+    "source": {
+     "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
+     "lines": [
+      14,
+      97
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-unified_calendar_event",
+    "label": "unified_calendar_event",
+    "source": {
+     "path": "backend/src/rox_core/models/public_unified_calendar_event.py",
+     "lines": [
+      14,
+      139
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (14)",
+    "source": {
+     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
+     "lines": [
+      34,
+      34
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/chat/routes/events/dto.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (4)",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-unified_adhoc_event",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-calendar_event",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-calendar_event",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-calendar_event_attendee",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
+     "lines": [
+      20,
+      20
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-unified_adhoc_event",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "calendar_event",
+   "calendar_event_attendee",
+   "unified_adhoc_event",
+   "unified_calendar_event"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Activity integrations: email, calendar, meetings, Slack",
+   "page": "domain-activity",
+   "source": {
+    "path": "backend/src/rox_core/models/public_calendar_event.py",
+    "lines": [
+     13,
+     140
+    ]
+   }
+  },
+  {
+   "label": "Note",
+   "page": "feature-activity-note",
+   "source": {
+    "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Calendar Event Metadata",
+   "page": "feature-activity-calendar-event-metadata",
+   "source": {
+    "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

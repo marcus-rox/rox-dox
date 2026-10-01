@@ -1,0 +1,1145 @@
+{
+ "id": "feature-tenancy-api-key",
+ "title": "Api Key",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-tenancy",
+ "paths": [
+  ".circleci/lint.yml",
+  "backend/src/agent_framework/data_interface/account_plan/handoff_region.py",
+  "backend/src/agent_framework/data_interface/account_plan/proposal_diff.py",
+  "backend/src/public_api/rate_limiting/config.py",
+  "backend/src/public_api/rate_limiting/rate_limiter.py",
+  "backend/src/public_api/routes/enrichment/router.py",
+  "backend/src/public_api/routes/health/router.py",
+  "backend/src/public_api/routes/prospects/router.py",
+  "backend/src/public_api/server/app.py",
+  "backend/src/public_api/server/auth.py",
+  "backend/src/public_api/server/factory.py",
+  "backend/src/public_api/server/paths.py",
+  "backend/src/public_api/server/rate_limit_middleware.py",
+  "backend/src/public_api/server/request_meter.py",
+  "backend/src/public_api/spec.py",
+  "backend/src/rox_core/api/agents/outreach/enrollment/flags.py",
+  "backend/src/rox_core/api/api_access/api_key/business.py",
+  "backend/src/rox_core/api/api_access/api_key/dto.py",
+  "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+  "backend/src/rox_core/api/security/api_key_cache.py",
+  "backend/src/rox_core/api/security/api_key_util.py",
+  "backend/src/rox_core/models/api_key.py",
+  "backend/src/util/async_flask_compat.py",
+  "backend/src/util/feature_flag_client.py",
+  "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysSettings.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/CreateApiKeyDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/RevokeApiKeyDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/apiKeysSettings.utils.ts",
+  "web/apps/web/src/app/hooks/react-query/generated/api-keys/api-keys.ts",
+  "web/packages/internal-api/src/generated/core/api-keys/api-keys.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: api_key.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/api_key.py",
+      "lines": [
+       14,
+       64
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 7, HTTP routes: 4, Business logic: 19, Models: 1, Deployment: 1.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "backend/src/public_api/routes/enrichment/router.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/api_key.py",
+      "lines": [
+       14,
+       14
+      ]
+     },
+     {
+      "path": ".circleci/lint.yml",
+      "lines": [
+       345,
+       345
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings (5), web/apps/web/src/app/hooks/react-query/generated/api-keys (1), web/packages/internal-api/src/generated/core/api-keys (1).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/hooks/react-query/generated/api-keys/api-keys.ts",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "web/packages/internal-api/src/generated/core/api-keys/api-keys.ts",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/public_api/routes/enrichment (1), backend/src/public_api/routes/health (1), backend/src/public_api/routes/prospects (1).",
+    "sources": [
+     {
+      "path": "backend/src/public_api/routes/enrichment/router.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/public_api/server/factory.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/public_api/routes/prospects/router.py",
+      "lines": [
+       12,
+       12
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/public_api/server (6), backend/src/agent_framework/data_interface/account_plan (2), backend/src/public_api/rate_limiting (2).",
+    "sources": [
+     {
+      "path": "backend/src/public_api/server/app.py",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
+      "path": "backend/src/public_api/rate_limiting/rate_limiter.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/api_key.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Deployment: .circleci (1).",
+    "sources": [
+     {
+      "path": ".circleci/lint.yml",
+      "lines": [
+       345,
+       345
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     ".circleci/lint.yml",
+     "Deployment",
+     "Primary",
+     "references public_api.spec"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/account_plan/handoff_region.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/tools/accounts/plan_tools.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/account_plan/proposal_diff.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/tools/accounts/plan_tools.py"
+    ],
+    [
+     "backend/src/public_api/rate_limiting/config.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/rate_limiting/rate_limiter.py; imports backend/src/public_api/server/rate_limit_middleware.py"
+    ],
+    [
+     "backend/src/public_api/rate_limiting/rate_limiter.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/rate_limiting/config.py; imports backend/src/public_api/server/rate_limit_middleware.py"
+    ],
+    [
+     "backend/src/public_api/routes/enrichment/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/public_api/server/auth.py; imports backend/src/public_api/server/factory.py"
+    ],
+    [
+     "backend/src/public_api/routes/health/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/public_api/server/factory.py"
+    ],
+    [
+     "backend/src/public_api/routes/prospects/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/public_api/server/auth.py; imports backend/src/public_api/server/factory.py"
+    ],
+    [
+     "backend/src/public_api/server/app.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/factory.py"
+    ],
+    [
+     "backend/src/public_api/server/auth.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/routes/enrichment/router.py; imports backend/src/public_api/routes/prospects/router.py; imports backend/src/public_api/server/paths.py; imports backend/src/rox_core/api/security/api_key_util.py; imports backend/src/util/async_flask_compat.py"
+    ],
+    [
+     "backend/src/public_api/server/factory.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/app.py; imports backend/src/public_api/routes/enrichment/router.py; imports backend/src/public_api/routes/health/router.py; imports backend/src/public_api/routes/prospects/router.py; imports backend/src/public_api/server/auth.py"
+    ],
+    [
+     "backend/src/public_api/server/paths.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/auth.py; imports backend/src/public_api/server/factory.py; imports backend/src/public_api/server/rate_limit_middleware.py"
+    ],
+    [
+     "backend/src/public_api/server/rate_limit_middleware.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/factory.py; imports backend/src/public_api/rate_limiting/config.py; imports backend/src/public_api/rate_limiting/rate_limiter.py; imports backend/src/public_api/server/paths.py; imports backend/src/rox_core/api/security/api_key_util.py"
+    ],
+    [
+     "backend/src/public_api/server/request_meter.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/factory.py; imports backend/src/util/async_flask_compat.py"
+    ],
+    [
+     "backend/src/public_api/spec.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/factory.py"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/enrollment/flags.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/util/feature_flag_client.py"
+    ],
+    [
+     "backend/src/rox_core/api/api_access/api_key/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/api_access/api_key/dto.py; imports backend/src/rox_core/api/security/api_key_util.py; imports backend/src/rox_core/models/api_key.py; imports backend/src/rox_core/api/api_access/api_key/endpoints.py; uses api_key"
+    ],
+    [
+     "backend/src/rox_core/api/api_access/api_key/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/api_access/api_key/business.py; imports backend/src/rox_core/api/api_access/api_key/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/api_access/api_key/business.py; imports backend/src/rox_core/api/api_access/api_key/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/security/api_key_cache.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/security/api_key_util.py"
+    ],
+    [
+     "backend/src/rox_core/api/security/api_key_util.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/auth.py; imports backend/src/public_api/server/rate_limit_middleware.py; imports backend/src/rox_core/api/api_access/api_key/business.py; imports backend/src/rox_core/api/security/api_key_cache.py; imports backend/src/rox_core/models/api_key.py"
+    ],
+    [
+     "backend/src/rox_core/models/api_key.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/api_access/api_key/business.py; imports backend/src/rox_core/api/security/api_key_util.py; uses api_key"
+    ],
+    [
+     "backend/src/util/async_flask_compat.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/auth.py; imports backend/src/public_api/server/factory.py; imports backend/src/public_api/server/request_meter.py"
+    ],
+    [
+     "backend/src/util/feature_flag_client.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/public_api/server/rate_limit_middleware.py; imports backend/src/rox_core/api/agents/outreach/enrollment/flags.py; imports backend/src/workflow/agentflow/tools/accounts/plan_tools.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/account_plan/handoff_region.py; imports backend/src/agent_framework/data_interface/account_plan/proposal_diff.py; imports backend/src/util/feature_flag_client.py"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysSettings.tsx",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/CreateApiKeyDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/RevokeApiKeyDialog.tsx",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/apiKeysSettings.utils.ts",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/api-keys/api-keys.ts",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/api-keys/api-keys.ts",
+     "Web screens",
+     "Primary",
+     "route tag api-keys"
+    ]
+   ],
+   "sources": [
+    {
+     "path": ".circleci/lint.yml",
+     "lines": [
+      345,
+      345
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/public_api/rate_limiting/rate_limiter.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/rate_limit_middleware.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/enrichment/router.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/router.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/app.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/auth.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/auth.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/auth.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/rate_limit_middleware.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/rate_limit_middleware.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/request_meter.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/public_api/spec.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/flags.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/security/api_key_util.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/security/api_key_util.py",
+     "lines": [
+      214,
+      214
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/public_api/server/rate_limit_middleware.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysSettings.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/CreateApiKeyDialog.tsx",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/RevokeApiKeyDialog.tsx",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/apiKeysSettings.utils.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/api-keys/api-keys.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/api-keys/api-keys.ts",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/api_key.py",
+      "lines": [
+       14,
+       64
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+     "lines": [
+      23,
+      23
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/public_api/routes/enrichment/router.py",
+     "lines": [
+      12,
+      12
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "lines": [
+      17,
+      17
+     ]
+    }
+   },
+   {
+    "id": "group-layer-models",
+    "label": "Models / Deployment",
+    "source": {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      64
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings — 5 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/apiKeysSettings/ApiKeysDataTable.tsx",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/apps/web/src/app/hooks/react-query/generated/api-keys — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/hooks/react-query/generated/api-keys/api-keys.ts",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/packages/internal-api/src/generated/core/api-keys — 1 files",
+      "sources": [
+       {
+        "path": "web/packages/internal-api/src/generated/core/api-keys/api-keys.ts",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/public_api/routes/enrichment/router.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/public_api/routes/enrichment — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/routes/enrichment/router.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/public_api/routes/health — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/server/factory.py",
+        "lines": [
+         22,
+         22
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/public_api/routes/prospects — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/routes/prospects/router.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/api_access/api_key — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/api_access/api_key/endpoints.py",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/public_api/server — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/server/app.py",
+        "lines": [
+         23,
+         23
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/data_interface/account_plan — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/agentflow/tools/accounts/plan_tools.py",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/public_api/rate_limiting — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/rate_limiting/rate_limiter.py",
+        "lines": [
+         16,
+         16
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/api_access/api_key — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/security — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/security/api_key_util.py",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/util — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/public_api/server/auth.py",
+        "lines": [
+         32,
+         32
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-models",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/api_key.py",
+        "lines": [
+         14,
+         14
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "deploy",
+    "label": "Deployment",
+    "source": {
+     "path": ".circleci/lint.yml",
+     "lines": [
+      345,
+      345
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-models",
+    "many": false,
+    "details": [
+     {
+      "text": ".circleci — 1 files",
+      "sources": [
+       {
+        "path": ".circleci/lint.yml",
+        "lines": [
+         345,
+         345
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-api_key",
+    "label": "api_key",
+    "source": {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      64
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "routes",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/public_api/server/factory.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (4)",
+    "source": {
+     "path": "backend/src/public_api/routes/enrichment/router.py",
+     "lines": [
+      12,
+      12
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-api_key",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/api/api_access/api_key/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-api_key",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/api_key.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "api_key"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Tenancy: orgs, users, auth & billing",
+   "page": "domain-tenancy",
+   "source": {
+    "path": "backend/src/rox_core/models/api_key.py",
+    "lines": [
+     14,
+     64
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

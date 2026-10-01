@@ -1,0 +1,980 @@
+{
+ "id": "feature-deals-deal",
+ "title": "Deal (+4 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-deals",
+ "paths": [
+  "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+  "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+  "backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py",
+  "backend/src/rox_core/api/data_controller/entity_ids.py",
+  "backend/src/rox_core/api/entities/deal/stage/service.py",
+  "backend/src/rox_core/api/governance/record_display/deal.py",
+  "backend/src/rox_core/api/graph/erd/onboarding_endpoint_key_utils.py",
+  "backend/src/rox_core/api/user_task/dto.py",
+  "backend/src/rox_core/models/entities/deal.py",
+  "backend/src/rox_customer/common/entity_reference_tables.py",
+  "backend/src/rox_customer/graph/registry/identity.py",
+  "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+  "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+  "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
+  "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+  "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+  "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+  "backend/src/workflow/triggers/handlers/deal.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: deal, deal_log, deal_person, deal_stage.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/entities/deal.py",
+      "lines": [
+       174,
+       402
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/entities/deal.py",
+      "lines": [
+       533,
+       598
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/entities/deal.py",
+      "lines": [
+       405,
+       433
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/entities/deal.py",
+      "lines": [
+       34,
+       171
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Business logic: 16, Models: 2.",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Business logic: backend/src/unified_data/reserved_fields/deal (2), backend/src/data_store/graph/v4 (1), backend/src/ext_integrations/integration/crm (1).",
+    "sources": [
+     {
+      "path": "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models/entities (1), backend/src/rox_customer/real_time/models/entity (1).",
+    "sources": [
+     {
+      "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+      "lines": [
+       11,
+       11
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/entities/deal/stage/service.py; imports backend/src/rox_core/models/entities/deal.py; imports backend/src/rox_customer/common/entity_reference_tables.py; imports backend/src/rox_customer/graph/registry/identity.py; uses deal_stage"
+    ],
+    [
+     "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal_stage"
+    ],
+    [
+     "backend/src/rox_core/api/data_controller/entity_ids.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/common/entity_reference_tables.py; imports backend/src/rox_customer/graph/registry/identity.py; uses deal"
+    ],
+    [
+     "backend/src/rox_core/api/entities/deal/stage/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/deal_stage_reconciler.py; imports backend/src/rox_core/models/entities/deal.py; uses deal; uses deal_stage"
+    ],
+    [
+     "backend/src/rox_core/api/governance/record_display/deal.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ],
+    [
+     "backend/src/rox_core/api/graph/erd/onboarding_endpoint_key_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_customer/graph/registry/identity.py"
+    ],
+    [
+     "backend/src/rox_core/api/user_task/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py"
+    ],
+    [
+     "backend/src/rox_core/models/entities/deal.py",
+     "Models",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/deal_stage_reconciler.py; imports backend/src/ext_integrations/integration/crm/writeback_delay_metric.py; imports backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py; imports backend/src/rox_core/api/entities/deal/stage/service.py; imports backend/src/rox_core/api/governance/record_display/deal.py"
+    ],
+    [
+     "backend/src/rox_customer/common/entity_reference_tables.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/deal_stage_reconciler.py; imports backend/src/rox_core/api/data_controller/entity_ids.py; imports backend/src/rox_core/models/entities/deal.py; imports backend/src/rox_customer/graph/registry/identity.py; uses deal_stage"
+    ],
+    [
+     "backend/src/rox_customer/graph/registry/identity.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/data_store/graph/v4/deal_stage_reconciler.py; imports backend/src/rox_core/api/data_controller/entity_ids.py; imports backend/src/rox_core/api/graph/erd/onboarding_endpoint_key_utils.py; imports backend/src/rox_customer/common/entity_reference_tables.py"
+    ],
+    [
+     "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+     "Models",
+     "Primary",
+     "uses deal"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal; uses deal_person"
+    ],
+    [
+     "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ],
+    [
+     "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ],
+    [
+     "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal_person"
+    ],
+    [
+     "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ],
+    [
+     "backend/src/workflow/triggers/handlers/deal.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/entities/deal.py; uses deal"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/deal/stage/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/deal/stage/service.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/deal.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/deal.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_endpoint_key_utils.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user_task/dto.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/common/entity_reference_tables.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/common/entity_reference_tables.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/registry/identity.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/deal.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/deal.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/entities/deal.py",
+      "lines": [
+       174,
+       402
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      174,
+      402
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/unified_data/reserved_fields/deal — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/unified_data/reserved_fields/deal/associated_contacts.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/data_store/graph/v4 — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/ext_integrations/integration/crm — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/campaigns — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/campaigns/contact_policy_service.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/data_controller — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/entities/deal/stage — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/entities/deal/stage/service.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models/entities — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+        "lines": [
+         11,
+         11
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-deal",
+    "label": "deal",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      174,
+      402
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-deal_log",
+    "label": "deal_log",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      533,
+      598
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-deal_person",
+    "label": "deal_person",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      405,
+      433
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-deal_stage",
+    "label": "deal_stage",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      34,
+      171
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (13)",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      11,
+      11
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-deal",
+    "label": "uses (9)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-deal_person",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-deal_stage",
+    "label": "uses (4)",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/deal_stage_reconciler.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-deal",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "deal",
+   "deal_log",
+   "deal_person",
+   "deal_stage"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "deal",
+    "dst": "deal_log",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/deal/service.py",
+     "lines": [
+      1691,
+      1691
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_log",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      551,
+      551
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_log",
+    "label": "primaryjoin:ambiguous",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      296,
+      296
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_log",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      533,
+      533
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_person",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/deal/associated_contacts.py",
+     "lines": [
+      77,
+      77
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_person",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      419,
+      419
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_person",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      405,
+      405
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_stage",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
+     "lines": [
+      879,
+      879
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_stage",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      236,
+      236
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "deal",
+    "dst": "deal_stage",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal_log",
+    "dst": "deal_person",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      405,
+      405
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal_log",
+    "dst": "deal_stage",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "deal_person",
+    "dst": "deal_stage",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Deals, quotes & contracts",
+   "page": "domain-deals",
+   "source": {
+    "path": "backend/src/rox_core/models/entities/deal.py",
+    "lines": [
+     174,
+     402
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

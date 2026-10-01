@@ -1,0 +1,2862 @@
+{
+ "id": "feature-tenancy-auth0-role",
+ "title": "Auth0 Role (+8 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-tenancy",
+ "paths": [
+  "backend/src/agent_framework/agent_executor.py",
+  "backend/src/agent_framework/command_sdk/agents/context.py",
+  "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
+  "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+  "backend/src/agent_framework/command_sdk/agents/tools/plan_dto.py",
+  "backend/src/agent_framework/data_interface/email/dto.py",
+  "backend/src/agent_framework/data_interface/org_chart/dto.py",
+  "backend/src/agent_framework/data_interface/org_user/dto.py",
+  "backend/src/agent_framework/model/azure_routing.py",
+  "backend/src/agent_framework/rox_tracing.py",
+  "backend/src/agent_framework/runner/stopping.py",
+  "backend/src/agent_framework/tracing.py",
+  "backend/src/auth/__init__.py",
+  "backend/src/auth/auth0/__init__.py",
+  "backend/src/auth/auth0/service.py",
+  "backend/src/auth/auth0_legacy/api.py",
+  "backend/src/auth/auth0_legacy/dto.py",
+  "backend/src/auth/auth0_legacy/service.py",
+  "backend/src/auth/dto.py",
+  "backend/src/auth/factory.py",
+  "backend/src/auth/service.py",
+  "backend/src/chat/agent_executor/models/config.py",
+  "backend/src/chat/agent_executor/models/org_chart_helpers.py",
+  "backend/src/chat/agent_executor/models/workers.py",
+  "backend/src/chat/rox_agents/worker_agents.py",
+  "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+  "backend/src/ext_integrations/call_recorders/dto.py",
+  "backend/src/ext_integrations/call_recorders/gong/gong_shim.py",
+  "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+  "backend/src/ext_integrations/email_integration/base_outlook_service.py",
+  "backend/src/ext_integrations/util.py",
+  "backend/src/insights/filtering_agent_executor.py",
+  "backend/src/insights/filtering_agent_executor_v2.py",
+  "backend/src/insights/filtering_utils.py",
+  "backend/src/insights/nba_agent_executor_v2.py",
+  "backend/src/insights/tldr_generator.py",
+  "backend/src/outreach/auto_reply_agent_dto.py",
+  "backend/src/outreach/policy_agent_executor.py",
+  "backend/src/rate_limiter/rate_limiter.py",
+  "backend/src/research/agents/content_change_agent.py",
+  "backend/src/research/agents/insight_generation_agent.py",
+  "backend/src/research/clever_column_config/config_agent_executor.py",
+  "backend/src/research/research_agent/base_research_agent_executor.py",
+  "backend/src/research/research_agent/zero_sources_agent.py",
+  "backend/src/research/tools/emails.py",
+  "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+  "backend/src/rox_core/api/auth0/business.py",
+  "backend/src/rox_core/api/auth0/dto.py",
+  "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+  "backend/src/rox_core/api/auth0/invitation_email_service.py",
+  "backend/src/rox_core/api/auth0/invitation_service.py",
+  "backend/src/rox_core/api/azure_marketplace/payload_store.py",
+  "backend/src/rox_core/api/billing/action_usage_alerts.py",
+  "backend/src/rox_core/api/content_indexing/summary_executor.py",
+  "backend/src/rox_core/api/internal/business.py",
+  "backend/src/rox_core/api/internal/dto.py",
+  "backend/src/rox_core/api/internal/endpoints.py",
+  "backend/src/rox_core/api/notes/dto.py",
+  "backend/src/rox_core/api/user/dto.py",
+  "backend/src/rox_core/models/auth0/connection.py",
+  "backend/src/rox_core/models/auth0/organization.py",
+  "backend/src/rox_core/models/auth0/role.py",
+  "backend/src/rox_core/models/auth0/state.py",
+  "backend/src/rox_core/models/auth0/user.py",
+  "backend/src/rox_core/models/organization_dto.py",
+  "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+  "backend/src/shim_layer/rillet_shim/rillet_shim.py",
+  "backend/src/shim_layer/s3_shim/s3_shim.py",
+  "backend/src/tasks/executors/send_invoices.py",
+  "backend/src/workflow/agentflow/tools/org_chart/org_chart_tools.py",
+  "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+  "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+  "web/packages/internal-api/src/generated/core/internal/internal.ts"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: auth0_connection, auth0_organization, auth0_organization_connections, auth0_organization_user_roles, auth0_organization_users, auth0_role, auth0_state, auth0_user.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/auth0/connection.py",
+      "lines": [
+       10,
+       36
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/organization.py",
+      "lines": [
+       390,
+       555
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/organization.py",
+      "lines": [
+       12,
+       36
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/organization.py",
+      "lines": [
+       134,
+       263
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/organization.py",
+      "lines": [
+       39,
+       131
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/role.py",
+      "lines": [
+       10,
+       50
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/state.py",
+      "lines": [
+       30,
+       53
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/auth0/user.py",
+      "lines": [
+       11,
+       164
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Web screens: 2, HTTP routes: 1, Background workers: 1, Business logic: 64, Models: 11, Agent skills: 1.",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/internal/endpoints.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/agent_executor.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/chat/agent_executor/models/config.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": ".agents/skills/modernization-migration/SKILL.md",
+      "lines": [
+       310,
+       310
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/app/hooks/react-query/generated/internal (1), web/packages/internal-api/src/generated/core/internal (1).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "web/packages/internal-api/src/generated/core/internal/internal.ts",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/internal (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/internal/endpoints.py",
+      "lines": [
+       9,
+       9
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/auth0 (6), backend/src/insights (5), backend/src/auth (4).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+      "lines": [
+       24,
+       24
+      ]
+     },
+     {
+      "path": "backend/src/insights/filtering_agent_executor.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/auth/__init__.py",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models/auth0 (5), backend/src/chat/agent_executor/models (3), backend/src/rox_core/models (3).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/auth0/connection.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/chat/agent_executor/models/config.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+      "lines": [
+       19,
+       19
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Agent skills: .agents/skills/modernization-migration (1).",
+    "sources": [
+     {
+      "path": ".agents/skills/modernization-migration/SKILL.md",
+      "lines": [
+       310,
+       310
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/agent_framework/agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/rox_tracing.py; imports backend/src/agent_framework/tracing.py; imports backend/src/rox_core/api/user/dto.py; imports backend/src/chat/agent_executor/models/config.py; imports backend/src/insights/filtering_utils.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/context.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/plan_dto.py; imports backend/src/chat/agent_executor/models/config.py; imports backend/src/rox_core/api/user/dto.py; imports backend/src/agent_framework/command_sdk/agents/tools/notes.py; imports backend/src/agent_framework/command_sdk/agents/tools/org_chart.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/context.py; imports backend/src/rox_core/api/notes/dto.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/context.py; imports backend/src/agent_framework/data_interface/org_chart/dto.py; imports backend/src/agent_framework/runner/stopping.py; imports backend/src/chat/agent_executor/models/workers.py"
+    ],
+    [
+     "backend/src/agent_framework/command_sdk/agents/tools/plan_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/context.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/email/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/clever_column_config/config_agent_executor.py; imports backend/src/research/tools/emails.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/org_chart/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/org_chart.py; imports backend/src/workflow/agentflow/tools/org_chart/org_chart_tools.py"
+    ],
+    [
+     "backend/src/agent_framework/data_interface/org_user/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/user/dto.py; imports backend/src/insights/filtering_agent_executor_v2.py; imports backend/src/insights/filtering_utils.py; imports backend/src/insights/nba_agent_executor_v2.py; imports backend/src/insights/tldr_generator.py"
+    ],
+    [
+     "backend/src/agent_framework/model/azure_routing.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/insights/nba_agent_executor_v2.py; imports backend/src/outreach/policy_agent_executor.py"
+    ],
+    [
+     "backend/src/agent_framework/rox_tracing.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py"
+    ],
+    [
+     "backend/src/agent_framework/runner/stopping.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/org_chart.py"
+    ],
+    [
+     "backend/src/agent_framework/tracing.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py"
+    ],
+    [
+     "backend/src/auth/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/service.py"
+    ],
+    [
+     "backend/src/auth/auth0/__init__.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py"
+    ],
+    [
+     "backend/src/auth/auth0/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/__init__.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/dto.py; imports backend/src/auth/service.py"
+    ],
+    [
+     "backend/src/auth/auth0_legacy/api.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py"
+    ],
+    [
+     "backend/src/auth/auth0_legacy/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/api.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py"
+    ],
+    [
+     "backend/src/auth/auth0_legacy/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/api.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/auth/dto.py; imports backend/src/auth/service.py"
+    ],
+    [
+     "backend/src/auth/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py"
+    ],
+    [
+     "backend/src/auth/factory.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/service.py; imports backend/src/rox_core/api/auth0/business.py"
+    ],
+    [
+     "backend/src/auth/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/__init__.py; imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/factory.py; imports backend/src/auth/auth0_legacy/dto.py"
+    ],
+    [
+     "backend/src/chat/agent_executor/models/config.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/context.py; imports backend/src/agent_framework/agent_executor.py; imports backend/src/chat/rox_agents/worker_agents.py; imports backend/src/insights/nba_agent_executor_v2.py; imports backend/src/workflow/builder/workflow_builder_worker_agent.py"
+    ],
+    [
+     "backend/src/chat/agent_executor/models/org_chart_helpers.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/agent_executor/models/workers.py"
+    ],
+    [
+     "backend/src/chat/agent_executor/models/workers.py",
+     "Models",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/org_chart.py; imports backend/src/chat/agent_executor/models/org_chart_helpers.py"
+    ],
+    [
+     "backend/src/chat/rox_agents/worker_agents.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/chat/agent_executor/models/config.py; imports backend/src/rox_core/api/user/dto.py; imports backend/src/workflow/builder/workflow_builder_worker_agent.py"
+    ],
+    [
+     "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/util.py"
+    ],
+    [
+     "backend/src/ext_integrations/call_recorders/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/util.py"
+    ],
+    [
+     "backend/src/ext_integrations/call_recorders/gong/gong_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rate_limiter/rate_limiter.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/util.py; imports backend/src/rate_limiter/rate_limiter.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/ext_integrations/email_integration/base_outlook_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/util.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/ext_integrations/util.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py; imports backend/src/ext_integrations/email_integration/base_gmail_service.py; imports backend/src/ext_integrations/email_integration/base_outlook_service.py; imports backend/src/ext_integrations/call_recorders/dto.py; imports backend/src/rox_core/models/auth0/organization.py"
+    ],
+    [
+     "backend/src/insights/filtering_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/insights/filtering_utils.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/insights/filtering_agent_executor_v2.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/insights/filtering_utils.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/insights/filtering_utils.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/insights/filtering_agent_executor.py; imports backend/src/insights/filtering_agent_executor_v2.py; imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/insights/nba_agent_executor_v2.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/agent_framework/model/azure_routing.py; imports backend/src/chat/agent_executor/models/config.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/insights/tldr_generator.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/org_user/dto.py"
+    ],
+    [
+     "backend/src/outreach/auto_reply_agent_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py"
+    ],
+    [
+     "backend/src/outreach/policy_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/agent_framework/model/azure_routing.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/rate_limiter/rate_limiter.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/ext_integrations/call_recorders/gong/gong_shim.py; imports backend/src/ext_integrations/email_integration/base_gmail_service.py; imports backend/src/shim_layer/rillet_shim/rillet_shim.py; imports backend/src/shim_layer/s3_shim/s3_shim.py"
+    ],
+    [
+     "backend/src/research/agents/content_change_agent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/org_user/dto.py"
+    ],
+    [
+     "backend/src/research/agents/insight_generation_agent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/org_user/dto.py"
+    ],
+    [
+     "backend/src/research/clever_column_config/config_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/data_interface/email/dto.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/research/research_agent/base_research_agent_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/research/research_agent/zero_sources_agent.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/research/research_agent/zero_sources_agent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/research/research_agent/base_research_agent_executor.py"
+    ],
+    [
+     "backend/src/research/tools/emails.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/email/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0_legacy/api.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/models/auth0/organization.py; imports backend/src/rox_core/models/auth0/user.py"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py; imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/auth/service.py; imports backend/src/rox_core/api/auth0/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/rox_core/models/auth0/state.py; imports backend/src/rox_core/api/auth0/invitation_service.py"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/models/auth0/role.py; imports backend/src/rox_core/models/organization_dto.py; uses auth0_role; uses organization"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/invitation_email_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/business.py"
+    ],
+    [
+     "backend/src/rox_core/api/auth0/invitation_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/rox_core/api/auth0/dto.py; imports backend/src/rox_core/models/auth0/organization.py; uses auth0_invitation"
+    ],
+    [
+     "backend/src/rox_core/api/azure_marketplace/payload_store.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/shim_layer/s3_shim/s3_shim.py"
+    ],
+    [
+     "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/auth0/organization.py; imports backend/src/rox_core/models/auth0/role.py; uses auth0_organization_user_roles; uses auth0_role; uses enterprise_subscription"
+    ],
+    [
+     "backend/src/rox_core/api/content_indexing/summary_executor.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/internal/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/api/internal/dto.py; imports backend/src/rox_core/api/internal/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/internal/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/internal/business.py; imports backend/src/rox_core/api/internal/endpoints.py"
+    ],
+    [
+     "backend/src/rox_core/api/internal/endpoints.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/api/internal/business.py; imports backend/src/rox_core/api/internal/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/notes/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/tools/notes.py"
+    ],
+    [
+     "backend/src/rox_core/api/user/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/agent_executor.py; imports backend/src/agent_framework/command_sdk/agents/context.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/chat/rox_agents/worker_agents.py; imports backend/src/ext_integrations/email_integration/base_gmail_service.py"
+    ],
+    [
+     "backend/src/rox_core/models/auth0/connection.py",
+     "Models",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; uses auth0_connection"
+    ],
+    [
+     "backend/src/rox_core/models/auth0/organization.py",
+     "Models",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; imports backend/src/ext_integrations/util.py; imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py"
+    ],
+    [
+     "backend/src/rox_core/models/auth0/role.py",
+     "Models",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; imports backend/src/ext_integrations/util.py; imports backend/src/rox_core/api/auth0/business.py"
+    ],
+    [
+     "backend/src/rox_core/models/auth0/state.py",
+     "Models",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/api/auth0/dto.py"
+    ],
+    [
+     "backend/src/rox_core/models/auth0/user.py",
+     "Models",
+     "Primary",
+     "imports backend/src/auth/auth0/service.py; imports backend/src/auth/auth0_legacy/service.py; imports backend/src/auth/service.py; imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py; imports backend/src/rox_core/api/user/dto.py"
+    ],
+    [
+     "backend/src/rox_core/models/organization_dto.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py"
+    ],
+    [
+     "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/user/dto.py; imports backend/src/auth/auth0_legacy/dto.py"
+    ],
+    [
+     "backend/src/shim_layer/rillet_shim/rillet_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rate_limiter/rate_limiter.py"
+    ],
+    [
+     "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/api/azure_marketplace/payload_store.py; imports backend/src/rate_limiter/rate_limiter.py"
+    ],
+    [
+     "backend/src/tasks/executors/send_invoices.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/auth0/organization.py; imports backend/src/rox_core/models/auth0/role.py; imports backend/src/rox_core/models/auth0/user.py; uses auth0_organization_user_roles; uses auth0_role"
+    ],
+    [
+     "backend/src/workflow/agentflow/tools/org_chart/org_chart_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/data_interface/org_chart/dto.py"
+    ],
+    [
+     "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/agent_framework/command_sdk/agents/context.py; imports backend/src/agent_framework/data_interface/org_user/dto.py; imports backend/src/chat/agent_executor/models/config.py; imports backend/src/chat/rox_agents/worker_agents.py"
+    ],
+    [
+     "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+     "Web screens",
+     "Primary",
+     "route tag internal"
+    ],
+    [
+     "web/packages/internal-api/src/generated/core/internal/internal.ts",
+     "Web screens",
+     "Primary",
+     "route tag internal"
+    ],
+    [
+     ".agents/skills/modernization-migration/SKILL.md",
+     "Agent skills",
+     "Shared",
+     "references auth/auth0_legacy/dto.py"
+    ],
+    [
+     "backend/src/rox_core/api/security/guards.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/api/internal/endpoints.py; imports backend/src/rox_core/models/auth0/organization.py; imports backend/src/rox_core/models/auth0/role.py; imports backend/src/auth/auth0_legacy/service.py"
+    ],
+    [
+     "backend/src/rox_core/api/user/business.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/api/internal/business.py; imports backend/src/rox_core/api/user/dto.py; imports backend/src/rox_core/models/auth0/organization.py"
+    ],
+    [
+     "backend/src/rox_core/api/user/role_service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/auth/auth0_legacy/service.py; imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/models/auth0/organization.py; uses auth0_organization_user_roles; uses organization"
+    ],
+    [
+     "backend/src/rox_core/api/user/team_roster_service.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/auth/auth0_legacy/dto.py; imports backend/src/rox_core/api/user/dto.py; imports backend/src/rox_core/models/auth0/role.py; uses auth0_invitation; uses auth0_role"
+    ],
+    [
+     "backend/src/rox_core/models/starter_action_grant.py",
+     "Models",
+     "Shared",
+     "imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/models/auth0/user.py; uses auth0_user; uses starter_action_grant"
+    ],
+    [
+     "backend/src/rox_core/models/user.py",
+     "Models",
+     "Shared",
+     "imports backend/src/auth/auth0_legacy/service.py; imports backend/src/ext_integrations/util.py; imports backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py; imports backend/src/rox_core/api/auth0/business.py; imports backend/src/rox_core/api/auth0/invitation_service.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/agent_framework/agent_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/agent_executor.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/agent_executor.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/chat/agent_executor/models/config.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_utils.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/context.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/context.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/context.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/command_sdk/agents/tools/org_chart.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column_config/config_agent_executor.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/research/tools/emails.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/tools/org_chart/org_chart_tools.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/data_interface/org_user/dto.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_agent_executor_v2.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_utils.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/insights/nba_agent_executor_v2.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/insights/tldr_generator.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/insights/nba_agent_executor_v2.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/outreach/policy_agent_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/auth/__init__.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/__init__.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/api.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/auth/factory.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/auth/factory.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      117,
+      117
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/worker_agents.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/insights/nba_agent_executor_v2.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/chat/agent_executor/models/org_chart_helpers.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/chat/agent_executor/models/workers.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/chat/rox_agents/worker_agents.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/call_recorders/gong/gong_shim.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_outlook_service.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_outlook_service.py",
+     "lines": [
+      52,
+      52
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      526,
+      526
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_agent_executor.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_agent_executor.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_agent_executor_v2.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_agent_executor_v2.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/insights/filtering_utils.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/insights/nba_agent_executor_v2.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/insights/nba_agent_executor_v2.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_agent_dto.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/outreach/policy_agent_executor.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/outreach/policy_agent_executor.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/outreach/policy_agent_executor.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/rillet_shim/rillet_shim.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/research/agents/content_change_agent.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/research/agents/insight_generation_agent.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column_config/config_agent_executor.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column_config/config_agent_executor.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/research/clever_column_config/config_agent_executor.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      70,
+      70
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      83,
+      83
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/dto.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/dto.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/invitation_service.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      64,
+      64
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      65,
+      65
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/invitation_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/invitation_service.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/invitation_service.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/azure_marketplace/payload_store.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/content_indexing/summary_executor.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/content_indexing/summary_executor.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/content_indexing/summary_executor.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/business.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/business.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      527,
+      527
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      93,
+      93
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      94,
+      94
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0/service.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      62,
+      62
+     ]
+    },
+    {
+     "path": "backend/src/auth/service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/dto.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/dto.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/internal/internal.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": ".agents/skills/modernization-migration/SKILL.md",
+     "lines": [
+      310,
+      310
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      85,
+      85
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/security/guards.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/security/guards.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/security/guards.py",
+     "lines": [
+      317,
+      317
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      1525,
+      1525
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/business.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/business.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/business.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/business.py",
+     "lines": [
+      93,
+      93
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      90,
+      90
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/role_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/role_service.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      99,
+      99
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      64,
+      64
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      528,
+      528
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/business.py",
+     "lines": [
+      101,
+      101
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/auth0/invitation_service.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 7 files with Organization (+5 tables).",
+    "sources": [
+     {
+      "path": ".agents/skills/modernization-migration/SKILL.md",
+      "lines": [
+       33,
+       33
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Enterprise Subscription (+13 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 2 files with Delete User Request (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/auth/auth0_legacy/service.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with User Extra.",
+    "sources": [
+     {
+      "path": "backend/src/auth/auth0_legacy/service.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Auth0 Invitation.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic / Models / Agent skills",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/role.py",
+     "lines": [
+      10,
+      50
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web",
+    "label": "Web screens",
+    "source": {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-web",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/app/hooks/react-query/generated/internal — 1 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "web/packages/internal-api/src/generated/core/internal — 1 files",
+      "sources": [
+       {
+        "path": "web/packages/internal-api/src/generated/core/internal/internal.ts",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/internal — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/internal/endpoints.py",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/send_invoices.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/agent_framework/agent_executor.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/auth0 — 6 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+        "lines": [
+         24,
+         24
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/insights — 5 files",
+      "sources": [
+       {
+        "path": "backend/src/insights/filtering_agent_executor.py",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/auth — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/auth/__init__.py",
+        "lines": [
+         6,
+         6
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/user — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/user/business.py",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/agent_executor.py",
+        "lines": [
+         12,
+         12
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/command_sdk/agents/tools — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/chat/agent_executor/models/config.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models/auth0 — 5 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/connection.py",
+        "lines": [
+         10,
+         10
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/chat/agent_executor/models — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/agent_executor/models/config.py",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/models — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "skills",
+    "label": "Agent skills",
+    "source": {
+     "path": ".agents/skills/modernization-migration/SKILL.md",
+     "lines": [
+      310,
+      310
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": ".agents/skills/modernization-migration — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/modernization-migration/SKILL.md",
+        "lines": [
+         310,
+         310
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-tables",
+    "label": "Tables (8)",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/role.py",
+     "lines": [
+      10,
+      50
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": [
+     {
+      "text": "auth0_connection — 4 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/connection.py",
+        "lines": [
+         10,
+         36
+        ]
+       }
+      ]
+     },
+     {
+      "text": "auth0_organization — 10 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/organization.py",
+        "lines": [
+         390,
+         555
+        ]
+       }
+      ]
+     },
+     {
+      "text": "auth0_organization_connections — 2 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/organization.py",
+        "lines": [
+         12,
+         36
+        ]
+       }
+      ]
+     },
+     {
+      "text": "auth0_organization_user_roles — 3 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/organization.py",
+        "lines": [
+         134,
+         263
+        ]
+       }
+      ]
+     },
+     {
+      "text": "auth0_organization_users — 2 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/organization.py",
+        "lines": [
+         39,
+         131
+        ]
+       }
+      ]
+     },
+     {
+      "text": "auth0_role — 4 columns",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/auth0/role.py",
+        "lines": [
+         10,
+         50
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (19)",
+    "source": {
+     "path": "backend/src/agent_framework/command_sdk/agents/context.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/chat/agent_executor/models/config.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      9,
+      9
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      16,
+      16
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-tables",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-tables",
+    "label": "uses (3)",
+    "source": {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      10
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-tables",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "auth0_connection",
+   "auth0_organization",
+   "auth0_organization_connections",
+   "auth0_organization_user_roles",
+   "auth0_organization_users",
+   "auth0_role",
+   "auth0_state",
+   "auth0_user"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "auth0_connection",
+    "dst": "auth0_organization_connections",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_connections",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_connections",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_user_roles",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      138,
+      138
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_user_roles",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      134,
+      134
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_users",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization",
+    "dst": "auth0_organization_users",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_connections",
+    "dst": "auth0_organization_user_roles",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      134,
+      134
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_connections",
+    "dst": "auth0_organization_users",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_organization_users",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/auth/auth0_legacy/service.py",
+     "lines": [
+      156,
+      156
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_organization_users",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      39,
+      39
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_role",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      155,
+      155
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_role",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      144,
+      144
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_user",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      187,
+      187
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "auth0_organization_user_roles",
+    "dst": "auth0_user",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      141,
+      141
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "auth0_organization_users",
+    "dst": "auth0_user",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    "kind": "enforced"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Tenancy: orgs, users, auth & billing",
+   "page": "domain-tenancy",
+   "source": {
+    "path": "backend/src/rox_core/models/auth0/role.py",
+    "lines": [
+     10,
+     50
+    ]
+   }
+  },
+  {
+   "label": "Organization (+5 tables)",
+   "page": "feature-tenancy-organization",
+   "source": {
+    "path": ".agents/skills/modernization-migration/SKILL.md",
+    "lines": [
+     33,
+     33
+    ]
+   }
+  },
+  {
+   "label": "Enterprise Subscription (+13 tables)",
+   "page": "feature-tenancy-enterprise-subscription",
+   "source": {
+    "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+    "lines": [
+     26,
+     26
+    ]
+   }
+  },
+  {
+   "label": "Delete User Request (+3 tables)",
+   "page": "feature-tenancy-delete-user-request",
+   "source": {
+    "path": "backend/src/auth/auth0_legacy/service.py",
+    "lines": [
+     64,
+     64
+    ]
+   }
+  },
+  {
+   "label": "User Extra",
+   "page": "feature-tenancy-user-extra",
+   "source": {
+    "path": "backend/src/auth/auth0_legacy/service.py",
+    "lines": [
+     64,
+     64
+    ]
+   }
+  },
+  {
+   "label": "Auth0 Invitation",
+   "page": "feature-tenancy-auth0-invitation",
+   "source": {
+    "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
+    "lines": [
+     26,
+     26
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

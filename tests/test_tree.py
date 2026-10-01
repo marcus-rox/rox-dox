@@ -99,6 +99,118 @@ def test_missing_related_page_link_is_reported(
     assert "related 'Missing module': link to missing page 'missing'" in problems
 
 
+def test_missing_schema_domain_page_link_is_reported(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["data"]["sql_tables"] = []
+    payload["data"]["domains"] = [
+        {
+            "id": "identity",
+            "title": "Identity",
+            "tables": ["users"],
+            "key_tables": ["users"],
+            "page": "missing",
+        }
+    ]
+
+    problems = tree_problems([Page.model_validate(payload)])
+
+    assert "schema domain 'identity': link to missing page 'missing'" in problems
+
+
+def test_schema_domain_page_link_must_match_page_kind(
+    page_data: dict[str, object],
+) -> None:
+    root = copy.deepcopy(page_data)
+    root["kind"] = "root"
+    root["data"]["sql_tables"] = []
+    root["data"]["domains"] = [
+        {
+            "id": "identity",
+            "title": "Identity",
+            "tables": ["users"],
+            "key_tables": ["users"],
+            "page": "feature",
+        }
+    ]
+    feature = copy.deepcopy(page_data)
+    feature["id"] = "feature"
+    feature["kind"] = "feature"
+    feature["parent"] = root["id"]
+    feature["paths"] = ["pkg"]
+
+    problems = tree_problems([Page.model_validate(root), Page.model_validate(feature)])
+
+    assert (
+        "schema domain 'identity': page 'feature' has kind 'feature'; expected 'domain'"
+    ) in problems
+
+
+def test_missing_summary_table_page_link_is_reported(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["tldr"]["table"]["links"] = [{"row": 0, "column": 0, "page": "missing"}]
+
+    problems = tree_problems([Page.model_validate(payload)])
+
+    assert "TLDR table: link to missing page 'missing'" in problems
+
+
+def test_root_domain_feature_kinds_form_a_valid_leaf_tree(
+    page_data: dict[str, object],
+) -> None:
+    root = copy.deepcopy(page_data)
+    root["kind"] = "root"
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain-seq"
+    domain["kind"] = "domain"
+    domain["parent"] = "rox-core"
+    domain["paths"] = ["pkg"]
+    feature = copy.deepcopy(page_data)
+    feature["id"] = "feature-seq-sequence"
+    feature["kind"] = "feature"
+    feature["parent"] = "domain-seq"
+    feature["paths"] = ["pkg/a.py"]
+
+    problems = tree_problems(
+        [
+            Page.model_validate(root),
+            Page.model_validate(domain),
+            Page.model_validate(feature),
+        ]
+    )
+
+    assert problems == []
+
+
+def test_feature_map_pages_can_share_paths(
+    page_data: dict[str, object],
+) -> None:
+    root = copy.deepcopy(page_data)
+    root["kind"] = "root"
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain-a"
+    domain["kind"] = "domain"
+    domain["parent"] = "rox-core"
+    domain["paths"] = ["pkg/shared.py"]
+    features = []
+    for feature_id in ("feature-a", "feature-b"):
+        feature = copy.deepcopy(page_data)
+        feature["id"] = feature_id
+        feature["kind"] = "feature"
+        feature["parent"] = "domain-a"
+        feature["paths"] = ["pkg/shared.py"]
+        features.append(Page.model_validate(feature))
+
+    problems = tree_problems(
+        [Page.model_validate(root), Page.model_validate(domain), *features]
+    )
+
+    assert problems == []
+
+
 def test_root_paths_must_be_exactly_the_repository_root(
     page_data: dict[str, object],
 ) -> None:

@@ -1,0 +1,728 @@
+{
+ "id": "feature-seq-sequence-task-audit",
+ "title": "Task audit, ghost feedback & LinkedIn replies",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-seq",
+ "paths": [
+  "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+  "backend/src/rox_core/models/sequence_linkedin_reply.py",
+  "backend/src/rox_core/models/sequence_task_audit.py",
+  "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+  "backend/src/rox_core/models/sequence_task_ghost_promotion.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: sequence_linkedin_reply, sequence_task_audit, sequence_task_ghost_feedback, sequence_task_ghost_promotion.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+      "lines": [
+       37,
+       108
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_task_audit.py",
+      "lines": [
+       21,
+       45
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+      "lines": [
+       22,
+       101
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_task_ghost_promotion.py",
+      "lines": [
+       11,
+       97
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: Background workers: 1, Business logic: 3, Models: 4.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/email.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Background workers: backend/src/tasks/executors (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/email.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/agents/outreach/sequence (1), backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen (1), backend/src/rox_core/api/integrations (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (4).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/sequence_linkedin_reply.py; imports backend/src/rox_core/models/sequence_task_audit.py; imports backend/src/rox_core/models/sequence_task_ghost_feedback.py; imports backend/src/rox_core/models/sequence_task_ghost_promotion.py; uses sequence_linkedin_reply"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; uses sequence_linkedin_reply"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_task_audit.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; uses sequence_task_audit"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; uses sequence_task_ghost_feedback"
+    ],
+    [
+     "backend/src/rox_core/models/sequence_task_ghost_promotion.py",
+     "Models",
+     "Primary",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; uses sequence_task_ghost_promotion"
+    ],
+    [
+     "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; imports backend/src/rox_core/models/sequence_task_audit.py; uses campaign_request; uses sequence"
+    ],
+    [
+     "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; imports backend/src/rox_core/models/sequence_linkedin_reply.py; uses sequence; uses sequence_linkedin_reply; uses sequence_task"
+    ],
+    [
+     "backend/src/tasks/executors/email.py",
+     "Background workers",
+     "Shared",
+     "imports backend/src/rox_core/api/agents/outreach/sequence/business.py; imports backend/src/rox_core/models/sequence_task_audit.py; uses campaign_request; uses campaign_step_config; uses rox_email"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      259,
+      259
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      284,
+      284
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      10047,
+      10047
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      10048,
+      10048
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_task_audit.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_promotion.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      106,
+      106
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+     "lines": [
+      195,
+      195
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      104,
+      104
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 2 files with Campaigns & sequence builds.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/business.py",
+      "lines": [
+       136,
+       136
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 3 files with Sequences, tasks & email sending.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with LinkedIn messages & connections.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-logic",
+    "label": "Business logic / Models",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "lines": [
+      37,
+      108
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/email.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/sequence — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/integrations — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "lines": [
+      37,
+      37
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-logic",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+        "lines": [
+         37,
+         37
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-sequence_linkedin_reply",
+    "label": "sequence_linkedin_reply",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "lines": [
+      37,
+      108
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence_task_audit",
+    "label": "sequence_task_audit",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_audit.py",
+     "lines": [
+      21,
+      45
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence_task_ghost_feedback",
+    "label": "sequence_task_ghost_feedback",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+     "lines": [
+      22,
+      101
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-sequence_task_ghost_promotion",
+    "label": "sequence_task_ghost_promotion",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_promotion.py",
+     "lines": [
+      11,
+      97
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (6)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      259,
+      259
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      43,
+      43
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/email.py",
+     "lines": [
+      104,
+      104
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-sequence_linkedin_reply",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-sequence_linkedin_reply",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_linkedin_reply.py",
+     "lines": [
+      37,
+      37
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-sequence_task_audit",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_audit.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-sequence_task_ghost_feedback",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_feedback.py",
+     "lines": [
+      22,
+      22
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "store-sequence_task_ghost_promotion",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_task_ghost_promotion.py",
+     "lines": [
+      11,
+      11
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "sequence_linkedin_reply",
+   "sequence_task_audit",
+   "sequence_task_ghost_feedback",
+   "sequence_task_ghost_promotion"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Sequences & outreach",
+   "page": "domain-seq",
+   "source": {
+    "path": "backend/src/rox_core/models/sequence_task_audit.py",
+    "lines": [
+     21,
+     45
+    ]
+   }
+  },
+  {
+   "label": "Campaigns & sequence builds",
+   "page": "feature-seq-campaign-request",
+   "source": {
+    "path": "backend/src/rox_core/api/agents/outreach/business.py",
+    "lines": [
+     136,
+     136
+    ]
+   }
+  },
+  {
+   "label": "Sequences, tasks & email sending",
+   "page": "feature-seq-sequence",
+   "source": {
+    "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+    "lines": [
+     16,
+     16
+    ]
+   }
+  },
+  {
+   "label": "LinkedIn messages & connections",
+   "page": "feature-seq-rox-linkedin-message",
+   "source": {
+    "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}

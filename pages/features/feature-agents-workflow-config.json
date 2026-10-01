@@ -1,0 +1,1837 @@
+{
+ "id": "feature-agents-workflow-config",
+ "title": "Workflow Config (+6 tables)",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-agents",
+ "paths": [
+  ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+  "backend/src/agent_framework/trace_presentation/service.py",
+  "backend/src/chat/routes/conversation_link/business.py",
+  "backend/src/chat/routes/conversation_link/router.py",
+  "backend/src/chat/routes/eval/rox_traces.py",
+  "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+  "backend/src/rox_core/api/governance/record_display/single_column.py",
+  "backend/src/rox_core/models/workflow_config.py",
+  "backend/src/rox_core/models/workflow_config_draft.py",
+  "backend/src/rox_core/models/workflow_inbox.py",
+  "backend/src/rox_core/models/workflow_run.py",
+  "backend/src/task_items/workflow_inbox_backfill_job.py",
+  "backend/src/tasks/executors/user_deactivation_cleanup.py",
+  "backend/src/workflow/agentflow/activities/lifecycle.py",
+  "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+  "backend/src/workflow/agentflow/cell/dto.py",
+  "backend/src/workflow/agentflow/cell/events.py",
+  "backend/src/workflow/agentflow/meta_tools.py",
+  "backend/src/workflow/builder/skill_tools.py",
+  "backend/src/workflow/draft_service.py",
+  "backend/src/workflow/dto/kind_dto.py",
+  "backend/src/workflow/execution_graph/template.py",
+  "backend/src/workflow/inbox/errors.py",
+  "backend/src/workflow/inbox/inbox_dto.py",
+  "backend/src/workflow/inbox/inbox_service.py",
+  "backend/src/workflow/router/config.py",
+  "backend/src/workflow/router/inbox.py",
+  "backend/src/workflow/router/run.py",
+  "backend/src/workflow/service.py",
+  "backend/src/workflow/strip_removed_actions_backfill_job.py",
+  "backend/src/workflow/sysadmin/sysadmin_router.py",
+  "backend/src/workflow/version_conversation_backfill_job.py",
+  "backend/src/workflow/workflow_run/trace_preparation.py",
+  "backend/src/workflow/workflow_run/workflow_run_service.py"
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Stores: workflow_config, workflow_config_draft, workflow_config_version, workflow_inbox, workflow_run, workflow_step_output.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/workflow_config.py",
+      "lines": [
+       144,
+       289
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_config_draft.py",
+      "lines": [
+       24,
+       124
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_config.py",
+      "lines": [
+       30,
+       141
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_inbox.py",
+      "lines": [
+       27,
+       158
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_run.py",
+      "lines": [
+       24,
+       149
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_run.py",
+      "lines": [
+       152,
+       210
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Files by layer: HTTP routes: 6, Background workers: 2, Business logic: 24, Models: 4, Agent skills: 1.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/conversation_link/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/run.py",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/workflow_config.py",
+      "lines": [
+       26,
+       26
+      ]
+     },
+     {
+      "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+      "lines": [
+       86,
+       86
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "HTTP routes: backend/src/workflow/router (3), backend/src/chat/routes/conversation_link (2), backend/src/chat/routes/eval (1).",
+    "sources": [
+     {
+      "path": "backend/src/workflow/router/config.py",
+      "lines": [
+       31,
+       31
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/conversation_link/business.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/eval/rox_traces.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (2).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/workflow (5), backend/src/workflow/agentflow/cell (3), backend/src/workflow/inbox (3).",
+    "sources": [
+     {
+      "path": "backend/src/workflow/config_access.py",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+      "lines": [
+       28,
+       28
+      ]
+     },
+     {
+      "path": "backend/src/workflow/inbox/inbox_service.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (4).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/workflow_config.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Agent skills: .agents/skills/how-to-debug-outreach-traces (1).",
+    "sources": [
+     {
+      "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+      "lines": [
+       86,
+       86
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "File",
+    "Layer",
+    "Primary/shared",
+    "Evidence"
+   ],
+   "rows": [
+    [
+     ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "Agent skills",
+     "Primary",
+     "references backend/src/chat/routes/eval/rox_traces.py"
+    ],
+    [
+     "backend/src/agent_framework/trace_presentation/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/router/run.py"
+    ],
+    [
+     "backend/src/chat/routes/conversation_link/business.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_config_draft.py; imports backend/src/chat/routes/conversation_link/router.py; uses conversation; uses workflow_config_draft"
+    ],
+    [
+     "backend/src/chat/routes/conversation_link/router.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/chat/routes/conversation_link/business.py"
+    ],
+    [
+     "backend/src/chat/routes/eval/rox_traces.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_run.py; uses workflow_run"
+    ],
+    [
+     "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; uses workflow_config"
+    ],
+    [
+     "backend/src/rox_core/api/governance/record_display/single_column.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; uses workflow_config"
+    ],
+    [
+     "backend/src/rox_core/models/workflow_config.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/routes/conversation_link/business.py; imports backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py; imports backend/src/rox_core/api/governance/record_display/single_column.py; imports backend/src/workflow/dto/kind_dto.py; imports backend/src/task_items/workflow_inbox_backfill_job.py"
+    ],
+    [
+     "backend/src/rox_core/models/workflow_config_draft.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/routes/conversation_link/business.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py; uses workflow_config_draft"
+    ],
+    [
+     "backend/src/rox_core/models/workflow_inbox.py",
+     "Models",
+     "Primary",
+     "imports backend/src/task_items/workflow_inbox_backfill_job.py; imports backend/src/workflow/inbox/inbox_service.py; imports backend/src/workflow/service.py; uses workflow_inbox"
+    ],
+    [
+     "backend/src/rox_core/models/workflow_run.py",
+     "Models",
+     "Primary",
+     "imports backend/src/chat/routes/eval/rox_traces.py; imports backend/src/task_items/workflow_inbox_backfill_job.py; imports backend/src/tasks/executors/user_deactivation_cleanup.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/inbox/inbox_service.py"
+    ],
+    [
+     "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_inbox.py; imports backend/src/rox_core/models/workflow_run.py; uses workflow_config; uses workflow_inbox"
+    ],
+    [
+     "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "Background workers",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/service.py; uses workflow_config; uses workflow_run"
+    ],
+    [
+     "backend/src/workflow/agentflow/activities/lifecycle.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/execution_graph/template.py; imports backend/src/workflow/workflow_run/workflow_run_service.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/agentflow/activities/lifecycle.py; imports backend/src/workflow/agentflow/cell/dto.py; imports backend/src/workflow/agentflow/cell/events.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/cell/dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/cell/events.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py"
+    ],
+    [
+     "backend/src/workflow/agentflow/meta_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/workflow_run/workflow_run_service.py"
+    ],
+    [
+     "backend/src/workflow/builder/skill_tools.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/draft_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py"
+    ],
+    [
+     "backend/src/workflow/draft_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/builder/skill_tools.py; imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_config_draft.py; imports backend/src/workflow/service.py; uses workflow_config"
+    ],
+    [
+     "backend/src/workflow/dto/kind_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py"
+    ],
+    [
+     "backend/src/workflow/execution_graph/template.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/activities/lifecycle.py"
+    ],
+    [
+     "backend/src/workflow/inbox/errors.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/inbox/inbox_service.py"
+    ],
+    [
+     "backend/src/workflow/inbox/inbox_dto.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/inbox/inbox_service.py; imports backend/src/workflow/router/inbox.py"
+    ],
+    [
+     "backend/src/workflow/inbox/inbox_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_inbox.py; imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/inbox/errors.py; imports backend/src/workflow/inbox/inbox_dto.py; imports backend/src/workflow/router/inbox.py"
+    ],
+    [
+     "backend/src/workflow/router/config.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py"
+    ],
+    [
+     "backend/src/workflow/router/inbox.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/workflow/inbox/inbox_dto.py; imports backend/src/workflow/inbox/inbox_service.py"
+    ],
+    [
+     "backend/src/workflow/router/run.py",
+     "HTTP routes",
+     "Primary",
+     "imports backend/src/agent_framework/trace_presentation/service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/trace_preparation.py; imports backend/src/workflow/workflow_run/workflow_run_service.py"
+    ],
+    [
+     "backend/src/workflow/service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/tasks/executors/user_deactivation_cleanup.py; imports backend/src/workflow/builder/skill_tools.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/router/config.py; imports backend/src/workflow/router/run.py"
+    ],
+    [
+     "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_config_draft.py; imports backend/src/workflow/dto/kind_dto.py; imports backend/src/workflow/service.py; uses workflow_config"
+    ],
+    [
+     "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py; imports backend/src/rox_core/models/workflow_config.py; uses workflow_config"
+    ],
+    [
+     "backend/src/workflow/version_conversation_backfill_job.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/rox_core/models/workflow_config.py; uses conversation; uses workflow_config_version"
+    ],
+    [
+     "backend/src/workflow/workflow_run/trace_preparation.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/router/run.py"
+    ],
+    [
+     "backend/src/workflow/workflow_run/workflow_run_service.py",
+     "Business logic",
+     "Primary",
+     "imports backend/src/workflow/agentflow/activities/lifecycle.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/agentflow/meta_tools.py; imports backend/src/workflow/builder/skill_tools.py; imports backend/src/workflow/router/config.py"
+    ],
+    [
+     "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/rox_core/models/workflow_run.py; uses agent_actions_log; uses workflow_run"
+    ],
+    [
+     "backend/src/tasks/executors/workflow_business_event.py",
+     "Background workers",
+     "Shared",
+     "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/dto/kind_dto.py; uses workflow_config; uses workflow_config_user_enablement"
+    ],
+    [
+     "backend/src/workflow/config_access.py",
+     "Business logic",
+     "Shared",
+     "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py"
+    ]
+   ],
+   "sources": [
+    {
+     "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "lines": [
+      86,
+      86
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/router.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_config_draft.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/workflow/service.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/workflow/inbox/inbox_service.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/workflow/service.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/workflow/inbox/inbox_service.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/meta_tools.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/skill_tools.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/skill_tools.py",
+     "lines": [
+      45,
+      45
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/skill_tools.py",
+     "lines": [
+      50,
+      50
+     ]
+    },
+    {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/workflow/inbox/inbox_service.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/workflow/inbox/inbox_service.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      319,
+      319
+     ]
+    },
+    {
+     "path": "backend/src/workflow/version_conversation_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/version_conversation_backfill_job.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      54,
+      54
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/workflow_business_event.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/workflow_business_event.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/workflow_business_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "backend/src/workflow/config_access.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/workflow/service.py",
+     "lines": [
+      41,
+      41
+     ]
+    },
+    {
+     "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
+     "lines": [
+      28,
+      28
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 1 files with Skill (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Conversation (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/workflow/version_conversation_backfill_job.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 2 files with Workflow Config User Enablement (+2 tables).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/workflow_business_event.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Agent State.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Workflow Schedule.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Agent Actions Log (+3 tables).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Dropped 6 lower-volume block edges to satisfy the layout limit; their evidence remains in the \"Why these files are one feature\" table.",
+    "sources": [
+     {
+      "path": "backend/src/workflow/version_conversation_backfill_job.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-layer-routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-layer-workers",
+    "label": "Background workers / Business logic / Models / Agent skills",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-stores",
+    "label": "Stores",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      144,
+      289
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "routes",
+    "label": "HTTP routes",
+    "source": {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-routes",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/workflow/router — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         31,
+         31
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/chat/routes/conversation_link — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/conversation_link/business.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/chat/routes/eval — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/tasks/executors — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "logic",
+    "label": "Business logic",
+    "source": {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/workflow — 5 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/config_access.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/workflow/agentflow/cell — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+        "lines": [
+         28,
+         28
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/workflow/inbox — 3 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/inbox/inbox_service.py",
+        "lines": [
+         8,
+         8
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/workflow/workflow_run — 2 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/run.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/agent_framework/trace_presentation — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/run.py",
+        "lines": [
+         3,
+         3
+        ]
+       }
+      ]
+     },
+     {
+      "text": "backend/src/rox_core/api/governance/ownership — 1 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+        "lines": [
+         1,
+         1
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "models",
+    "label": "Models",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "backend/src/rox_core/models — 4 files",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_config.py",
+        "lines": [
+         26,
+         26
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "skills",
+    "label": "Agent skills",
+    "source": {
+     "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "lines": [
+      86,
+      86
+     ]
+    },
+    "kind": "component",
+    "group": "group-layer-workers",
+    "many": false,
+    "details": [
+     {
+      "text": ".agents/skills/how-to-debug-outreach-traces — 1 files",
+      "sources": [
+       {
+        "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+        "lines": [
+         86,
+         86
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-workflow_config",
+    "label": "workflow_config",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      144,
+      289
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow_config_draft",
+    "label": "workflow_config_draft",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config_draft.py",
+     "lines": [
+      24,
+      124
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow_config_version",
+    "label": "workflow_config_version",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      30,
+      141
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow_inbox",
+    "label": "workflow_inbox",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      27,
+      158
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow_run",
+    "label": "workflow_run",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      24,
+      149
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow_step_output",
+    "label": "workflow_step_output",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      152,
+      210
+     ]
+    },
+    "kind": "store",
+    "group": "group-stores",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "logic",
+    "dst": "models",
+    "label": "imports (17)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      32,
+      32
+     ]
+    }
+   },
+   {
+    "src": "models",
+    "dst": "logic",
+    "label": "imports (1)",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      26,
+      26
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "logic",
+    "label": "imports (8)",
+    "source": {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      31,
+      31
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "lines": [
+      5,
+      5
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "logic",
+    "label": "imports (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      30,
+      30
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "models",
+    "label": "imports (3)",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      11,
+      11
+     ]
+    }
+   },
+   {
+    "src": "routes",
+    "dst": "store-workflow_run",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-workflow_config",
+    "label": "uses (2)",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "workers",
+    "dst": "store-workflow_run",
+    "label": "uses (1)",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "logic",
+    "dst": "store-workflow_config",
+    "label": "uses (6)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "workflow_config",
+   "workflow_config_draft",
+   "workflow_config_version",
+   "workflow_inbox",
+   "workflow_run",
+   "workflow_step_output"
+  ],
+  "nosql": [],
+  "relations": [
+   {
+    "src": "workflow_config",
+    "dst": "workflow_config_draft",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config_draft.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_config_version",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_config_version",
+    "label": "primaryjoin",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      223,
+      223
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_config_version",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_inbox",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      180,
+      180
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_inbox",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_inbox",
+    "label": "primaryjoin",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      102,
+      102
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_run",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_config",
+    "dst": "workflow_run",
+    "label": "primaryjoin",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      213,
+      213
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config_version",
+    "dst": "workflow_run",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
+     "lines": [
+      292,
+      292
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_config_version",
+    "dst": "workflow_run",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      57,
+      57
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_config_version",
+    "dst": "workflow_run",
+    "label": "primaryjoin",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_inbox",
+    "dst": "workflow_run",
+    "label": "comparison",
+    "source": {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      177,
+      177
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_inbox",
+    "dst": "workflow_run",
+    "label": "fk",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      67,
+      67
+     ]
+    },
+    "kind": "enforced"
+   },
+   {
+    "src": "workflow_inbox",
+    "dst": "workflow_run",
+    "label": "primaryjoin",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      108,
+      108
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "workflow_run",
+    "dst": "workflow_step_output",
+    "label": "same_file",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_run.py",
+     "lines": [
+      152,
+      152
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Agents, chat, workflows & artifacts",
+   "page": "domain-agents",
+   "source": {
+    "path": "backend/src/rox_core/models/workflow_config.py",
+    "lines": [
+     144,
+     289
+    ]
+   }
+  },
+  {
+   "label": "Skill (+2 tables)",
+   "page": "feature-agents-skill",
+   "source": {
+    "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Conversation (+2 tables)",
+   "page": "feature-agents-conversation",
+   "source": {
+    "path": "backend/src/workflow/version_conversation_backfill_job.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Workflow Config User Enablement (+2 tables)",
+   "page": "feature-agents-workflow-config-user-enablement",
+   "source": {
+    "path": "backend/src/tasks/executors/workflow_business_event.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Agent State",
+   "page": "feature-agents-agent-state",
+   "source": {
+    "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Workflow Schedule",
+   "page": "feature-agents-workflow-schedule",
+   "source": {
+    "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Agent Actions Log (+3 tables)",
+   "page": "feature-agents-agent-actions-log",
+   "source": {
+    "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "notion": []
+}
