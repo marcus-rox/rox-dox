@@ -182,39 +182,39 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: sequence_agent_action.",
+    "text": "Runs 3 background workers and workflows: AutoUnpauseSequencesCoordinatorTaskExecutor, AutoUnpauseSequencesWorkerTaskExecutor, RegenerateSequenceTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+      "lines": [
+       24,
+       24
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+      "lines": [
+       90,
+       90
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+      "lines": [
+       2841,
+       2841
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: sequence_agent_action.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/sequence_agent_action.py",
       "lines": [
        52,
        342
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 2, Business logic: 4, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/sequence_agent_action.py",
-      "lines": [
-       52,
-       52
       ]
      }
     ]
@@ -274,29 +274,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "1",
-     "backend/src/tasks/executors (2)"
+     "Executors workers",
+     "Background workers / workflows",
+     "sequence_agent_action",
+     "—"
     ],
     [
-     "Business logic",
-     "0",
-     "4",
-     "backend/src/outreach/seqregen_cell (2), backend/src/ext_integrations/integration/crm/salesforce (1), backend/src/rox_core/api/agents/outreach/sequence (1)"
+     "Seqregen Cell (library)",
+     "Library code",
+     "sequence_agent_action",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Salesforce (library)",
+     "Library code",
+     "sequence_agent_action",
+     "—"
+    ],
+    [
+     "Sequence (library)",
+     "Library code",
+     "sequence_agent_action",
+     "—"
+    ],
+    [
+     "sequence_agent_action",
+     "Database",
+     "sequence_agent_action",
+     "—"
     ]
    ],
    "sources": [
@@ -310,6 +322,34 @@
     {
      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
      "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+     "lines": [
+      90,
+      90
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+     "lines": [
+      2841,
+      2841
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sequence_agent_action.py",
+     "lines": [
+      52,
+      52
+     ]
+    },
+    {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
       1,
       1
      ]
@@ -322,10 +362,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/sequence_agent_action.py",
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
      "lines": [
-      52,
-      52
+      1,
+      1
      ]
     }
    ],
@@ -385,30 +425,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+     "lines": [
+      24,
+      24
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
      "lines": [
-      1,
-      1
+      24,
+      24
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/sequence_agent_action.py",
      "lines": [
@@ -416,31 +469,67 @@
       342
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/sequence_agent_action.py",
+     "lines": [
+      52,
+      342
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
      "lines": [
-      1,
-      1
+      24,
+      24
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 2 files",
+      "text": "AutoUnpauseSequencesCoordinatorTaskExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
         "lines": [
-         1,
-         1
+         24,
+         24
+        ]
+       }
+      ]
+     },
+     {
+      "text": "AutoUnpauseSequencesWorkerTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+        "lines": [
+         90,
+         90
+        ]
+       }
+      ]
+     },
+     {
+      "text": "RegenerateSequenceTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
+        "lines": [
+         2841,
+         2841
         ]
        }
       ]
@@ -448,8 +537,23 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-outreach-seqregen-cell",
+    "label": "Seqregen Cell (library)",
+    "source": {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-integration-crm-salesforce",
+    "label": "Salesforce (library)",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
      "lines": [
@@ -458,77 +562,27 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/outreach/seqregen_cell — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/integration/crm/salesforce — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/agents/outreach/sequence — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-agents-outreach-sequence",
+    "label": "Sequence (library)",
     "source": {
-     "path": "backend/src/rox_core/models/sequence_agent_action.py",
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
      "lines": [
-      52,
-      52
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/sequence_agent_action.py",
-        "lines": [
-         52,
-         52
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-sequence_agent_action",
+    "id": "store-sequence-agent-action",
     "label": "sequence_agent_action",
     "source": {
      "path": "backend/src/rox_core/models/sequence_agent_action.py",
@@ -538,52 +592,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
-     "lines": [
-      7,
-      7
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-sequence_agent_action",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-sequence_agent_action",
-    "label": "uses (4)",
+    "src": "library-backend-src-ext-integrations-integration-crm-salesforce",
+    "dst": "store-sequence-agent-action",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
      "lines": [
@@ -593,9 +611,33 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-sequence_agent_action",
-    "label": "uses (1)",
+    "src": "library-backend-src-outreach-seqregen-cell",
+    "dst": "store-sequence-agent-action",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-agents-outreach-sequence",
+    "dst": "store-sequence-agent-action",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/unpause.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-sequence-agent-action",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/sequence_agent_action.py",
      "lines": [

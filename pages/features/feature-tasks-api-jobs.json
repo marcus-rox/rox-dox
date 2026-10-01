@@ -583,32 +583,46 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: api_jobs.",
+    "text": "Runs 4 background workers and workflows: PublicApiJobReconciliationWorkflow, PublicApiJobWorkflow, finalize, reconcile_public_api_jobs_page.",
+    "sources": [
+     {
+      "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+      "lines": [
+       21,
+       21
+      ]
+     },
+     {
+      "path": "backend/src/public_api/async_jobs/temporal/workflow.py",
+      "lines": [
+       36,
+       36
+      ]
+     },
+     {
+      "path": "backend/src/public_api/async_jobs/temporal/activities.py",
+      "lines": [
+       84,
+       84
+      ]
+     },
+     {
+      "path": "backend/src/public_api/async_jobs/temporal/reconciliation.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: api_jobs.",
     "sources": [
      {
       "path": "backend/src/public_api/async_jobs/jobs/models.py",
       "lines": [
        27,
        87
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 14, Business logic: 2.",
-    "sources": [
-     {
-      "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/public_api/async_jobs/operations/execution.py",
-      "lines": [
-       1,
-       1
       ]
      }
     ]
@@ -656,23 +670,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "14",
-     "0",
-     "backend/src/public_api/async_jobs/temporal (7), backend/src/public_api/async_jobs/jobs (6), backend/src/temporal/workflows (1)"
+     "Temporal workflows",
+     "Background workers / workflows",
+     "api_jobs",
+     "—"
     ],
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/public_api/async_jobs/operations (2)"
+     "Jobs (library)",
+     "Library code",
+     "api_jobs",
+     "—"
+    ],
+    [
+     "api_jobs",
+     "Database",
+     "api_jobs",
+     "—"
     ]
    ],
    "sources": [
@@ -684,14 +704,42 @@
      ]
     },
     {
-     "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
+     "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/public_api/async_jobs/temporal/workflow.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/public_api/async_jobs/temporal/activities.py",
+     "lines": [
+      84,
+      84
+     ]
+    },
+    {
+     "path": "backend/src/public_api/async_jobs/temporal/reconciliation.py",
+     "lines": [
+      36,
+      36
+     ]
+    },
+    {
+     "path": "backend/src/public_api/async_jobs/jobs/lifecycle.py",
      "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/public_api/async_jobs/operations/execution.py",
+     "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
      "lines": [
       1,
       1
@@ -718,30 +766,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+     "lines": [
+      21,
+      21
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
+    "source": {
+     "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
      "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/public_api/async_jobs/operations/execution.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/public_api/async_jobs/jobs/models.py",
      "lines": [
@@ -749,12 +810,88 @@
       87
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/public_api/async_jobs/jobs/models.py",
+     "lines": [
+      27,
+      87
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "temporal-backend-src-public-api-async-jobs-temporal",
+    "label": "Temporal workflows",
+    "source": {
+     "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "PublicApiJobReconciliationWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/public_api/async_jobs/temporal/reconciliation_workflow.py",
+        "lines": [
+         21,
+         21
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PublicApiJobWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/public_api/async_jobs/temporal/workflow.py",
+        "lines": [
+         36,
+         36
+        ]
+       }
+      ]
+     },
+     {
+      "text": "finalize",
+      "sources": [
+       {
+        "path": "backend/src/public_api/async_jobs/temporal/activities.py",
+        "lines": [
+         84,
+         84
+        ]
+       }
+      ]
+     },
+     {
+      "text": "reconcile_public_api_jobs_page",
+      "sources": [
+       {
+        "path": "backend/src/public_api/async_jobs/temporal/reconciliation.py",
+        "lines": [
+         36,
+         36
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-public-api-async-jobs-jobs",
+    "label": "Jobs (library)",
     "source": {
      "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
      "lines": [
@@ -763,77 +900,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/public_api/async_jobs/temporal — 7 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/async_jobs/temporal/activities.py",
-        "lines": [
-         13,
-         13
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/public_api/async_jobs/jobs — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/temporal/workflows — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/async_jobs/temporal/workflow.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/public_api/async_jobs/operations/execution.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/public_api/async_jobs/operations — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/async_jobs/operations/execution.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-api_jobs",
+    "id": "store-api-jobs",
     "label": "api_jobs",
     "source": {
      "path": "backend/src/public_api/async_jobs/jobs/models.py",
@@ -843,40 +915,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "workers",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/public_api/async_jobs/operations/execution.py",
-     "lines": [
-      7,
-      7
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/public_api/async_jobs/jobs/service.py",
-     "lines": [
-      26,
-      26
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-api_jobs",
-    "label": "uses (3)",
+    "src": "library-backend-src-public-api-async-jobs-jobs",
+    "dst": "store-api-jobs",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/public_api/async_jobs/jobs/acceptance.py",
      "lines": [
@@ -886,11 +934,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-api_jobs",
-    "label": "uses (1)",
+    "src": "temporal-backend-src-public-api-async-jobs-temporal",
+    "dst": "store-api-jobs",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/public_api/async_jobs/operations/execution.py",
+     "path": "backend/src/public_api/async_jobs/jobs/lifecycle.py",
      "lines": [
       1,
       1

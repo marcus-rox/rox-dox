@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import rox_core_domains
+from rox_dox.components import extract_file_facts
 from rox_dox.feature_pages import feature_pages
 from rox_dox.features import FeatureMap
 from rox_dox.schema import extract_tables
@@ -36,11 +37,26 @@ def main() -> None:
         domain_id: title for domain_id, title, *_ in rox_core_domains.DOMAINS
     }
     tables_by_commit = {}
+    components_by_commit = {}
     generated = []
     for feature_map in feature_maps:
         if feature_map.commit not in tables_by_commit:
             tables_by_commit[feature_map.commit] = extract_tables(
                 repo, feature_map.commit
+            )
+            source_paths = sorted(
+                {
+                    file.path
+                    for candidate in feature_maps
+                    if candidate.commit == feature_map.commit
+                    for feature in candidate.features
+                    for file in feature.files
+                }
+            )
+            components_by_commit[feature_map.commit] = extract_file_facts(
+                repo,
+                feature_map.commit,
+                source_paths,
             )
         generated.extend(
             feature_pages(
@@ -49,6 +65,7 @@ def main() -> None:
                 domain_title=domain_titles[feature_map.domain],
                 names=names.get(feature_map.domain, {}),
                 tables=tables_by_commit[feature_map.commit],
+                component_facts=components_by_commit[feature_map.commit],
             )
         )
 

@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-crm-writeback-audit-log",
- "title": "Crm Writeback Audit Log (+2 tables)",
+ "title": "Crm Writeback Audit Log",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -150,7 +150,26 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: crm_writeback_audit_log, crm_writeback_entity_snapshot.",
+    "text": "Runs 2 background workers and workflows: AuditLoggerCleanupCoordinatorTaskExecutor, AuditLoggerCleanupTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+      "lines": [
+       97,
+       97
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+      "lines": [
+       145,
+       145
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: crm_writeback_audit_log, crm_writeback_entity_snapshot.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
@@ -164,32 +183,6 @@
       "lines": [
        14,
        68
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 1, Business logic: 2, Models: 2.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
-      "lines": [
-       8,
-       8
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
-      "lines": [
-       17,
-       17
       ]
      }
     ]
@@ -235,29 +228,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors/writeback (1)"
+     "Writeback workers",
+     "Background workers / workflows",
+     "crm_writeback_audit_log",
+     "—"
     ],
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/ext_integrations/integration/crm/audit_log (2)"
+     "Audit Log (library)",
+     "Library code",
+     "crm_writeback_audit_log, crm_writeback_entity_snapshot",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Models (library)",
+     "Library code",
+     "crm_writeback_entity_snapshot",
+     "—"
+    ],
+    [
+     "crm_writeback_audit_log",
+     "Database",
+     "crm_writeback_audit_log",
+     "—"
+    ],
+    [
+     "crm_writeback_entity_snapshot",
+     "Database",
+     "crm_writeback_entity_snapshot",
+     "—"
     ]
    ],
    "sources": [
@@ -278,15 +283,15 @@
     {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
-      1,
-      1
+      97,
+      97
      ]
     },
     {
-     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
-      8,
-      8
+      145,
+      145
      ]
     },
     {
@@ -294,6 +299,20 @@
      "lines": [
       17,
       17
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+     "lines": [
+      14,
+      14
      ]
     }
    ],
@@ -317,30 +336,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      97,
+      97
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
+      97,
+      97
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+     "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
-    "source": {
-     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
-     "lines": [
-      8,
-      8
-     ]
-    }
-   },
-   {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
      "lines": [
@@ -348,95 +380,93 @@
       83
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      83
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors-writeback",
+    "label": "Writeback workers",
     "source": {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "AuditLoggerCleanupCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         97,
+         97
+        ]
+       }
+      ]
+     },
+     {
+      "text": "AuditLoggerCleanupTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         145,
+         145
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-ext-integrations-integration-crm-audit-log",
+    "label": "Audit Log (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors/writeback — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
-     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
      "lines": [
-      8,
-      8
+      14,
+      14
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/ext_integrations/integration/crm/audit_log — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-crm_writeback_audit_log",
+    "id": "store-crm-writeback-audit-log",
     "label": "crm_writeback_audit_log",
     "source": {
      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
@@ -446,12 +476,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-crm_writeback_entity_snapshot",
+    "id": "store-crm-writeback-entity-snapshot",
     "label": "crm_writeback_entity_snapshot",
     "source": {
      "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
@@ -461,52 +491,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
-     "lines": [
-      21,
-      21
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-crm_writeback_audit_log",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-crm_writeback_audit_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-integration-crm-audit-log",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
      "lines": [
@@ -516,9 +510,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-crm_writeback_entity_snapshot",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-integration-crm-audit-log",
+    "dst": "store-crm-writeback-entity-snapshot",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
      "lines": [
@@ -528,26 +522,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-crm_writeback_audit_log",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-crm_writeback_entity_snapshot",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-crm-writeback-entity-snapshot",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
      "lines": [
       14,
       14
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors-writeback",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      17
      ]
     }
    }

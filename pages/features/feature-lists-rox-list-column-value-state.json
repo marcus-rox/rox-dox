@@ -1,6 +1,6 @@
 {
  "id": "feature-lists-rox-list-column-value-state",
- "title": "Rox List Column Value State (+2 tables)",
+ "title": "Rox List Column Value State",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-lists",
@@ -137,7 +137,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: rox_list_column_value, rox_list_column_value_state.",
+    "text": "Stores data in: rox_list_column_value, rox_list_column_value_state.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
@@ -156,20 +156,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/research/clever_column/entity_state_service.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
-      "lines": [
-       28,
-       28
       ]
      }
     ]
@@ -210,23 +203,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/research/clever_column (1), backend/src/rox_core/api/enrichment (1)"
+     "Lists (library)",
+     "Library code",
+     "rox_list_column_value, rox_list_column_value_state",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models/lists (2)"
+     "Clever Column (library)",
+     "Library code",
+     "rox_list_column_value_state",
+     "—"
+    ],
+    [
+     "Enrichment (library)",
+     "Library code",
+     "rox_list_column_value, rox_list_column_value_state",
+     "—"
+    ],
+    [
+     "rox_list_column_value",
+     "Database",
+     "rox_list_column_value",
+     "—"
+    ],
+    [
+     "rox_list_column_value_state",
+     "Database",
+     "rox_list_column_value_state",
+     "—"
     ]
    ],
    "sources": [
@@ -245,6 +256,20 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/lists/rox_list_column_value_state.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
      "path": "backend/src/research/clever_column/entity_state_service.py",
      "lines": [
       1,
@@ -252,10 +277,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
+     "path": "backend/src/rox_core/api/enrichment/prospect_column_service.py",
      "lines": [
-      28,
-      28
+      1,
+      1
      ]
     }
    ],
@@ -279,19 +304,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/research/clever_column/entity_state_service.py",
+     "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
      "lines": [
-      1,
-      1
+      28,
+      28
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
      "lines": [
@@ -299,52 +336,24 @@
       234
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
+     "lines": [
+      28,
+      234
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/research/clever_column/entity_state_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/research/clever_column — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/research/clever_column/entity_state_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/enrichment/prospect_column_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models-lists",
+    "label": "Lists (library)",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
      "lines": [
@@ -353,25 +362,42 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/lists — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
-        "lines": [
-         28,
-         28
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-rox_list_column_value",
+    "id": "library-backend-src-research-clever-column",
+    "label": "Clever Column (library)",
+    "source": {
+     "path": "backend/src/research/clever_column/entity_state_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-enrichment",
+    "label": "Enrichment (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/prospect_column_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-rox-list-column-value",
     "label": "rox_list_column_value",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
@@ -381,12 +407,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_list_column_value_state",
+    "id": "store-rox-list-column-value-state",
     "label": "rox_list_column_value_state",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value_state.py",
@@ -396,28 +422,28 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
+    "src": "library-backend-src-research-clever-column",
+    "dst": "store-rox-list-column-value-state",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/research/clever_column/entity_state_service.py",
      "lines": [
-      19,
-      19
+      1,
+      1
      ]
     }
    },
    {
-    "src": "logic",
-    "dst": "store-rox_list_column_value",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-enrichment",
+    "dst": "store-rox-list-column-value",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/enrichment/prospect_column_service.py",
      "lines": [
@@ -427,11 +453,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-rox_list_column_value_state",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-enrichment",
+    "dst": "store-rox-list-column-value-state",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/research/clever_column/entity_state_service.py",
+     "path": "backend/src/rox_core/api/enrichment/prospect_column_service.py",
      "lines": [
       1,
       1
@@ -439,9 +465,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_list_column_value",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models-lists",
+    "dst": "store-rox-list-column-value",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value.py",
      "lines": [
@@ -451,9 +477,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_list_column_value_state",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models-lists",
+    "dst": "store-rox-list-column-value-state",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list_column_value_state.py",
      "lines": [

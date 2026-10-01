@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-external-entity-column-value",
- "title": "External Entity Column Value (+4 tables)",
+ "title": "External Entity Column Value",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -432,7 +432,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: external_entity_column_value, external_entity_column_value_cdc, external_entity_column_value_staging, external_entity_column_version.",
+    "text": "Runs 1 background workers and workflows: DataControllerSingleColumnRefreshTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+      "lines": [
+       46,
+       46
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: external_entity_column_value, external_entity_column_value_cdc, external_entity_column_value_staging, external_entity_column_version.",
     "sources": [
      {
       "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
@@ -460,25 +472,6 @@
       "lines": [
        552,
        566
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 2, Business logic: 11, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/_backfill_signal.py",
-      "lines": [
-       5,
-       5
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
-      "lines": [
-       36,
-       36
       ]
      }
     ]
@@ -545,29 +538,59 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "2",
-     "0",
-     "backend/src/tasks/executors (1), backend/src/temporal/workflows (1)"
+     "Data Controller workers",
+     "Background workers / workflows",
+     "external_entity_column_value, external_entity_column_value_staging, external_entity_column_version",
+     "—"
     ],
     [
-     "Business logic",
-     "11",
-     "0",
-     "backend/src/rox_core/api/column_value_mirror (2), backend/src/rox_core/api/data_controller (2), backend/src/rox_core/api/entities/column_values (2)"
+     "Shared (library)",
+     "Library code",
+     "external_entity_column_value",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_customer/real_time/models/entity (1)"
+     "Data Controller (library)",
+     "Library code",
+     "external_entity_column_version",
+     "—"
+    ],
+    [
+     "Column Values (library)",
+     "Library code",
+     "external_entity_column_value, external_entity_column_value_cdc",
+     "—"
+    ],
+    [
+     "external_entity_column_value",
+     "Database",
+     "external_entity_column_value",
+     "—"
+    ],
+    [
+     "external_entity_column_value_cdc",
+     "Database",
+     "external_entity_column_value_cdc",
+     "—"
+    ],
+    [
+     "external_entity_column_value_staging",
+     "Database",
+     "external_entity_column_value_staging",
+     "—"
+    ],
+    [
+     "external_entity_column_version",
+     "Database",
+     "external_entity_column_version",
+     "—"
     ]
    ],
    "sources": [
@@ -600,17 +623,38 @@
      ]
     },
     {
-     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
-      5,
-      5
+      46,
+      46
      ]
     },
     {
-     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
-      36,
-      36
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -618,7 +662,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Erd Mapping (+3 tables).",
+    "text": "Shares 1 files with Erd Mapping.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
@@ -646,30 +690,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      46,
+      46
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
-     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
-      5,
-      5
+      46,
+      46
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
      "lines": [
-      36,
-      36
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
      "lines": [
@@ -677,131 +734,43 @@
       661
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
+     "lines": [
+      606,
+      661
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-rox-core-api-data-controller",
+    "label": "Data Controller workers",
     "source": {
-     "path": "backend/src/tasks/executors/_backfill_signal.py",
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
-      5,
-      5
+      46,
+      46
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/_backfill_signal.py",
-        "lines": [
-         5,
-         5
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/temporal/workflows — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/temporal/workflows/_backfill_common.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
-     "lines": [
-      36,
-      36
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/column_value_mirror — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
-        "lines": [
-         36,
-         36
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/data_controller — 2 files",
+      "text": "DataControllerSingleColumnRefreshTaskExecutor",
       "sources": [
        {
         "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
         "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/column_values — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/eav_value_tables.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers/source_renderers/shared — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers/registry — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/registry/source_type_registry.py",
-        "lines": [
-         27,
-         27
+         46,
+         46
         ]
        }
       ]
@@ -809,35 +778,52 @@
     ]
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-unified-data-renderers-source-renderers-shared",
+    "label": "Shared (library)",
     "source": {
-     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
      "lines": [
-      36,
-      36
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
-        "lines": [
-         36,
-         36
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-external_entity_column_value",
+    "id": "library-backend-src-rox-core-api-data-controller",
+    "label": "Data Controller (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-entities-column-values",
+    "label": "Column Values (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-external-entity-column-value",
     "label": "external_entity_column_value",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
@@ -847,12 +833,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-external_entity_column_value_cdc",
+    "id": "store-external-entity-column-value-cdc",
     "label": "external_entity_column_value_cdc",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
@@ -862,12 +848,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-external_entity_column_value_staging",
+    "id": "store-external-entity-column-value-staging",
     "label": "external_entity_column_value_staging",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
@@ -877,12 +863,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-external_entity_column_version",
+    "id": "store-external-entity-column-version",
     "label": "external_entity_column_version",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
@@ -892,42 +878,18 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (7)",
+    "src": "library-backend-src-rox-core-api-data-controller",
+    "dst": "store-external-entity-column-version",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
-     "lines": [
-      36,
-      36
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/_backfill_signal.py",
-     "lines": [
-      5,
-      5
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-external_entity_column_value",
-    "label": "uses (4)",
-    "source": {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
      "lines": [
       1,
       1
@@ -935,9 +897,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-external_entity_column_value_cdc",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-column-values",
+    "dst": "store-external-entity-column-value",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
      "lines": [
@@ -947,9 +909,33 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-external_entity_column_value_staging",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-column-values",
+    "dst": "store-external-entity-column-value-cdc",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-renderers-source-renderers-shared",
+    "dst": "store-external-entity-column-value",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/external_column_value.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-rox-core-api-data-controller",
+    "dst": "store-external-entity-column-value",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
@@ -959,9 +945,21 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-external_entity_column_version",
-    "label": "uses (2)",
+    "src": "task_executor-backend-src-rox-core-api-data-controller",
+    "dst": "store-external-entity-column-value-staging",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-rox-core-api-data-controller",
+    "dst": "store-external-entity-column-version",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
@@ -981,86 +979,7 @@
    "external_entity_column_version"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "external_entity_column_value",
-    "dst": "external_entity_column_value_cdc",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      708,
-      708
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "external_entity_column_value",
-    "dst": "external_entity_column_value_staging",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      664,
-      664
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "external_entity_column_value",
-    "dst": "external_entity_column_version",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      552,
-      552
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "external_entity_column_value_cdc",
-    "dst": "external_entity_column_value_staging",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      664,
-      664
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "external_entity_column_value_cdc",
-    "dst": "external_entity_column_version",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      552,
-      552
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "external_entity_column_value_staging",
-    "dst": "external_entity_column_version",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/column_value.py",
-     "lines": [
-      552,
-      552
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -1079,7 +998,7 @@
    }
   },
   {
-   "label": "Erd Mapping (+3 tables)",
+   "label": "Erd Mapping",
    "page": "feature-crm-erd-mapping",
    "source": {
     "path": "backend/src/rox_core/api/data_controller/spark_executor.py",

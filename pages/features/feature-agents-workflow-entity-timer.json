@@ -1,6 +1,6 @@
 {
  "id": "feature-agents-workflow-entity-timer",
- "title": "Workflow Entity Timer (+2 tables)",
+ "title": "Workflow Entity Timer",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-agents",
@@ -259,7 +259,33 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: workflow_entity_timer, workflow_timer_trigger_config.",
+    "text": "Runs 3 background workers and workflows: EntityTimerPollerWorkflow, execute_timer_batch, fetch_due_timers.",
+    "sources": [
+     {
+      "path": "backend/src/temporal/workflows/entity_timer_poller.py",
+      "lines": [
+       51,
+       51
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/entity_timers/fetch_due_timers.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: workflow_entity_timer, workflow_timer_trigger_config.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/workflow_entity_timer.py",
@@ -273,32 +299,6 @@
       "lines": [
        19,
        279
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 4, Business logic: 3, Models: 2.",
-    "sources": [
-     {
-      "path": "backend/src/temporal/activities/entity_timers/__init__.py",
-      "lines": [
-       3,
-       3
-      ]
-     },
-     {
-      "path": "backend/src/workflow/entity_timer_service.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/workflow_entity_timer.py",
-      "lines": [
-       35,
-       35
       ]
      }
     ]
@@ -365,29 +365,59 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "4",
-     "0",
-     "backend/src/temporal/activities/entity_timers (3), backend/src/temporal/workflows (1)"
+     "Entity Timers workflows",
+     "Background workers / workflows",
+     "workflow_entity_timer",
+     "—"
     ],
     [
-     "Business logic",
-     "3",
-     "0",
-     "backend/src/workflow (1), backend/src/workflow/triggers (1), backend/src/workflow/triggers/handlers (1)"
+     "Workflows workflows",
+     "Background workers / workflows",
+     "—",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Models (library)",
+     "Library code",
+     "workflow_entity_timer, workflow_timer_trigger_config",
+     "—"
+    ],
+    [
+     "Workflow (library)",
+     "Library code",
+     "workflow_entity_timer, workflow_timer_trigger_config",
+     "—"
+    ],
+    [
+     "Triggers (library)",
+     "Library code",
+     "workflow_timer_trigger_config",
+     "—"
+    ],
+    [
+     "Handlers (library)",
+     "Library code",
+     "workflow_entity_timer, workflow_timer_trigger_config",
+     "—"
+    ],
+    [
+     "workflow_entity_timer",
+     "Database",
+     "workflow_entity_timer",
+     "—"
+    ],
+    [
+     "workflow_timer_trigger_config",
+     "Database",
+     "workflow_timer_trigger_config",
+     "—"
     ]
    ],
    "sources": [
@@ -406,10 +436,45 @@
      ]
     },
     {
-     "path": "backend/src/temporal/activities/entity_timers/__init__.py",
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
      "lines": [
-      3,
-      3
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/entity_timers/fetch_due_timers.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/entity_timer_poller.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_entity_timer.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_timer_trigger_config.py",
+     "lines": [
+      19,
+      19
      ]
     },
     {
@@ -420,10 +485,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/workflow_entity_timer.py",
+     "path": "backend/src/workflow/triggers/trigger_service.py",
      "lines": [
-      35,
-      35
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -447,19 +519,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/temporal/activities/entity_timers/__init__.py",
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
      "lines": [
-      3,
-      3
+      22,
+      22
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_entity_timer.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/workflow_entity_timer.py",
      "lines": [
@@ -467,43 +563,83 @@
       686
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_entity_timer.py",
+     "lines": [
+      35,
+      686
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "temporal-backend-src-temporal-activities-entity-timers",
+    "label": "Entity Timers workflows",
     "source": {
-     "path": "backend/src/temporal/activities/entity_timers/__init__.py",
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
      "lines": [
-      3,
-      3
+      22,
+      22
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/temporal/activities/entity_timers — 3 files",
+      "text": "execute_timer_batch",
       "sources": [
        {
-        "path": "backend/src/temporal/activities/entity_timers/__init__.py",
+        "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
         "lines": [
-         3,
-         3
+         22,
+         22
         ]
        }
       ]
      },
      {
-      "text": "backend/src/temporal/workflows — 1 files",
+      "text": "fetch_due_timers",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/entity_timers/fetch_due_timers.py",
+        "lines": [
+         20,
+         20
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-temporal-workflows",
+    "label": "Workflows workflows",
+    "source": {
+     "path": "backend/src/temporal/workflows/entity_timer_poller.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "EntityTimerPollerWorkflow",
       "sources": [
        {
         "path": "backend/src/temporal/workflows/entity_timer_poller.py",
         "lines": [
-         18,
-         18
+         51,
+         51
         ]
        }
       ]
@@ -511,60 +647,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/workflow/entity_timer_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/workflow — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/entity_timer_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/triggers — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/triggers/trigger_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/triggers/handlers — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/workflow_entity_timer.py",
      "lines": [
@@ -573,25 +657,57 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/workflow_entity_timer.py",
-        "lines": [
-         35,
-         35
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-workflow_entity_timer",
+    "id": "library-backend-src-workflow",
+    "label": "Workflow (library)",
+    "source": {
+     "path": "backend/src/workflow/entity_timer_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-workflow-triggers",
+    "label": "Triggers (library)",
+    "source": {
+     "path": "backend/src/workflow/triggers/trigger_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-workflow-triggers-handlers",
+    "label": "Handlers (library)",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow-entity-timer",
     "label": "workflow_entity_timer",
     "source": {
      "path": "backend/src/rox_core/models/workflow_entity_timer.py",
@@ -601,12 +717,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-workflow_timer_trigger_config",
+    "id": "store-workflow-timer-trigger-config",
     "label": "workflow_timer_trigger_config",
     "source": {
      "path": "backend/src/rox_core/models/workflow_timer_trigger_config.py",
@@ -616,64 +732,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-workflow_entity_timer",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-workflow_entity_timer",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/workflow/entity_timer_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-workflow_timer_trigger_config",
-    "label": "uses (3)",
-    "source": {
-     "path": "backend/src/workflow/entity_timer_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-workflow_entity_timer",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-workflow-entity-timer",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/workflow_entity_timer.py",
      "lines": [
@@ -683,14 +751,86 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-workflow_timer_trigger_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-workflow-timer-trigger-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/workflow_timer_trigger_config.py",
      "lines": [
       19,
       19
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow",
+    "dst": "store-workflow-entity-timer",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/entity_timer_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow",
+    "dst": "store-workflow-timer-trigger-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/entity_timer_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-triggers",
+    "dst": "store-workflow-timer-trigger-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/trigger_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-triggers-handlers",
+    "dst": "store-workflow-entity-timer",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-triggers-handlers",
+    "dst": "store-workflow-timer-trigger-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/entity_timer.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-activities-entity-timers",
+    "dst": "store-workflow-entity-timer",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/temporal/activities/entity_timers/execute_timer_batch.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }

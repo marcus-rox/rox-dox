@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-entity-link-staging",
- "title": "Entity Link Staging (+2 tables)",
+ "title": "Entity Link Staging",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -152,7 +152,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: entity_link_staging, graph_staging.",
+    "text": "Stores data in: entity_link_staging, graph_staging.",
     "sources": [
      {
       "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
@@ -171,20 +171,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 3, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
       "lines": [
        30,
        30
-      ]
-     },
-     {
-      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
-      "lines": [
-       65,
-       65
       ]
      }
     ]
@@ -225,23 +218,35 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "3",
-     "0",
-     "backend/src/data_store/graph/v4 (2), backend/src/data_store/batch (1)"
+     "V4 (library)",
+     "Library code",
+     "—",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_customer/real_time/models/entity (2)"
+     "Entity (library)",
+     "Library code",
+     "entity_link_staging, graph_staging",
+     "—"
+    ],
+    [
+     "entity_link_staging",
+     "Database",
+     "entity_link_staging",
+     "—"
+    ],
+    [
+     "graph_staging",
+     "Database",
+     "graph_staging",
+     "—"
     ]
    ],
    "sources": [
@@ -262,8 +267,8 @@
     {
      "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
      "lines": [
-      30,
-      30
+      1,
+      1
      ]
     },
     {
@@ -272,13 +277,27 @@
       65,
       65
      ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      92,
+      92
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+     "lines": [
+      187,
+      187
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 1 files with Graph (+6 tables).",
+    "text": "Shares 1 files with Graph.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
@@ -290,7 +309,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Graph Cdc (+3 tables).",
+    "text": "Shares 2 files with Graph Cdc.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/datum_processor.py",
@@ -306,30 +325,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
      "lines": [
-      30,
-      30
+      1,
+      1
      ]
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
      "lines": [
-      65,
-      65
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
      "lines": [
@@ -337,52 +357,39 @@
       109
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+     "lines": [
+      92,
+      109
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-data-store-graph-v4",
+    "label": "V4 (library)",
     "source": {
      "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
      "lines": [
-      30,
-      30
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/data_store/graph/v4 — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-        "lines": [
-         47,
-         47
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store/batch — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-        "lines": [
-         30,
-         30
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-customer-real-time-models-entity",
+    "label": "Entity (library)",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
      "lines": [
@@ -391,25 +398,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
-        "lines": [
-         65,
-         65
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-entity_link_staging",
+    "id": "store-entity-link-staging",
     "label": "entity_link_staging",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
@@ -419,12 +413,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-graph_staging",
+    "id": "store-graph-staging",
     "label": "graph_staging",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
@@ -434,28 +428,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-     "lines": [
-      185,
-      185
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-entity_link_staging",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-real-time-models-entity",
+    "dst": "store-entity-link-staging",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
      "lines": [
@@ -465,9 +447,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-graph_staging",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-real-time-models-entity",
+    "dst": "store-graph-staging",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
      "lines": [
@@ -504,7 +486,7 @@
    }
   },
   {
-   "label": "Graph (+6 tables)",
+   "label": "Graph",
    "page": "feature-crm-graph",
    "source": {
     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
@@ -515,7 +497,7 @@
    }
   },
   {
-   "label": "Graph Cdc (+3 tables)",
+   "label": "Graph Cdc",
    "page": "feature-crm-graph-cdc",
    "source": {
     "path": "backend/src/data_store/graph/v4/datum_processor.py",

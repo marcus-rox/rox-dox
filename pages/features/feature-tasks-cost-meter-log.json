@@ -1,6 +1,6 @@
 {
  "id": "feature-tasks-cost-meter-log",
- "title": "Cost Meter Log (+5 tables)",
+ "title": "Cost Meter Log",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tasks",
@@ -734,7 +734,40 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: cost_meter_log, data_extraction_cost_meter_log, extraction_task_status, insight_cost_meter_log, task_params_log.",
+    "text": "Calls outside services: LiteLLM, OpenAI.",
+    "sources": [
+     {
+      "path": "backend/src/agents_core/rxa/models/api_models.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/agents_core/rxa/models/api_models.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+      "lines": [
+       2,
+       2
+      ]
+     },
+     {
+      "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: cost_meter_log, data_extraction_cost_meter_log, extraction_task_status, insight_cost_meter_log, task_params_log.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/cost_meter.py",
@@ -774,27 +807,13 @@
     ]
    },
    {
-    "text": "Files by layer: HTTP routes: 2, Business logic: 25, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/chat/routes/testing/router_dto.py",
-      "lines": [
-       10,
-       10
-      ]
-     },
      {
       "path": "backend/src/agent_framework/httpx/http_client.py",
       "lines": [
        27,
        27
-      ]
-     },
-     {
-      "path": "backend/src/agents_core/rxa/models/api_models.py",
-      "lines": [
-       8,
-       8
       ]
      }
     ]
@@ -868,29 +887,77 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "2",
-     "0",
-     "backend/src/chat/routes/testing (1), backend/src/public_api/routes/enrichment (1)"
+     "Engines (library)",
+     "Library code",
+     "—",
+     "OpenAI"
     ],
     [
-     "Business logic",
-     "25",
-     "0",
-     "backend/src/agents_core/rxa/engines (3), backend/src/rox_core/api/metering (3), backend/src/data_store (2)"
+     "Models (library)",
+     "Library code",
+     "—",
+     "LiteLLM"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/agents_core/rxa/models (1), backend/src/rox_core/models (1)"
+     "Cold Storage Store (library)",
+     "Library code",
+     "cost_meter_log, data_extraction_cost_meter_log, extraction_task_status, insight_cost_meter_log",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "cost_meter_log, data_extraction_cost_meter_log",
+     "—"
+    ],
+    [
+     "cost_meter_log",
+     "Database",
+     "cost_meter_log",
+     "—"
+    ],
+    [
+     "data_extraction_cost_meter_log",
+     "Database",
+     "data_extraction_cost_meter_log",
+     "—"
+    ],
+    [
+     "extraction_task_status",
+     "Database",
+     "extraction_task_status",
+     "—"
+    ],
+    [
+     "insight_cost_meter_log",
+     "Database",
+     "insight_cost_meter_log",
+     "—"
+    ],
+    [
+     "task_params_log",
+     "Database",
+     "task_params_log",
+     "—"
+    ],
+    [
+     "LiteLLM",
+     "External service",
+     "—",
+     "LiteLLM"
+    ],
+    [
+     "OpenAI",
+     "External service",
+     "—",
+     "OpenAI"
     ]
    ],
    "sources": [
@@ -930,24 +997,38 @@
      ]
     },
     {
-     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
      "lines": [
-      10,
-      10
-     ]
-    },
-    {
-     "path": "backend/src/agent_framework/httpx/http_client.py",
-     "lines": [
-      27,
-      27
+      2,
+      2
      ]
     },
     {
      "path": "backend/src/agents_core/rxa/models/api_models.py",
      "lines": [
-      8,
-      8
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      136,
+      136
      ]
     }
    ],
@@ -971,30 +1052,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
      "lines": [
-      10,
-      10
+      2,
+      2
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/agent_framework/httpx/http_client.py",
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
      "lines": [
-      27,
-      27
+      2,
+      2
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
      "lines": [
@@ -1002,179 +1084,95 @@
       133
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      133
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "library-backend-src-agents-core-rxa-engines",
+    "label": "Engines (library)",
     "source": {
-     "path": "backend/src/chat/routes/testing/router_dto.py",
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
      "lines": [
-      10,
-      10
+      2,
+      2
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/chat/routes/testing — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/testing/router_dto.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/public_api/routes/enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/routes/enrichment/service.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/agent_framework/httpx/http_client.py",
-     "lines": [
-      27,
-      27
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/agents_core/rxa/engines — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/metering — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/metering/cost_calculator.py",
-        "lines": [
-         27,
-         27
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/artifact_vector_store/file_processor.py",
-        "lines": [
-         5,
-         5
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/enrichment/services — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/enrichment/services/enrichment_service.py",
-        "lines": [
-         35,
-         35
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/processors/people_search_processor/utils/embedding_utils.py",
-        "lines": [
-         5,
-         5
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/execution_graph/packages/code — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/execution_graph/packages/code/__init__.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-agents-core-rxa-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/agents_core/rxa/models/api_models.py",
      "lines": [
-      8,
-      8
+      4,
+      4
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/agents_core/rxa/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agents_core/rxa/models/api_models.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/cost_meter.py",
-        "lines": [
-         46,
-         46
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-cost_meter_log",
+    "id": "library-backend-src-data-store-cold-storage-store",
+    "label": "Cold Storage Store (library)",
+    "source": {
+     "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
+    "source": {
+     "path": "backend/src/rox_core/models/cost_meter.py",
+     "lines": [
+      46,
+      46
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-cost-meter-log",
     "label": "cost_meter_log",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
@@ -1184,12 +1182,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-data_extraction_cost_meter_log",
+    "id": "store-data-extraction-cost-meter-log",
     "label": "data_extraction_cost_meter_log",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
@@ -1199,12 +1197,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-extraction_task_status",
+    "id": "store-extraction-task-status",
     "label": "extraction_task_status",
     "source": {
      "path": "backend/src/rox_core/models/data_extraction_task_status.py",
@@ -1214,12 +1212,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-insight_cost_meter_log",
+    "id": "store-insight-cost-meter-log",
     "label": "insight_cost_meter_log",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
@@ -1229,12 +1227,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-task_params_log",
+    "id": "store-task-params-log",
     "label": "task_params_log",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
@@ -1244,52 +1242,46 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-litellm",
+    "label": "LiteLLM",
+    "source": {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-openai",
+    "label": "OpenAI",
+    "source": {
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/agents_core/rxa/engines/llmengine.py",
-     "lines": [
-      2,
-      2
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/agents_core/rxa/models/api_models.py",
-     "lines": [
-      8,
-      8
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/chat/routes/testing/router_dto.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-cost_meter_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-data-store-cold-storage-store",
+    "dst": "store-cost-meter-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
      "lines": [
@@ -1299,9 +1291,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-data_extraction_cost_meter_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-data-store-cold-storage-store",
+    "dst": "store-data-extraction-cost-meter-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
      "lines": [
@@ -1311,9 +1303,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-extraction_task_status",
-    "label": "uses (1)",
+    "src": "library-backend-src-data-store-cold-storage-store",
+    "dst": "store-extraction-task-status",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
      "lines": [
@@ -1323,9 +1315,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-insight_cost_meter_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-data-store-cold-storage-store",
+    "dst": "store-insight-cost-meter-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
      "lines": [
@@ -1335,9 +1327,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-cost_meter_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-cost-meter-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
      "lines": [
@@ -1347,14 +1339,38 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-data_extraction_cost_meter_log",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-data-extraction-cost-meter-log",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/cost_meter.py",
      "lines": [
       136,
       136
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-agents-core-rxa-models",
+    "dst": "external-litellm",
+    "label": "calls LiteLLM",
+    "source": {
+     "path": "backend/src/agents_core/rxa/models/api_models.py",
+     "lines": [
+      4,
+      4
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-agents-core-rxa-engines",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+     "lines": [
+      2,
+      2
      ]
     }
    }
@@ -1372,105 +1388,14 @@
   "nosql": [],
   "relations": [
    {
-    "src": "cost_meter_log",
-    "dst": "data_extraction_cost_meter_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      136,
-      136
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "cost_meter_log",
-    "dst": "insight_cost_meter_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      153,
-      153
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "cost_meter_log",
-    "dst": "task_params_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      334,
-      334
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "data_extraction_cost_meter_log",
     "dst": "extraction_task_status",
-    "label": "commented_fk",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      145,
-      145
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "data_extraction_cost_meter_log",
-    "dst": "extraction_task_status",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/util/cost_meter_utils.py",
      "lines": [
       784,
       784
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "data_extraction_cost_meter_log",
-    "dst": "insight_cost_meter_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      153,
-      153
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "data_extraction_cost_meter_log",
-    "dst": "task_params_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      334,
-      334
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "insight_cost_meter_log",
-    "dst": "task_params_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/cost_meter.py",
-     "lines": [
-      334,
-      334
      ]
     },
     "kind": "symbolic"

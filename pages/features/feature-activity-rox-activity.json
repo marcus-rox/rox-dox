@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-rox-activity",
- "title": "Rox Activity",
+ "title": "Activity records",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -101,7 +101,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: rox_activity.",
+    "text": "Stores data in: rox_activity.",
     "sources": [
      {
       "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
@@ -113,20 +113,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/activity/business.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
-      "lines": [
-       31,
-       31
       ]
      }
     ]
@@ -160,23 +153,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/rox_core/api/activity (2)"
+     "Activity (library)",
+     "Library code",
+     "rox_activity",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_customer/real_time/models (1)"
+     "Models (library)",
+     "Library code",
+     "rox_activity",
+     "—"
+    ],
+    [
+     "rox_activity",
+     "Database",
+     "rox_activity",
+     "—"
     ]
    ],
    "sources": [
@@ -222,8 +221,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/activity/business.py",
      "lines": [
@@ -233,19 +232,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
+     "path": "backend/src/rox_core/api/activity/business.py",
      "lines": [
-      31,
-      31
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
      "lines": [
@@ -253,12 +253,24 @@
       96
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
+     "lines": [
+      31,
+      96
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-activity",
+    "label": "Activity (library)",
     "source": {
      "path": "backend/src/rox_core/api/activity/business.py",
      "lines": [
@@ -267,26 +279,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/activity — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-customer-real-time-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
      "lines": [
@@ -295,25 +294,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/real_time/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
-        "lines": [
-         31,
-         31
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-rox_activity",
+    "id": "store-rox-activity",
     "label": "rox_activity",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
@@ -323,28 +309,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/activity/business.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-rox_activity",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-activity",
+    "dst": "store-rox-activity",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/activity/business.py",
      "lines": [
@@ -354,9 +328,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_activity",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-real-time-models",
+    "dst": "store-rox-activity",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
      "lines": [

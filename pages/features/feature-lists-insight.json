@@ -1,6 +1,6 @@
 {
  "id": "feature-lists-insight",
- "title": "Insight (+4 tables)",
+ "title": "Insight",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-lists",
@@ -1257,7 +1257,78 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: insight, insight_feedback, insight_filtering, insight_user_status.",
+    "text": "Serves 17 HTTP endpoints in 2 API groups: Insight Configs, Slack Agent.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/insights/endpoints.py",
+      "lines": [
+       139,
+       139
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+      "lines": [
+       3696,
+       3696
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 3 background workers and workflows: OnDemandInsightTaskExecutor, PublicDataAccountRefreshCoordinatorTaskExecutor, PublicDataAccountRefreshTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/on_demand_insight.py",
+      "lines": [
+       15,
+       15
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+      "lines": [
+       59,
+       59
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+      "lines": [
+       154,
+       154
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: Slack.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+      "lines": [
+       18,
+       18
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/rox_command_handlers.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+      "lines": [
+       19,
+       19
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: insight, insight_feedback, insight_filtering, insight_user_status.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/insight.py",
@@ -1285,46 +1356,6 @@
       "lines": [
        14,
        124
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Web screens: 14, HTTP routes: 2, Background workers: 2, Business logic: 23, Models: 5.",
-    "sources": [
-     {
-      "path": "web/apps/app-platform/prepared-leads/src/lib/useLeadDetail.ts",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/insights/endpoints.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/on_demand_insight.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/data_interface/insight/live.py",
-      "lines": [
-       2,
-       2
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/insight_feedback.py",
-      "lines": [
-       6,
-       6
       ]
      }
     ]
@@ -1429,41 +1460,71 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Web screens",
-     "13",
-     "1",
-     "web/apps/app-platform/prepared-leads/src/lib (2), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/customerTable/customerTableBatchActions (2), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/accountColumns (1)"
+     "Web app",
+     "Web app",
+     "—",
+     "—"
     ],
     [
-     "HTTP routes",
-     "2",
-     "0",
-     "backend/src/rox_core/api/insights (1), backend/src/rox_core/api/slack_agent (1)"
+     "Insight Configs API",
+     "HTTP API",
+     "—",
+     "—"
     ],
     [
-     "Background workers",
-     "2",
-     "0",
-     "backend/src/tasks/executors (2)"
+     "Slack Agent API",
+     "HTTP API",
+     "insight_feedback",
+     "Slack"
     ],
     [
-     "Business logic",
-     "23",
-     "0",
-     "backend/src/rox_core/api/alerts/processors (4), backend/src/agent_framework/data_interface/insight (2), backend/src/insights (2)"
+     "Executors workers",
+     "Background workers / workflows",
+     "insight, insight_user_status",
+     "—"
     ],
     [
-     "Models",
-     "5",
-     "0",
-     "backend/src/rox_core/models (5)"
+     "Insight (library)",
+     "Library code",
+     "insight",
+     "—"
+    ],
+    [
+     "insight",
+     "Database",
+     "insight",
+     "—"
+    ],
+    [
+     "insight_feedback",
+     "Database",
+     "insight_feedback",
+     "—"
+    ],
+    [
+     "insight_filtering",
+     "Database",
+     "insight_filtering",
+     "—"
+    ],
+    [
+     "insight_user_status",
+     "Database",
+     "insight_user_status",
+     "—"
+    ],
+    [
+     "Slack",
+     "External service",
+     "—",
+     "Slack"
     ]
    ],
    "sources": [
@@ -1503,10 +1564,122 @@
      ]
     },
     {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/customerTable/customerTableBatchActions/CustomerTableBatchTrackAccountsModal.tsx",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/accountColumns/useAccountsColumns.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/useAccountsV4Columns.tsx",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/home/useDeepLinkInsight.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/useInsightsV2WithCompanyFilter.ts",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/insights/endpoints.py",
+     "lines": [
+      139,
+      139
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/insights/endpoints.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/insights/endpoints.py",
+     "lines": [
+      212,
+      212
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+     "lines": [
+      3696,
+      3696
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+     "lines": [
+      712,
+      712
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+     "lines": [
+      3737,
+      3737
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+     "lines": [
+      3778,
+      3778
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/insight_feedback.py",
      "lines": [
       9,
       9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/slack_integration/rox_command_handlers.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/on_demand_insight.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+     "lines": [
+      154,
+      154
      ]
     },
     {
@@ -1517,17 +1690,17 @@
      ]
     },
     {
-     "path": "backend/src/agent_framework/data_interface/insight/live.py",
+     "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      2,
-      2
+      1,
+      1
      ]
     },
     {
-     "path": "backend/src/rox_core/models/insight_feedback.py",
+     "path": "backend/src/agent_framework/data_interface/insight/live.py",
      "lines": [
-      6,
-      6
+      1,
+      1
      ]
     }
    ],
@@ -1535,7 +1708,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Column Metadata (+2 tables).",
+    "text": "Shares 1 files with Column Metadata.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
@@ -1547,7 +1720,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Column Alert (+2 tables).",
+    "text": "Shares 1 files with Column Alert.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
@@ -1559,7 +1732,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Rox List Column Metadata (+4 tables).",
+    "text": "Shares 1 files with Rox List Column Metadata.",
     "sources": [
      {
       "path": "backend/src/research/endpoints.py",
@@ -1587,8 +1760,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-web",
-    "label": "Web screens",
+    "id": "group-web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/app-platform/prepared-leads/src/lib/useLeadDetail.ts",
      "lines": [
@@ -1598,30 +1771,55 @@
     }
    },
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/insights/endpoints.py",
      "lines": [
-      9,
-      9
+      139,
+      139
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/rox_core/api/insights/endpoints.py",
+     "lines": [
+      139,
+      139
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/on_demand_insight.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/agent_framework/data_interface/insight/live.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/insight.py",
      "lines": [
@@ -1629,12 +1827,36 @@
       714
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/insight.py",
+     "lines": [
+      75,
+      714
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/ext_integrations/slack_integration/rox_command_handlers.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "web",
-    "label": "Web screens",
+    "id": "web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/app-platform/prepared-leads/src/lib/useLeadDetail.ts",
      "lines": [
@@ -1643,7 +1865,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-web",
+    "group": "group-web-app",
     "many": false,
     "details": [
      {
@@ -1707,7 +1929,7 @@
       ]
      },
      {
-      "text": "web/apps/web/src/app/hooks — 1 files",
+      "text": "+7 more directories",
       "sources": [
        {
         "path": "web/apps/web/src/app/hooks/useInsightsV2WithCompanyFilter.ts",
@@ -1721,39 +1943,87 @@
     ]
    },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-insight-configs",
+    "label": "Insight Configs API",
     "source": {
      "path": "backend/src/rox_core/api/insights/endpoints.py",
      "lines": [
-      9,
-      9
+      139,
+      139
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/rox_core/api/insights — 1 files",
+      "text": "GET /insight_configs",
       "sources": [
        {
         "path": "backend/src/rox_core/api/insights/endpoints.py",
         "lines": [
-         9,
-         9
+         139,
+         139
         ]
        }
       ]
      },
      {
-      "text": "backend/src/rox_core/api/slack_agent — 1 files",
+      "text": "POST /insight_configs",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+        "path": "backend/src/rox_core/api/insights/endpoints.py",
         "lines": [
-         41,
-         41
+         139,
+         139
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /insight_configs",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/insights/endpoints.py",
+        "lines": [
+         139,
+         139
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /insights_v2",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/insights/endpoints.py",
+        "lines": [
+         56,
+         56
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /insights_v2",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/insights/endpoints.py",
+        "lines": [
+         56,
+         56
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+8 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/insights/endpoints.py",
+        "lines": [
+         212,
+         212
         ]
        }
       ]
@@ -1761,148 +2031,135 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "api-slack-agent",
+    "label": "Slack Agent API",
+    "source": {
+     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+     "lines": [
+      3696,
+      3696
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "POST /slack_agent/slack/commands",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+        "lines": [
+         3696,
+         3696
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /slack_agent/slack/events",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+        "lines": [
+         712,
+         712
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /slack_agent/slack/interactions",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+        "lines": [
+         3737,
+         3737
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /slack_agent/slack/options",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
+        "lines": [
+         3778,
+         3778
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/on_demand_insight.py",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "OnDemandInsightTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/on_demand_insight.py",
+        "lines": [
+         15,
+         15
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PublicDataAccountRefreshCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+        "lines": [
+         59,
+         59
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PublicDataAccountRefreshTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+        "lines": [
+         154,
+         154
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-agent-framework-data-interface-insight",
+    "label": "Insight (library)",
+    "source": {
+     "path": "backend/src/agent_framework/data_interface/insight/live.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/on_demand_insight.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/agent_framework/data_interface/insight/live.py",
-     "lines": [
-      2,
-      2
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/alerts/processors — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
-        "lines": [
-         72,
-         72
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/data_interface/insight — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/data_interface/insight/live.py",
-        "lines": [
-         2,
-         2
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/insights — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
-        "lines": [
-         43,
-         43
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/agents — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/agents/business.py",
-        "lines": [
-         39,
-         39
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/alerts — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/dto.py",
-        "lines": [
-         14,
-         14
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/insights — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/insights/business.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/models/insight_feedback.py",
-     "lines": [
-      6,
-      6
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/insight_feedback.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
     "id": "store-insight",
@@ -1915,12 +2172,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-insight_feedback",
+    "id": "store-insight-feedback",
     "label": "insight_feedback",
     "source": {
      "path": "backend/src/rox_core/models/insight_feedback.py",
@@ -1930,12 +2187,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-insight_filtering",
+    "id": "store-insight-filtering",
     "label": "insight_filtering",
     "source": {
      "path": "backend/src/rox_core/models/insight_filtering.py",
@@ -1945,12 +2202,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-insight_user_status",
+    "id": "store-insight-user-status",
     "label": "insight_user_status",
     "source": {
      "path": "backend/src/rox_core/models/insight_user_status.py",
@@ -1960,30 +2217,33 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-slack",
+    "label": "Slack",
+    "source": {
+     "path": "backend/src/ext_integrations/slack_integration/rox_command_handlers.py",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (13)",
+    "src": "web-app",
+    "dst": "api-insight-configs",
+    "label": "HTTP",
     "source": {
-     "path": "backend/src/agent_framework/data_interface/insight/live.py",
-     "lines": [
-      66,
-      66
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "routes",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/slack_agent/__init__.py",
+     "path": "web/apps/app-platform/prepared-leads/src/lib/useLeadDetail.ts",
      "lines": [
       1,
       1
@@ -1991,11 +2251,11 @@
     }
    },
    {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (6)",
+    "src": "api-slack-agent",
+    "dst": "store-insight-feedback",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/insights/endpoints.py",
+     "path": "backend/src/rox_core/models/insight_feedback.py",
      "lines": [
       9,
       9
@@ -2003,33 +2263,21 @@
     }
    },
    {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
-     "lines": [
-      96,
-      96
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/tasks/executors/on_demand_insight.py",
-     "lines": [
-      27,
-      27
-     ]
-    }
-   },
-   {
-    "src": "workers",
+    "src": "library-backend-src-agent-framework-data-interface-insight",
     "dst": "store-insight",
-    "label": "uses (2)",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/agent_framework/data_interface/insight/live.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-insight",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/tasks/executors/on_demand_insight.py",
      "lines": [
@@ -2039,9 +2287,9 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-insight_user_status",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-insight-user-status",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
@@ -2051,26 +2299,14 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-insight",
-    "label": "uses (1)",
+    "src": "api-slack-agent",
+    "dst": "external-slack",
+    "label": "calls Slack",
     "source": {
-     "path": "backend/src/agent_framework/data_interface/insight/live.py",
+     "path": "backend/src/ext_integrations/slack_integration/rox_command_handlers.py",
      "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-insight_feedback",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/insight_feedback.py",
-     "lines": [
-      9,
-      9
+      5,
+      5
      ]
     }
    }
@@ -2089,7 +2325,7 @@
    {
     "src": "insight",
     "dst": "insight_feedback",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/models/insight.py",
      "lines": [
@@ -2102,7 +2338,7 @@
    {
     "src": "insight",
     "dst": "insight_filtering",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/util/cost_meter_utils.py",
      "lines": [
@@ -2115,7 +2351,7 @@
    {
     "src": "insight",
     "dst": "insight_user_status",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/agents/business.py",
      "lines": [
@@ -2144,7 +2380,7 @@
    }
   },
   {
-   "label": "Column Metadata (+2 tables)",
+   "label": "Column Metadata",
    "page": "feature-lists-column-metadata",
    "source": {
     "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
@@ -2155,7 +2391,7 @@
    }
   },
   {
-   "label": "Column Alert (+2 tables)",
+   "label": "Column Alert",
    "page": "feature-lists-column-alert",
    "source": {
     "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
@@ -2166,7 +2402,7 @@
    }
   },
   {
-   "label": "Rox List Column Metadata (+4 tables)",
+   "label": "Rox List Column Metadata",
    "page": "feature-lists-rox-list-column-metadata",
    "source": {
     "path": "backend/src/research/endpoints.py",

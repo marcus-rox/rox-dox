@@ -1,6 +1,6 @@
 {
  "id": "feature-lists-rox-list-column-metadata",
- "title": "Rox List Column Metadata (+4 tables)",
+ "title": "Rox List Column Metadata",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-lists",
@@ -704,7 +704,59 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: column_request, custom_column_generation_feedback, rox_list_column_data_fetcher_mapping, rox_list_column_metadata.",
+    "text": "Serves 13 HTTP endpoints in 1 API groups: Research.",
+    "sources": [
+     {
+      "path": "backend/src/research/endpoints.py",
+      "lines": [
+       338,
+       338
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 7 background workers and workflows: ColumnInsightFanoutExecutor, CustomCellGenerationTaskExecutor, CustomColumnBackgroundRefreshTaskExecutor, CustomColumnDeleteOrgWideDataTaskExecutor, CustomColumnGenerationTaskExecutor and 2 more.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       3116,
+       3116
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1828,
+       1828
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       369,
+       369
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1142,
+       1142
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1352,
+       1352
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: column_request, custom_column_generation_feedback, rox_list_column_data_fetcher_mapping, rox_list_column_metadata.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/column_request.py",
@@ -732,46 +784,6 @@
       "lines": [
        155,
        206
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Web screens: 18, HTTP routes: 1, Background workers: 1, Business logic: 7, Models: 3.",
-    "sources": [
-     {
-      "path": "web/apps/app-platform/csg-deal-review/src/lib/research.ts",
-      "lines": [
-       2,
-       2
-      ]
-     },
-     {
-      "path": "backend/src/research/endpoints.py",
-      "lines": [
-       29,
-       29
-      ]
-     },
-     {
-      "path": "backend/src/tasks/task_executor.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/research/clever_column/scheduling_service.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/column_request.py",
-      "lines": [
-       20,
-       20
       ]
      }
     ]
@@ -876,41 +888,77 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Web screens",
-     "10",
-     "8",
-     "web/apps/web/src/lib/roxList/hooks (4), web/apps/web/src/contexts (2), web/apps/app-platform/csg-deal-review/src/lib (1)"
+     "Web app",
+     "Web app",
+     "—",
+     "—"
     ],
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/research (1)"
+     "Research API",
+     "HTTP API",
+     "custom_column_generation_feedback",
+     "—"
     ],
     [
-     "Background workers",
-     "0",
-     "1",
-     "backend/src/tasks (1)"
+     "Tasks workers",
+     "Background workers / workflows",
+     "column_request, custom_column_generation_feedback",
+     "—"
     ],
     [
-     "Business logic",
-     "4",
-     "3",
-     "backend/src/research/clever_column (2), backend/src/rox_core/api/agents/account_research_sections (1), backend/src/rox_core/api/column_metadata (1)"
+     "Column Metadata (library)",
+     "Library code",
+     "rox_list_column_metadata",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "1",
-     "backend/src/rox_core/models (2), backend/src/rox_core/models/lists (1)"
+     "Prospect Lists (library)",
+     "Library code",
+     "rox_list_column_metadata",
+     "—"
+    ],
+    [
+     "Lists (library)",
+     "Library code",
+     "rox_list_column_data_fetcher_mapping, rox_list_column_metadata",
+     "—"
+    ],
+    [
+     "Unified Data (library)",
+     "Library code",
+     "rox_list_column_metadata",
+     "—"
+    ],
+    [
+     "column_request",
+     "Database",
+     "column_request",
+     "—"
+    ],
+    [
+     "custom_column_generation_feedback",
+     "Database",
+     "custom_column_generation_feedback",
+     "—"
+    ],
+    [
+     "rox_list_column_data_fetcher_mapping",
+     "Database",
+     "rox_list_column_data_fetcher_mapping",
+     "—"
+    ],
+    [
+     "rox_list_column_metadata",
+     "Database",
+     "rox_list_column_metadata",
+     "—"
     ]
    ],
    "sources": [
@@ -950,17 +998,122 @@
      ]
     },
     {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+     "lines": [
+      64,
+      64
+     ]
+    },
+    {
+     "path": "web/apps/web/src/contexts/CleverColumnBuildContext.tsx",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "web/apps/app-platform/exec-dashboard/src/lib/research.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "web/apps/web/src/_DEMO/yuma/wspOpportunitiyInsightLink/OpportunityInsightLinkButton.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customNodes/CleverColumnCell/CleverColumnCellNode.tsx",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
      "path": "backend/src/research/endpoints.py",
      "lines": [
-      29,
-      29
+      338,
+      338
+     ]
+    },
+    {
+     "path": "backend/src/research/endpoints.py",
+     "lines": [
+      598,
+      598
+     ]
+    },
+    {
+     "path": "backend/src/research/endpoints.py",
+     "lines": [
+      398,
+      398
+     ]
+    },
+    {
+     "path": "backend/src/research/endpoints.py",
+     "lines": [
+      696,
+      696
+     ]
+    },
+    {
+     "path": "backend/src/research/endpoints.py",
+     "lines": [
+      655,
+      655
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/custom_column_feedback.py",
+     "lines": [
+      12,
+      12
      ]
     },
     {
      "path": "backend/src/tasks/task_executor.py",
      "lines": [
-      1,
-      1
+      3116,
+      3116
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      369,
+      369
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1142,
+      1142
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1352,
+      1352
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3081,
+      3081
      ]
     },
     {
@@ -971,10 +1124,38 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/column_request.py",
+     "path": "backend/src/rox_core/api/column_metadata/dao.py",
      "lines": [
-      20,
-      20
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/dto.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/lists/rox_list.py",
+     "lines": [
+      155,
+      155
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/lists/rox_list.py",
+     "lines": [
+      209,
+      209
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_sync.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -982,7 +1163,7 @@
   },
   "notes": [
    {
-    "text": "Shares 12 files with Column Metadata (+2 tables).",
+    "text": "Shares 12 files with Column Metadata.",
     "sources": [
      {
       "path": "backend/src/research/clever_column/scheduling_service.py",
@@ -1006,7 +1187,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Column Alert (+2 tables).",
+    "text": "Shares 2 files with Column Alert.",
     "sources": [
      {
       "path": "backend/src/research/endpoints.py",
@@ -1018,7 +1199,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Insight (+4 tables).",
+    "text": "Shares 1 files with Insight.",
     "sources": [
      {
       "path": "backend/src/research/endpoints.py",
@@ -1042,7 +1223,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Rox List (+3 tables).",
+    "text": "Shares 2 files with Rox List.",
     "sources": [
      {
       "path": "backend/src/agent_framework/data_interface/entity_list/live.py",
@@ -1054,7 +1235,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Tab Column (+7 tables).",
+    "text": "Shares 1 files with Tab Column.",
     "sources": [
      {
       "path": "backend/src/tasks/executors/data_extraction_s3_event_executor.py",
@@ -1082,8 +1263,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-web",
-    "label": "Web screens",
+    "id": "group-web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/app-platform/csg-deal-review/src/lib/research.ts",
      "lines": [
@@ -1093,30 +1274,55 @@
     }
    },
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes / Background workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/research/endpoints.py",
      "lines": [
-      29,
-      29
+      338,
+      338
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
     "source": {
-     "path": "backend/src/research/clever_column/scheduling_service.py",
+     "path": "backend/src/research/endpoints.py",
+     "lines": [
+      338,
+      338
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3116,
+      3116
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/column_metadata/dao.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/column_request.py",
      "lines": [
@@ -1124,12 +1330,24 @@
       98
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/column_request.py",
+     "lines": [
+      20,
+      98
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "web",
-    "label": "Web screens",
+    "id": "web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/app-platform/csg-deal-review/src/lib/research.ts",
      "lines": [
@@ -1138,7 +1356,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-web",
+    "group": "group-web-app",
     "many": false,
     "details": [
      {
@@ -1202,7 +1420,7 @@
       ]
      },
      {
-      "text": "…/(onboarded)/customers/(app)/[customerId]/customNodes/CleverColumnCell — 1 files",
+      "text": "+9 more directories",
       "sources": [
        {
         "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customNodes/CleverColumnCell/CleverColumnCellNode.tsx",
@@ -1216,27 +1434,87 @@
     ]
    },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-research",
+    "label": "Research API",
     "source": {
      "path": "backend/src/research/endpoints.py",
      "lines": [
-      29,
-      29
+      338,
+      338
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/research — 1 files",
+      "text": "POST /research/clever_column",
       "sources": [
        {
         "path": "backend/src/research/endpoints.py",
         "lines": [
-         29,
-         29
+         338,
+         338
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /research/clever_column/<column_id>/states",
+      "sources": [
+       {
+        "path": "backend/src/research/endpoints.py",
+        "lines": [
+         598,
+         598
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PATCH /research/clever_column/<string:column_id>",
+      "sources": [
+       {
+        "path": "backend/src/research/endpoints.py",
+        "lines": [
+         398,
+         398
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /research/clever_column/<string:column_id>",
+      "sources": [
+       {
+        "path": "backend/src/research/endpoints.py",
+        "lines": [
+         398,
+         398
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /research/clever_column/<string:column_id>/cancel",
+      "sources": [
+       {
+        "path": "backend/src/research/endpoints.py",
+        "lines": [
+         696,
+         696
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+8 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/research/endpoints.py",
+        "lines": [
+         655,
+         655
         ]
        }
       ]
@@ -1244,27 +1522,87 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks",
+    "label": "Tasks workers",
     "source": {
      "path": "backend/src/tasks/task_executor.py",
      "lines": [
-      1,
-      1
+      3116,
+      3116
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks — 1 files",
+      "text": "ColumnInsightFanoutExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/task_executor.py",
         "lines": [
-         1,
-         1
+         3116,
+         3116
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomCellGenerationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1828,
+         1828
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnBackgroundRefreshTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         369,
+         369
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnDeleteOrgWideDataTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1142,
+         1142
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnGenerationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1352,
+         1352
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+2 more workers",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         3081,
+         3081
         ]
        }
       ]
@@ -1272,135 +1610,67 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-column-metadata",
+    "label": "Column Metadata (library)",
     "source": {
-     "path": "backend/src/research/clever_column/scheduling_service.py",
+     "path": "backend/src/rox_core/api/column_metadata/dao.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/research/clever_column — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/research/clever_column/scheduling_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/agents/account_research_sections — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/research/clever_column/service.py",
-        "lines": [
-         66,
-         66
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/column_metadata — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/column_metadata/dao.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/research/clever_column/scheduling_service.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/prospect_lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/prospect_lists/dto.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/catalog_sync.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-prospect-lists",
+    "label": "Prospect Lists (library)",
     "source": {
-     "path": "backend/src/rox_core/models/column_request.py",
+     "path": "backend/src/rox_core/api/prospect_lists/dto.py",
      "lines": [
-      20,
-      20
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/column_request.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/models/lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/lists/rox_list.py",
-        "lines": [
-         155,
-         155
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-column_request",
+    "id": "library-backend-src-rox-core-models-lists",
+    "label": "Lists (library)",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/rox_list.py",
+     "lines": [
+      155,
+      155
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data",
+    "label": "Unified Data (library)",
+    "source": {
+     "path": "backend/src/unified_data/catalog_sync.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-column-request",
     "label": "column_request",
     "source": {
      "path": "backend/src/rox_core/models/column_request.py",
@@ -1410,12 +1680,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-custom_column_generation_feedback",
+    "id": "store-custom-column-generation-feedback",
     "label": "custom_column_generation_feedback",
     "source": {
      "path": "backend/src/rox_core/models/custom_column_feedback.py",
@@ -1425,12 +1695,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_list_column_data_fetcher_mapping",
+    "id": "store-rox-list-column-data-fetcher-mapping",
     "label": "rox_list_column_data_fetcher_mapping",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list.py",
@@ -1440,12 +1710,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_list_column_metadata",
+    "id": "store-rox-list-column-metadata",
     "label": "rox_list_column_metadata",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list.py",
@@ -1455,100 +1725,28 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
+    "src": "web-app",
+    "dst": "api-research",
+    "label": "HTTP",
     "source": {
-     "path": "backend/src/research/clever_column/service.py",
+     "path": "web/apps/app-platform/csg-deal-review/src/lib/research.ts",
      "lines": [
-      110,
-      110
+      2,
+      2
      ]
     }
    },
    {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/research/endpoints.py",
-     "lines": [
-      29,
-      29
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/task_executor.py",
-     "lines": [
-      39,
-      39
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/task_executor.py",
-     "lines": [
-      93,
-      93
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-column_request",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/research/clever_column/scheduling_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-rox_list_column_metadata",
-    "label": "uses (3)",
-    "source": {
-     "path": "backend/src/rox_core/api/column_metadata/dao.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-column_request",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/column_request.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-custom_column_generation_feedback",
-    "label": "uses (1)",
+    "src": "api-research",
+    "dst": "store-custom-column-generation-feedback",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/custom_column_feedback.py",
      "lines": [
@@ -1558,9 +1756,33 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_list_column_data_fetcher_mapping",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-column-metadata",
+    "dst": "store-rox-list-column-metadata",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/column_metadata/dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-prospect-lists",
+    "dst": "store-rox-list-column-metadata",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/dto.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models-lists",
+    "dst": "store-rox-list-column-data-fetcher-mapping",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list.py",
      "lines": [
@@ -1570,14 +1792,50 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_list_column_metadata",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models-lists",
+    "dst": "store-rox-list-column-metadata",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list.py",
      "lines": [
       155,
       155
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data",
+    "dst": "store-rox-list-column-metadata",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/catalog_sync.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks",
+    "dst": "store-column-request",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/research/clever_column/scheduling_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks",
+    "dst": "store-custom-column-generation-feedback",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/models/custom_column_feedback.py",
+     "lines": [
+      12,
+      12
      ]
     }
    }
@@ -1596,25 +1854,12 @@
    {
     "src": "rox_list_column_data_fetcher_mapping",
     "dst": "rox_list_column_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/lists/rox_list.py",
      "lines": [
       238,
       238
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "rox_list_column_data_fetcher_mapping",
-    "dst": "rox_list_column_metadata",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/lists/rox_list.py",
-     "lines": [
-      155,
-      155
      ]
     },
     "kind": "symbolic"
@@ -1638,7 +1883,7 @@
    }
   },
   {
-   "label": "Column Metadata (+2 tables)",
+   "label": "Column Metadata",
    "page": "feature-lists-column-metadata",
    "source": {
     "path": "backend/src/research/clever_column/scheduling_service.py",
@@ -1660,7 +1905,7 @@
    }
   },
   {
-   "label": "Column Alert (+2 tables)",
+   "label": "Column Alert",
    "page": "feature-lists-column-alert",
    "source": {
     "path": "backend/src/research/endpoints.py",
@@ -1671,7 +1916,7 @@
    }
   },
   {
-   "label": "Insight (+4 tables)",
+   "label": "Insight",
    "page": "feature-lists-insight",
    "source": {
     "path": "backend/src/research/endpoints.py",
@@ -1693,7 +1938,7 @@
    }
   },
   {
-   "label": "Rox List (+3 tables)",
+   "label": "Rox List",
    "page": "feature-lists-rox-list",
    "source": {
     "path": "backend/src/agent_framework/data_interface/entity_list/live.py",
@@ -1704,7 +1949,7 @@
    }
   },
   {
-   "label": "Tab Column (+7 tables)",
+   "label": "Tab Column",
    "page": "feature-lists-tab-column",
    "source": {
     "path": "backend/src/tasks/executors/data_extraction_s3_event_executor.py",

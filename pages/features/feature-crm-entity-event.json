@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-entity-event",
- "title": "Entity Event (+3 tables)",
+ "title": "Entity Event",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -715,7 +715,38 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: entity_event, entity_event_cdc, entity_event_staging.",
+    "text": "Serves 2 HTTP endpoints in 1 API groups: Cells.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/cells/driver_router.py",
+      "lines": [
+       47,
+       47
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: OpenAI.",
+    "sources": [
+     {
+      "path": "backend/src/agent_framework/cell_runtime/tool_execution.py",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/cell_runtime/turn_runner.py",
+      "lines": [
+       15,
+       15
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: entity_event, entity_event_cdc, entity_event_staging.",
     "sources": [
      {
       "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
@@ -736,32 +767,6 @@
       "lines": [
        65,
        67
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 2, Business logic: 24, Models: 2.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/cells/driver_router.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/cell_runtime/in_memory.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
-      "lines": [
-       35,
-       35
       ]
      }
     ]
@@ -828,29 +833,95 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "2",
-     "0",
-     "backend/src/chat/routes/cells (2)"
+     "Cells API",
+     "HTTP API",
+     "entity_event",
+     "—"
     ],
     [
-     "Business logic",
-     "20",
-     "4",
-     "backend/src/agent_framework/cell_runtime (9), backend/src/agent_framework/cell_runtime/reference/tally (2), backend/src/ext_integrations/call_recorders/ms_teams (2)"
+     "Cell Runtime (library)",
+     "Library code",
+     "entity_event",
+     "OpenAI"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_customer/batch/models/v4/entity/generated (1), backend/src/rox_customer/real_time/models/entity/generated (1)"
+     "Event V2 (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Record Display (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "People (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Transcript V2 (library)",
+     "Library code",
+     "entity_event, entity_event_cdc",
+     "—"
+    ],
+    [
+     "Entity Creator (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Generated (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Task Items (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Shared (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Company (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Person (library)",
+     "Library code",
+     "entity_event",
+     "—"
+    ],
+    [
+     "Database (3 tables)",
+     "Database",
+     "entity_event, entity_event_cdc, entity_event_staging",
+     "—"
+    ],
+    [
+     "OpenAI",
+     "External service",
+     "—",
+     "OpenAI"
     ]
    ],
    "sources": [
@@ -878,6 +949,20 @@
     {
      "path": "backend/src/chat/routes/cells/driver_router.py",
      "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/cells/driver_router.py",
+     "lines": [
+      69,
+      69
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/cell_runtime/kv_cell_event_service.py",
+     "lines": [
       1,
       1
      ]
@@ -890,10 +975,80 @@
      ]
     },
     {
+     "path": "backend/src/agent_framework/cell_runtime/tool_execution.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
      "lines": [
-      35,
-      35
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/event_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/company/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/person/last_events.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -901,7 +1056,7 @@
   },
   "notes": [
    {
-    "text": "Shares 9 files with Graph (+6 tables).",
+    "text": "Shares 9 files with Graph.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -913,7 +1068,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Entity Deal (+4 tables).",
+    "text": "Shares 1 files with Entity Deal.",
     "sources": [
      {
       "path": "backend/src/task_items/entity_resolution.py",
@@ -929,30 +1084,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/chat/routes/cells/driver_router.py",
      "lines": [
-      1,
-      1
+      47,
+      47
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/chat/routes/cells/driver_router.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/in_memory.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
      "lines": [
@@ -960,31 +1128,67 @@
       62
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+     "lines": [
+      60,
+      62
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/agent_framework/cell_runtime/tool_execution.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-cells",
+    "label": "Cells API",
     "source": {
      "path": "backend/src/chat/routes/cells/driver_router.py",
      "lines": [
-      1,
-      1
+      47,
+      47
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/chat/routes/cells — 2 files",
+      "text": "POST /cells",
       "sources": [
        {
         "path": "backend/src/chat/routes/cells/driver_router.py",
         "lines": [
-         1,
-         1
+         47,
+         47
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /cells/{cell_id}/events",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/cells/driver_router.py",
+        "lines": [
+         69,
+         69
         ]
        }
       ]
@@ -992,8 +1196,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-agent-framework-cell-runtime",
+    "label": "Cell Runtime (library)",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/in_memory.py",
      "lines": [
@@ -1002,117 +1206,206 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/agent_framework/cell_runtime — 9 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/cell_runtime/in_memory.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/cell_runtime/reference/tally — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/cell_runtime/reference/tally/runner.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/call_recorders/ms_teams — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/call_recorders/ms_teams/transcript_content_builder.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/event_v2 — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/chat/server — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/server/eval_app.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/governance/record_display — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/governance/record_display/event.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-entities-event-v2",
+    "label": "Event V2 (library)",
     "source": {
-     "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
      "lines": [
-      35,
-      35
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-governance-record-display",
+    "label": "Record Display (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-people",
+    "label": "People (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-transcript-v2",
+    "label": "Transcript V2 (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-customer-graph-v4-entity-creator",
+    "label": "Entity Creator (library)",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/event_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-customer-real-time-models-entity-generated",
+    "label": "Generated (library)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+     "lines": [
+      60,
+      60
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-task-items",
+    "label": "Task Items (library)",
+    "source": {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-renderers-source-renderers-shared",
+    "label": "Shared (library)",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-reserved-fields-company",
+    "label": "Company (library)",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/company/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-reserved-fields-person",
+    "label": "Person (library)",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/person/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "database",
+    "label": "Database (3 tables)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+     "lines": [
+      60,
+      62
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
     "many": false,
     "details": [
      {
-      "text": "backend/src/rox_customer/batch/models/v4/entity/generated — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
-        "lines": [
-         35,
-         35
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity/generated — 1 files",
+      "text": "entity_event",
       "sources": [
        {
         "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
         "lines": [
          60,
-         60
+         62
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_event_cdc",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+        "lines": [
+         70,
+         75
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_event_staging",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+        "lines": [
+         65,
+         67
         ]
        }
       ]
@@ -1120,94 +1413,28 @@
     ]
    },
    {
-    "id": "store-entity_event",
-    "label": "entity_event",
+    "id": "external-openai",
+    "label": "OpenAI",
     "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
+     "path": "backend/src/agent_framework/cell_runtime/tool_execution.py",
      "lines": [
-      60,
-      62
+      8,
+      8
      ]
     },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_event_cdc",
-    "label": "entity_event_cdc",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
-     "lines": [
-      70,
-      75
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_event_staging",
-    "label": "entity_event_staging",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
-     "lines": [
-      65,
-      67
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (10)",
+    "src": "api-cells",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
-     "lines": [
-      26,
-      26
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "routes",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/agent_framework/cell_runtime/worker.py",
-     "lines": [
-      32,
-      32
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/chat/routes/cells/driver_router.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-entity_event",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/chat/routes/cells/driver_router.py",
+     "path": "backend/src/agent_framework/cell_runtime/kv_cell_event_service.py",
      "lines": [
       1,
       1
@@ -1215,9 +1442,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-entity_event",
-    "label": "uses (15)",
+    "src": "library-backend-src-agent-framework-cell-runtime",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/in_memory.py",
      "lines": [
@@ -1227,9 +1454,45 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-entity_event_cdc",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-event-v2",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance-record-display",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-people",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-transcript-v2",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/transcript_v2/auto_register.py",
      "lines": [
@@ -1239,14 +1502,86 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-entity_event",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-graph-v4-entity-creator",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/event_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-customer-real-time-models-entity-generated",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
      "lines": [
       60,
       60
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-task-items",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-renderers-source-renderers-shared",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-reserved-fields-company",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/company/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-reserved-fields-person",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/person/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-agent-framework-cell-runtime",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/agent_framework/cell_runtime/tool_execution.py",
+     "lines": [
+      8,
+      8
      ]
     }
    }
@@ -1260,47 +1595,7 @@
    "entity_event_staging"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "entity_event",
-    "dst": "entity_event_cdc",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
-     "lines": [
-      70,
-      70
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "entity_event",
-    "dst": "entity_event_staging",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
-     "lines": [
-      65,
-      65
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "entity_event_cdc",
-    "dst": "entity_event_staging",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/event.py",
-     "lines": [
-      65,
-      65
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -1319,7 +1614,7 @@
    }
   },
   {
-   "label": "Graph (+6 tables)",
+   "label": "Graph",
    "page": "feature-crm-graph",
    "source": {
     "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -1330,7 +1625,7 @@
    }
   },
   {
-   "label": "Entity Deal (+4 tables)",
+   "label": "Entity Deal",
    "page": "feature-crm-entity-deal",
    "source": {
     "path": "backend/src/task_items/entity_resolution.py",

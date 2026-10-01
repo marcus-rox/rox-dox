@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-auth0-role",
- "title": "Auth0 Role (+8 tables)",
+ "title": "Auth0 Role",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -2354,7 +2354,85 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: auth0_connection, auth0_organization, auth0_organization_connections, auth0_organization_user_roles, auth0_organization_users, auth0_role, auth0_state, auth0_user.",
+    "text": "Serves 3 HTTP endpoints in 1 API groups: Internal.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/internal/endpoints.py",
+      "lines": [
+       29,
+       29
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 2 background workers and workflows: SendInvoicesCoordinatorTaskExecutor, SendInvoicesTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       40,
+       40
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       89,
+       89
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: AWS, Google APIs, OpenAI.",
+    "sources": [
+     {
+      "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/util.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: auth0_connection, auth0_organization, auth0_organization_connections, auth0_organization_user_roles, auth0_organization_users, auth0_role, auth0_state, auth0_user.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/auth0/connection.py",
@@ -2410,53 +2488,6 @@
       "lines": [
        11,
        164
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Web screens: 2, HTTP routes: 1, Background workers: 1, Business logic: 64, Models: 11, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/internal/endpoints.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/send_invoices.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/agent_executor.py",
-      "lines": [
-       12,
-       12
-      ]
-     },
-     {
-      "path": "backend/src/chat/agent_executor/models/config.py",
-      "lines": [
-       5,
-       5
-      ]
-     },
-     {
-      "path": ".agents/skills/modernization-migration/SKILL.md",
-      "lines": [
-       310,
-       310
       ]
      }
     ]
@@ -2573,47 +2604,155 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Web screens",
-     "2",
-     "0",
-     "web/apps/web/src/app/hooks/react-query/generated/internal (1), web/packages/internal-api/src/generated/core/internal (1)"
+     "Web app",
+     "Web app",
+     "—",
+     "—"
     ],
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/rox_core/api/internal (1)"
+     "Internal API",
+     "HTTP API",
+     "—",
+     "—"
     ],
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "auth0_organization_user_roles, auth0_role",
+     "—"
     ],
     [
-     "Business logic",
-     "60",
-     "4",
-     "backend/src/rox_core/api/auth0 (6), backend/src/insights (5), backend/src/auth (4)"
+     "Auth0 (library)",
+     "Library code",
+     "auth0_role",
+     "—"
     ],
     [
-     "Models",
-     "9",
-     "2",
-     "backend/src/rox_core/models/auth0 (5), backend/src/chat/agent_executor/models (3), backend/src/rox_core/models (3)"
+     "User (library)",
+     "Library code",
+     "auth0_organization_user_roles, auth0_role",
+     "—"
     ],
     [
-     "Agent skills",
-     "0",
-     "1",
-     ".agents/skills/modernization-migration (1)"
+     "Models (library)",
+     "Library code",
+     "auth0_user",
+     "—"
+    ],
+    [
+     "Email Integration (library)",
+     "Library code",
+     "—",
+     "Google APIs"
+    ],
+    [
+     "Research Agent (library)",
+     "Library code",
+     "—",
+     "OpenAI"
+    ],
+    [
+     "Ext Integrations (library)",
+     "Library code",
+     "—",
+     "Google APIs"
+    ],
+    [
+     "Billing (library)",
+     "Library code",
+     "auth0_organization_user_roles, auth0_role",
+     "—"
+    ],
+    [
+     "Auth0 (library)",
+     "Library code",
+     "auth0_connection",
+     "—"
+    ],
+    [
+     "S3 Shim (library)",
+     "Library code",
+     "—",
+     "AWS"
+    ],
+    [
+     "Builder (library)",
+     "Library code",
+     "—",
+     "OpenAI"
+    ],
+    [
+     "auth0_connection",
+     "Database",
+     "auth0_connection",
+     "—"
+    ],
+    [
+     "auth0_organization",
+     "Database",
+     "auth0_organization",
+     "—"
+    ],
+    [
+     "auth0_organization_connections",
+     "Database",
+     "auth0_organization_connections",
+     "—"
+    ],
+    [
+     "auth0_organization_user_roles",
+     "Database",
+     "auth0_organization_user_roles",
+     "—"
+    ],
+    [
+     "auth0_organization_users",
+     "Database",
+     "auth0_organization_users",
+     "—"
+    ],
+    [
+     "auth0_role",
+     "Database",
+     "auth0_role",
+     "—"
+    ],
+    [
+     "auth0_state",
+     "Database",
+     "auth0_state",
+     "—"
+    ],
+    [
+     "auth0_user",
+     "Database",
+     "auth0_user",
+     "—"
+    ],
+    [
+     "AWS",
+     "External service",
+     "—",
+     "AWS"
+    ],
+    [
+     "Google APIs",
+     "External service",
+     "—",
+     "Google APIs"
+    ],
+    [
+     "OpenAI",
+     "External service",
+     "—",
+     "OpenAI"
     ]
    ],
    "sources": [
@@ -2681,10 +2820,45 @@
      ]
     },
     {
+     "path": "web/packages/internal-api/src/generated/core/internal/internal.ts",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/internal/endpoints.py",
      "lines": [
-      9,
-      9
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      73,
+      73
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      89,
+      89
      ]
     },
     {
@@ -2695,24 +2869,80 @@
      ]
     },
     {
-     "path": "backend/src/agent_framework/agent_executor.py",
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
      "lines": [
-      12,
-      12
+      1,
+      1
      ]
     },
     {
-     "path": "backend/src/chat/agent_executor/models/config.py",
+     "path": "backend/src/rox_core/api/user/role_service.py",
      "lines": [
-      5,
-      5
+      1,
+      1
      ]
     },
     {
-     "path": ".agents/skills/modernization-migration/SKILL.md",
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
      "lines": [
-      310,
-      310
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      6,
+      6
      ]
     }
    ],
@@ -2720,7 +2950,7 @@
   },
   "notes": [
    {
-    "text": "Shares 7 files with Organization (+5 tables).",
+    "text": "Shares 7 files with Organization.",
     "sources": [
      {
       "path": ".agents/skills/modernization-migration/SKILL.md",
@@ -2732,7 +2962,7 @@
     ]
    },
    {
-    "text": "Shares 3 files with Enterprise Subscription (+13 tables).",
+    "text": "Shares 3 files with Enterprise Subscription.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
@@ -2744,7 +2974,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Delete User Request (+3 tables).",
+    "text": "Shares 2 files with Delete User Request.",
     "sources": [
      {
       "path": "backend/src/auth/auth0_legacy/service.py",
@@ -2784,8 +3014,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-web",
-    "label": "Web screens",
+    "id": "group-web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
      "lines": [
@@ -2795,43 +3025,92 @@
     }
    },
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/internal/endpoints.py",
      "lines": [
-      9,
-      9
+      29,
+      29
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/rox_core/api/internal/endpoints.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
      "lines": [
       1,
       1
      ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      36
+     ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-database",
+    "label": "Database",
     "source": {
-     "path": "backend/src/rox_core/models/auth0/role.py",
+     "path": "backend/src/rox_core/models/auth0/connection.py",
      "lines": [
       10,
-      50
+      36
      ]
-    }
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "web",
-    "label": "Web screens",
+    "id": "web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
      "lines": [
@@ -2840,7 +3119,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-web",
+    "group": "group-web-app",
     "many": false,
     "details": [
      {
@@ -2870,27 +3149,51 @@
     ]
    },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-internal",
+    "label": "Internal API",
     "source": {
      "path": "backend/src/rox_core/api/internal/endpoints.py",
      "lines": [
-      9,
-      9
+      29,
+      29
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/rox_core/api/internal — 1 files",
+      "text": "POST /internal/create-candidate-user",
       "sources": [
        {
         "path": "backend/src/rox_core/api/internal/endpoints.py",
         "lines": [
-         9,
-         9
+         29,
+         29
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /internal/create-demo",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/internal/endpoints.py",
+        "lines": [
+         51,
+         51
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /internal/notifications/promotions",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/internal/endpoints.py",
+        "lines": [
+         73,
+         73
         ]
        }
       ]
@@ -2898,204 +3201,273 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "SendInvoicesCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/send_invoices.py",
+        "lines": [
+         40,
+         40
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SendInvoicesTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/send_invoices.py",
+        "lines": [
+         89,
+         89
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-rox-core-api-auth0",
+    "label": "Auth0 (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/send_invoices.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-user",
+    "label": "User (library)",
     "source": {
-     "path": "backend/src/agent_framework/agent_executor.py",
+     "path": "backend/src/rox_core/api/user/role_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
+    "source": {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-email-integration",
+    "label": "Email Integration (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-research-research-agent",
+    "label": "Research Agent (library)",
+    "source": {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      16,
+      16
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations",
+    "label": "Ext Integrations (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-billing",
+    "label": "Billing (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models-auth0",
+    "label": "Auth0 (library)",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-shim-layer-s3-shim",
+    "label": "S3 Shim (library)",
+    "source": {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-workflow-builder",
+    "label": "Builder (library)",
+    "source": {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-auth0-connection",
+    "label": "auth0_connection",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/connection.py",
+     "lines": [
+      10,
+      36
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-auth0-organization",
+    "label": "auth0_organization",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
+     "lines": [
+      390,
+      555
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-auth0-organization-connections",
+    "label": "auth0_organization_connections",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
       12,
-      12
+      36
      ]
     },
-    "kind": "component",
-    "group": "group-layer-workers",
+    "kind": "store",
+    "group": "group-database",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/auth0 — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
-        "lines": [
-         24,
-         24
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/insights — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/insights/filtering_agent_executor.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/auth — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/auth/__init__.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/user — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/user/business.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/agent_executor.py",
-        "lines": [
-         12,
-         12
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/command_sdk/agents/tools — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/notes.py",
-        "lines": [
-         5,
-         5
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "store-auth0-organization-user-roles",
+    "label": "auth0_organization_user_roles",
     "source": {
-     "path": "backend/src/chat/agent_executor/models/config.py",
+     "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
-      5,
-      5
+      134,
+      263
      ]
     },
-    "kind": "component",
-    "group": "group-layer-workers",
+    "kind": "store",
+    "group": "group-database",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/auth0 — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/connection.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/chat/agent_executor/models — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/agent_executor/models/config.py",
-        "lines": [
-         5,
-         5
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/models — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
-        "lines": [
-         19,
-         19
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
+    "id": "store-auth0-organization-users",
+    "label": "auth0_organization_users",
     "source": {
-     "path": ".agents/skills/modernization-migration/SKILL.md",
+     "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
-      310,
-      310
+      39,
+      131
      ]
     },
-    "kind": "component",
-    "group": "group-layer-workers",
+    "kind": "store",
+    "group": "group-database",
     "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/modernization-migration — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/modernization-migration/SKILL.md",
-        "lines": [
-         310,
-         310
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-tables",
-    "label": "Tables (8)",
+    "id": "store-auth0-role",
+    "label": "auth0_role",
     "source": {
      "path": "backend/src/rox_core/models/auth0/role.py",
      "lines": [
@@ -3104,139 +3476,93 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
-    "details": [
-     {
-      "text": "auth0_connection — 4 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/connection.py",
-        "lines": [
-         10,
-         36
-        ]
-       }
-      ]
-     },
-     {
-      "text": "auth0_organization — 10 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/organization.py",
-        "lines": [
-         390,
-         555
-        ]
-       }
-      ]
-     },
-     {
-      "text": "auth0_organization_connections — 2 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/organization.py",
-        "lines": [
-         12,
-         36
-        ]
-       }
-      ]
-     },
-     {
-      "text": "auth0_organization_user_roles — 3 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/organization.py",
-        "lines": [
-         134,
-         263
-        ]
-       }
-      ]
-     },
-     {
-      "text": "auth0_organization_users — 2 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/organization.py",
-        "lines": [
-         39,
-         131
-        ]
-       }
-      ]
-     },
-     {
-      "text": "auth0_role — 4 columns",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/auth0/role.py",
-        "lines": [
-         10,
-         50
-        ]
-       }
-      ]
-     }
-    ]
-   }
-  ],
-  "edges": [
+    "details": []
+   },
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (19)",
+    "id": "store-auth0-state",
+    "label": "auth0_state",
     "source": {
-     "path": "backend/src/agent_framework/command_sdk/agents/context.py",
+     "path": "backend/src/rox_core/models/auth0/state.py",
+     "lines": [
+      30,
+      53
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-auth0-user",
+    "label": "auth0_user",
+    "source": {
+     "path": "backend/src/rox_core/models/auth0/user.py",
+     "lines": [
+      11,
+      164
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-aws",
+    "label": "AWS",
+    "source": {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
      "lines": [
       7,
       7
      ]
-    }
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
    },
    {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (1)",
+    "id": "external-google-apis",
+    "label": "Google APIs",
     "source": {
-     "path": "backend/src/chat/agent_executor/models/config.py",
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
      "lines": [
-      5,
-      5
+      22,
+      22
      ]
-    }
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
    },
    {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (2)",
+    "id": "external-openai",
+    "label": "OpenAI",
     "source": {
-     "path": "backend/src/rox_core/api/internal/endpoints.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/tasks/executors/send_invoices.py",
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
      "lines": [
       16,
       16
      ]
-    }
-   },
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
    {
-    "src": "workers",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "web-app",
+    "dst": "api-internal",
+    "label": "HTTP",
     "source": {
-     "path": "backend/src/tasks/executors/send_invoices.py",
+     "path": "web/apps/web/src/app/hooks/react-query/generated/internal/internal.ts",
      "lines": [
       1,
       1
@@ -3244,33 +3570,9 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/send_invoices.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (3)",
+    "src": "library-backend-src-rox-core-api-auth0",
+    "dst": "store-auth0-role",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/auth0/first_user_billing_roles_backfill_job.py",
      "lines": [
@@ -3280,9 +3582,69 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-billing",
+    "dst": "store-auth0-organization-user-roles",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-billing",
+    "dst": "store-auth0-role",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-user",
+    "dst": "store-auth0-organization-user-roles",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/user/role_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-user",
+    "dst": "store-auth0-role",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/user/team_roster_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-auth0-user",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models-auth0",
+    "dst": "store-auth0-connection",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/auth0/connection.py",
      "lines": [
@@ -3292,14 +3654,86 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-auth0-organization-user-roles",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "path": "backend/src/tasks/executors/send_invoices.py",
      "lines": [
       1,
       1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-auth0-role",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-shim-layer-s3-shim",
+    "dst": "external-aws",
+    "label": "calls AWS",
+    "source": {
+     "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-ext-integrations",
+    "dst": "external-google-apis",
+    "label": "calls Google APIs",
+    "source": {
+     "path": "backend/src/ext_integrations/util.py",
+     "lines": [
+      6,
+      6
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-ext-integrations-email-integration",
+    "dst": "external-google-apis",
+    "label": "calls Google APIs",
+    "source": {
+     "path": "backend/src/ext_integrations/email_integration/base_gmail_service.py",
+     "lines": [
+      22,
+      22
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-research-research-agent",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+     "lines": [
+      16,
+      16
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-builder",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/workflow/builder/workflow_builder_worker_agent.py",
+     "lines": [
+      6,
+      6
      ]
     }
    }
@@ -3322,7 +3756,7 @@
    {
     "src": "auth0_connection",
     "dst": "auth0_organization_connections",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3335,7 +3769,7 @@
    {
     "src": "auth0_organization",
     "dst": "auth0_organization_connections",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3347,21 +3781,8 @@
    },
    {
     "src": "auth0_organization",
-    "dst": "auth0_organization_connections",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      12,
-      12
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization",
     "dst": "auth0_organization_user_roles",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3373,21 +3794,8 @@
    },
    {
     "src": "auth0_organization",
-    "dst": "auth0_organization_user_roles",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      134,
-      134
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization",
     "dst": "auth0_organization_users",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3398,48 +3806,9 @@
     "kind": "enforced"
    },
    {
-    "src": "auth0_organization",
-    "dst": "auth0_organization_users",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      39,
-      39
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization_connections",
-    "dst": "auth0_organization_user_roles",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      134,
-      134
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization_connections",
-    "dst": "auth0_organization_users",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      39,
-      39
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "auth0_organization_user_roles",
     "dst": "auth0_organization_users",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/auth/auth0_legacy/service.py",
      "lines": [
@@ -3451,34 +3820,8 @@
    },
    {
     "src": "auth0_organization_user_roles",
-    "dst": "auth0_organization_users",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/auth0/organization.py",
-     "lines": [
-      39,
-      39
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization_user_roles",
     "dst": "auth0_role",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
-     "lines": [
-      155,
-      155
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization_user_roles",
-    "dst": "auth0_role",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3491,20 +3834,7 @@
    {
     "src": "auth0_organization_user_roles",
     "dst": "auth0_user",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/tasks/executors/send_invoices.py",
-     "lines": [
-      187,
-      187
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "auth0_organization_user_roles",
-    "dst": "auth0_user",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3517,7 +3847,7 @@
    {
     "src": "auth0_organization_users",
     "dst": "auth0_user",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/auth0/organization.py",
      "lines": [
@@ -3546,7 +3876,7 @@
    }
   },
   {
-   "label": "Organization (+5 tables)",
+   "label": "Organization",
    "page": "feature-tenancy-organization",
    "source": {
     "path": ".agents/skills/modernization-migration/SKILL.md",
@@ -3557,7 +3887,7 @@
    }
   },
   {
-   "label": "Enterprise Subscription (+13 tables)",
+   "label": "Enterprise Subscription",
    "page": "feature-tenancy-enterprise-subscription",
    "source": {
     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
@@ -3568,7 +3898,7 @@
    }
   },
   {
-   "label": "Delete User Request (+3 tables)",
+   "label": "Delete User Request",
    "page": "feature-tenancy-delete-user-request",
    "source": {
     "path": "backend/src/auth/auth0_legacy/service.py",

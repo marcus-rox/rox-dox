@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-webhook-config",
- "title": "Webhook Config",
+ "title": "Webhook configs",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -99,7 +99,47 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: webhook_config.",
+    "text": "Calls outside services: Google APIs, Salesforce.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/services.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: webhook_config.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/webhook_config.py",
@@ -111,27 +151,13 @@
     ]
    },
    {
-    "text": "Files by layer: Background workers: 1, Business logic: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/rox_core/api/tasks/services.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
      {
       "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/webhook_config.py",
-      "lines": [
-       23,
-       23
       ]
      }
     ]
@@ -177,29 +203,47 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/rox_core/api/tasks (1)"
+     "Calendar Integration (library)",
+     "Library code",
+     "webhook_config",
+     "Google APIs"
     ],
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/ext_integrations/calendar_integration (1)"
+     "Tasks (library)",
+     "Library code",
+     "webhook_config",
+     "Salesforce"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "webhook_config",
+     "—"
+    ],
+    [
+     "webhook_config",
+     "Database",
+     "webhook_config",
+     "—"
+    ],
+    [
+     "Google APIs",
+     "External service",
+     "—",
+     "Google APIs"
+    ],
+    [
+     "Salesforce",
+     "External service",
+     "—",
+     "Salesforce"
     ]
    ],
    "sources": [
@@ -211,7 +255,7 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/tasks/services.py",
+     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
      "lines": [
       1,
       1
@@ -220,8 +264,22 @@
     {
      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
      "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      8,
+      8
      ]
     },
     {
@@ -236,7 +294,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Integration (+9 tables).",
+    "text": "Shares 1 files with Integration connections & sync.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
@@ -252,19 +310,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
      "lines": [
@@ -274,8 +321,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/webhook_config.py",
      "lines": [
@@ -283,40 +342,36 @@
       102
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/webhook_config.py",
+     "lines": [
+      23,
+      102
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/tasks — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/tasks/services.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-ext-integrations-calendar-integration",
+    "label": "Calendar Integration (library)",
     "source": {
      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
      "lines": [
@@ -325,26 +380,28 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/ext_integrations/calendar_integration — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-tasks",
+    "label": "Tasks (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/webhook_config.py",
      "lines": [
@@ -353,25 +410,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/webhook_config.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-webhook_config",
+    "id": "store-webhook-config",
     "label": "webhook_config",
     "source": {
      "path": "backend/src/rox_core/models/webhook_config.py",
@@ -381,52 +425,46 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-google-apis",
+    "label": "Google APIs",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-salesforce",
+    "label": "Salesforce",
+    "source": {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
-     "lines": [
-      28,
-      28
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      84,
-      84
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-webhook_config",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-webhook_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-calendar-integration",
+    "dst": "store-webhook-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
      "lines": [
@@ -436,14 +474,50 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-webhook_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-tasks",
+    "dst": "store-webhook-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-webhook-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/webhook_config.py",
      "lines": [
       23,
       23
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-ext-integrations-calendar-integration",
+    "dst": "external-google-apis",
+    "label": "calls Google APIs",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-tasks",
+    "dst": "external-salesforce",
+    "label": "calls Salesforce",
+    "source": {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      8,
+      8
      ]
     }
    }
@@ -474,7 +548,7 @@
    }
   },
   {
-   "label": "Integration (+9 tables)",
+   "label": "Integration connections & sync",
    "page": "feature-activity-integration",
    "source": {
     "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",

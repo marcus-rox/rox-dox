@@ -1,6 +1,6 @@
 {
  "id": "feature-people-rox-company-merge",
- "title": "Rox Company Merge (+2 tables)",
+ "title": "Rox Company Merge",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -180,7 +180,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: account_migration_request, rox_company_merge.",
+    "text": "Stores data in: account_migration_request, rox_company_merge.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/account_migration_request.py",
@@ -199,20 +199,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 4, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/company/interface.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/account_migration_request.py",
-      "lines": [
-       24,
-       24
       ]
      }
     ]
@@ -260,23 +253,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "3",
-     "1",
-     "backend/src/rox_core/api/hierarchy (2), backend/src/rox_core/api/entities/company (1), backend/src/rox_core/api/entities/refresh (1)"
+     "Models (library)",
+     "Library code",
+     "account_migration_request, rox_company_merge",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Company (library)",
+     "Library code",
+     "rox_company_merge",
+     "—"
+    ],
+    [
+     "Refresh (library)",
+     "Library code",
+     "account_migration_request, rox_company_merge",
+     "—"
+    ],
+    [
+     "account_migration_request",
+     "Database",
+     "account_migration_request",
+     "—"
+    ],
+    [
+     "rox_company_merge",
+     "Database",
+     "rox_company_merge",
+     "—"
     ]
    ],
    "sources": [
@@ -295,6 +306,20 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/models/account_migration_request.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/rox_company.py",
+     "lines": [
+      171,
+      171
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/entities/company/interface.py",
      "lines": [
       1,
@@ -302,10 +327,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/account_migration_request.py",
+     "path": "backend/src/rox_core/api/entities/refresh/dao.py",
      "lines": [
-      24,
-      24
+      1,
+      1
      ]
     }
    ],
@@ -313,7 +338,7 @@
   },
   "notes": [
    {
-    "text": "Shares 2 files with Rox Company (+4 tables).",
+    "text": "Shares 2 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/chat/agent_executor/enriched_tool_calls.py",
@@ -329,19 +354,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/rox_core/api/entities/company/interface.py",
+     "path": "backend/src/rox_core/models/account_migration_request.py",
      "lines": [
-      1,
-      1
+      24,
+      24
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/account_migration_request.py",
+     "lines": [
+      24,
+      24
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/account_migration_request.py",
      "lines": [
@@ -349,64 +386,24 @@
       67
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/account_migration_request.py",
+     "lines": [
+      24,
+      67
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/rox_core/api/entities/company/interface.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/hierarchy — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/hierarchy/__init__.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/company — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/company/interface.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/refresh — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/refresh/dao.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/account_migration_request.py",
      "lines": [
@@ -415,25 +412,42 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/account_migration_request.py",
-        "lines": [
-         24,
-         24
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-account_migration_request",
+    "id": "library-backend-src-rox-core-api-entities-company",
+    "label": "Company (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/company/interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-entities-refresh",
+    "label": "Refresh (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/refresh/dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-account-migration-request",
     "label": "account_migration_request",
     "source": {
      "path": "backend/src/rox_core/models/account_migration_request.py",
@@ -443,12 +457,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_company_merge",
+    "id": "store-rox-company-merge",
     "label": "rox_company_merge",
     "source": {
      "path": "backend/src/rox_core/models/rox_company.py",
@@ -458,28 +472,28 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (5)",
+    "src": "library-backend-src-rox-core-api-entities-company",
+    "dst": "store-rox-company-merge",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/company/interface.py",
      "lines": [
-      18,
-      18
+      1,
+      1
      ]
     }
    },
    {
-    "src": "logic",
-    "dst": "store-account_migration_request",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-refresh",
+    "dst": "store-account-migration-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/refresh/dao.py",
      "lines": [
@@ -489,11 +503,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-rox_company_merge",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-entities-refresh",
+    "dst": "store-rox-company-merge",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/entities/company/interface.py",
+     "path": "backend/src/rox_core/api/entities/refresh/dao.py",
      "lines": [
       1,
       1
@@ -501,9 +515,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-account_migration_request",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-account-migration-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/account_migration_request.py",
      "lines": [
@@ -513,9 +527,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_company_merge",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-rox-company-merge",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/rox_company.py",
      "lines": [
@@ -552,7 +566,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/chat/agent_executor/enriched_tool_calls.py",

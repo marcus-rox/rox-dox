@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-enterprise-subscription",
- "title": "Enterprise Subscription (+13 tables)",
+ "title": "Enterprise Subscription",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -2562,7 +2562,99 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: auto_reload_config, downgrade_request, enterprise_subscription, payment_processor_customer, payment_processor_organization, plan, purchased_actions_log, remaining_agents_change_log, starter_action_grant, subscription, subscription_change_log, subscription_schedule, user_limit_subscription.",
+    "text": "Serves 50 HTTP endpoints in 1 API groups: Billing.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/endpoints.py",
+      "lines": [
+       823,
+       823
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 10 background workers and workflows: CancelSubscriptionsTaskExecutor, ReplenishUserLimitsCoordinatorTaskExecutor, ReplenishUserLimitsTaskExecutor, SendInvoicesCoordinatorTaskExecutor, SendInvoicesTaskExecutor and 5 more.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/replenish_user_limits.py",
+      "lines": [
+       26,
+       26
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/replenish_user_limits.py",
+      "lines": [
+       138,
+       138
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       40,
+       40
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/send_invoices.py",
+      "lines": [
+       89,
+       89
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: Stripe.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/business.py",
+      "lines": [
+       18,
+       18
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/billing/endpoints.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/shim_layer/stripe_shim/dto.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: auto_reload_config, downgrade_request, enterprise_subscription, payment_processor_customer, payment_processor_organization, plan, purchased_actions_log, remaining_agents_change_log, starter_action_grant, subscription, subscription_change_log, subscription_schedule, user_limit_subscription.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/purchased_actions.py",
@@ -2653,46 +2745,6 @@
       "lines": [
        831,
        1079
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Web screens: 47, HTTP routes: 3, Background workers: 7, Business logic: 30, Models: 6.",
-    "sources": [
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
-      "lines": [
-       6,
-       6
-      ]
-     },
-     {
-      "path": "backend/src/public_api/routes/prospects/billing.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/orchestrator/orchestrator.py",
-      "lines": [
-       28,
-       28
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/downgrade_request.py",
-      "lines": [
-       20,
-       20
       ]
      }
     ]
@@ -2811,41 +2863,89 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Web screens",
-     "47",
-     "0",
-     "web/apps/web/src/components/billing (14), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription (9), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing (6)"
+     "Web app",
+     "Web app",
+     "—",
+     "—"
     ],
     [
-     "HTTP routes",
-     "3",
-     "0",
-     "backend/src/public_api/routes/prospects (2), backend/src/rox_core/api/billing (1)"
+     "Billing API",
+     "HTTP API",
+     "enterprise_subscription",
+     "Stripe"
     ],
     [
-     "Background workers",
-     "6",
-     "1",
-     "backend/src/tasks/executors (4), backend/src/temporal/activities/enrichment (2), backend/src/temporal/workflows (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "enterprise_subscription, plan, subscription, user_limit_subscription",
+     "Stripe"
     ],
     [
-     "Business logic",
-     "28",
-     "2",
-     "backend/src/rox_core/api/billing (8), backend/src/shim_layer/redis_shim (4), backend/src/util (4)"
+     "Enrichment workflows",
+     "Background workers / workflows",
+     "—",
+     "—"
     ],
     [
-     "Models",
-     "6",
-     "0",
-     "backend/src/rox_core/models (6)"
+     "Workflows workflows",
+     "Background workers / workflows",
+     "—",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "auto_reload_config, downgrade_request, payment_processor_customer, payment_processor_organization, purchased_actions_log, starter_action_grant",
+     "—"
+    ],
+    [
+     "Util (library)",
+     "Library code",
+     "enterprise_subscription, plan",
+     "—"
+    ],
+    [
+     "Prospects (library)",
+     "Library code",
+     "enterprise_subscription",
+     "—"
+    ],
+    [
+     "Billing (library)",
+     "Library code",
+     "enterprise_subscription, plan",
+     "—"
+    ],
+    [
+     "Agent State (library)",
+     "Library code",
+     "user_limit_subscription",
+     "—"
+    ],
+    [
+     "Stripe Shim (library)",
+     "Library code",
+     "—",
+     "Stripe"
+    ],
+    [
+     "Database (13 tables)",
+     "Database",
+     "auto_reload_config, downgrade_request, enterprise_subscription, payment_processor_customer, payment_processor_organization, plan, purchased_actions_log, remaining_agents_change_log, starter_action_grant, subscription, subscription_change_log, subscription_schedule, user_limit_subscription",
+     "—"
+    ],
+    [
+     "Stripe",
+     "External service",
+     "—",
+     "Stripe"
     ]
    ],
    "sources": [
@@ -2948,24 +3048,171 @@
      ]
     },
     {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "path": "web/apps/web/src/components/billing/ChangePlan.tsx",
+     "lines": [
+      12,
+      12
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/enterprise-subscription/ApplyRenewalForm.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/AutoReloadCard.tsx",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/billingTab/BillingHistoryView.tsx",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
+     "lines": [
+      15,
+      15
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      823,
+      823
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      610,
+      610
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      980,
+      980
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      1065,
+      1065
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      1092,
+      1092
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      637,
+      637
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      18,
+      18
      ]
     },
     {
      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
      "lines": [
-      1,
-      1
+      13,
+      13
      ]
     },
     {
-     "path": "backend/src/orchestrator/orchestrator.py",
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
      "lines": [
-      28,
-      28
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/replenish_user_limits.py",
+     "lines": [
+      138,
+      138
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      40,
+      40
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/send_invoices.py",
+     "lines": [
+      89,
+      89
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/update_subscriptions.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      400,
+      400
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      302,
+      302
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      96,
+      96
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      572,
+      572
      ]
     },
     {
@@ -2974,13 +3221,48 @@
       20,
       20
      ]
+    },
+    {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/stripe_shim/dto.py",
+     "lines": [
+      4,
+      4
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 5 files with Organization (+5 tables).",
+    "text": "Shares 5 files with Organization.",
     "sources": [
      {
       "path": "backend/src/agent_evals_v2/eval_org_teardown.py",
@@ -2992,7 +3274,7 @@
     ]
    },
    {
-    "text": "Shares 3 files with Auth0 Role (+8 tables).",
+    "text": "Shares 3 files with Auth0 Role.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
@@ -3004,7 +3286,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Organization Config (+4 tables).",
+    "text": "Shares 1 files with Organization Config.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
@@ -3032,8 +3314,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-web",
-    "label": "Web screens",
+    "id": "group-web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
      "lines": [
@@ -3043,43 +3325,92 @@
     }
    },
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
      "lines": [
-      1,
-      1
+      823,
+      823
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
+     "lines": [
+      823,
+      823
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
      "lines": [
-      1,
-      1
+      13,
+      13
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/downgrade_request.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      213,
+      272
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-database",
+    "label": "Database",
     "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
+     "path": "backend/src/rox_core/models/purchased_actions.py",
      "lines": [
-      610,
-      828
+      213,
+      272
      ]
-    }
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "web",
-    "label": "Web screens",
+    "id": "web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/BillingContent.tsx",
      "lines": [
@@ -3088,7 +3419,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-web",
+    "group": "group-web-app",
     "many": false,
     "details": [
      {
@@ -3152,7 +3483,7 @@
       ]
      },
      {
-      "text": "web/apps/web/src/components/billing/changePlan — 3 files",
+      "text": "+8 more directories",
       "sources": [
        {
         "path": "web/apps/web/src/components/billing/changePlan/DowngradePlanStep.tsx",
@@ -3166,39 +3497,87 @@
     ]
    },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-billing",
+    "label": "Billing API",
     "source": {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "path": "backend/src/rox_core/api/billing/endpoints.py",
      "lines": [
-      1,
-      1
+      823,
+      823
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/public_api/routes/prospects — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/public_api/routes/prospects/billing.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/billing — 1 files",
+      "text": "POST /billing/billing_portal/session",
       "sources": [
        {
         "path": "backend/src/rox_core/api/billing/endpoints.py",
         "lines": [
-         8,
-         8
+         823,
+         823
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /billing/checkout/session",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         610,
+         610
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /billing/enterprise_subscription",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         980,
+         980
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /billing/enterprise_subscription/cancel",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         1065,
+         1065
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /billing/enterprise_subscription/cancel/undo",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         1092,
+         1092
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+45 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/endpoints.py",
+        "lines": [
+         637,
+         637
         ]
        }
       ]
@@ -3206,88 +3585,24 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/cancel_subscriptions.py",
      "lines": [
-      1,
-      1
+      13,
+      13
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 4 files",
+      "text": "CancelSubscriptionsTaskExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/temporal/activities/enrichment — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/temporal/activities/enrichment/billing.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/temporal/workflows — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/temporal/workflows/webhook_waiter.py",
-        "lines": [
-         27,
-         27
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/orchestrator/orchestrator.py",
-     "lines": [
-      28,
-      28
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/billing — 8 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/billing/access_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/shim_layer/redis_shim — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/shim_layer/redis_shim/redis.py",
         "lines": [
          13,
          13
@@ -3296,49 +3611,61 @@
       ]
      },
      {
-      "text": "backend/src/util — 4 files",
+      "text": "ReplenishUserLimitsCoordinatorTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/orchestrator/orchestrator.py",
+        "path": "backend/src/tasks/executors/replenish_user_limits.py",
         "lines": [
-         82,
-         82
+         26,
+         26
         ]
        }
       ]
      },
      {
-      "text": "backend/src/enrichment/util — 2 files",
+      "text": "ReplenishUserLimitsTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/enrichment/util/enrichment_output_util.py",
+        "path": "backend/src/tasks/executors/replenish_user_limits.py",
         "lines": [
-         17,
-         17
+         138,
+         138
         ]
        }
       ]
      },
      {
-      "text": "backend/src/rox_core/api/metering — 2 files",
+      "text": "SendInvoicesCoordinatorTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/metering/action_pricing_service.py",
+        "path": "backend/src/tasks/executors/send_invoices.py",
         "lines": [
-         20,
-         20
+         40,
+         40
         ]
        }
       ]
      },
      {
-      "text": "backend/src/shim_layer/stripe_shim — 2 files",
+      "text": "SendInvoicesTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/billing/business.py",
+        "path": "backend/src/tasks/executors/send_invoices.py",
         "lines": [
-         117,
-         117
+         89,
+         89
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+1 more workers",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/update_subscriptions.py",
+        "lines": [
+         21,
+         21
         ]
        }
       ]
@@ -3346,8 +3673,88 @@
     ]
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "temporal-backend-src-temporal-activities-enrichment",
+    "label": "Enrichment workflows",
+    "source": {
+     "path": "backend/src/temporal/activities/enrichment/billing.py",
+     "lines": [
+      400,
+      400
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "finalize_credits",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/billing.py",
+        "lines": [
+         400,
+         400
+        ]
+       }
+      ]
+     },
+     {
+      "text": "reserve_credits",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/billing.py",
+        "lines": [
+         302,
+         302
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-temporal-workflows",
+    "label": "Workflows workflows",
+    "source": {
+     "path": "backend/src/temporal/workflows/webhook_waiter.py",
+     "lines": [
+      96,
+      96
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "WebhookWaiterWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/webhook_waiter.py",
+        "lines": [
+         96,
+         96
+        ]
+       }
+      ]
+     },
+     {
+      "text": "enqueue_next_waterfall_step",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/webhook_waiter.py",
+        "lines": [
+         572,
+         572
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/downgrade_request.py",
      "lines": [
@@ -3356,39 +3763,101 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/downgrade_request.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-tables",
-    "label": "Tables (13)",
+    "id": "library-backend-src-util",
+    "label": "Util (library)",
     "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
+     "path": "backend/src/util/org_config_utils.py",
      "lines": [
-      610,
-      828
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-public-api-routes-prospects",
+    "label": "Prospects (library)",
+    "source": {
+     "path": "backend/src/public_api/routes/prospects/billing.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-billing",
+    "label": "Billing (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-agent-state",
+    "label": "Agent State (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/agent_state/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-shim-layer-stripe-shim",
+    "label": "Stripe Shim (library)",
+    "source": {
+     "path": "backend/src/shim_layer/stripe_shim/dto.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "database",
+    "label": "Database (13 tables)",
+    "source": {
+     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "lines": [
+      213,
+      272
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": [
      {
-      "text": "auto_reload_config — 11 columns",
+      "text": "auto_reload_config",
       "sources": [
        {
         "path": "backend/src/rox_core/models/purchased_actions.py",
@@ -3400,7 +3869,7 @@
       ]
      },
      {
-      "text": "downgrade_request — 13 columns",
+      "text": "downgrade_request",
       "sources": [
        {
         "path": "backend/src/rox_core/models/downgrade_request.py",
@@ -3412,7 +3881,7 @@
       ]
      },
      {
-      "text": "enterprise_subscription — 23 columns",
+      "text": "enterprise_subscription",
       "sources": [
        {
         "path": "backend/src/rox_core/models/subscription.py",
@@ -3424,7 +3893,7 @@
       ]
      },
      {
-      "text": "payment_processor_customer — 5 columns",
+      "text": "payment_processor_customer",
       "sources": [
        {
         "path": "backend/src/rox_core/models/payment_processor_customer.py",
@@ -3436,7 +3905,7 @@
       ]
      },
      {
-      "text": "payment_processor_organization — 4 columns",
+      "text": "payment_processor_organization",
       "sources": [
        {
         "path": "backend/src/rox_core/models/payment_processor_customer.py",
@@ -3448,7 +3917,7 @@
       ]
      },
      {
-      "text": "plan — 14 columns",
+      "text": "+8 more tables",
       "sources": [
        {
         "path": "backend/src/rox_core/models/plan.py",
@@ -3460,133 +3929,40 @@
       ]
      }
     ]
+   },
+   {
+    "id": "external-stripe",
+    "label": "Stripe",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (16)",
+    "src": "web-app",
+    "dst": "api-billing",
+    "label": "HTTP",
     "source": {
-     "path": "backend/src/rox_core/api/agent_actions/dao.py",
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
      "lines": [
-      43,
-      43
+      34,
+      34
      ]
     }
    },
    {
-    "src": "logic",
-    "dst": "workers",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/enrichment/util/enrichment_output_util.py",
-     "lines": [
-      31,
-      31
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (5)",
-    "source": {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
-     "lines": [
-      19,
-      19
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (10)",
-    "source": {
-     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-     "lines": [
-      2,
-      2
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (8)",
-    "source": {
-     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-     "lines": [
-      3,
-      3
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/public_api/routes/prospects/billing.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/replenish_user_limits.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-tables",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/cancel_subscriptions.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (5)",
+    "src": "api-billing",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/agent_actions/dao.py",
      "lines": [
@@ -3596,11 +3972,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (2)",
+    "src": "library-backend-src-public-api-routes-prospects",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+     "path": "backend/src/public_api/routes/prospects/billing.py",
      "lines": [
       1,
       1
@@ -3608,9 +3984,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-agent-state",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/agent_state/business.py",
      "lines": [
@@ -3620,21 +3996,21 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-billing",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
      "lines": [
-      213,
-      213
+      1,
+      1
      ]
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/downgrade_request.py",
      "lines": [
@@ -3644,50 +4020,62 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-util",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "path": "backend/src/util/org_config_utils.py",
      "lines": [
-      20,
-      20
+      1,
+      1
      ]
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/payment_processor_customer.py",
+     "path": "backend/src/rox_core/api/agent_actions/dao.py",
      "lines": [
-      87,
-      87
+      1,
+      1
      ]
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "api-billing",
+    "dst": "external-stripe",
+    "label": "calls Stripe",
     "source": {
-     "path": "backend/src/rox_core/models/purchased_actions.py",
+     "path": "backend/src/rox_core/api/billing/business.py",
      "lines": [
-      31,
-      31
+      18,
+      18
      ]
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-shim-layer-stripe-shim",
+    "dst": "external-stripe",
+    "label": "calls Stripe",
     "source": {
-     "path": "backend/src/rox_core/models/starter_action_grant.py",
+     "path": "backend/src/shim_layer/stripe_shim/dto.py",
      "lines": [
-      14,
-      14
+      4,
+      4
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "external-stripe",
+    "label": "calls Stripe",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/business.py",
+     "lines": [
+      18,
+      18
      ]
     }
    }
@@ -3713,22 +4101,9 @@
   "nosql": [],
   "relations": [
    {
-    "src": "auto_reload_config",
-    "dst": "purchased_actions_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/purchased_actions.py",
-     "lines": [
-      31,
-      31
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "downgrade_request",
     "dst": "payment_processor_customer",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/downgrade_request.py",
      "lines": [
@@ -3741,7 +4116,7 @@
    {
     "src": "downgrade_request",
     "dst": "plan",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/downgrade_request.py",
      "lines": [
@@ -3754,7 +4129,7 @@
    {
     "src": "enterprise_subscription",
     "dst": "payment_processor_organization",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3767,20 +4142,7 @@
    {
     "src": "enterprise_subscription",
     "dst": "plan",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/rox_core/api/billing/access_service.py",
-     "lines": [
-      201,
-      201
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "enterprise_subscription",
-    "dst": "plan",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3792,60 +4154,8 @@
    },
    {
     "src": "enterprise_subscription",
-    "dst": "remaining_agents_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      559,
-      559
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "enterprise_subscription",
-    "dst": "subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      108,
-      108
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "enterprise_subscription",
-    "dst": "subscription_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      440,
-      440
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "enterprise_subscription",
-    "dst": "subscription_schedule",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      1082,
-      1082
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "enterprise_subscription",
     "dst": "user_limit_subscription",
-    "label": "commented_fk",
+    "label": "commented-out FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3856,35 +4166,9 @@
     "kind": "symbolic"
    },
    {
-    "src": "enterprise_subscription",
-    "dst": "user_limit_subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      831,
-      831
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "payment_processor_customer",
-    "dst": "payment_processor_organization",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/payment_processor_customer.py",
-     "lines": [
-      87,
-      87
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "payment_processor_customer",
     "dst": "subscription",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3897,7 +4181,7 @@
    {
     "src": "plan",
     "dst": "subscription",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3910,7 +4194,7 @@
    {
     "src": "plan",
     "dst": "subscription_change_log",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/subscription.py",
      "lines": [
@@ -3919,136 +4203,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "remaining_agents_change_log",
-    "dst": "subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      108,
-      108
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "remaining_agents_change_log",
-    "dst": "subscription_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      440,
-      440
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "remaining_agents_change_log",
-    "dst": "subscription_schedule",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      1082,
-      1082
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "remaining_agents_change_log",
-    "dst": "user_limit_subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      831,
-      831
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription",
-    "dst": "subscription_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      440,
-      440
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription",
-    "dst": "subscription_schedule",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      1082,
-      1082
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription",
-    "dst": "user_limit_subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      831,
-      831
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription_change_log",
-    "dst": "subscription_schedule",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      1082,
-      1082
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription_change_log",
-    "dst": "user_limit_subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      831,
-      831
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "subscription_schedule",
-    "dst": "user_limit_subscription",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/subscription.py",
-     "lines": [
-      831,
-      831
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],
@@ -4069,7 +4223,7 @@
    }
   },
   {
-   "label": "Organization (+5 tables)",
+   "label": "Organization",
    "page": "feature-tenancy-organization",
    "source": {
     "path": "backend/src/agent_evals_v2/eval_org_teardown.py",
@@ -4080,7 +4234,7 @@
    }
   },
   {
-   "label": "Auth0 Role (+8 tables)",
+   "label": "Auth0 Role",
    "page": "feature-tenancy-auth0-role",
    "source": {
     "path": "backend/src/rox_core/api/auth0/auth0_duplicate_user_merge_backfill_job.py",
@@ -4091,7 +4245,7 @@
    }
   },
   {
-   "label": "Organization Config (+4 tables)",
+   "label": "Organization Config",
    "page": "feature-tenancy-organization-config",
    "source": {
     "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",

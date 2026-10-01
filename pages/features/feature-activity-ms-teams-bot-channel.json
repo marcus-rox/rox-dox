@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-ms-teams-bot-channel",
- "title": "Ms Teams Bot Channel (+3 tables)",
+ "title": "Microsoft Teams bot",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -483,7 +483,38 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: ms_teams_bot_channel, ms_teams_bot_personal_chat, ms_teams_bot_team.",
+    "text": "Runs 2 background workers and workflows: MSTeamsAgentCleanupTaskExecutor, MSTeamsBotMessageTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
+      "lines": [
+       18,
+       18
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/message_task_executor.py",
+      "lines": [
+       90,
+       90
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: Microsoft identity.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: ms_teams_bot_channel, ms_teams_bot_personal_chat, ms_teams_bot_team.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/integrations/msteamsbot/channel.py",
@@ -504,25 +535,6 @@
       "lines": [
        12,
        93
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Business logic: 11, Models: 3.",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/ms_teams/bot/adaptive_card.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
-      "lines": [
-       39,
-       39
       ]
      }
     ]
@@ -570,23 +582,47 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "11",
-     "0",
-     "backend/src/ext_integrations/ms_teams/bot (4), backend/src/ext_integrations/ms_teams/bot/task_executors (3), backend/src/workflow/builder (2)"
+     "Task Executors workers",
+     "Background workers / workflows",
+     "ms_teams_bot_channel, ms_teams_bot_personal_chat",
+     "Microsoft identity"
     ],
     [
-     "Models",
-     "3",
-     "0",
-     "backend/src/rox_core/models/integrations/msteamsbot (3)"
+     "Builder (library)",
+     "Library code",
+     "ms_teams_bot_channel, ms_teams_bot_team",
+     "—"
+    ],
+    [
+     "ms_teams_bot_channel",
+     "Database",
+     "ms_teams_bot_channel",
+     "—"
+    ],
+    [
+     "ms_teams_bot_personal_chat",
+     "Database",
+     "ms_teams_bot_personal_chat",
+     "—"
+    ],
+    [
+     "ms_teams_bot_team",
+     "Database",
+     "ms_teams_bot_team",
+     "—"
+    ],
+    [
+     "Microsoft identity",
+     "External service",
+     "—",
+     "Microsoft identity"
     ]
    ],
    "sources": [
@@ -612,17 +648,38 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/ms_teams/bot/adaptive_card.py",
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
      "lines": [
-      9,
-      9
+      18,
+      18
      ]
     },
     {
-     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/message_task_executor.py",
      "lines": [
-      39,
-      39
+      90,
+      90
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/workflow/builder/tools.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -646,19 +703,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/adaptive_card.py",
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
      "lines": [
-      9,
-      9
+      18,
+      18
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/workflow/builder/tools.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/integrations/msteamsbot/channel.py",
      "lines": [
@@ -666,67 +747,67 @@
       113
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/integrations/msteamsbot/channel.py",
+     "lines": [
+      12,
+      113
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "task_executor-backend-src-ext-integrations-ms-teams-bot-task-executors",
+    "label": "Task Executors workers",
     "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/adaptive_card.py",
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
      "lines": [
-      9,
-      9
+      18,
+      18
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/ext_integrations/ms_teams/bot — 4 files",
+      "text": "MSTeamsAgentCleanupTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/ext_integrations/ms_teams/bot/adaptive_card.py",
+        "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
         "lines": [
-         9,
-         9
+         18,
+         18
         ]
        }
       ]
      },
      {
-      "text": "backend/src/ext_integrations/ms_teams/bot/task_executors — 3 files",
+      "text": "MSTeamsBotMessageTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
+        "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/message_task_executor.py",
         "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/builder — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/builder/tools.py",
-        "lines": [
-         43,
-         43
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/execution_graph/packages/msteams — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/execution_graph/packages/msteams/__init__.py",
-        "lines": [
-         8,
-         8
+         90,
+         90
         ]
        }
       ]
@@ -734,35 +815,22 @@
     ]
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-workflow-builder",
+    "label": "Builder (library)",
     "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
+     "path": "backend/src/workflow/builder/tools.py",
      "lines": [
-      39,
-      39
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/integrations/msteamsbot — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
-        "lines": [
-         39,
-         39
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-ms_teams_bot_channel",
+    "id": "store-ms-teams-bot-channel",
     "label": "ms_teams_bot_channel",
     "source": {
      "path": "backend/src/rox_core/models/integrations/msteamsbot/channel.py",
@@ -772,12 +840,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-ms_teams_bot_personal_chat",
+    "id": "store-ms-teams-bot-personal-chat",
     "label": "ms_teams_bot_personal_chat",
     "source": {
      "path": "backend/src/rox_core/models/integrations/msteamsbot/personal_chat.py",
@@ -787,12 +855,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-ms_teams_bot_team",
+    "id": "store-ms-teams-bot-team",
     "label": "ms_teams_bot_team",
     "source": {
      "path": "backend/src/rox_core/models/integrations/msteamsbot/team.py",
@@ -802,52 +870,31 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-microsoft-identity",
+    "label": "Microsoft identity",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (10)",
-    "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
-     "lines": [
-      39,
-      39
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-ms_teams_bot_channel",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-ms_teams_bot_personal_chat",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-ms_teams_bot_team",
-    "label": "uses (1)",
+    "src": "library-backend-src-workflow-builder",
+    "dst": "store-ms-teams-bot-channel",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/workflow/builder/tools.py",
      "lines": [
@@ -857,14 +904,50 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-ms_teams_bot_personal_chat",
-    "label": "uses (1)",
+    "src": "library-backend-src-workflow-builder",
+    "dst": "store-ms-teams-bot-team",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/integrations/msteamsbot/personal_chat.py",
+     "path": "backend/src/workflow/builder/tools.py",
      "lines": [
-      12,
-      12
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-ext-integrations-ms-teams-bot-task-executors",
+    "dst": "store-ms-teams-bot-channel",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-ext-integrations-ms-teams-bot-task-executors",
+    "dst": "store-ms-teams-bot-personal-chat",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/cleanup_task_executor.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-ext-integrations-ms-teams-bot-task-executors",
+    "dst": "external-microsoft-identity",
+    "label": "calls Microsoft identity",
+    "source": {
+     "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+     "lines": [
+      3,
+      3
      ]
     }
    }

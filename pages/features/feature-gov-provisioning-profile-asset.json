@@ -1,6 +1,6 @@
 {
  "id": "feature-gov-provisioning-profile-asset",
- "title": "Provisioning Profile Asset (+5 tables)",
+ "title": "Provisioning Profile Asset",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-gov",
@@ -381,7 +381,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping, provisioning_profile_assignment.",
+    "text": "Stores data in: provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping, provisioning_profile_assignment.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -421,20 +421,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 9, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
-      "lines": [
-       23,
-       23
       ]
      }
     ]
@@ -475,23 +468,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "9",
-     "0",
-     "backend/src/rox_core/api/provisioning_profiles/applicators (6), backend/src/rox_core/api/provisioning_profiles (3)"
+     "Applicators (library)",
+     "Library code",
+     "provisioning_profile_asset, provisioning_profile_asset_mapping",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Provisioning Profiles (library)",
+     "Library code",
+     "provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset",
+     "—"
+    ],
+    [
+     "provisioning_profile",
+     "Database",
+     "provisioning_profile",
+     "—"
+    ],
+    [
+     "provisioning_profile_apply_run",
+     "Database",
+     "provisioning_profile_apply_run",
+     "—"
+    ],
+    [
+     "provisioning_profile_asset",
+     "Database",
+     "provisioning_profile_asset",
+     "—"
+    ],
+    [
+     "provisioning_profile_asset_mapping",
+     "Database",
+     "provisioning_profile_asset_mapping",
+     "—"
+    ],
+    [
+     "provisioning_profile_assignment",
+     "Database",
+     "provisioning_profile_assignment",
+     "—"
     ]
    ],
    "sources": [
@@ -538,10 +561,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      23,
-      23
+      1,
+      1
      ]
     }
    ],
@@ -565,8 +588,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
      "lines": [
@@ -576,8 +599,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -585,12 +620,24 @@
       163
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/provisioning_profile.py",
+     "lines": [
+      67,
+      163
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
+    "label": "Applicators (library)",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
      "lines": [
@@ -599,65 +646,27 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/provisioning_profiles/applicators — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/provisioning_profiles — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/provisioning_profiles/business.py",
-        "lines": [
-         3,
-         3
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-provisioning-profiles",
+    "label": "Provisioning Profiles (library)",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      23,
-      23
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-provisioning_profile",
+    "id": "store-provisioning-profile",
     "label": "provisioning_profile",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -667,12 +676,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-provisioning_profile_apply_run",
+    "id": "store-provisioning-profile-apply-run",
     "label": "provisioning_profile_apply_run",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -682,12 +691,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-provisioning_profile_asset",
+    "id": "store-provisioning-profile-asset",
     "label": "provisioning_profile_asset",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -697,12 +706,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-provisioning_profile_asset_mapping",
+    "id": "store-provisioning-profile-asset-mapping",
     "label": "provisioning_profile_asset_mapping",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -712,12 +721,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-provisioning_profile_assignment",
+    "id": "store-provisioning-profile-assignment",
     "label": "provisioning_profile_assignment",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
@@ -727,28 +736,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (8)",
-    "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
-     "lines": [
-      23,
-      23
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-provisioning_profile",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles",
+    "dst": "store-provisioning-profile",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
@@ -758,9 +755,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-provisioning_profile_apply_run",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles",
+    "dst": "store-provisioning-profile-apply-run",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
@@ -770,9 +767,21 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-provisioning_profile_asset",
-    "label": "uses (6)",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles",
+    "dst": "store-provisioning-profile-asset",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
+    "dst": "store-provisioning-profile-asset",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
      "lines": [
@@ -782,9 +791,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-provisioning_profile_asset_mapping",
-    "label": "uses (5)",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
+    "dst": "store-provisioning-profile-asset-mapping",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
      "lines": [
@@ -809,7 +818,7 @@
    {
     "src": "provisioning_profile",
     "dst": "provisioning_profile_apply_run",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -821,21 +830,8 @@
    },
    {
     "src": "provisioning_profile",
-    "dst": "provisioning_profile_apply_run",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      596,
-      596
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile",
     "dst": "provisioning_profile_asset",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -847,34 +843,8 @@
    },
    {
     "src": "provisioning_profile",
-    "dst": "provisioning_profile_asset",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      166,
-      166
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile",
-    "dst": "provisioning_profile_asset_mapping",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      731,
-      731
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile",
     "dst": "provisioning_profile_assignment",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -885,61 +855,9 @@
     "kind": "enforced"
    },
    {
-    "src": "provisioning_profile",
-    "dst": "provisioning_profile_assignment",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      374,
-      374
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile_apply_run",
-    "dst": "provisioning_profile_asset",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      166,
-      166
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile_apply_run",
-    "dst": "provisioning_profile_asset_mapping",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      731,
-      731
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile_apply_run",
-    "dst": "provisioning_profile_assignment",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      374,
-      374
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "provisioning_profile_asset",
     "dst": "provisioning_profile_asset_mapping",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -948,45 +866,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "provisioning_profile_asset",
-    "dst": "provisioning_profile_asset_mapping",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      731,
-      731
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile_asset",
-    "dst": "provisioning_profile_assignment",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      374,
-      374
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "provisioning_profile_asset_mapping",
-    "dst": "provisioning_profile_assignment",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/provisioning_profile.py",
-     "lines": [
-      374,
-      374
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],

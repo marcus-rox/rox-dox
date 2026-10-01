@@ -1,6 +1,6 @@
 {
  "id": "feature-people-email-domain-mapping",
- "title": "Email Domain Mapping (+2 tables)",
+ "title": "Email Domain Mapping",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -422,7 +422,45 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: email_domain_mapping, email_domain_observation.",
+    "text": "Runs 2 background workers and workflows: EmailDomainResolutionRefreshCoordinatorTaskExecutor, EmailDomainResolutionTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/email_domain_resolution.py",
+      "lines": [
+       180,
+       180
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/email_domain_resolution.py",
+      "lines": [
+       35,
+       35
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: OpenAI.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
+      "lines": [
+       23,
+       23
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_redirect_evaluator.py",
+      "lines": [
+       25,
+       25
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: email_domain_mapping, email_domain_observation.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/email_domain_resolution.py",
@@ -436,32 +474,6 @@
       "lines": [
        116,
        147
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 1, Business logic: 9, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/email_domain_resolution.py",
-      "lines": [
-       3,
-       3
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/entities/company/business.py",
-      "lines": [
-       16,
-       16
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/entities/company/business.py",
-      "lines": [
-       26,
-       26
       ]
      }
     ]
@@ -507,29 +519,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "—",
+     "OpenAI"
     ],
     [
-     "Business logic",
-     "9",
-     "0",
-     "backend/src/rox_core/api/entities/company (9)"
+     "Company (library)",
+     "Library code",
+     "email_domain_mapping",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "email_domain_mapping",
+     "Database",
+     "email_domain_mapping",
+     "—"
+    ],
+    [
+     "email_domain_observation",
+     "Database",
+     "email_domain_observation",
+     "—"
+    ],
+    [
+     "OpenAI",
+     "External service",
+     "—",
+     "OpenAI"
     ]
    ],
    "sources": [
@@ -550,22 +574,29 @@
     {
      "path": "backend/src/tasks/executors/email_domain_resolution.py",
      "lines": [
-      3,
-      3
+      180,
+      180
      ]
     },
     {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
+     "path": "backend/src/tasks/executors/email_domain_resolution.py",
      "lines": [
-      16,
-      16
+      35,
+      35
      ]
     },
     {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
+     "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
      "lines": [
-      26,
-      26
+      23,
+      23
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -573,7 +604,7 @@
   },
   "notes": [
    {
-    "text": "Shares 2 files with Rox Company (+4 tables).",
+    "text": "Shares 2 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
@@ -589,30 +620,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/email_domain_resolution.py",
+     "lines": [
+      180,
+      180
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/email_domain_resolution.py",
      "lines": [
-      3,
-      3
+      180,
+      180
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
+     "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
      "lines": [
-      16,
-      16
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/email_domain_resolution.py",
      "lines": [
@@ -620,31 +664,67 @@
       113
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/email_domain_resolution.py",
+     "lines": [
+      52,
+      113
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/email_domain_resolution.py",
      "lines": [
-      3,
-      3
+      180,
+      180
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 1 files",
+      "text": "EmailDomainResolutionRefreshCoordinatorTaskExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/email_domain_resolution.py",
         "lines": [
-         3,
-         3
+         180,
+         180
+        ]
+       }
+      ]
+     },
+     {
+      "text": "EmailDomainResolutionTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/email_domain_resolution.py",
+        "lines": [
+         35,
+         35
         ]
        }
       ]
@@ -652,63 +732,22 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-entities-company",
+    "label": "Company (library)",
     "source": {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
+     "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
      "lines": [
-      16,
-      16
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/entities/company — 9 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/company/business.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
-     "lines": [
-      26,
-      26
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/company/business.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-email_domain_mapping",
+    "id": "store-email-domain-mapping",
     "label": "email_domain_mapping",
     "source": {
      "path": "backend/src/rox_core/models/email_domain_resolution.py",
@@ -718,12 +757,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-email_domain_observation",
+    "id": "store-email-domain-observation",
     "label": "email_domain_observation",
     "source": {
      "path": "backend/src/rox_core/models/email_domain_resolution.py",
@@ -733,57 +772,48 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-openai",
+    "label": "OpenAI",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (6)",
-    "source": {
-     "path": "backend/src/rox_core/api/entities/company/business.py",
-     "lines": [
-      26,
-      26
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/tasks/executors/email_domain_resolution.py",
-     "lines": [
-      3,
-      3
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/email_domain_resolution.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-email_domain_mapping",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-company",
+    "dst": "store-email-domain-mapping",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
      "lines": [
       1,
       1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
+     "lines": [
+      23,
+      23
      ]
     }
    }
@@ -796,21 +826,7 @@
    "email_domain_observation"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "email_domain_mapping",
-    "dst": "email_domain_observation",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/email_domain_resolution.py",
-     "lines": [
-      116,
-      116
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -829,7 +845,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",

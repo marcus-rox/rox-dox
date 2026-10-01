@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-user-account-link-preferences",
- "title": "User Account Link Preferences (+3 tables)",
+ "title": "User Account Link Preferences",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -166,7 +166,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: user_account_link_preferences, user_account_link_preferences_filters, user_account_link_preferences_relationships.",
+    "text": "Stores data in: user_account_link_preferences, user_account_link_preferences_filters, user_account_link_preferences_relationships.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
@@ -192,17 +192,10 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 4, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/business.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
       "lines": [
        1,
        1
@@ -246,23 +239,47 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "4",
-     "0",
-     "backend/src/rox_core/api/account (2), backend/src/rox_core/api/assignment_prediction (2)"
+     "Account (library)",
+     "Library code",
+     "user_account_link_preferences, user_account_link_preferences_filters",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models/account (1)"
+     "Assignment Prediction (library)",
+     "Library code",
+     "user_account_link_preferences",
+     "—"
+    ],
+    [
+     "Account (library)",
+     "Library code",
+     "user_account_link_preferences",
+     "—"
+    ],
+    [
+     "user_account_link_preferences",
+     "Database",
+     "user_account_link_preferences",
+     "—"
+    ],
+    [
+     "user_account_link_preferences_filters",
+     "Database",
+     "user_account_link_preferences_filters",
+     "—"
+    ],
+    [
+     "user_account_link_preferences_relationships",
+     "Database",
+     "user_account_link_preferences_relationships",
+     "—"
     ]
    ],
    "sources": [
@@ -295,10 +312,24 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/assignment_prediction/sfdc_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
+     "lines": [
+      24,
+      24
      ]
     }
    ],
@@ -322,8 +353,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
@@ -333,8 +364,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/account/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -342,12 +385,24 @@
       155
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
+     "lines": [
+      24,
+      155
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-account",
+    "label": "Account (library)",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
@@ -356,38 +411,28 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/account — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/account/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/assignment_prediction — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/assignment_prediction/business.py",
-        "lines": [
-         2,
-         2
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-assignment-prediction",
+    "label": "Assignment Prediction (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/assignment_prediction/sfdc_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models-account",
+    "label": "Account (library)",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -396,25 +441,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/account — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-user_account_link_preferences",
+    "id": "store-user-account-link-preferences",
     "label": "user_account_link_preferences",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
@@ -424,12 +456,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-user_account_link_preferences_filters",
+    "id": "store-user-account-link-preferences-filters",
     "label": "user_account_link_preferences_filters",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
@@ -439,12 +471,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-user_account_link_preferences_relationships",
+    "id": "store-user-account-link-preferences-relationships",
     "label": "user_account_link_preferences_relationships",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
@@ -454,28 +486,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/rox_core/api/account/business.py",
-     "lines": [
-      55,
-      55
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-user_account_link_preferences",
-    "label": "uses (3)",
+    "src": "library-backend-src-rox-core-api-account",
+    "dst": "store-user-account-link-preferences",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
@@ -485,9 +505,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-user_account_link_preferences_filters",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-account",
+    "dst": "store-user-account-link-preferences-filters",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
@@ -497,9 +517,21 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-user_account_link_preferences",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-assignment-prediction",
+    "dst": "store-user-account-link-preferences",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/assignment_prediction/sfdc_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models-account",
+    "dst": "store-user-account-link-preferences",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -522,7 +554,7 @@
    {
     "src": "user_account_link_preferences",
     "dst": "user_account_link_preferences_filters",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -534,34 +566,8 @@
    },
    {
     "src": "user_account_link_preferences",
-    "dst": "user_account_link_preferences_filters",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
-     "lines": [
-      48,
-      48
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "user_account_link_preferences",
-    "dst": "user_account_link_preferences_filters",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
-     "lines": [
-      179,
-      179
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "user_account_link_preferences",
     "dst": "user_account_link_preferences_relationships",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -570,32 +576,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "user_account_link_preferences",
-    "dst": "user_account_link_preferences_relationships",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
-     "lines": [
-      158,
-      158
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "user_account_link_preferences_filters",
-    "dst": "user_account_link_preferences_relationships",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
-     "lines": [
-      158,
-      158
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],

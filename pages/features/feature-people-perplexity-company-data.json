@@ -1,6 +1,6 @@
 {
  "id": "feature-people-perplexity-company-data",
- "title": "Perplexity Company Data (+4 tables)",
+ "title": "Perplexity Company Data",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -776,7 +776,47 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: crustdata_company_data, mixrank_company_data_synced, perplexity_company_data, zoominfo_company_data.",
+    "text": "Runs 5 background workers and workflows: BatchWorkflow, MixrankSyncWorkflow, get_new_company_domains, get_stale_domains, sync_batch.",
+    "sources": [
+     {
+      "path": "backend/src/temporal/workflows/batch_workflow.py",
+      "lines": [
+       154,
+       154
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/mixrank_sync.py",
+      "lines": [
+       53,
+       53
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+      "lines": [
+       105,
+       105
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+      "lines": [
+       65,
+       65
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+      "lines": [
+       145,
+       145
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: crustdata_company_data, mixrank_company_data_synced, perplexity_company_data, zoominfo_company_data.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/crustdata_company_data.py",
@@ -804,32 +844,6 @@
       "lines": [
        17,
        131
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 7, Business logic: 14, Models: 4.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/command_sdk/agents/tools/public_contact_enrichment.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/crustdata_company_data.py",
-      "lines": [
-       17,
-       17
       ]
      }
     ]
@@ -903,29 +917,71 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "6",
-     "1",
-     "backend/src/temporal/workflows (3), backend/src/temporal/activities/mixrank_sync (2), backend/src/tasks/listeners (1)"
+     "Mixrank Sync workflows",
+     "Background workers / workflows",
+     "mixrank_company_data_synced",
+     "—"
     ],
     [
-     "Business logic",
-     "12",
-     "2",
-     "backend/src/data_extraction/svc/services/company_enrichment_service (4), backend/src/agent_framework/modules/public_contact_enrichment (2), backend/src/rox_core/api/data_extraction (2)"
+     "Workflows workflows",
+     "Background workers / workflows",
+     "—",
+     "—"
     ],
     [
-     "Models",
-     "4",
-     "0",
-     "backend/src/rox_core/models (4)"
+     "Models (library)",
+     "Library code",
+     "crustdata_company_data, perplexity_company_data, zoominfo_company_data",
+     "—"
+    ],
+    [
+     "Data Extraction (library)",
+     "Library code",
+     "—",
+     "—"
+    ],
+    [
+     "People (library)",
+     "Library code",
+     "perplexity_company_data",
+     "—"
+    ],
+    [
+     "Listeners (library)",
+     "Library code",
+     "crustdata_company_data, perplexity_company_data",
+     "—"
+    ],
+    [
+     "crustdata_company_data",
+     "Database",
+     "crustdata_company_data",
+     "—"
+    ],
+    [
+     "mixrank_company_data_synced",
+     "Database",
+     "mixrank_company_data_synced",
+     "—"
+    ],
+    [
+     "perplexity_company_data",
+     "Database",
+     "perplexity_company_data",
+     "—"
+    ],
+    [
+     "zoominfo_company_data",
+     "Database",
+     "zoominfo_company_data",
+     "—"
     ]
    ],
    "sources": [
@@ -958,17 +1014,45 @@
      ]
     },
     {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+     "lines": [
+      65,
+      65
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+     "lines": [
+      145,
+      145
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_extraction/mixrank_sync.py",
      "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/public_contact_enrichment.py",
+     "path": "backend/src/temporal/workflows/batch_workflow.py",
      "lines": [
-      9,
-      9
+      154,
+      154
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/mixrank_sync.py",
+     "lines": [
+      53,
+      53
      ]
     },
     {
@@ -977,13 +1061,48 @@
       17,
       17
      ]
+    },
+    {
+     "path": "backend/src/rox_core/models/perplexity_company_data.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/zoominfo_company_data.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_extraction/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "lines": [
+      1,
+      1
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 2 files with Rox Company (+4 tables).",
+    "text": "Shares 2 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/data_extraction/svc/services/company_enrichment_service/sql_enrichment_function.py",
@@ -995,7 +1114,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Company Request Status (+4 tables).",
+    "text": "Shares 2 files with Company Request Status.",
     "sources": [
      {
       "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",
@@ -1011,19 +1130,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
      "lines": [
-      1,
-      1
+      105,
+      105
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/crustdata_company_data.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/crustdata_company_data.py",
      "lines": [
@@ -1031,67 +1174,107 @@
       126
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/crustdata_company_data.py",
+     "lines": [
+      17,
+      126
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "temporal-backend-src-temporal-activities-mixrank-sync",
+    "label": "Mixrank Sync workflows",
     "source": {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
      "lines": [
-      1,
-      1
+      105,
+      105
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/temporal/workflows — 3 files",
+      "text": "get_new_company_domains",
       "sources": [
        {
-        "path": "backend/src/temporal/workflows/__init__.py",
+        "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
         "lines": [
-         3,
-         3
+         105,
+         105
         ]
        }
       ]
      },
      {
-      "text": "backend/src/temporal/activities/mixrank_sync — 2 files",
+      "text": "get_stale_domains",
       "sources": [
        {
-        "path": "backend/src/temporal/activities/mixrank_sync/__init__.py",
+        "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
         "lines": [
-         1,
-         1
+         65,
+         65
         ]
        }
       ]
      },
      {
-      "text": "backend/src/tasks/listeners — 1 files",
+      "text": "sync_batch",
       "sources": [
        {
-        "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+        "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
         "lines": [
-         1,
-         1
+         145,
+         145
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-temporal-workflows",
+    "label": "Workflows workflows",
+    "source": {
+     "path": "backend/src/temporal/workflows/batch_workflow.py",
+     "lines": [
+      154,
+      154
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "BatchWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/batch_workflow.py",
+        "lines": [
+         154,
+         154
         ]
        }
       ]
      },
      {
-      "text": "backend/src/temporal — 1 files",
+      "text": "MixrankSyncWorkflow",
       "sources": [
        {
         "path": "backend/src/temporal/workflows/mixrank_sync.py",
         "lines": [
-         7,
-         7
+         53,
+         53
         ]
        }
       ]
@@ -1099,96 +1282,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/public_contact_enrichment.py",
-     "lines": [
-      9,
-      9
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/data_extraction/svc/services/company_enrichment_service — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/data_extraction/svc/services/company_enrichment_service/sql_enrichment_function.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/modules/public_contact_enrichment — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/public_contact_enrichment.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/data_extraction — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/data_extraction/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/command_sdk/agents/tools — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/public_contact_enrichment.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/people_enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/people_enrichment/util.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/company — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/people_enrichment/util.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/crustdata_company_data.py",
      "lines": [
@@ -1197,25 +1292,57 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/crustdata_company_data.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-crustdata_company_data",
+    "id": "library-backend-src-rox-core-api-data-extraction",
+    "label": "Data Extraction (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_extraction/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-people",
+    "label": "People (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/people/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-tasks-listeners",
+    "label": "Listeners (library)",
+    "source": {
+     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-crustdata-company-data",
     "label": "crustdata_company_data",
     "source": {
      "path": "backend/src/rox_core/models/crustdata_company_data.py",
@@ -1225,12 +1352,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-mixrank_company_data_synced",
+    "id": "store-mixrank-company-data-synced",
     "label": "mixrank_company_data_synced",
     "source": {
      "path": "backend/src/rox_core/models/mixrank_company_data_synced.py",
@@ -1240,12 +1367,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-perplexity_company_data",
+    "id": "store-perplexity-company-data",
     "label": "perplexity_company_data",
     "source": {
      "path": "backend/src/rox_core/models/perplexity_company_data.py",
@@ -1255,12 +1382,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-zoominfo_company_data",
+    "id": "store-zoominfo-company-data",
     "label": "zoominfo_company_data",
     "source": {
      "path": "backend/src/rox_core/models/zoominfo_company_data.py",
@@ -1270,100 +1397,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (15)",
-    "source": {
-     "path": "backend/src/data_extraction/svc/services/company_enrichment_service/sql_enrichment_function.py",
-     "lines": [
-      98,
-      98
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
-     "lines": [
-      6,
-      6
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
-     "lines": [
-      22,
-      22
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-crustdata_company_data",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-mixrank_company_data_synced",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/temporal/activities/mixrank_sync/sync_activity.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-perplexity_company_data",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-mixrank_company_data_synced",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/data_extraction/mixrank_sync.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-perplexity_company_data",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-people",
+    "dst": "store-perplexity-company-data",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/people/business.py",
      "lines": [
@@ -1373,9 +1416,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-crustdata_company_data",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-crustdata-company-data",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/crustdata_company_data.py",
      "lines": [
@@ -1385,9 +1428,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-perplexity_company_data",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-perplexity-company-data",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/perplexity_company_data.py",
      "lines": [
@@ -1397,14 +1440,50 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-zoominfo_company_data",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-zoominfo-company-data",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/zoominfo_company_data.py",
      "lines": [
       17,
       17
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-listeners",
+    "dst": "store-crustdata-company-data",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-listeners",
+    "dst": "store-perplexity-company-data",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/listeners/insight_extraction_listener.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-activities-mixrank-sync",
+    "dst": "store-mixrank-company-data-synced",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/data_extraction/mixrank_sync.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }
@@ -1438,7 +1517,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/data_extraction/svc/services/company_enrichment_service/sql_enrichment_function.py",
@@ -1449,7 +1528,7 @@
    }
   },
   {
-   "label": "Company Request Status (+4 tables)",
+   "label": "Company Request Status",
    "page": "feature-people-company-request-status",
    "source": {
     "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",

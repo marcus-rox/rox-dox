@@ -136,7 +136,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: sequence_agent_cell.",
+    "text": "Stores data in: sequence_agent_cell.",
     "sources": [
      {
       "path": "backend/src/outreach/seqregen_cell/models.py",
@@ -148,20 +148,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 3, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/outreach/seqregen_cell/business.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/outreach/seqregen_cell/models.py",
-      "lines": [
-       17,
-       17
       ]
      }
     ]
@@ -195,23 +188,23 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "1",
-     "backend/src/outreach/seqregen_cell (3)"
+     "Seqregen Cell (library)",
+     "Library code",
+     "sequence_agent_cell",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/outreach/seqregen_cell (1)"
+     "sequence_agent_cell",
+     "Database",
+     "sequence_agent_cell",
+     "—"
     ]
    ],
    "sources": [
@@ -227,13 +220,6 @@
      "lines": [
       1,
       1
-     ]
-    },
-    {
-     "path": "backend/src/outreach/seqregen_cell/models.py",
-     "lines": [
-      17,
-      17
      ]
     }
    ],
@@ -281,8 +267,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/outreach/seqregen_cell/business.py",
      "lines": [
@@ -292,19 +278,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/outreach/seqregen_cell/models.py",
+     "path": "backend/src/outreach/seqregen_cell/business.py",
      "lines": [
-      17,
-      17
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/outreach/seqregen_cell/models.py",
      "lines": [
@@ -312,12 +299,24 @@
       53
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/outreach/seqregen_cell/models.py",
+     "lines": [
+      17,
+      53
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-outreach-seqregen-cell",
+    "label": "Seqregen Cell (library)",
     "source": {
      "path": "backend/src/outreach/seqregen_cell/business.py",
      "lines": [
@@ -326,53 +325,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/outreach/seqregen_cell — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/outreach/seqregen_cell/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/outreach/seqregen_cell/models.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-models",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/outreach/seqregen_cell — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/outreach/seqregen_cell/models.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-sequence_agent_cell",
+    "id": "store-sequence-agent-cell",
     "label": "sequence_agent_cell",
     "source": {
      "path": "backend/src/outreach/seqregen_cell/models.py",
@@ -382,45 +340,21 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/outreach/seqregen_cell/business.py",
-     "lines": [
-      27,
-      27
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-sequence_agent_cell",
-    "label": "uses (3)",
+    "src": "library-backend-src-outreach-seqregen-cell",
+    "dst": "store-sequence-agent-cell",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/outreach/seqregen_cell/business.py",
      "lines": [
       1,
       1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-sequence_agent_cell",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/outreach/seqregen_cell/models.py",
-     "lines": [
-      17,
-      17
      ]
     }
    }

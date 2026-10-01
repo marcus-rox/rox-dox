@@ -1,6 +1,6 @@
 {
  "id": "feature-tasks-digest-task",
- "title": "Digest Task (+3 tables)",
+ "title": "Digest Task",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tasks",
@@ -221,7 +221,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: data_processing_task, digest_task, digest_task_request.",
+    "text": "Serves 1 HTTP endpoints in 1 API groups: Digests.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/eval/digests.py",
+      "lines": [
+       97,
+       97
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: data_processing_task, digest_task, digest_task_request.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/data_processing_task.py",
@@ -242,39 +254,6 @@
       "lines": [
        123,
        184
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 1, Business logic: 4, Models: 2, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/eval/digests.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/lambda_coordinator/rox_core_apis/company_process.py",
-      "lines": [
-       60,
-       60
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/data_processing_task.py",
-      "lines": [
-       17,
-       17
-      ]
-     },
-     {
-      "path": ".agents/skills/how-to-debug-insights/SKILL.md",
-      "lines": [
-       41,
-       41
       ]
      }
     ]
@@ -346,35 +325,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/chat/routes/eval (1)"
+     "Digests API",
+     "HTTP API",
+     "digest_task, digest_task_request",
+     "—"
     ],
     [
-     "Business logic",
-     "4",
-     "0",
-     "backend/src/rox_core/api/alerts (2), backend/src/lambda_coordinator/rox_core_apis (1), backend/src/research/research_agent (1)"
+     "Models (library)",
+     "Library code",
+     "data_processing_task",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "data_processing_task",
+     "Database",
+     "data_processing_task",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/how-to-debug-insights (1)"
+     "digest_task",
+     "Database",
+     "digest_task",
+     "—"
+    ],
+    [
+     "digest_task_request",
+     "Database",
+     "digest_task_request",
+     "—"
     ]
    ],
    "sources": [
@@ -402,15 +387,15 @@
     {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
-      1,
-      1
+      97,
+      97
      ]
     },
     {
-     "path": "backend/src/lambda_coordinator/rox_core_apis/company_process.py",
+     "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
-      60,
-      60
+      1,
+      1
      ]
     },
     {
@@ -419,20 +404,13 @@
       17,
       17
      ]
-    },
-    {
-     "path": ".agents/skills/how-to-debug-insights/SKILL.md",
-     "lines": [
-      41,
-      41
-     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 1 files with User Task (+2 tables).",
+    "text": "Shares 1 files with User Task.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
@@ -448,30 +426,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes / Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
-      1,
-      1
+      97,
+      97
      ]
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models / Agent skills",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/chat/routes/eval/digests.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
      "path": "backend/src/rox_core/models/data_processing_task.py",
      "lines": [
       17,
       17
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/data_processing_task.py",
      "lines": [
@@ -479,31 +470,43 @@
       65
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/data_processing_task.py",
+     "lines": [
+      17,
+      65
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-digests",
+    "label": "Digests API",
     "source": {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
-      1,
-      1
+      97,
+      97
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/chat/routes/eval — 1 files",
+      "text": "POST /digests/by_user",
       "sources": [
        {
         "path": "backend/src/chat/routes/eval/digests.py",
         "lines": [
-         1,
-         1
+         97,
+         97
         ]
        }
       ]
@@ -511,60 +514,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/lambda_coordinator/rox_core_apis/company_process.py",
-     "lines": [
-      60,
-      60
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/alerts — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/business.py",
-        "lines": [
-         41,
-         41
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/lambda_coordinator/rox_core_apis — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/lambda_coordinator/rox_core_apis/company_process.py",
-        "lines": [
-         60,
-         60
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/research/research_agent — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/research/research_agent/get_config.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/data_processing_task.py",
      "lines": [
@@ -573,53 +524,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/data_processing_task.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
-    "source": {
-     "path": ".agents/skills/how-to-debug-insights/SKILL.md",
-     "lines": [
-      41,
-      41
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-models",
-    "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/how-to-debug-insights — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/how-to-debug-insights/SKILL.md",
-        "lines": [
-         41,
-         41
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-data_processing_task",
+    "id": "store-data-processing-task",
     "label": "data_processing_task",
     "source": {
      "path": "backend/src/rox_core/models/data_processing_task.py",
@@ -629,12 +539,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-digest_task",
+    "id": "store-digest-task",
     "label": "digest_task",
     "source": {
      "path": "backend/src/rox_core/models/digest_task.py",
@@ -644,12 +554,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-digest_task_request",
+    "id": "store-digest-task-request",
     "label": "digest_task_request",
     "source": {
      "path": "backend/src/rox_core/models/digest_task.py",
@@ -659,40 +569,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/alerts/business.py",
-     "lines": [
-      81,
-      81
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/chat/routes/eval/digests.py",
-     "lines": [
-      15,
-      15
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-digest_task",
-    "label": "uses (1)",
+    "src": "api-digests",
+    "dst": "store-digest-task",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
@@ -702,9 +588,9 @@
     }
    },
    {
-    "src": "routes",
-    "dst": "store-digest_task_request",
-    "label": "uses (1)",
+    "src": "api-digests",
+    "dst": "store-digest-task-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
@@ -714,38 +600,14 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-data_processing_task",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-data-processing-task",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/data_processing_task.py",
      "lines": [
       17,
       17
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-digest_task",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/digest_task.py",
-     "lines": [
-      31,
-      31
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-digest_task_request",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/digest_task.py",
-     "lines": [
-      123,
-      123
      ]
     }
    }
@@ -763,25 +625,12 @@
    {
     "src": "digest_task",
     "dst": "digest_task_request",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/chat/routes/eval/digests.py",
      "lines": [
       66,
       66
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "digest_task",
-    "dst": "digest_task_request",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/digest_task.py",
-     "lines": [
-      123,
-      123
      ]
     },
     "kind": "symbolic"
@@ -805,7 +654,7 @@
    }
   },
   {
-   "label": "User Task (+2 tables)",
+   "label": "User Task",
    "page": "feature-tasks-user-task",
    "source": {
     "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",

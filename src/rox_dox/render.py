@@ -289,12 +289,33 @@ a:hover {
 }
 .citations {
   margin-left: 0.2rem;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+details.citations {
+  display: inline-block;
+  vertical-align: baseline;
+}
+details.citations summary {
+  cursor: pointer;
+}
+.citation-links {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.summary-claim {
+  margin: 0.65rem 0;
+}
+.table-sources {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .membership-table .citations {
   white-space: normal;
 }
 .citations sup {
+  display: inline-block;
   margin-right: 0.2rem;
 }
 .table-scroll {
@@ -523,7 +544,15 @@ def _citation_links(sources: list[Source], *, page: Page, repo_url: str) -> str:
         for number, source in enumerate(sources, start=1)
     )
     joined = " ".join(references)
-    return f'<span class="citations">{joined}</span>' if joined else ""
+    if not joined:
+        return ""
+    if len(sources) > 3:
+        return (
+            '<details class="citations">'
+            f"<summary>Sources ({len(sources)})</summary>"
+            f'<span class="citation-links">{joined}</span></details>'
+        )
+    return f'<span class="citations">{joined}</span>'
 
 
 def _claim_text(claim: Claim, *, page: Page, repo_url: str) -> str:
@@ -572,13 +601,13 @@ def _table_html(page: Page, *, repo_url: str) -> str:
         '<div class="table-scroll"><table>'
         f"<thead><tr>{headings}</tr></thead>"
         f"<tbody>{rows}</tbody></table></div>"
-        f"<p>Sources: {citations}</p>"
+        f'<div class="table-sources">Sources: {citations}</div>'
     )
 
 
 def _tldr_html(page: Page, *, repo_url: str) -> str:
     summary = "".join(
-        f"<p>{_claim_text(claim, page=page, repo_url=repo_url)}</p>"
+        f'<div class="summary-claim">{_claim_text(claim, page=page, repo_url=repo_url)}</div>'
         for claim in page.tldr.summary
     )
     key_points = (

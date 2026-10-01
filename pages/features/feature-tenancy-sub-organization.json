@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-sub-organization",
- "title": "Sub Organization (+2 tables)",
+ "title": "Sub Organization",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -94,7 +94,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: sub_organization, sub_organization_product_mapping.",
+    "text": "Stores data in: sub_organization, sub_organization_product_mapping.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/sub_organization.py",
@@ -113,20 +113,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/sub_organization/service.py",
       "lines": [
        7,
        7
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/sub_organization.py",
-      "lines": [
-       25,
-       25
       ]
      }
     ]
@@ -160,23 +153,35 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/rox_core/api/sub_organization (2)"
+     "Sub Organization (library)",
+     "Library code",
+     "sub_organization, sub_organization_product_mapping",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "sub_organization, sub_organization_product_mapping",
+     "—"
+    ],
+    [
+     "sub_organization",
+     "Database",
+     "sub_organization",
+     "—"
+    ],
+    [
+     "sub_organization_product_mapping",
+     "Database",
+     "sub_organization_product_mapping",
+     "—"
     ]
    ],
    "sources": [
@@ -197,8 +202,8 @@
     {
      "path": "backend/src/rox_core/api/sub_organization/service.py",
      "lines": [
-      7,
-      7
+      1,
+      1
      ]
     },
     {
@@ -206,6 +211,13 @@
      "lines": [
       25,
       25
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/sub_organization.py",
+     "lines": [
+      73,
+      73
      ]
     }
    ],
@@ -229,19 +241,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/sub_organization/service.py",
      "lines": [
-      7,
-      7
+      1,
+      1
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/sub_organization/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
      "lines": [
@@ -249,40 +273,39 @@
       70
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/sub_organization.py",
+     "lines": [
+      25,
+      70
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-sub-organization",
+    "label": "Sub Organization (library)",
     "source": {
      "path": "backend/src/rox_core/api/sub_organization/service.py",
      "lines": [
-      7,
-      7
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/sub_organization — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/sub_organization/service.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
      "lines": [
@@ -291,25 +314,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/sub_organization.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-sub_organization",
+    "id": "store-sub-organization",
     "label": "sub_organization",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
@@ -319,12 +329,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-sub_organization_product_mapping",
+    "id": "store-sub-organization-product-mapping",
     "label": "sub_organization_product_mapping",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
@@ -334,28 +344,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/sub_organization/service.py",
-     "lines": [
-      12,
-      12
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-sub_organization",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-sub-organization",
+    "dst": "store-sub-organization",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/sub_organization/service.py",
      "lines": [
@@ -365,9 +363,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-sub_organization_product_mapping",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-sub-organization",
+    "dst": "store-sub-organization-product-mapping",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/sub_organization/service.py",
      "lines": [
@@ -377,9 +375,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-sub_organization",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-sub-organization",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
      "lines": [
@@ -389,9 +387,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-sub_organization_product_mapping",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-sub-organization-product-mapping",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
      "lines": [
@@ -413,7 +411,7 @@
    {
     "src": "sub_organization",
     "dst": "sub_organization_product_mapping",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/sub_organization.py",
      "lines": [
@@ -422,19 +420,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "sub_organization",
-    "dst": "sub_organization_product_mapping",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/sub_organization.py",
-     "lines": [
-      73,
-      73
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],

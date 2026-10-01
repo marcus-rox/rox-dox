@@ -87,7 +87,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: push_device.",
+    "text": "Stores data in: push_device.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/push_device.py",
@@ -99,20 +99,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/notifications/device_service.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/push_device.py",
-      "lines": [
-       13,
-       13
       ]
      }
     ]
@@ -146,23 +139,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/rox_core/api/notifications (2)"
+     "Notifications (library)",
+     "Library code",
+     "push_device",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "push_device",
+     "—"
+    ],
+    [
+     "push_device",
+     "Database",
+     "push_device",
+     "—"
     ]
    ],
    "sources": [
@@ -208,8 +207,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/notifications/device_service.py",
      "lines": [
@@ -219,19 +218,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/push_device.py",
+     "path": "backend/src/rox_core/api/notifications/device_service.py",
      "lines": [
-      13,
-      13
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/push_device.py",
      "lines": [
@@ -239,12 +239,24 @@
       104
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/push_device.py",
+     "lines": [
+      13,
+      104
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-notifications",
+    "label": "Notifications (library)",
     "source": {
      "path": "backend/src/rox_core/api/notifications/device_service.py",
      "lines": [
@@ -253,26 +265,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/notifications — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/notifications/device_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/push_device.py",
      "lines": [
@@ -281,25 +280,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/push_device.py",
-        "lines": [
-         13,
-         13
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-push_device",
+    "id": "store-push-device",
     "label": "push_device",
     "source": {
      "path": "backend/src/rox_core/models/push_device.py",
@@ -309,28 +295,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/notifications/device_service.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-push_device",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-notifications",
+    "dst": "store-push-device",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/notifications/device_service.py",
      "lines": [
@@ -340,9 +314,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-push_device",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-push-device",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/push_device.py",
      "lines": [

@@ -1,6 +1,6 @@
 {
  "id": "feature-deals-contract",
- "title": "Contract (+6 tables)",
+ "title": "Contract",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-deals",
@@ -836,7 +836,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: contract, contract_bundle, contract_document, contract_document_clause, contract_document_link, contract_document_party.",
+    "text": "Calls outside services: Google APIs.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: contract, contract_bundle, contract_document, contract_document_clause, contract_document_link, contract_document_party.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/contract.py",
@@ -883,27 +895,13 @@
     ]
    },
    {
-    "text": "Files by layer: Background workers: 1, Business logic: 18, Models: 7.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
-      "lines": [
-       41,
-       41
-      ]
-     },
      {
       "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
       "lines": [
        19,
        19
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/contract.py",
-      "lines": [
-       40,
-       40
       ]
      }
     ]
@@ -970,29 +968,71 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors (1)"
+     "Models (library)",
+     "Library code",
+     "contract, contract_bundle, contract_document, contract_document_clause, contract_document_link, contract_document_party",
+     "—"
     ],
     [
-     "Business logic",
-     "18",
-     "0",
-     "backend/src/unified_data/renderers/base_object (4), backend/src/unified_data/renderers/base_object/plugins (4), backend/src/unified_data/renderers (2)"
+     "Hierarchy (library)",
+     "Library code",
+     "contract, contract_bundle",
+     "—"
     ],
     [
-     "Models",
-     "7",
-     "0",
-     "backend/src/rox_core/models (6), backend/src/unified_data/renderers/base_object (1)"
+     "Executors (library)",
+     "Library code",
+     "—",
+     "Google APIs"
+    ],
+    [
+     "contract",
+     "Database",
+     "contract",
+     "—"
+    ],
+    [
+     "contract_bundle",
+     "Database",
+     "contract_bundle",
+     "—"
+    ],
+    [
+     "contract_document",
+     "Database",
+     "contract_document",
+     "—"
+    ],
+    [
+     "contract_document_clause",
+     "Database",
+     "contract_document_clause",
+     "—"
+    ],
+    [
+     "contract_document_link",
+     "Database",
+     "contract_document_link",
+     "—"
+    ],
+    [
+     "contract_document_party",
+     "Database",
+     "contract_document_party",
+     "—"
+    ],
+    [
+     "Google APIs",
+     "External service",
+     "—",
+     "Google APIs"
     ]
    ],
    "sources": [
@@ -1039,24 +1079,59 @@
      ]
     },
     {
-     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
-     "lines": [
-      41,
-      41
-     ]
-    },
-    {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
-     "lines": [
-      19,
-      19
-     ]
-    },
-    {
      "path": "backend/src/rox_core/models/contract.py",
      "lines": [
       40,
       40
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_bundle.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_clause.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_link.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/contract_document_party.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      34,
+      34
      ]
     }
    ],
@@ -1080,30 +1155,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "path": "backend/src/rox_core/models/contract.py",
      "lines": [
-      41,
-      41
+      40,
+      40
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
+     "path": "backend/src/rox_core/models/contract.py",
      "lines": [
-      19,
-      19
+      40,
+      40
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/contract.py",
      "lines": [
@@ -1111,128 +1187,36 @@
       116
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/contract.py",
+     "lines": [
+      40,
+      116
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
-     "lines": [
-      41,
-      41
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
-        "lines": [
-         41,
-         41
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
-     "lines": [
-      19,
-      19
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/unified_data/renderers/base_object — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/base_object/base.py",
-        "lines": [
-         21,
-         21
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers/base_object/plugins — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/base_object/plugins/account.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/foreign_key_pushdown.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/command_sdk/agents/tools — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
-        "lines": [
-         19,
-         19
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/data_interface/rql — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/rql.py",
-        "lines": [
-         19,
-         19
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/hierarchy — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/contract.py",
      "lines": [
@@ -1241,34 +1225,39 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/contract.py",
-        "lines": [
-         40,
-         40
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers/base_object — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/base_object/models.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-hierarchy",
+    "label": "Hierarchy (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-tasks-executors",
+    "label": "Executors (library)",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
    },
    {
     "id": "store-contract",
@@ -1281,12 +1270,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contract_bundle",
+    "id": "store-contract-bundle",
     "label": "contract_bundle",
     "source": {
      "path": "backend/src/rox_core/models/contract_bundle.py",
@@ -1296,12 +1285,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contract_document",
+    "id": "store-contract-document",
     "label": "contract_document",
     "source": {
      "path": "backend/src/rox_core/models/contract_document.py",
@@ -1311,12 +1300,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contract_document_clause",
+    "id": "store-contract-document-clause",
     "label": "contract_document_clause",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_clause.py",
@@ -1326,12 +1315,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contract_document_link",
+    "id": "store-contract-document-link",
     "label": "contract_document_link",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_link.py",
@@ -1341,12 +1330,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contract_document_party",
+    "id": "store-contract-document-party",
     "label": "contract_document_party",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_party.py",
@@ -1356,52 +1345,31 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-google-apis",
+    "label": "Google APIs",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (11)",
-    "source": {
-     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
-     "lines": [
-      22,
-      22
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/unified_data/renderers/base_object/models.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (5)",
-    "source": {
-     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
-     "lines": [
-      41,
-      41
-     ]
-    }
-   },
-   {
-    "src": "logic",
+    "src": "library-backend-src-rox-core-api-hierarchy",
     "dst": "store-contract",
-    "label": "uses (1)",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
      "lines": [
@@ -1411,9 +1379,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-contract_bundle",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-hierarchy",
+    "dst": "store-contract-bundle",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
      "lines": [
@@ -1423,9 +1391,9 @@
     }
    },
    {
-    "src": "models",
+    "src": "library-backend-src-rox-core-models",
     "dst": "store-contract",
-    "label": "uses (1)",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract.py",
      "lines": [
@@ -1435,9 +1403,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-contract_bundle",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-contract-bundle",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract_bundle.py",
      "lines": [
@@ -1447,9 +1415,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-contract_document",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-contract-document",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract_document.py",
      "lines": [
@@ -1459,9 +1427,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-contract_document_clause",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-contract-document-clause",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_clause.py",
      "lines": [
@@ -1471,9 +1439,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-contract_document_link",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-contract-document-link",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_link.py",
      "lines": [
@@ -1483,14 +1451,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-contract_document_party",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-contract-document-party",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_party.py",
      "lines": [
       20,
       20
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-executors",
+    "dst": "external-google-apis",
+    "label": "calls Google APIs",
+    "source": {
+     "path": "backend/src/tasks/executors/backfill_contract_tables_from_bq.py",
+     "lines": [
+      34,
+      34
      ]
     }
    }
@@ -1511,20 +1491,7 @@
    {
     "src": "contract",
     "dst": "contract_bundle",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/rox_core/api/hierarchy/contract_hierarchy_service.py",
-     "lines": [
-      297,
-      297
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contract",
-    "dst": "contract_bundle",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/contract.py",
      "lines": [
@@ -1537,7 +1504,7 @@
    {
     "src": "contract",
     "dst": "contract_document_link",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_link.py",
      "lines": [
@@ -1550,7 +1517,7 @@
    {
     "src": "contract_document",
     "dst": "contract_document_clause",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_clause.py",
      "lines": [
@@ -1563,7 +1530,7 @@
    {
     "src": "contract_document",
     "dst": "contract_document_link",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_link.py",
      "lines": [
@@ -1576,7 +1543,7 @@
    {
     "src": "contract_document",
     "dst": "contract_document_party",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/contract_document_party.py",
      "lines": [

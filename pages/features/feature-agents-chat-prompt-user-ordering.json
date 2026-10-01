@@ -1,6 +1,6 @@
 {
  "id": "feature-agents-chat-prompt-user-ordering",
- "title": "Chat Prompt User Ordering (+2 tables)",
+ "title": "Chat Prompt User Ordering",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-agents",
@@ -156,7 +156,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: chat_prompt_user_ordering, prompt.",
+    "text": "Stores data in: chat_prompt_user_ordering, prompt.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
@@ -175,27 +175,13 @@
     ]
    },
    {
-    "text": "Files by layer: HTTP routes: 1, Business logic: 1, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/chat/routes/chat_prompts/business.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
-      "lines": [
-       14,
-       14
       ]
      }
     ]
@@ -241,29 +227,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/chat/routes/chat_prompts (1)"
+     "Models (library)",
+     "Library code",
+     "chat_prompt_user_ordering, prompt",
+     "—"
     ],
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/rox_core/api/provisioning_profiles/applicators (1)"
+     "Chat Prompts (library)",
+     "Library code",
+     "chat_prompt_user_ordering, prompt",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Applicators (library)",
+     "Library code",
+     "chat_prompt_user_ordering, prompt",
+     "—"
+    ],
+    [
+     "chat_prompt_user_ordering",
+     "Database",
+     "chat_prompt_user_ordering",
+     "—"
+    ],
+    [
+     "prompt",
+     "Database",
+     "prompt",
+     "—"
     ]
    ],
    "sources": [
@@ -282,6 +280,20 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/prompt.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
       1,
@@ -293,13 +305,6 @@
      "lines": [
       1,
       1
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
-     "lines": [
-      14,
-      14
      ]
     }
    ],
@@ -323,19 +328,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes / Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/chat/routes/chat_prompts/business.py",
+     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
      "lines": [
-      1,
-      1
+      14,
+      14
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
      "lines": [
@@ -343,68 +360,24 @@
       122
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
+     "lines": [
+      14,
+      122
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
-    "source": {
-     "path": "backend/src/chat/routes/chat_prompts/business.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/chat/routes/chat_prompts — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/chat_prompts/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/provisioning_profiles/applicators — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
      "lines": [
@@ -413,25 +386,42 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
-        "lines": [
-         14,
-         14
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-chat_prompt_user_ordering",
+    "id": "library-backend-src-chat-routes-chat-prompts",
+    "label": "Chat Prompts (library)",
+    "source": {
+     "path": "backend/src/chat/routes/chat_prompts/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
+    "label": "Applicators (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-chat-prompt-user-ordering",
     "label": "chat_prompt_user_ordering",
     "source": {
      "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
@@ -441,7 +431,7 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
@@ -456,52 +446,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "routes",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
-     "lines": [
-      3,
-      3
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/chat/routes/chat_prompts/business.py",
-     "lines": [
-      16,
-      16
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-chat_prompt_user_ordering",
-    "label": "uses (1)",
+    "src": "library-backend-src-chat-routes-chat-prompts",
+    "dst": "store-chat-prompt-user-ordering",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
@@ -511,9 +465,9 @@
     }
    },
    {
-    "src": "routes",
+    "src": "library-backend-src-chat-routes-chat-prompts",
     "dst": "store-prompt",
-    "label": "uses (1)",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
@@ -523,9 +477,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-chat_prompt_user_ordering",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
+    "dst": "store-chat-prompt-user-ordering",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
      "lines": [
@@ -535,9 +489,9 @@
     }
    },
    {
-    "src": "logic",
+    "src": "library-backend-src-rox-core-api-provisioning-profiles-applicators",
     "dst": "store-prompt",
-    "label": "uses (1)",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/applicators/chat_prompt.py",
      "lines": [
@@ -547,9 +501,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-chat_prompt_user_ordering",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-chat-prompt-user-ordering",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
      "lines": [
@@ -559,9 +513,9 @@
     }
    },
    {
-    "src": "models",
+    "src": "library-backend-src-rox-core-models",
     "dst": "store-prompt",
-    "label": "uses (1)",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/prompt.py",
      "lines": [

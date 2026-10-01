@@ -193,7 +193,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: erd_relationship.",
+    "text": "Stores data in: erd_relationship.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/erd_relationship.py",
@@ -205,17 +205,10 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 4, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/erd_relationship.py",
       "lines": [
        1,
        1
@@ -266,23 +259,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "3",
-     "1",
-     "backend/src/rox_core/api/graph/erd (2), backend/src/data_store/graph/v4 (1), backend/src/rox_core/api/account (1)"
+     "Erd (library)",
+     "Library code",
+     "erd_relationship",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "V4 (library)",
+     "Library code",
+     "erd_relationship",
+     "—"
+    ],
+    [
+     "Account (library)",
+     "Library code",
+     "erd_relationship",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "erd_relationship",
+     "—"
+    ],
+    [
+     "erd_relationship",
+     "Database",
+     "erd_relationship",
+     "—"
     ]
    ],
    "sources": [
@@ -294,7 +305,21 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
      "lines": [
       1,
       1
@@ -306,13 +331,20 @@
       1,
       1
      ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      21,
+      21
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 5 files with Erd Mapping (+3 tables).",
+    "text": "Shares 5 files with Erd Mapping.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/store.py",
@@ -324,7 +356,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Erd Onboarding Proposal (+4 tables).",
+    "text": "Shares 1 files with Erd Onboarding Proposal.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
@@ -352,10 +384,10 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
      "lines": [
       1,
       1
@@ -363,19 +395,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/erd_relationship.py",
      "lines": [
@@ -383,12 +416,39 @@
       146
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      21,
+      146
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-graph-erd",
+    "label": "Erd (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-data-store-graph-v4",
+    "label": "V4 (library)",
     "source": {
      "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
      "lines": [
@@ -397,50 +457,28 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/graph/erd — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store/graph/v4 — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/account — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-account",
+    "label": "Account (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/erd_relationship.py",
      "lines": [
@@ -449,25 +487,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/erd_relationship.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-erd_relationship",
+    "id": "store-erd-relationship",
     "label": "erd_relationship",
     "source": {
      "path": "backend/src/rox_core/models/erd_relationship.py",
@@ -477,28 +502,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-erd_relationship",
-    "label": "uses (4)",
+    "src": "library-backend-src-data-store-graph-v4",
+    "dst": "store-erd-relationship",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
      "lines": [
@@ -508,9 +521,33 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-erd_relationship",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-account",
+    "dst": "store-erd-relationship",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/account/custom_view_relationship_publisher.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-graph-erd",
+    "dst": "store-erd-relationship",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-erd-relationship",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/erd_relationship.py",
      "lines": [
@@ -546,7 +583,7 @@
    }
   },
   {
-   "label": "Erd Mapping (+3 tables)",
+   "label": "Erd Mapping",
    "page": "feature-crm-erd-mapping",
    "source": {
     "path": "backend/src/data_store/graph/store.py",
@@ -557,7 +594,7 @@
    }
   },
   {
-   "label": "Erd Onboarding Proposal (+4 tables)",
+   "label": "Erd Onboarding Proposal",
    "page": "feature-crm-erd-onboarding-proposal",
    "source": {
     "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",

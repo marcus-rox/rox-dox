@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-graph",
- "title": "Graph (+6 tables)",
+ "title": "Graph",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -3496,7 +3496,47 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: crm_writeback_graph_staging, entity_company, entity_lead, entity_link, entity_person, graph.",
+    "text": "Runs 5 background workers and workflows: EntityDataAddedTaskExecutor, LeadRegistrationTaskExecutor, ReassignCallRecorderEventCustomerCoordinatorTaskExecutor, ReassignCallRecorderEventCustomerTaskExecutor, SalesforceImportTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/entity_data_added.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/lead_registration.py",
+      "lines": [
+       81,
+       81
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+      "lines": [
+       76,
+       76
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+      "lines": [
+       156,
+       156
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_import.py",
+      "lines": [
+       191,
+       191
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: crm_writeback_graph_staging, entity_company, entity_lead, entity_link, entity_person, graph.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
@@ -3538,39 +3578,6 @@
       "lines": [
        48,
        184
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 4, Business logic: 94, Models: 19, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/entity_data_added.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/data_store/graph/v4/build_hooks.py",
-      "lines": [
-       22,
-       22
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
-      "lines": [
-       26,
-       26
-      ]
-     },
-     {
-      "path": ".agents/skills/graph-test-harness/SKILL.md",
-      "lines": [
-       58,
-       58
       ]
      }
     ]
@@ -3656,35 +3663,185 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "4",
-     "0",
-     "backend/src/tasks/executors (4)"
+     "Executors workers",
+     "Background workers / workflows",
+     "entity_lead, graph",
+     "—"
     ],
     [
-     "Business logic",
-     "75",
-     "19",
-     "backend/src/rox_customer/graph/v4/entity_creator (12), backend/src/rox_customer/real_time/erd/mapping (6), backend/src/data_store/graph/v4 (5)"
+     "Entity Creator (library)",
+     "Library code",
+     "graph",
+     "—"
     ],
     [
-     "Models",
-     "18",
-     "1",
-     "backend/src/rox_customer/batch/models/v4/entity (5), backend/src/rox_customer/batch/models/v4/entity/data_sources (4), backend/src/rox_customer/batch/models/v4/entity/generated (4)"
+     "V4 (library)",
+     "Library code",
+     "entity_link, graph",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/graph-test-harness (1)"
+     "Entity (library)",
+     "Library code",
+     "entity_company, entity_lead, entity_person",
+     "—"
+    ],
+    [
+     "Salesforce (library)",
+     "Library code",
+     "crm_writeback_graph_staging, entity_company, entity_lead, entity_link, entity_person, graph",
+     "—"
+    ],
+    [
+     "Account (library)",
+     "Library code",
+     "entity_company, entity_link, graph",
+     "—"
+    ],
+    [
+     "Crm Campaigns (library)",
+     "Library code",
+     "entity_lead, entity_person, graph",
+     "—"
+    ],
+    [
+     "Event V2 (library)",
+     "Library code",
+     "entity_link, graph",
+     "—"
+    ],
+    [
+     "Cascade (library)",
+     "Library code",
+     "entity_link, graph",
+     "—"
+    ],
+    [
+     "Ownership (library)",
+     "Library code",
+     "entity_link, graph",
+     "—"
+    ],
+    [
+     "Record Display (library)",
+     "Library code",
+     "entity_person, graph",
+     "—"
+    ],
+    [
+     "Salesforce Enrichment (library)",
+     "Library code",
+     "entity_person, graph",
+     "—"
+    ],
+    [
+     "Link Creator (library)",
+     "Library code",
+     "entity_link",
+     "—"
+    ],
+    [
+     "Entity (library)",
+     "Library code",
+     "entity_company",
+     "—"
+    ],
+    [
+     "Company (library)",
+     "Library code",
+     "entity_company, entity_link",
+     "—"
+    ],
+    [
+     "Person (library)",
+     "Library code",
+     "entity_link, entity_person",
+     "—"
+    ],
+    [
+     "Common (library)",
+     "Library code",
+     "entity_company, entity_link",
+     "—"
+    ],
+    [
+     "Persist (library)",
+     "Library code",
+     "graph",
+     "—"
+    ],
+    [
+     "Data Controller (library)",
+     "Library code",
+     "graph",
+     "—"
+    ],
+    [
+     "Interfaces (library)",
+     "Library code",
+     "entity_link, entity_person",
+     "—"
+    ],
+    [
+     "Governance (library)",
+     "Library code",
+     "graph",
+     "—"
+    ],
+    [
+     "People (library)",
+     "Library code",
+     "entity_link, graph",
+     "—"
+    ],
+    [
+     "Real Time (library)",
+     "Library code",
+     "entity_company",
+     "—"
+    ],
+    [
+     "Task Items (library)",
+     "Library code",
+     "entity_person",
+     "—"
+    ],
+    [
+     "Unified Data (library)",
+     "Library code",
+     "entity_company, entity_lead",
+     "—"
+    ],
+    [
+     "Plugins (library)",
+     "Library code",
+     "entity_link",
+     "—"
+    ],
+    [
+     "Shared (library)",
+     "Library code",
+     "—",
+     "—"
+    ],
+    [
+     "Shared (library)",
+     "Library code",
+     "graph",
+     "—"
+    ],
+    [
+     "Database (6 tables)",
+     "Database",
+     "crm_writeback_graph_staging, entity_company, entity_lead, entity_link, entity_person, graph",
+     "—"
     ]
    ],
    "sources": [
@@ -3733,29 +3890,232 @@
     {
      "path": "backend/src/tasks/executors/entity_data_added.py",
      "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/lead_registration.py",
+     "lines": [
+      81,
+      81
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+     "lines": [
+      156,
+      156
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_import.py",
+     "lines": [
+      191,
+      191
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/lead_registration.py",
+     "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/data_store/graph/v4/build_hooks.py",
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py",
      "lines": [
-      22,
-      22
+      1,
+      1
      ]
     },
     {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
      "lines": [
-      26,
-      26
+      1,
+      1
      ]
     },
     {
-     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "path": "backend/src/rox_customer/batch/models/v4/entity/company.py",
      "lines": [
-      58,
-      58
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_campaigns/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/link_creator/contracts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/account_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/company/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/common/matcher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/persist/identity_upsert.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/data_controller/reference_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/auto_register.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/resolved_column_value_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/plugins/entity_link.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/shared/crm_id.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -3763,7 +4123,7 @@
   },
   "notes": [
    {
-    "text": "Shares 2 files with Entity Organization (+3 tables).",
+    "text": "Shares 2 files with Entity Organization.",
     "sources": [
      {
       "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -3775,7 +4135,7 @@
     ]
    },
    {
-    "text": "Shares 5 files with Erd Mapping (+3 tables).",
+    "text": "Shares 5 files with Erd Mapping.",
     "sources": [
      {
       "path": "backend/src/agent_framework/data_interface/column/dto.py",
@@ -3787,7 +4147,7 @@
     ]
    },
    {
-    "text": "Shares 3 files with Entity User (+3 tables).",
+    "text": "Shares 3 files with Entity User.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
@@ -3799,7 +4159,7 @@
     ]
    },
    {
-    "text": "Shares 3 files with Graph Cdc (+3 tables).",
+    "text": "Shares 3 files with Graph Cdc.",
     "sources": [
      {
       "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -3811,7 +4171,7 @@
     ]
    },
    {
-    "text": "Shares 9 files with Entity Event (+3 tables).",
+    "text": "Shares 9 files with Entity Event.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -3823,7 +4183,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Sfdc User (+25 tables).",
+    "text": "Shares 1 files with Sfdc User.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/persist/identity_upsert.py",
@@ -3835,7 +4195,7 @@
     ]
    },
    {
-    "text": "Shares 5 files with Entity Deal (+4 tables).",
+    "text": "Shares 5 files with Entity Deal.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -3847,7 +4207,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Entity Campaign Member (+4 tables).",
+    "text": "Shares 2 files with Entity Campaign Member.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/crm_campaigns/business.py",
@@ -3859,7 +4219,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Entity Link Staging (+2 tables).",
+    "text": "Shares 1 files with Entity Link Staging.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
@@ -3899,264 +4259,549 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/tasks/executors/entity_data_added.py",
      "lines": [
-      1,
-      1
+      13,
+      13
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
-    "source": {
-     "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
-     "lines": [
-      10,
-      43
-     ]
-    }
-   }
-  ],
-  "nodes": [
-   {
-    "id": "workers",
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/entity_data_added.py",
      "lines": [
+      13,
+      13
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
+     "lines": [
+      10,
+      43
+     ]
+    }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
+     "lines": [
+      10,
+      43
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
+    "source": {
+     "path": "backend/src/tasks/executors/entity_data_added.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "EntityDataAddedTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/entity_data_added.py",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     },
+     {
+      "text": "LeadRegistrationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/lead_registration.py",
+        "lines": [
+         81,
+         81
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ReassignCallRecorderEventCustomerCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+        "lines": [
+         76,
+         76
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ReassignCallRecorderEventCustomerTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
+        "lines": [
+         156,
+         156
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SalesforceImportTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_import.py",
+        "lines": [
+         191,
+         191
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-rox-customer-graph-v4-entity-creator",
+    "label": "Entity Creator (library)",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py",
+     "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/entity_data_added.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-data-store-graph-v4",
+    "label": "V4 (library)",
     "source": {
-     "path": "backend/src/data_store/graph/v4/build_hooks.py",
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
      "lines": [
-      22,
-      22
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/graph/v4/entity_creator — 12 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/graph/v4/entity_creator/contracts.py",
-        "lines": [
-         24,
-         24
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/erd/mapping — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/erd/mapping/creation_mapping.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store/graph/v4 — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/graph/v4/build_hooks.py",
-        "lines": [
-         22,
-         22
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/integration/crm/salesforce — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/renderers/source_renderers/person — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
-        "lines": [
-         29,
-         29
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/account — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-customer-batch-models-v4-entity",
+    "label": "Entity (library)",
     "source": {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
+     "path": "backend/src/rox_customer/batch/models/v4/entity/company.py",
      "lines": [
-      26,
-      26
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/batch/models/v4/entity — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/batch/models/v4/entity/company.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/batch/models/v4/entity/data_sources — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/batch/models/v4/entity/data_sources/calendar_source.py",
-        "lines": [
-         12,
-         12
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/batch/models/v4/entity/generated — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/batch/models/v4/entity/generated/crm_campaign_member.py",
-        "lines": [
-         15,
-         15
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/models/entity/account_dao.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/batch/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/batch/models/v4/entity/company.py",
-        "lines": [
-         11,
-         11
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
+    "id": "library-backend-src-ext-integrations-integration-crm-salesforce",
+    "label": "Salesforce (library)",
     "source": {
-     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
      "lines": [
-      58,
-      58
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/graph-test-harness — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/graph-test-harness/SKILL.md",
-        "lines": [
-         58,
-         58
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-crm_writeback_graph_staging",
-    "label": "crm_writeback_graph_staging",
+    "id": "library-backend-src-rox-core-api-account",
+    "label": "Account (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-crm-campaigns",
+    "label": "Crm Campaigns (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/crm_campaigns/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-entities-event-v2",
+    "label": "Event V2 (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-governance-cascade",
+    "label": "Cascade (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-governance-ownership",
+    "label": "Ownership (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-governance-record-display",
+    "label": "Record Display (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-salesforce-enrichment",
+    "label": "Salesforce Enrichment (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-customer-graph-v4-link-creator",
+    "label": "Link Creator (library)",
+    "source": {
+     "path": "backend/src/rox_customer/graph/v4/link_creator/contracts.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-customer-real-time-models-entity",
+    "label": "Entity (library)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/account_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-reserved-fields-company",
+    "label": "Company (library)",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/company/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-reserved-fields-person",
+    "label": "Person (library)",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-integration-common",
+    "label": "Common (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/common/matcher.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-integration-crm-salesforce-governance-persist",
+    "label": "Persist (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/persist/identity_upsert.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-data-controller",
+    "label": "Data Controller (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/reference_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "label": "Interfaces (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-governance",
+    "label": "Governance (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-people",
+    "label": "People (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-customer-real-time",
+    "label": "Real Time (library)",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/auto_register.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-task-items",
+    "label": "Task Items (library)",
+    "source": {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data",
+    "label": "Unified Data (library)",
+    "source": {
+     "path": "backend/src/unified_data/resolved_column_value_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-renderers-plugins",
+    "label": "Plugins (library)",
+    "source": {
+     "path": "backend/src/unified_data/renderers/plugins/entity_link.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-renderers-source-renderers-shared",
+    "label": "Shared (library)",
+    "source": {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-unified-data-reserved-fields-shared",
+    "label": "Shared (library)",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/shared/crm_id.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "database",
+    "label": "Database (6 tables)",
     "source": {
      "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
      "lines": [
@@ -4165,117 +4810,91 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_company",
-    "label": "entity_company",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/account.py",
-     "lines": [
-      86,
-      104
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_lead",
-    "label": "entity_lead",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/lead.py",
-     "lines": [
-      93,
-      116
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_link",
-    "label": "entity_link",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
-     "lines": [
-      65,
-      89
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-entity_person",
-    "label": "entity_person",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
-     "lines": [
-      83,
-      113
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-graph",
-    "label": "graph",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
-     "lines": [
-      48,
-      184
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
+    "details": [
+     {
+      "text": "crm_writeback_graph_staging",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/crm_writeback_graph_staging.py",
+        "lines": [
+         10,
+         43
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_company",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/account.py",
+        "lines": [
+         86,
+         104
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_lead",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/lead.py",
+        "lines": [
+         93,
+         116
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_link",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/entity_link.py",
+        "lines": [
+         65,
+         89
+        ]
+       }
+      ]
+     },
+     {
+      "text": "entity_person",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
+        "lines": [
+         83,
+         113
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+1 more tables",
+      "sources": [
+       {
+        "path": "backend/src/rox_customer/real_time/models/entity/graph.py",
+        "lines": [
+         48,
+         184
+        ]
+       }
+      ]
+     }
+    ]
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (25)",
+    "src": "library-backend-src-data-store-graph-v4",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/data_store/graph/v4/diff_computer.py",
-     "lines": [
-      24,
-      24
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/generated/crm_campaign_member.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (9)",
-    "source": {
-     "path": "backend/src/tasks/executors/entity_data_added.py",
+     "path": "backend/src/data_store/graph/v4/datum_processor.py",
      "lines": [
       1,
       1
@@ -4283,45 +4902,9 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-entity_lead",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/lead_registration.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-graph",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/reassign_call_recorder_event_customer.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-crm_writeback_graph_staging",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-entity_company",
-    "label": "uses (7)",
+    "src": "library-backend-src-ext-integrations-integration-common",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/common/matcher.py",
      "lines": [
@@ -4331,9 +4914,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-entity_lead",
-    "label": "uses (5)",
+    "src": "library-backend-src-ext-integrations-integration-crm-salesforce",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
      "lines": [
@@ -4343,11 +4926,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-entity_link",
-    "label": "uses (16)",
+    "src": "library-backend-src-ext-integrations-integration-crm-salesforce-governance-persist",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/persist/identity_upsert.py",
      "lines": [
       1,
       1
@@ -4355,11 +4938,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-entity_person",
-    "label": "uses (8)",
+    "src": "library-backend-src-rox-core-api-account",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
+     "path": "backend/src/rox_core/api/account/account_assignment_preview_query_builder.py",
      "lines": [
       1,
       1
@@ -4367,11 +4950,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-graph",
-    "label": "uses (16)",
+    "src": "library-backend-src-rox-core-api-crm-campaigns",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/data_store/graph/v4/datum_processor.py",
+     "path": "backend/src/rox_core/api/crm_campaigns/business.py",
      "lines": [
       1,
       1
@@ -4379,9 +4962,117 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-entity_company",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-data-controller",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/data_controller/reference_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-entities-event-v2",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance-cascade",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance-ownership",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance-record-display",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/record_display/event.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-people",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/people/contact_events_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-salesforce-enrichment",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-customer-batch-models-v4-entity",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/batch/models/v4/entity/company.py",
      "lines": [
@@ -4391,11 +5082,11 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-entity_lead",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-graph-v4-entity-creator",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/lead.py",
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py",
      "lines": [
       1,
       1
@@ -4403,11 +5094,119 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-entity_person",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-graph-v4-link-creator",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+     "path": "backend/src/rox_customer/graph/v4/link_creator/contracts.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-customer-real-time",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/auto_register.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-customer-real-time-models-entity",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/account_dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-task-items",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/resolved_column_value_store.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-renderers-plugins",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/renderers/plugins/entity_link.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-reserved-fields-company",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/company/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-reserved-fields-person",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data-reserved-fields-shared",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/reserved_fields/shared/crm_id.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/lead_registration.py",
      "lines": [
       1,
       1
@@ -4431,7 +5230,7 @@
    {
     "src": "crm_writeback_graph_staging",
     "dst": "entity_company",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/people/graph_dao.py",
      "lines": [
@@ -4444,7 +5243,7 @@
    {
     "src": "crm_writeback_graph_staging",
     "dst": "entity_lead",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/people/graph_dao.py",
      "lines": [
@@ -4457,7 +5256,7 @@
    {
     "src": "crm_writeback_graph_staging",
     "dst": "entity_person",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/people/graph_dao.py",
      "lines": [
@@ -4470,7 +5269,7 @@
    {
     "src": "crm_writeback_graph_staging",
     "dst": "graph",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
      "lines": [
@@ -4483,7 +5282,7 @@
    {
     "src": "entity_company",
     "dst": "entity_link",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
      "lines": [
@@ -4496,7 +5295,7 @@
    {
     "src": "entity_company",
     "dst": "graph",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/graph/data_source_service.py",
      "lines": [
@@ -4509,7 +5308,7 @@
    {
     "src": "entity_lead",
     "dst": "graph",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/graph/data_source_service.py",
      "lines": [
@@ -4522,7 +5321,7 @@
    {
     "src": "entity_link",
     "dst": "entity_person",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/ext_integrations/integration/common/matcher.py",
      "lines": [
@@ -4535,7 +5334,7 @@
    {
     "src": "entity_link",
     "dst": "graph",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/entities/event_v2/service.py",
      "lines": [
@@ -4548,7 +5347,7 @@
    {
     "src": "entity_person",
     "dst": "graph",
-    "label": "comparison",
+    "label": "query join",
     "source": {
      "path": "backend/src/rox_core/api/graph/data_source_service.py",
      "lines": [
@@ -4577,7 +5376,7 @@
    }
   },
   {
-   "label": "Entity Organization (+3 tables)",
+   "label": "Entity Organization",
    "page": "feature-crm-entity-organization",
    "source": {
     "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -4588,7 +5387,7 @@
    }
   },
   {
-   "label": "Erd Mapping (+3 tables)",
+   "label": "Erd Mapping",
    "page": "feature-crm-erd-mapping",
    "source": {
     "path": "backend/src/agent_framework/data_interface/column/dto.py",
@@ -4599,7 +5398,7 @@
    }
   },
   {
-   "label": "Entity User (+3 tables)",
+   "label": "Entity User",
    "page": "feature-crm-entity-user",
    "source": {
     "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
@@ -4610,7 +5409,7 @@
    }
   },
   {
-   "label": "Graph Cdc (+3 tables)",
+   "label": "Graph Cdc",
    "page": "feature-crm-graph-cdc",
    "source": {
     "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -4621,7 +5420,7 @@
    }
   },
   {
-   "label": "Entity Event (+3 tables)",
+   "label": "Entity Event",
    "page": "feature-crm-entity-event",
    "source": {
     "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -4632,7 +5431,7 @@
    }
   },
   {
-   "label": "Sfdc User (+25 tables)",
+   "label": "Sfdc User",
    "page": "feature-crm-sfdc-user",
    "source": {
     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/persist/identity_upsert.py",
@@ -4643,7 +5442,7 @@
    }
   },
   {
-   "label": "Entity Deal (+4 tables)",
+   "label": "Entity Deal",
    "page": "feature-crm-entity-deal",
    "source": {
     "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -4654,7 +5453,7 @@
    }
   },
   {
-   "label": "Entity Campaign Member (+4 tables)",
+   "label": "Entity Campaign Member",
    "page": "feature-crm-entity-campaign-member",
    "source": {
     "path": "backend/src/rox_core/api/crm_campaigns/business.py",
@@ -4665,7 +5464,7 @@
    }
   },
   {
-   "label": "Entity Link Staging (+2 tables)",
+   "label": "Entity Link Staging",
    "page": "feature-crm-entity-link-staging",
    "source": {
     "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",

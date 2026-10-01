@@ -1,6 +1,6 @@
 {
  "id": "feature-people-linkedin-profile",
- "title": "Linkedin Profile (+5 tables)",
+ "title": "Linkedin Profile",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -214,7 +214,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: country, linkedin_company, linkedin_profile, linkedin_profile_position3, linkedin_seniority.",
+    "text": "Stores data in: country, linkedin_company, linkedin_profile, linkedin_profile_position3, linkedin_seniority.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/mixrank.py",
@@ -254,22 +254,8 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 4, Models: 1, Agent skills: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/rox_core/api/mixrank/dao.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/mixrank.py",
-      "lines": [
-       65,
-       65
-      ]
-     },
      {
       "path": ".agents/skills/modernization-migration/SKILL.md",
       "lines": [
@@ -320,29 +306,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "4",
-     "0",
-     "backend/src/rox_core/api/mixrank (4)"
+     "Mixrank (library)",
+     "Library code",
+     "linkedin_company, linkedin_profile",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "linkedin_company, linkedin_profile",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/modernization-migration (1)"
+     "country",
+     "Database",
+     "country",
+     "—"
+    ],
+    [
+     "linkedin_company",
+     "Database",
+     "linkedin_company",
+     "—"
+    ],
+    [
+     "linkedin_profile",
+     "Database",
+     "linkedin_profile",
+     "—"
+    ],
+    [
+     "linkedin_profile_position3",
+     "Database",
+     "linkedin_profile_position3",
+     "—"
+    ],
+    [
+     "linkedin_seniority",
+     "Database",
+     "linkedin_seniority",
+     "—"
     ]
    ],
    "sources": [
@@ -396,10 +406,10 @@
      ]
     },
     {
-     "path": ".agents/skills/modernization-migration/SKILL.md",
+     "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
-      311,
-      311
+      144,
+      144
      ]
     }
    ],
@@ -423,8 +433,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models / Agent skills",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/mixrank/dao.py",
      "lines": [
@@ -434,8 +444,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/mixrank/dao.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -443,12 +465,24 @@
       300
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/mixrank.py",
+     "lines": [
+      260,
+      300
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-mixrank",
+    "label": "Mixrank (library)",
     "source": {
      "path": "backend/src/rox_core/api/mixrank/dao.py",
      "lines": [
@@ -457,26 +491,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/mixrank — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/mixrank/dao.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -485,50 +506,9 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/mixrank.py",
-        "lines": [
-         65,
-         65
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "skills",
-    "label": "Agent skills",
-    "source": {
-     "path": ".agents/skills/modernization-migration/SKILL.md",
-     "lines": [
-      311,
-      311
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/modernization-migration — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/modernization-migration/SKILL.md",
-        "lines": [
-         311,
-         311
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
     "id": "store-country",
@@ -541,12 +521,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-linkedin_company",
+    "id": "store-linkedin-company",
     "label": "linkedin_company",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
@@ -556,12 +536,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-linkedin_profile",
+    "id": "store-linkedin-profile",
     "label": "linkedin_profile",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
@@ -571,12 +551,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-linkedin_profile_position3",
+    "id": "store-linkedin-profile-position3",
     "label": "linkedin_profile_position3",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
@@ -586,12 +566,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-linkedin_seniority",
+    "id": "store-linkedin-seniority",
     "label": "linkedin_seniority",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
@@ -601,28 +581,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/rox_core/api/mixrank/dao.py",
-     "lines": [
-      30,
-      30
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-linkedin_company",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-mixrank",
+    "dst": "store-linkedin-company",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/mixrank/dao.py",
      "lines": [
@@ -632,9 +600,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-linkedin_profile",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-mixrank",
+    "dst": "store-linkedin-profile",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/mixrank/dao.py",
      "lines": [
@@ -644,9 +612,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-linkedin_company",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-linkedin-company",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -656,9 +624,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-linkedin_profile",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-linkedin-profile",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -682,21 +650,8 @@
   "relations": [
    {
     "src": "country",
-    "dst": "linkedin_company",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      65,
-      65
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "country",
     "dst": "linkedin_profile",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -707,61 +662,9 @@
     "kind": "symbolic"
    },
    {
-    "src": "country",
-    "dst": "linkedin_profile",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      144,
-      144
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "country",
-    "dst": "linkedin_profile_position3",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      202,
-      202
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "country",
-    "dst": "linkedin_seniority",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      251,
-      251
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "linkedin_company",
-    "dst": "linkedin_profile",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      144,
-      144
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "linkedin_company",
     "dst": "linkedin_profile_position3",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -772,48 +675,9 @@
     "kind": "enforced"
    },
    {
-    "src": "linkedin_company",
-    "dst": "linkedin_profile_position3",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      202,
-      202
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "linkedin_company",
-    "dst": "linkedin_seniority",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      251,
-      251
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "linkedin_profile",
     "dst": "linkedin_profile_position3",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/rox_core/api/mixrank/dao.py",
-     "lines": [
-      123,
-      123
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "linkedin_profile",
-    "dst": "linkedin_profile_position3",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/mixrank.py",
      "lines": [
@@ -822,45 +686,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "linkedin_profile",
-    "dst": "linkedin_profile_position3",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      202,
-      202
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "linkedin_profile",
-    "dst": "linkedin_seniority",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      251,
-      251
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "linkedin_profile_position3",
-    "dst": "linkedin_seniority",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/mixrank.py",
-     "lines": [
-      251,
-      251
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],

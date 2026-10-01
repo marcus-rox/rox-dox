@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-adhoc-event",
- "title": "Adhoc Event (+26 tables)",
+ "title": "Meeting recordings, Slack channels & notifications",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -1919,7 +1919,40 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: adhoc_event, adhoc_event_attendee, attention_event_attendee, attention_event_metadata, avoma_event_attendee, avoma_event_metadata, circleback_event_attendee, circleback_event_metadata, gong_event_attendee, gong_event_metadata, ms_teams_event_attendee, ms_teams_event_metadata, notification, notification_delivery, notification_preference, slack_app_mention, slack_channel, slack_channel_bot_membership, slack_channel_partition, slack_channel_rox_company_link, slack_message_log, slack_user, slack_user_channel_membership, transcript_v2, zoom_event_attendee, zoom_event_metadata.",
+    "text": "Calls outside services: Slack.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: adhoc_event, adhoc_event_attendee, attention_event_attendee, attention_event_metadata, avoma_event_attendee, avoma_event_metadata, circleback_event_attendee, circleback_event_metadata, gong_event_attendee, gong_event_metadata, ms_teams_event_attendee, ms_teams_event_metadata, notification, notification_delivery, notification_preference, slack_app_mention, slack_channel, slack_channel_bot_membership, slack_channel_partition, slack_channel_rox_company_link, slack_message_log, slack_user, slack_user_channel_membership, transcript_v2, zoom_event_attendee, zoom_event_metadata.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/public_adhoc_event.py",
@@ -2106,22 +2139,8 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 30, Models: 30, Agent skills: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/enrichment/pricing/provider_credit_usage.py",
-      "lines": [
-       8,
-       8
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/public_adhoc_event.py",
-      "lines": [
-       13,
-       13
-      ]
-     },
      {
       "path": ".agents/skills/rox-lists-migration/SKILL.md",
       "lines": [
@@ -2200,29 +2219,65 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "28",
-     "2",
-     "backend/src/ext_integrations/slack_integration (5), backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers (5), backend/src/rox_core/rox_lists (4)"
+     "Models (library)",
+     "Library code",
+     "adhoc_event, adhoc_event_attendee, attention_event_attendee, attention_event_metadata, avoma_event_attendee, avoma_event_metadata, circleback_event_attendee, circleback_event_metadata, gong_event_attendee, gong_event_metadata, ms_teams_event_attendee, ms_teams_event_metadata, notification, notification_delivery, notification_preference, slack_app_mention, slack_channel, slack_channel_bot_membership, slack_channel_partition, slack_channel_rox_company_link, slack_message_log, slack_user, slack_user_channel_membership, transcript_v2, zoom_event_attendee, zoom_event_metadata",
+     "—"
     ],
     [
-     "Models",
-     "30",
-     "0",
-     "backend/src/rox_core/models (27), backend/src/rox_core/rox_lists (1), backend/src/rox_customer/real_time/models (1)"
+     "Slack Integration (library)",
+     "Library code",
+     "—",
+     "Slack"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/rox-lists-migration (1)"
+     "Calendar Integration (library)",
+     "Library code",
+     "adhoc_event",
+     "—"
+    ],
+    [
+     "Gong (library)",
+     "Library code",
+     "gong_event_metadata",
+     "—"
+    ],
+    [
+     "Mention Agent (library)",
+     "Library code",
+     "—",
+     "Slack"
+    ],
+    [
+     "Notifications (library)",
+     "Library code",
+     "notification_delivery",
+     "—"
+    ],
+    [
+     "Notifications (library)",
+     "Library code",
+     "notification_preference",
+     "—"
+    ],
+    [
+     "Database (26 tables)",
+     "Database",
+     "adhoc_event, adhoc_event_attendee, attention_event_attendee, attention_event_metadata, avoma_event_attendee, avoma_event_metadata, circleback_event_attendee, circleback_event_metadata, gong_event_attendee, gong_event_metadata, ms_teams_event_attendee, ms_teams_event_metadata, notification, notification_delivery, notification_preference, slack_app_mention, slack_channel, slack_channel_bot_membership, slack_channel_partition, slack_channel_rox_company_link, slack_message_log, slack_user, slack_user_channel_membership, transcript_v2, zoom_event_attendee, zoom_event_metadata",
+     "—"
+    ],
+    [
+     "Slack",
+     "External service",
+     "—",
+     "Slack"
     ]
    ],
    "sources": [
@@ -2409,13 +2464,6 @@
      ]
     },
     {
-     "path": "backend/src/enrichment/pricing/provider_credit_usage.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    {
      "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
       13,
@@ -2423,10 +2471,45 @@
      ]
     },
     {
-     "path": ".agents/skills/rox-lists-migration/SKILL.md",
+     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
      "lines": [
-      60,
-      60
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/call_recorders/gong/helpers.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "backend/src/notifications/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/notifications/business.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -2434,7 +2517,7 @@
   },
   "notes": [
    {
-    "text": "Shares 3 files with Integration (+9 tables).",
+    "text": "Shares 3 files with Integration connections & sync.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/alertable_state_notifications.py",
@@ -2450,19 +2533,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models / Agent skills",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/enrichment/pricing/provider_credit_usage.py",
+     "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
-      8,
-      8
+      13,
+      13
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/public_adhoc_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
@@ -2470,100 +2565,36 @@
       98
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/public_adhoc_event.py",
+     "lines": [
+      13,
+      98
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/enrichment/pricing/provider_credit_usage.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/ext_integrations/slack_integration — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/slack_integration/agent_session_stop.py",
-        "lines": [
-         15,
-         15
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers/__init__.py",
-        "lines": [
-         3,
-         3
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/rox_lists — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/rox_lists/default_list_manager.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/rox_lists/repositories — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/rox_lists/repositories/column_mapping.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/calendar_integration — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/call_recorders/gong — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/call_recorders/gong/helpers.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
@@ -2572,90 +2603,103 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 27 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/public_adhoc_event.py",
-        "lines": [
-         13,
-         13
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/rox_lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/rox_lists/repositories/column_mapping.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/slack_integration/slack_table_service.py",
-        "lines": [
-         54,
-         54
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models/integration — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/slack_integration/service.py",
-        "lines": [
-         27,
-         27
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
+    "id": "library-backend-src-ext-integrations-slack-integration",
+    "label": "Slack Integration (library)",
     "source": {
-     "path": ".agents/skills/rox-lists-migration/SKILL.md",
+     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
      "lines": [
-      60,
-      60
+      9,
+      9
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/rox-lists-migration — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/rox-lists-migration/SKILL.md",
-        "lines": [
-         60,
-         60
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-tables",
-    "label": "Tables (26)",
+    "id": "library-backend-src-ext-integrations-calendar-integration",
+    "label": "Calendar Integration (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-call-recorders-gong",
+    "label": "Gong (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/call_recorders/gong/helpers.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-ext-integrations-slack-integration-mention-agent",
+    "label": "Mention Agent (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-notifications",
+    "label": "Notifications (library)",
+    "source": {
+     "path": "backend/src/notifications/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-notifications",
+    "label": "Notifications (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/notifications/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "database",
+    "label": "Database (26 tables)",
     "source": {
      "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
@@ -2664,11 +2708,11 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": [
      {
-      "text": "adhoc_event — 20 columns",
+      "text": "adhoc_event",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_adhoc_event.py",
@@ -2680,7 +2724,7 @@
       ]
      },
      {
-      "text": "adhoc_event_attendee — 9 columns",
+      "text": "adhoc_event_attendee",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_adhoc_event_attendee.py",
@@ -2692,7 +2736,7 @@
       ]
      },
      {
-      "text": "attention_event_attendee — 10 columns",
+      "text": "attention_event_attendee",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_attention_event_attendee.py",
@@ -2704,7 +2748,7 @@
       ]
      },
      {
-      "text": "attention_event_metadata — 6 columns",
+      "text": "attention_event_metadata",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_attention_event_metadata.py",
@@ -2716,7 +2760,7 @@
       ]
      },
      {
-      "text": "avoma_event_attendee — 9 columns",
+      "text": "avoma_event_attendee",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_avoma_event_attendee.py",
@@ -2728,7 +2772,7 @@
       ]
      },
      {
-      "text": "avoma_event_metadata — 0 columns",
+      "text": "+21 more tables",
       "sources": [
        {
         "path": "backend/src/rox_core/models/public_avoma_event_metadata.py",
@@ -2740,25 +2784,28 @@
       ]
      }
     ]
+   },
+   {
+    "id": "external-slack",
+    "label": "Slack",
+    "source": {
+     "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (19)",
-    "source": {
-     "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (2)",
+    "src": "library-backend-src-ext-integrations-calendar-integration",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
      "lines": [
@@ -2768,9 +2815,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (2)",
+    "src": "library-backend-src-ext-integrations-call-recorders-gong",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/call_recorders/gong/helpers.py",
      "lines": [
@@ -2780,9 +2827,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-notifications",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/notifications/service.py",
      "lines": [
@@ -2792,9 +2839,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-notifications",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/notifications/business.py",
      "lines": [
@@ -2804,9 +2851,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/public_adhoc_event.py",
      "lines": [
@@ -2816,302 +2863,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-slack-integration",
+    "dst": "external-slack",
+    "label": "calls Slack",
     "source": {
-     "path": "backend/src/rox_core/models/public_adhoc_event_attendee.py",
+     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
      "lines": [
-      18,
-      18
+      9,
+      9
      ]
     }
    },
    {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-slack-integration-mention-agent",
+    "dst": "external-slack",
+    "label": "calls Slack",
     "source": {
-     "path": "backend/src/rox_core/models/public_attention_event_attendee.py",
+     "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
      "lines": [
-      19,
-      19
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_attention_event_metadata.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_avoma_event_attendee.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_avoma_event_metadata.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_circleback_event_attendee.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_circleback_event_metadata.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_gong_event_attendee.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_gong_event_metadata.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_ms_teams_event_attendee.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_ms_teams_event_metadata.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_notification.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_notification_delivery.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_notification_preference.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_app_mention.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_bot_membership.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_partition.py",
-     "lines": [
-      21,
-      21
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_rox_company_link.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_message_log.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_user.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_user_channel_membership.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_transcript_v2.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_zoom_event_attendee.py",
-     "lines": [
-      18,
-      18
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-tables",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/public_zoom_event_metadata.py",
-     "lines": [
-      11,
-      11
+      3,
+      3
      ]
     }
    }
@@ -3152,7 +2923,7 @@
    {
     "src": "attention_event_attendee",
     "dst": "attention_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_attention_event_metadata.py",
      "lines": [
@@ -3165,7 +2936,7 @@
    {
     "src": "avoma_event_attendee",
     "dst": "avoma_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_avoma_event_metadata.py",
      "lines": [
@@ -3178,7 +2949,7 @@
    {
     "src": "circleback_event_attendee",
     "dst": "circleback_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_circleback_event_metadata.py",
      "lines": [
@@ -3191,7 +2962,7 @@
    {
     "src": "gong_event_attendee",
     "dst": "gong_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_gong_event_metadata.py",
      "lines": [
@@ -3204,7 +2975,7 @@
    {
     "src": "ms_teams_event_attendee",
     "dst": "ms_teams_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_ms_teams_event_metadata.py",
      "lines": [
@@ -3217,7 +2988,7 @@
    {
     "src": "slack_channel",
     "dst": "slack_channel_bot_membership",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/public_slack_channel_bot_membership.py",
      "lines": [
@@ -3229,21 +3000,8 @@
    },
    {
     "src": "slack_channel",
-    "dst": "slack_channel_bot_membership",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_bot_membership.py",
-     "lines": [
-      62,
-      62
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "slack_channel",
     "dst": "slack_channel_partition",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/public_slack_channel_partition.py",
      "lines": [
@@ -3255,21 +3013,8 @@
    },
    {
     "src": "slack_channel",
-    "dst": "slack_channel_partition",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_partition.py",
-     "lines": [
-      85,
-      85
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "slack_channel",
     "dst": "slack_channel_rox_company_link",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/public_slack_channel_rox_company_link.py",
      "lines": [
@@ -3281,21 +3026,8 @@
    },
    {
     "src": "slack_channel",
-    "dst": "slack_channel_rox_company_link",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_channel_rox_company_link.py",
-     "lines": [
-      83,
-      83
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "slack_channel",
     "dst": "slack_message_log",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/public_slack_message_log.py",
      "lines": [
@@ -3307,21 +3039,8 @@
    },
    {
     "src": "slack_channel",
-    "dst": "slack_message_log",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/public_slack_message_log.py",
-     "lines": [
-      57,
-      57
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "slack_channel",
     "dst": "slack_user_channel_membership",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/public_slack_user_channel_membership.py",
      "lines": [
@@ -3334,7 +3053,7 @@
    {
     "src": "zoom_event_attendee",
     "dst": "zoom_event_metadata",
-    "label": "primaryjoin",
+    "label": "ORM join",
     "source": {
      "path": "backend/src/rox_core/models/public_zoom_event_metadata.py",
      "lines": [
@@ -3363,7 +3082,7 @@
    }
   },
   {
-   "label": "Integration (+9 tables)",
+   "label": "Integration connections & sync",
    "page": "feature-activity-integration",
    "source": {
     "path": "backend/src/ext_integrations/alertable_state_notifications.py",

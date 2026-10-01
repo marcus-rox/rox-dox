@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-webhook-integration",
- "title": "Webhook Integration (+2 tables)",
+ "title": "Webhook integrations",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -472,7 +472,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: webhook_integration, webhook_integration_action.",
+    "text": "Runs 1 background workers and workflows: WebhookCoordinatorTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/webhook_coordinator.py",
+      "lines": [
+       25,
+       25
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: webhook_integration, webhook_integration_action.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/webhook_integration.py",
@@ -486,32 +498,6 @@
       "lines": [
        240,
        351
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 2, Business logic: 9, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/webhook_coordinator.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-      "lines": [
-       46,
-       46
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-      "lines": [
-       49,
-       49
       ]
      }
     ]
@@ -578,29 +564,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "2",
-     "0",
-     "backend/src/tasks (1), backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "webhook_integration, webhook_integration_action",
+     "—"
     ],
     [
-     "Business logic",
-     "9",
-     "0",
-     "backend/src/rox_core/api/webhook_integrations (7), backend/src/rox_core/api/prospect_lists (1), backend/src/workflow/triggers/handlers (1)"
+     "Webhook Integrations (library)",
+     "Library code",
+     "webhook_integration",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Handlers (library)",
+     "Library code",
+     "webhook_integration",
+     "—"
+    ],
+    [
+     "webhook_integration",
+     "Database",
+     "webhook_integration",
+     "—"
+    ],
+    [
+     "webhook_integration_action",
+     "Database",
+     "webhook_integration_action",
+     "—"
     ]
    ],
    "sources": [
@@ -621,22 +619,29 @@
     {
      "path": "backend/src/tasks/executors/webhook_coordinator.py",
      "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_coordinator.py",
+     "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
+     "path": "backend/src/rox_core/api/webhook_integrations/webhook_router.py",
      "lines": [
-      46,
-      46
+      1,
+      1
      ]
     },
     {
-     "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
+     "path": "backend/src/workflow/triggers/handlers/webhook.py",
      "lines": [
-      49,
-      49
+      1,
+      1
      ]
     }
    ],
@@ -660,19 +665,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/tasks/executors/webhook_coordinator.py",
      "lines": [
-      1,
-      1
+      25,
+      25
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/webhook_coordinator.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/webhook_integrations/webhook_router.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/webhook_integration.py",
      "lines": [
@@ -680,131 +709,81 @@
       237
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/webhook_integration.py",
+     "lines": [
+      59,
+      237
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/webhook_coordinator.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "WebhookCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/webhook_coordinator.py",
+        "lines": [
+         25,
+         25
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-rox-core-api-webhook-integrations",
+    "label": "Webhook Integrations (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/webhook_integrations/webhook_router.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/webhook_action_types.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/tasks/executors — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/webhook_coordinator.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-workflow-triggers-handlers",
+    "label": "Handlers (library)",
     "source": {
-     "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
+     "path": "backend/src/workflow/triggers/handlers/webhook.py",
      "lines": [
-      46,
-      46
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/webhook_integrations — 7 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/webhook_integrations/auth_config_dto.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/prospect_lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-        "lines": [
-         46,
-         46
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/triggers/handlers — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/triggers/handlers/webhook.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-     "lines": [
-      49,
-      49
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-        "lines": [
-         49,
-         49
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-webhook_integration",
+    "id": "store-webhook-integration",
     "label": "webhook_integration",
     "source": {
      "path": "backend/src/rox_core/models/webhook_integration.py",
@@ -814,12 +793,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-webhook_integration_action",
+    "id": "store-webhook-integration-action",
     "label": "webhook_integration_action",
     "source": {
      "path": "backend/src/rox_core/models/webhook_integration.py",
@@ -829,66 +808,54 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (7)",
-    "source": {
-     "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-     "lines": [
-      49,
-      49
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/webhook_coordinator.py",
-     "lines": [
-      13,
-      13
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-webhook_integration",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/webhook_coordinator.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-webhook_integration_action",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/webhook_coordinator.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-webhook_integration",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-webhook-integrations",
+    "dst": "store-webhook-integration",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/webhook_integrations/webhook_router.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-triggers-handlers",
+    "dst": "store-webhook-integration",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/webhook.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-webhook-integration",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/webhook_coordinator.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-webhook-integration-action",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/webhook_coordinator.py",
      "lines": [
       1,
       1
@@ -908,7 +875,7 @@
    {
     "src": "webhook_integration",
     "dst": "webhook_integration_action",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/webhook_integration.py",
      "lines": [
@@ -917,19 +884,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "webhook_integration",
-    "dst": "webhook_integration_action",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/webhook_integration.py",
-     "lines": [
-      240,
-      240
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],

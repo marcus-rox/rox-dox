@@ -1,6 +1,6 @@
 {
  "id": "feature-tasks-task-item",
- "title": "Task Item (+3 tables)",
+ "title": "Task Item",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tasks",
@@ -143,7 +143,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: task_item, task_item_entity_link, task_item_step.",
+    "text": "Serves 9 HTTP endpoints in 1 API groups: Task Items.",
+    "sources": [
+     {
+      "path": "backend/src/task_items/router.py",
+      "lines": [
+       56,
+       56
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: task_item, task_item_entity_link, task_item_step.",
     "sources": [
      {
       "path": "backend/src/task_items/models.py",
@@ -164,32 +176,6 @@
       "lines": [
        108,
        153
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 1, Business logic: 3, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/task_items/router.py",
-      "lines": [
-       30,
-       30
-      ]
-     },
-     {
-      "path": "backend/src/chat/agent_executor/interceptors.py",
-      "lines": [
-       8,
-       8
-      ]
-     },
-     {
-      "path": "backend/src/task_items/models.py",
-      "lines": [
-       35,
-       35
       ]
      }
     ]
@@ -249,29 +235,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/task_items (1)"
+     "Task Items API",
+     "HTTP API",
+     "task_item, task_item_entity_link, task_item_step",
+     "—"
     ],
     [
-     "Business logic",
-     "3",
-     "0",
-     "backend/src/agent_framework/command_sdk/utils (1), backend/src/chat/agent_executor (1), backend/src/task_items (1)"
+     "Agent Executor (library)",
+     "Library code",
+     "task_item",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/task_items (1)"
+     "task_item",
+     "Database",
+     "task_item",
+     "—"
+    ],
+    [
+     "task_item_entity_link",
+     "Database",
+     "task_item_entity_link",
+     "—"
+    ],
+    [
+     "task_item_step",
+     "Database",
+     "task_item_step",
+     "—"
     ]
    ],
    "sources": [
@@ -299,15 +297,43 @@
     {
      "path": "backend/src/task_items/router.py",
      "lines": [
-      30,
-      30
+      56,
+      56
      ]
     },
     {
-     "path": "backend/src/chat/agent_executor/interceptors.py",
+     "path": "backend/src/task_items/router.py",
      "lines": [
-      8,
-      8
+      98,
+      98
+     ]
+    },
+    {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      108,
+      108
+     ]
+    },
+    {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      152,
+      152
+     ]
+    },
+    {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      78,
+      78
+     ]
+    },
+    {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      129,
+      129
      ]
     },
     {
@@ -315,6 +341,27 @@
      "lines": [
       35,
       35
+     ]
+    },
+    {
+     "path": "backend/src/task_items/models.py",
+     "lines": [
+      156,
+      156
+     ]
+    },
+    {
+     "path": "backend/src/task_items/models.py",
+     "lines": [
+      108,
+      108
+     ]
+    },
+    {
+     "path": "backend/src/chat/agent_executor/interceptors.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -338,30 +385,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/task_items/router.py",
      "lines": [
-      30,
-      30
+      56,
+      56
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
      "path": "backend/src/chat/agent_executor/interceptors.py",
      "lines": [
-      8,
-      8
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/task_items/models.py",
      "lines": [
@@ -369,111 +429,103 @@
       105
      ]
     }
-   }
-  ],
-  "nodes": [
-   {
-    "id": "routes",
-    "label": "HTTP routes",
-    "source": {
-     "path": "backend/src/task_items/router.py",
-     "lines": [
-      30,
-      30
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/task_items — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/task_items/router.py",
-        "lines": [
-         30,
-         30
-        ]
-       }
-      ]
-     }
-    ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/chat/agent_executor/interceptors.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/agent_framework/command_sdk/utils — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/agent_executor/interceptors.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/chat/agent_executor — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/agent_executor/interceptors.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/task_items — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/task_items/service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "group-database",
+    "label": "Database",
     "source": {
      "path": "backend/src/task_items/models.py",
      "lines": [
       35,
-      35
+      105
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "api-task-items",
+    "label": "Task Items API",
+    "source": {
+     "path": "backend/src/task_items/router.py",
+     "lines": [
+      56,
+      56
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/task_items — 1 files",
+      "text": "GET /task_items",
       "sources": [
        {
-        "path": "backend/src/task_items/models.py",
+        "path": "backend/src/task_items/router.py",
         "lines": [
-         35,
-         35
+         56,
+         56
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /task_items",
+      "sources": [
+       {
+        "path": "backend/src/task_items/router.py",
+        "lines": [
+         98,
+         98
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /task_items/batch_create",
+      "sources": [
+       {
+        "path": "backend/src/task_items/router.py",
+        "lines": [
+         108,
+         108
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /task_items/batch_delete",
+      "sources": [
+       {
+        "path": "backend/src/task_items/router.py",
+        "lines": [
+         152,
+         152
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /task_items/batch_get",
+      "sources": [
+       {
+        "path": "backend/src/task_items/router.py",
+        "lines": [
+         78,
+         78
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+4 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/task_items/router.py",
+        "lines": [
+         129,
+         129
         ]
        }
       ]
@@ -481,7 +533,22 @@
     ]
    },
    {
-    "id": "store-task_item",
+    "id": "library-backend-src-chat-agent-executor",
+    "label": "Agent Executor (library)",
+    "source": {
+     "path": "backend/src/chat/agent_executor/interceptors.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-task-item",
     "label": "task_item",
     "source": {
      "path": "backend/src/task_items/models.py",
@@ -491,12 +558,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-task_item_entity_link",
+    "id": "store-task-item-entity-link",
     "label": "task_item_entity_link",
     "source": {
      "path": "backend/src/task_items/models.py",
@@ -506,12 +573,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-task_item_step",
+    "id": "store-task-item-step",
     "label": "task_item_step",
     "source": {
      "path": "backend/src/task_items/models.py",
@@ -521,76 +588,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/task_items/service.py",
-     "lines": [
-      43,
-      43
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/task_items/router.py",
-     "lines": [
-      30,
-      30
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-task_item",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/chat/agent_executor/interceptors.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-task_item_entity_link",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/task_items/service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-task_item_step",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/task_items/service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-task_item",
-    "label": "uses (1)",
+    "src": "api-task-items",
+    "dst": "store-task-item",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/task_items/models.py",
      "lines": [
@@ -600,9 +607,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-task_item_entity_link",
-    "label": "uses (1)",
+    "src": "api-task-items",
+    "dst": "store-task-item-entity-link",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/task_items/models.py",
      "lines": [
@@ -612,14 +619,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-task_item_step",
-    "label": "uses (1)",
+    "src": "api-task-items",
+    "dst": "store-task-item-step",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/task_items/models.py",
      "lines": [
       108,
       108
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-chat-agent-executor",
+    "dst": "store-task-item",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/chat/agent_executor/interceptors.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }
@@ -633,47 +652,7 @@
    "task_item_step"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "task_item",
-    "dst": "task_item_entity_link",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/task_items/models.py",
-     "lines": [
-      156,
-      156
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "task_item",
-    "dst": "task_item_step",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/task_items/models.py",
-     "lines": [
-      108,
-      108
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "task_item_entity_link",
-    "dst": "task_item_step",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/task_items/models.py",
-     "lines": [
-      108,
-      108
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },

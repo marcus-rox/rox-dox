@@ -1,6 +1,6 @@
 {
  "id": "feature-deals-quote",
- "title": "Quote (+2 tables)",
+ "title": "Quote",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-deals",
@@ -11,7 +11,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: quote, quote_line_item.",
+    "text": "Stores data in: quote, quote_line_item.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/quote.py",
@@ -30,20 +30,13 @@
     ]
    },
    {
-    "text": "No in-scope code uses its tables.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/quote.py",
       "lines": [
        43,
        109
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/quote_line_item.py",
-      "lines": [
-       32,
-       95
       ]
      }
     ]
@@ -52,12 +45,25 @@
   "key_points": [],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
-   "rows": [],
+   "rows": [
+    [
+     "quote",
+     "Database",
+     "quote",
+     "—"
+    ],
+    [
+     "quote_line_item",
+     "Database",
+     "quote_line_item",
+     "—"
+    ]
+   ],
    "sources": [
     {
      "path": "backend/src/rox_core/models/quote.py",
@@ -94,8 +100,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/quote.py",
      "lines": [
@@ -103,6 +109,18 @@
       109
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/quote.py",
+     "lines": [
+      43,
+      109
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
@@ -117,12 +135,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-quote_line_item",
+    "id": "store-quote-line-item",
     "label": "quote_line_item",
     "source": {
      "path": "backend/src/rox_core/models/quote_line_item.py",
@@ -132,7 +150,7 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
@@ -150,7 +168,7 @@
    {
     "src": "quote",
     "dst": "quote_line_item",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/quote_line_item.py",
      "lines": [

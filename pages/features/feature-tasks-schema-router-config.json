@@ -178,7 +178,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: schema_router_config.",
+    "text": "Stores data in: schema_router_config.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/schema_router_config.py",
@@ -190,27 +190,13 @@
     ]
    },
    {
-    "text": "Files by layer: Background workers: 1, Business logic: 3, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
      {
       "path": "backend/src/rox_core/api/schema_router_admin/business.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/schema_router_config.py",
-      "lines": [
-       11,
-       11
       ]
      }
     ]
@@ -263,29 +249,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/generic_backfill (1)"
+     "Schema Router Admin (library)",
+     "Library code",
+     "schema_router_config",
+     "—"
     ],
     [
-     "Business logic",
-     "3",
-     "0",
-     "backend/src/rox_core/api/schema_router_admin (2), backend/src/rox_core (1)"
+     "Rox Core (library)",
+     "Library code",
+     "schema_router_config",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "schema_router_config",
+     "—"
+    ],
+    [
+     "Generic Backfill (library)",
+     "Library code",
+     "schema_router_config",
+     "—"
+    ],
+    [
+     "schema_router_config",
+     "Database",
+     "schema_router_config",
+     "—"
     ]
    ],
    "sources": [
@@ -297,14 +295,14 @@
      ]
     },
     {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
+     "path": "backend/src/rox_core/api/schema_router_admin/business.py",
      "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/rox_core/api/schema_router_admin/business.py",
+     "path": "backend/src/rox_core/schema_router_config_provider.py",
      "lines": [
       1,
       1
@@ -315,6 +313,13 @@
      "lines": [
       11,
       11
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -338,19 +343,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/schema_router_admin/business.py",
      "lines": [
@@ -360,8 +354,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/schema_router_admin/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/schema_router_config.py",
      "lines": [
@@ -369,40 +375,24 @@
       21
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/schema_router_config.py",
+     "lines": [
+      11,
+      21
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/generic_backfill — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-schema-router-admin",
+    "label": "Schema Router Admin (library)",
     "source": {
      "path": "backend/src/rox_core/api/schema_router_admin/business.py",
      "lines": [
@@ -411,38 +401,28 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/schema_router_admin — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/schema_router_admin/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/schema_router_config_provider.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core",
+    "label": "Rox Core (library)",
+    "source": {
+     "path": "backend/src/rox_core/schema_router_config_provider.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/schema_router_config.py",
      "lines": [
@@ -451,25 +431,27 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/schema_router_config.py",
-        "lines": [
-         11,
-         11
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-schema_router_config",
+    "id": "library-backend-src-tasks-generic-backfill",
+    "label": "Generic Backfill (library)",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-schema-router-config",
     "label": "schema_router_config",
     "source": {
      "path": "backend/src/rox_core/models/schema_router_config.py",
@@ -479,54 +461,18 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
+    "src": "library-backend-src-rox-core",
+    "dst": "store-schema-router-config",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/schema_router_admin/business.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-     "lines": [
-      15,
-      15
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
-     "lines": [
-      8,
-      8
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-schema_router_config",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
+     "path": "backend/src/rox_core/schema_router_config_provider.py",
      "lines": [
       1,
       1
@@ -534,9 +480,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-schema_router_config",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-schema-router-admin",
+    "dst": "store-schema-router-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/schema_router_admin/business.py",
      "lines": [
@@ -546,14 +492,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-schema_router_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-schema-router-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/schema_router_config.py",
      "lines": [
       11,
       11
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-generic-backfill",
+    "dst": "store-schema-router-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/schema_router_config_backfill.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }

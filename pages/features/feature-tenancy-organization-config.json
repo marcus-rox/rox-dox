@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-organization-config",
- "title": "Organization Config (+4 tables)",
+ "title": "Organization Config",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -965,7 +965,113 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: org_extra, organization_config, organization_ddb_config, organization_graph_config.",
+    "text": "Serves 5 HTTP endpoints in 1 API groups: Health.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/health/router.py",
+      "lines": [
+       63,
+       63
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 7 background workers and workflows: GenerateIcpInsightKeywordsTaskExecutor, OrgProvisioningCoordinatorExecutor, OrgProvisioningTaskExecutor, OrganizationCreationBackgroundTaskExecutor, OrganizationDataCleanupCoordinatorTaskExecutor and 2 more.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
+      "lines": [
+       27,
+       27
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_provisioning.py",
+      "lines": [
+       106,
+       106
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_provisioning.py",
+      "lines": [
+       287,
+       287
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_provisioning.py",
+      "lines": [
+       594,
+       594
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/organization_data_cleanup.py",
+      "lines": [
+       49,
+       49
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: AWS, LiteLLM, OpenAI.",
+    "sources": [
+     {
+      "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/model/rox_litellm_sambanova_model.py",
+      "lines": [
+       2,
+       2
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/model/rox_agent_models.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/data_store/conversation_store.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/data_store/conversation_store.py",
+      "lines": [
+       13,
+       13
+      ]
+     },
+     {
+      "path": "backend/src/data_store/conversation_store.py",
+      "lines": [
+       16,
+       16
+      ]
+     },
+     {
+      "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: org_extra, organization_config, organization_ddb_config, organization_graph_config.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/organization.py",
@@ -993,46 +1099,6 @@
       "lines": [
        381,
        419
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 1, Background workers: 3, Business logic: 30, Models: 1, Agent skills: 2.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/health/router.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
-      "lines": [
-       25,
-       25
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
-      "lines": [
-       10,
-       10
-      ]
-     },
-     {
-      "path": ".agents/skills/graph-test-harness/SKILL.md",
-      "lines": [
-       299,
-       299
       ]
      }
     ]
@@ -1123,41 +1189,125 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/chat/routes/health (1)"
+     "Health API",
+     "HTTP API",
+     "—",
+     "LiteLLM, OpenAI"
     ],
     [
-     "Background workers",
-     "2",
-     "1",
-     "backend/src/tasks/executors (3)"
+     "Executors workers",
+     "Background workers / workflows",
+     "org_extra, organization_config",
+     "OpenAI"
     ],
     [
-     "Business logic",
-     "27",
-     "3",
-     "backend/src/agent_framework/model (6), backend/src/agents_core/agents_core_v2/data/stores (2), backend/src/data_store (2)"
+     "Data Store (library)",
+     "Library code",
+     "—",
+     "OpenAI"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Graph Harness (library)",
+     "Library code",
+     "organization_graph_config",
+     "—"
     ],
     [
-     "Agent skills",
-     "2",
-     "0",
-     ".agents/skills/graph-test-harness (1), .agents/skills/modal-apps (1)"
+     "Util (library)",
+     "Library code",
+     "organization_config, organization_ddb_config",
+     "—"
+    ],
+    [
+     "Governance (library)",
+     "Library code",
+     "organization_config",
+     "—"
+    ],
+    [
+     "Enrollment (library)",
+     "Library code",
+     "organization_config",
+     "—"
+    ],
+    [
+     "Graph (library)",
+     "Library code",
+     "organization_graph_config",
+     "—"
+    ],
+    [
+     "Onboarding (library)",
+     "Library code",
+     "organization_config",
+     "—"
+    ],
+    [
+     "Sequences (library)",
+     "Library code",
+     "organization_config",
+     "—"
+    ],
+    [
+     "Secrets Manager Shim (library)",
+     "Library code",
+     "—",
+     "AWS"
+    ],
+    [
+     "Workflow (library)",
+     "Library code",
+     "organization_config",
+     "—"
+    ],
+    [
+     "org_extra",
+     "Database",
+     "org_extra",
+     "—"
+    ],
+    [
+     "organization_config",
+     "Database",
+     "organization_config",
+     "—"
+    ],
+    [
+     "organization_ddb_config",
+     "Database",
+     "organization_ddb_config",
+     "—"
+    ],
+    [
+     "organization_graph_config",
+     "Database",
+     "organization_graph_config",
+     "—"
+    ],
+    [
+     "AWS",
+     "External service",
+     "—",
+     "AWS"
+    ],
+    [
+     "LiteLLM",
+     "External service",
+     "—",
+     "LiteLLM"
+    ],
+    [
+     "OpenAI",
+     "External service",
+     "—",
+     "OpenAI"
     ]
    ],
    "sources": [
@@ -1192,36 +1342,183 @@
     {
      "path": "backend/src/chat/routes/health/router.py",
      "lines": [
-      9,
-      9
+      63,
+      63
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      87,
+      87
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      53,
+      53
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/model/rox_litellm_sambanova_model.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "lines": [
+      23,
+      23
      ]
     },
     {
      "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_provisioning.py",
+     "lines": [
+      106,
+      106
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_provisioning.py",
+     "lines": [
+      287,
+      287
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/org_provisioning.py",
+     "lines": [
+      594,
+      594
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/organization_data_cleanup.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/organization_data_cleanup.py",
+     "lines": [
+      122,
+      122
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/service.py",
      "lines": [
       1,
       1
      ]
     },
     {
-     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "path": "backend/src/tasks/executors/org_provisioning.py",
      "lines": [
-      25,
-      25
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/data_store/conversation_store.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/graph_harness/seeder.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/util/org_config_reader.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
      "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
      "lines": [
-      10,
-      10
+      1,
+      1
      ]
     },
     {
-     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
      "lines": [
-      299,
-      299
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/onboarding/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/settings/sequences/hierarchical_setting_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/workflow/constraints.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -1229,7 +1526,7 @@
   },
   "notes": [
    {
-    "text": "Shares 4 files with Organization (+5 tables).",
+    "text": "Shares 4 files with Organization.",
     "sources": [
      {
       "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -1241,7 +1538,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Enterprise Subscription (+13 tables).",
+    "text": "Shares 1 files with Enterprise Subscription.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
@@ -1281,30 +1578,55 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/chat/routes/health/router.py",
      "lines": [
-      9,
-      9
+      63,
+      63
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
      "lines": [
-      1,
-      1
+      27,
+      27
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/data_store/conversation_store.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/organization.py",
      "lines": [
@@ -1312,31 +1634,103 @@
       1170
      ]
     }
-   }
-  ],
-  "nodes": [
+   },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "group-database",
+    "label": "Database",
     "source": {
-     "path": "backend/src/chat/routes/health/router.py",
+     "path": "backend/src/rox_core/models/organization.py",
+     "lines": [
+      1142,
+      1170
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
      "lines": [
       9,
       9
      ]
     },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "api-health",
+    "label": "Health API",
+    "source": {
+     "path": "backend/src/chat/routes/health/router.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/chat/routes/health — 1 files",
+      "text": "GET /health",
       "sources": [
        {
         "path": "backend/src/chat/routes/health/router.py",
         "lines": [
-         9,
-         9
+         63,
+         63
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /health/migration",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/health/router.py",
+        "lines": [
+         76,
+         76
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /health/model",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/health/router.py",
+        "lines": [
+         87,
+         87
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /livez",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/health/router.py",
+        "lines": [
+         48,
+         48
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /readyz",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/health/router.py",
+        "lines": [
+         53,
+         53
         ]
        }
       ]
@@ -1344,191 +1738,245 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "GenerateIcpInsightKeywordsTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     },
+     {
+      "text": "OrgProvisioningCoordinatorExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/org_provisioning.py",
+        "lines": [
+         106,
+         106
+        ]
+       }
+      ]
+     },
+     {
+      "text": "OrgProvisioningTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/org_provisioning.py",
+        "lines": [
+         287,
+         287
+        ]
+       }
+      ]
+     },
+     {
+      "text": "OrganizationCreationBackgroundTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/org_provisioning.py",
+        "lines": [
+         594,
+         594
+        ]
+       }
+      ]
+     },
+     {
+      "text": "OrganizationDataCleanupCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/organization_data_cleanup.py",
+        "lines": [
+         49,
+         49
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+2 more workers",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/organization_data_cleanup.py",
+        "lines": [
+         122,
+         122
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-data-store",
+    "label": "Data Store (library)",
+    "source": {
+     "path": "backend/src/data_store/conversation_store.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-graph-harness",
+    "label": "Graph Harness (library)",
+    "source": {
+     "path": "backend/src/graph_harness/seeder.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-util",
+    "label": "Util (library)",
     "source": {
-     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "path": "backend/src/util/org_config_reader.py",
      "lines": [
-      25,
-      25
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/agent_framework/model — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agents_core/agents_core_v2/data/stores — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agents_core/agents_core_v2/data/stores/agent_key_value_store.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/conversation_store.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/graph_harness — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/graph_harness/seeder.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/util — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/util/org_config_reader.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store/note_store — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/note_store/note_store.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-ext-integrations-email-integration-governance",
+    "label": "Governance (library)",
     "source": {
      "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
      "lines": [
-      10,
-      10
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
+    "id": "library-backend-src-rox-core-api-agents-outreach-enrollment",
+    "label": "Enrollment (library)",
     "source": {
-     "path": ".agents/skills/graph-test-harness/SKILL.md",
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
      "lines": [
-      299,
-      299
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/graph-test-harness — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/graph-test-harness/SKILL.md",
-        "lines": [
-         299,
-         299
-        ]
-       }
-      ]
-     },
-     {
-      "text": ".agents/skills/modal-apps — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/modal-apps/SKILL.md",
-        "lines": [
-         163,
-         163
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-org_extra",
+    "id": "library-backend-src-rox-core-api-graph",
+    "label": "Graph (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-onboarding",
+    "label": "Onboarding (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/onboarding/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-settings-sequences",
+    "label": "Sequences (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/settings/sequences/hierarchical_setting_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-shim-layer-secrets-manager-shim",
+    "label": "Secrets Manager Shim (library)",
+    "source": {
+     "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-workflow",
+    "label": "Workflow (library)",
+    "source": {
+     "path": "backend/src/workflow/constraints.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-org-extra",
     "label": "org_extra",
     "source": {
      "path": "backend/src/rox_core/models/organization.py",
@@ -1538,12 +1986,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-organization_config",
+    "id": "store-organization-config",
     "label": "organization_config",
     "source": {
      "path": "backend/src/rox_core/models/organization.py",
@@ -1553,12 +2001,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-organization_ddb_config",
+    "id": "store-organization-ddb-config",
     "label": "organization_ddb_config",
     "source": {
      "path": "backend/src/rox_core/models/organization.py",
@@ -1568,12 +2016,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-organization_graph_config",
+    "id": "store-organization-graph-config",
     "label": "organization_graph_config",
     "source": {
      "path": "backend/src/rox_core/models/organization.py",
@@ -1583,100 +2031,61 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-aws",
+    "label": "AWS",
+    "source": {
+     "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-litellm",
+    "label": "LiteLLM",
+    "source": {
+     "path": "backend/src/agent_framework/model/rox_litellm_sambanova_model.py",
+     "lines": [
+      2,
+      2
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-openai",
+    "label": "OpenAI",
+    "source": {
+     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "lines": [
+      23,
+      23
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (13)",
-    "source": {
-     "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/chat/routes/health/router.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
-     "lines": [
-      53,
-      53
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
-     "lines": [
-      112,
-      112
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-org_extra",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-organization_config",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/org_provisioning.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-org_extra",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/organizations/service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-organization_config",
-    "label": "uses (6)",
+    "src": "library-backend-src-ext-integrations-email-integration-governance",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/email_integration/governance/deterministic_filter.py",
      "lines": [
@@ -1686,9 +2095,81 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-organization_ddb_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-graph-harness",
+    "dst": "store-organization-graph-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/graph_harness/seeder.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-agents-outreach-enrollment",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-graph",
+    "dst": "store-organization-graph-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-onboarding",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/onboarding/business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-settings-sequences",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/settings/sequences/hierarchical_setting_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-util",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/util/org_config_utils.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-util",
+    "dst": "store-organization-ddb-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/util/org_config_reader.py",
      "lines": [
@@ -1698,14 +2179,98 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-organization_graph_config",
-    "label": "uses (2)",
+    "src": "library-backend-src-workflow",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/graph_harness/seeder.py",
+     "path": "backend/src/workflow/constraints.py",
      "lines": [
       1,
       1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-org-extra",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/organizations/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-organization-config",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/org_provisioning.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-shim-layer-secrets-manager-shim",
+    "dst": "external-aws",
+    "label": "calls AWS",
+    "source": {
+     "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+     "lines": [
+      9,
+      9
+     ]
+    }
+   },
+   {
+    "src": "api-health",
+    "dst": "external-litellm",
+    "label": "calls LiteLLM",
+    "source": {
+     "path": "backend/src/agent_framework/model/rox_litellm_sambanova_model.py",
+     "lines": [
+      2,
+      2
+     ]
+    }
+   },
+   {
+    "src": "api-health",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "lines": [
+      23,
+      23
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-data-store",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/data_store/conversation_store.py",
+     "lines": [
+      7,
+      7
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "external-openai",
+    "label": "calls OpenAI",
+    "source": {
+     "path": "backend/src/agent_framework/model/rox_agent_model_types.py",
+     "lines": [
+      23,
+      23
      ]
     }
    }
@@ -1720,86 +2285,7 @@
    "organization_graph_config"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "org_extra",
-    "dst": "organization_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      965,
-      965
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "org_extra",
-    "dst": "organization_ddb_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      422,
-      422
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "org_extra",
-    "dst": "organization_graph_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      381,
-      381
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "organization_config",
-    "dst": "organization_ddb_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      422,
-      422
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "organization_config",
-    "dst": "organization_graph_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      381,
-      381
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "organization_ddb_config",
-    "dst": "organization_graph_config",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/organization.py",
-     "lines": [
-      381,
-      381
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -1818,7 +2304,7 @@
    }
   },
   {
-   "label": "Organization (+5 tables)",
+   "label": "Organization",
    "page": "feature-tenancy-organization",
    "source": {
     "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -1829,7 +2315,7 @@
    }
   },
   {
-   "label": "Enterprise Subscription (+13 tables)",
+   "label": "Enterprise Subscription",
    "page": "feature-tenancy-enterprise-subscription",
    "source": {
     "path": "backend/src/rox_core/api/agents/outreach/enrollment/config.py",

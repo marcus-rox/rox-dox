@@ -1,6 +1,6 @@
 {
  "id": "feature-people-company-request-status",
- "title": "Company Request Status (+4 tables)",
+ "title": "Company Request Status",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -770,7 +770,40 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: company_registration_request, company_registration_task, company_request_status, company_request_status_log.",
+    "text": "Runs 4 background workers and workflows: CompanyRegistrationCoordinatorTaskExecutor, CompanyRegistrationTaskExecutor, DataExtractionCoordinatorExecutor, DataExtractionWarmRefreshCoordinatorTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/company_registration.py",
+      "lines": [
+       63,
+       63
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/company_registration.py",
+      "lines": [
+       314,
+       314
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/data_extraction_coordinator_executor.py",
+      "lines": [
+       34,
+       34
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/data_extraction.py",
+      "lines": [
+       51,
+       51
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: company_registration_request, company_registration_task, company_request_status, company_request_status_log.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/company_registration.py",
@@ -798,39 +831,6 @@
       "lines": [
        219,
        249
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 12, Business logic: 11, Models: 2, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/company_registration.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agents_core/data/rox_address_entity_resolution.py",
-      "lines": [
-       10,
-       10
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/company_registration.py",
-      "lines": [
-       26,
-       26
-      ]
-     },
-     {
-      "path": ".agents/skills/temp-sync-async-migration-rules/SKILL.md",
-      "lines": [
-       105,
-       105
       ]
      }
     ]
@@ -916,35 +916,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "12",
-     "0",
-     "backend/src/tasks/listeners (4), backend/src/tasks/executors (3), backend/src/tasks/task_types (3)"
+     "Executors workers",
+     "Background workers / workflows",
+     "company_registration_request, company_registration_task",
+     "—"
     ],
     [
-     "Business logic",
-     "10",
-     "1",
-     "backend/src/rox_core/api/data_extraction (3), backend/src/data_extraction/svc/services (2), backend/src/rox_core/api/entities/company (2)"
+     "Listeners (library)",
+     "Library code",
+     "company_request_status",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Company (library)",
+     "Library code",
+     "company_request_status",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/temp-sync-async-migration-rules (1)"
+     "company_registration_request",
+     "Database",
+     "company_registration_request",
+     "—"
+    ],
+    [
+     "company_registration_task",
+     "Database",
+     "company_registration_task",
+     "—"
+    ],
+    [
+     "company_request_status",
+     "Database",
+     "company_request_status",
+     "—"
+    ],
+    [
+     "company_request_status_log",
+     "Database",
+     "company_request_status_log",
+     "—"
     ]
    ],
    "sources": [
@@ -979,15 +997,29 @@
     {
      "path": "backend/src/tasks/executors/company_registration.py",
      "lines": [
-      1,
-      1
+      63,
+      63
      ]
     },
     {
-     "path": "backend/src/agents_core/data/rox_address_entity_resolution.py",
+     "path": "backend/src/tasks/executors/company_registration.py",
      "lines": [
-      10,
-      10
+      314,
+      314
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/data_extraction_coordinator_executor.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/data_extraction.py",
+     "lines": [
+      51,
+      51
      ]
     },
     {
@@ -998,10 +1030,24 @@
      ]
     },
     {
-     "path": ".agents/skills/temp-sync-async-migration-rules/SKILL.md",
+     "path": "backend/src/rox_core/models/company_registration.py",
      "lines": [
-      105,
-      105
+      85,
+      85
+     ]
+    },
+    {
+     "path": "backend/src/tasks/listeners/data_extraction_fan_out_listener.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/company/helper_dao.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -1009,7 +1055,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Rox Company (+4 tables).",
+    "text": "Shares 1 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/data_extraction/business.py",
@@ -1021,7 +1067,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Perplexity Company Data (+4 tables).",
+    "text": "Shares 2 files with Perplexity Company Data.",
     "sources": [
      {
       "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",
@@ -1037,19 +1083,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/tasks/executors/company_registration.py",
      "lines": [
-      1,
-      1
+      63,
+      63
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/executors/company_registration.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/tasks/listeners/data_extraction_fan_out_listener.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
      "lines": [
@@ -1057,219 +1127,117 @@
       75
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/company_registration.py",
+     "lines": [
+      26,
+      75
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/company_registration.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "CompanyRegistrationCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/company_registration.py",
+        "lines": [
+         63,
+         63
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CompanyRegistrationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/company_registration.py",
+        "lines": [
+         314,
+         314
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DataExtractionCoordinatorExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/data_extraction_coordinator_executor.py",
+        "lines": [
+         34,
+         34
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DataExtractionWarmRefreshCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/data_extraction.py",
+        "lines": [
+         51,
+         51
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-tasks-listeners",
+    "label": "Listeners (library)",
+    "source": {
+     "path": "backend/src/tasks/listeners/data_extraction_fan_out_listener.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/listeners — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         12,
-         12
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/tasks/executors — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/company_registration.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/tasks/task_types — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",
-        "lines": [
-         128,
-         128
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/tasks — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-entities-company",
+    "label": "Company (library)",
     "source": {
-     "path": "backend/src/agents_core/data/rox_address_entity_resolution.py",
+     "path": "backend/src/rox_core/api/entities/company/helper_dao.py",
      "lines": [
-      10,
-      10
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/data_extraction — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/data_extraction/business.py",
-        "lines": [
-         54,
-         54
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_extraction/svc/services — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/company — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agents_core/data/rox_address_entity_resolution.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agents_core/data — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agents_core/data/rox_address_entity_resolution.py",
-        "lines": [
-         10,
-         10
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/enrichment/providers/crustdata — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/data_extraction/business.py",
-        "lines": [
-         39,
-         39
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/google_maps_integration — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/data_extraction/business.py",
-        "lines": [
-         40,
-         40
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/models/company_registration.py",
-     "lines": [
-      26,
-      26
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/company_registration.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "skills",
-    "label": "Agent skills",
-    "source": {
-     "path": ".agents/skills/temp-sync-async-migration-rules/SKILL.md",
-     "lines": [
-      105,
-      105
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/temp-sync-async-migration-rules — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/temp-sync-async-migration-rules/SKILL.md",
-        "lines": [
-         105,
-         105
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-company_registration_request",
+    "id": "store-company-registration-request",
     "label": "company_registration_request",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
@@ -1279,12 +1247,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-company_registration_task",
+    "id": "store-company-registration-task",
     "label": "company_registration_task",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
@@ -1294,12 +1262,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-company_request_status",
+    "id": "store-company-request-status",
     "label": "company_request_status",
     "source": {
      "path": "backend/src/rox_core/models/data_extraction_company_request_status.py",
@@ -1309,12 +1277,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-company_request_status_log",
+    "id": "store-company-request-status-log",
     "label": "company_request_status_log",
     "source": {
      "path": "backend/src/rox_core/models/data_extraction_company_request_status.py",
@@ -1324,100 +1292,28 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
+    "src": "library-backend-src-rox-core-api-entities-company",
+    "dst": "store-company-request-status",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/company/helper_dao.py",
      "lines": [
-      8,
-      8
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "workers",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",
-     "lines": [
-      128,
-      128
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/data_extraction_company_request_status.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (9)",
-    "source": {
-     "path": "backend/src/tasks/executors/company_registration.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (5)",
-    "source": {
-     "path": "backend/src/tasks/executors/company_registration.py",
-     "lines": [
-      37,
-      37
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-company_registration_request",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/company_registration.py",
-     "lines": [
       1,
       1
      ]
     }
    },
    {
-    "src": "workers",
-    "dst": "store-company_registration_task",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/company_registration.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-company_request_status",
-    "label": "uses (1)",
+    "src": "library-backend-src-tasks-listeners",
+    "dst": "store-company-request-status",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/tasks/listeners/data_extraction_fan_out_listener.py",
      "lines": [
@@ -1427,21 +1323,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-company_request_status",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/entities/company/helper_dao.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-company_registration_request",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-company-registration-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
      "lines": [
@@ -1451,9 +1335,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-company_registration_task",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-company-registration-task",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
      "lines": [
@@ -1477,38 +1361,12 @@
    {
     "src": "company_registration_request",
     "dst": "company_registration_task",
-    "label": "commented_fk",
+    "label": "commented-out FK",
     "source": {
      "path": "backend/src/rox_core/models/company_registration.py",
      "lines": [
       100,
       100
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "company_registration_request",
-    "dst": "company_registration_task",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/company_registration.py",
-     "lines": [
-      85,
-      85
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "company_request_status",
-    "dst": "company_request_status_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/data_extraction_company_request_status.py",
-     "lines": [
-      219,
-      219
      ]
     },
     "kind": "symbolic"
@@ -1532,7 +1390,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/rox_core/api/data_extraction/business.py",
@@ -1543,7 +1401,7 @@
    }
   },
   {
-   "label": "Perplexity Company Data (+4 tables)",
+   "label": "Perplexity Company Data",
    "page": "feature-people-perplexity-company-data",
    "source": {
     "path": "backend/src/data_extraction/svc/services/request_coordinator_svc.py",

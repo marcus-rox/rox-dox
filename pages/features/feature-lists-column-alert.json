@@ -1,6 +1,6 @@
 {
  "id": "feature-lists-column-alert",
- "title": "Column Alert (+2 tables)",
+ "title": "Column Alert",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-lists",
@@ -1334,7 +1334,59 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: column_alert, column_refresh_schedule.",
+    "text": "Serves 25 HTTP endpoints in 1 API groups: Unified Data.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+      "lines": [
+       199,
+       199
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 10 background workers and workflows: ColumnInsightFanoutExecutor, CustomCellGenerationTaskExecutor, CustomColumnBackgroundRefreshTaskExecutor, CustomColumnDeleteOrgWideDataTaskExecutor, CustomColumnGenerationTaskExecutor and 5 more.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       3116,
+       3116
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1828,
+       1828
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       369,
+       369
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1142,
+       1142
+      ]
+     },
+     {
+      "path": "backend/src/tasks/task_executor.py",
+      "lines": [
+       1352,
+       1352
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: column_alert, column_refresh_schedule.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/column_alert.py",
@@ -1348,53 +1400,6 @@
       "lines": [
        48,
        292
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Web screens: 28, HTTP routes: 1, Background workers: 3, Business logic: 15, Models: 2, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/AccountsTable.tsx",
-      "lines": [
-       41,
-       41
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/unified_data/endpoints.py",
-      "lines": [
-       6,
-       6
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-      "lines": [
-       17,
-       17
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-      "lines": [
-       24,
-       24
-      ]
-     },
-     {
-      "path": ".agents/skills/rox-lists-migration/SKILL.md",
-      "lines": [
-       53,
-       53
       ]
      }
     ]
@@ -1511,47 +1516,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Web screens",
-     "28",
-     "0",
-     "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists (6), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4 (3), web/apps/web/src/lib/roxList/hooks (3)"
+     "Web app",
+     "Web app",
+     "—",
+     "—"
     ],
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/rox_core/api/unified_data (1)"
+     "Unified Data API",
+     "HTTP API",
+     "column_alert, column_refresh_schedule",
+     "—"
     ],
     [
-     "Background workers",
-     "1",
-     "2",
-     "backend/src/tasks/executors (2), backend/src/tasks (1)"
+     "Tasks workers",
+     "Background workers / workflows",
+     "column_alert",
+     "—"
     ],
     [
-     "Business logic",
-     "14",
-     "1",
-     "backend/src/rox_core/api/unified_data (6), backend/src/research/clever_column (1), backend/src/rox_core/api/alerts (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "column_alert, column_refresh_schedule",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "Processors (library)",
+     "Library code",
+     "column_alert",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/rox-lists-migration (1)"
+     "column_alert",
+     "Database",
+     "column_alert",
+     "—"
+    ],
+    [
+     "column_refresh_schedule",
+     "Database",
+     "column_refresh_schedule",
+     "—"
     ]
    ],
    "sources": [
@@ -1577,10 +1588,157 @@
      ]
     },
     {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityContactsEditor.tsx",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useResolveLogicalNames.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/crmCampaigns/CampaignMemberSearch.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/overview/useRoxListOverviewController.ts",
+     "lines": [
+      18,
+      18
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/people/components/PeopleSelectionDialog.tsx",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/unified_data/endpoints.py",
      "lines": [
-      6,
-      6
+      199,
+      199
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+     "lines": [
+      543,
+      543
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+     "lines": [
+      506,
+      506
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+     "lines": [
+      225,
+      225
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/column_alert/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/unified_data/column_refresh_sysadmin_business.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3116,
+      3116
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      369,
+      369
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1142,
+      1142
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      1352,
+      1352
+     ]
+    },
+    {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3081,
+      3081
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
+     "lines": [
+      536,
+      536
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/tabs_propagation.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/tabs_propagation.py",
+     "lines": [
+      117,
+      117
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/tabs_propagation.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
@@ -1591,24 +1749,10 @@
      ]
     },
     {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
+     "path": "backend/src/rox_core/api/alerts/processors/research_insight_processor_v2.py",
      "lines": [
-      17,
-      17
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-     "lines": [
-      24,
-      24
-     ]
-    },
-    {
-     "path": ".agents/skills/rox-lists-migration/SKILL.md",
-     "lines": [
-      53,
-      53
+      1,
+      1
      ]
     }
    ],
@@ -1616,7 +1760,7 @@
   },
   "notes": [
    {
-    "text": "Shares 8 files with Column Metadata (+2 tables).",
+    "text": "Shares 8 files with Column Metadata.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
@@ -1640,7 +1784,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Insight (+4 tables).",
+    "text": "Shares 1 files with Insight.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
@@ -1664,7 +1808,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Rox List (+3 tables).",
+    "text": "Shares 1 files with Rox List.",
     "sources": [
      {
       "path": ".agents/skills/rox-lists-migration/SKILL.md",
@@ -1676,7 +1820,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Rox List Column Metadata (+4 tables).",
+    "text": "Shares 2 files with Rox List Column Metadata.",
     "sources": [
      {
       "path": "backend/src/research/endpoints.py",
@@ -1688,7 +1832,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Tab Column (+7 tables).",
+    "text": "Shares 1 files with Tab Column.",
     "sources": [
      {
       "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
@@ -1704,8 +1848,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-web",
-    "label": "Web screens",
+    "id": "group-web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/AccountsTable.tsx",
      "lines": [
@@ -1715,30 +1859,55 @@
     }
    },
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/unified_data/endpoints.py",
      "lines": [
-      6,
-      6
+      199,
+      199
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "group-http-api",
+    "label": "HTTP API",
     "source": {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
+     "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+     "lines": [
+      199,
+      199
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3116,
+      3116
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/alerts/processors/research_insight_processor_v2.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/column_alert.py",
      "lines": [
@@ -1746,12 +1915,24 @@
       343
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/column_alert.py",
+     "lines": [
+      51,
+      343
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "web",
-    "label": "Web screens",
+    "id": "web-app",
+    "label": "Web app",
     "source": {
      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/AccountsTable.tsx",
      "lines": [
@@ -1760,7 +1941,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-web",
+    "group": "group-web-app",
     "many": false,
     "details": [
      {
@@ -1824,7 +2005,7 @@
       ]
      },
      {
-      "text": "…/(provisioned)/(workspace)/(onboarded)/outreach/people/components — 1 files",
+      "text": "+12 more directories",
       "sources": [
        {
         "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/people/components/PeopleSelectionDialog.tsx",
@@ -1838,27 +2019,87 @@
     ]
    },
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-unified-data",
+    "label": "Unified Data API",
     "source": {
      "path": "backend/src/rox_core/api/unified_data/endpoints.py",
      "lines": [
-      6,
-      6
+      199,
+      199
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/rox_core/api/unified_data — 1 files",
+      "text": "POST /unified_data/<string:object_logical_name>/members",
       "sources": [
        {
         "path": "backend/src/rox_core/api/unified_data/endpoints.py",
         "lines": [
-         6,
-         6
+         199,
+         199
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DELETE /unified_data/alerts/<string:object_logical_name>/<string:field_logical_name>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+        "lines": [
+         543,
+         543
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /unified_data/alerts/<string:object_logical_name>/<string:field_logical_name>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+        "lines": [
+         543,
+         543
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /unified_data/alerts/<string:object_logical_name>/<string:field_logical_name>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+        "lines": [
+         543,
+         543
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PATCH /unified_data/catalog_entries/<int:entry_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+        "lines": [
+         506,
+         506
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+20 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/unified_data/endpoints.py",
+        "lines": [
+         225,
+         225
         ]
        }
       ]
@@ -1866,191 +2107,162 @@
     ]
    },
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks",
+    "label": "Tasks workers",
+    "source": {
+     "path": "backend/src/tasks/task_executor.py",
+     "lines": [
+      3116,
+      3116
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "ColumnInsightFanoutExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         3116,
+         3116
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomCellGenerationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1828,
+         1828
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnBackgroundRefreshTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         369,
+         369
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnDeleteOrgWideDataTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1142,
+         1142
+        ]
+       }
+      ]
+     },
+     {
+      "text": "CustomColumnGenerationTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         1352,
+         1352
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+2 more workers",
+      "sources": [
+       {
+        "path": "backend/src/tasks/task_executor.py",
+        "lines": [
+         3081,
+         3081
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
+     "lines": [
+      536,
+      536
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "CustomColumnRefreshDispatchTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
+        "lines": [
+         536,
+         536
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PropagateTabsCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/tabs_propagation.py",
+        "lines": [
+         33,
+         33
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PropagateTabsTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/tabs_propagation.py",
+        "lines": [
+         117,
+         117
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-rox-core-api-alerts-processors",
+    "label": "Processors (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/alerts/processors/research_insight_processor_v2.py",
      "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/tasks — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/task_executor.py",
-        "lines": [
-         63,
-         63
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/unified_data — 6 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/unified_data/business.py",
-        "lines": [
-         15,
-         15
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/research/clever_column — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/alerts — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/alerts/processors — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/processors/research_insight_processor_v2.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/column_alert — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/column_alert/service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/column_metadata — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/unified_data/business.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-     "lines": [
-      24,
-      24
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-        "lines": [
-         24,
-         24
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "skills",
-    "label": "Agent skills",
-    "source": {
-     "path": ".agents/skills/rox-lists-migration/SKILL.md",
-     "lines": [
-      53,
-      53
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/rox-lists-migration — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/rox-lists-migration/SKILL.md",
-        "lines": [
-         53,
-         53
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-column_alert",
+    "id": "store-column-alert",
     "label": "column_alert",
     "source": {
      "path": "backend/src/rox_core/models/column_alert.py",
@@ -2060,12 +2272,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-column_refresh_schedule",
+    "id": "store-column-refresh-schedule",
     "label": "column_refresh_schedule",
     "source": {
      "path": "backend/src/rox_core/models/column_refresh_schedule.py",
@@ -2075,64 +2287,76 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (9)",
+    "src": "web-app",
+    "dst": "api-unified-data",
+    "label": "HTTP",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/AccountsTable.tsx",
+     "lines": [
+      41,
+      41
+     ]
+    }
+   },
+   {
+    "src": "api-unified-data",
+    "dst": "store-column-alert",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/column_alert/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "api-unified-data",
+    "dst": "store-column-refresh-schedule",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/unified_data/column_refresh_sysadmin_business.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-alerts-processors",
+    "dst": "store-column-alert",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/alerts/processors/research_insight_processor_v2.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks",
+    "dst": "store-column-alert",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
      "lines": [
-      24,
-      24
+      1,
+      1
      ]
     }
    },
    {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (5)",
-    "source": {
-     "path": "backend/src/rox_core/api/unified_data/endpoints.py",
-     "lines": [
-      6,
-      6
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-     "lines": [
-      27,
-      27
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-column_alert",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-column-alert",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/tasks/executors/tabs_propagation.py",
      "lines": [
@@ -2142,35 +2366,11 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-column_refresh_schedule",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-column-refresh-schedule",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-column_alert",
-    "label": "uses (4)",
-    "source": {
-     "path": "backend/src/rox_core/api/alerts/column_alert_matching.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-column_refresh_schedule",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/unified_data/column_refresh_sysadmin_business.py",
      "lines": [
       1,
       1
@@ -2205,7 +2405,7 @@
    }
   },
   {
-   "label": "Column Metadata (+2 tables)",
+   "label": "Column Metadata",
    "page": "feature-lists-column-metadata",
    "source": {
     "path": "backend/src/rox_core/api/column_metadata/endpoints.py",
@@ -2227,7 +2427,7 @@
    }
   },
   {
-   "label": "Insight (+4 tables)",
+   "label": "Insight",
    "page": "feature-lists-insight",
    "source": {
     "path": "backend/src/rox_core/api/alerts/processors/insight_processor.py",
@@ -2249,7 +2449,7 @@
    }
   },
   {
-   "label": "Rox List (+3 tables)",
+   "label": "Rox List",
    "page": "feature-lists-rox-list",
    "source": {
     "path": ".agents/skills/rox-lists-migration/SKILL.md",
@@ -2260,7 +2460,7 @@
    }
   },
   {
-   "label": "Rox List Column Metadata (+4 tables)",
+   "label": "Rox List Column Metadata",
    "page": "feature-lists-rox-list-column-metadata",
    "source": {
     "path": "backend/src/research/endpoints.py",
@@ -2271,7 +2471,7 @@
    }
   },
   {
-   "label": "Tab Column (+7 tables)",
+   "label": "Tab Column",
    "page": "feature-lists-tab-column",
    "source": {
     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",

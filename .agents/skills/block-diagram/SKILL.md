@@ -37,3 +37,14 @@ white dashed `#6b7280` boxes with an `«external»` stereotype; groups are trans
 databases and caches, `queue` for queues and streams, and `external` for third parties. Keep
 cited edge labels on white rounded backgrounds, use solid `#374151` arrows for ordinary routes
 and dashed `4 3` arrows for long-channel routes, and include the shape legend.
+
+## Generated domain and feature pages
+
+Feature diagrams flow left to right from Web app through HTTP APIs, background workers and
+eligible library code to Database and External services.
+Domain diagrams flow from linked Features to their per-feature tables and shared external services.
+Entry reach starts at each API or worker and follows internal `call` evidence within that feature.
+Reach stops before files owned by a different entry; unreachable backend library directories are
+shown only when they use a table or an outside service.
+Web-to-API arrows require paired web-route and backend endpoint-path evidence; all diagram
+components, details and edges retain source citations.

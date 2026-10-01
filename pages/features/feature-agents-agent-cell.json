@@ -1,6 +1,6 @@
 {
  "id": "feature-agents-agent-cell",
- "title": "Agent Cell (+2 tables)",
+ "title": "Agent Cell",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-agents",
@@ -215,7 +215,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: agent_cell, cell_filesystem_association.",
+    "text": "Serves 3 HTTP endpoints in 1 API groups: Cells.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/cells/router.py",
+      "lines": [
+       69,
+       69
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: agent_cell, cell_filesystem_association.",
     "sources": [
      {
       "path": "backend/src/agent_framework/cell_runtime/models.py",
@@ -229,32 +241,6 @@
       "lines": [
        38,
        67
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 3, Business logic: 3, Models: 1.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/cells/deps.py",
-      "lines": [
-       6,
-       6
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/agent_framework/cell_runtime/models.py",
-      "lines": [
-       16,
-       16
       ]
      }
     ]
@@ -307,29 +293,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "3",
-     "0",
-     "backend/src/chat/routes/cells (3)"
+     "Cells API",
+     "HTTP API",
+     "agent_cell",
+     "—"
     ],
     [
-     "Business logic",
-     "3",
-     "0",
-     "backend/src/agent_framework/cell_runtime (2), backend/src/outreach/seqregen_cell (1)"
+     "Cell Runtime (library)",
+     "Library code",
+     "agent_cell, cell_filesystem_association",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/agent_framework/cell_runtime (1)"
+     "Seqregen Cell (library)",
+     "Library code",
+     "agent_cell",
+     "—"
+    ],
+    [
+     "agent_cell",
+     "Database",
+     "agent_cell",
+     "—"
+    ],
+    [
+     "cell_filesystem_association",
+     "Database",
+     "cell_filesystem_association",
+     "—"
     ]
    ],
    "sources": [
@@ -348,10 +346,31 @@
      ]
     },
     {
-     "path": "backend/src/chat/routes/cells/deps.py",
+     "path": "backend/src/chat/routes/cells/router.py",
      "lines": [
-      6,
-      6
+      69,
+      69
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/cells/router.py",
+     "lines": [
+      78,
+      78
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/cells/router.py",
+     "lines": [
+      105,
+      105
+     ]
+    },
+    {
+     "path": "backend/src/agent_framework/cell_runtime/models.py",
+     "lines": [
+      16,
+      16
      ]
     },
     {
@@ -362,10 +381,10 @@
      ]
     },
     {
-     "path": "backend/src/agent_framework/cell_runtime/models.py",
+     "path": "backend/src/outreach/seqregen_cell/dispatch.py",
      "lines": [
-      16,
-      16
+      1,
+      1
      ]
     }
    ],
@@ -389,30 +408,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/chat/routes/cells/deps.py",
+     "path": "backend/src/chat/routes/cells/router.py",
      "lines": [
-      6,
-      6
+      69,
+      69
      ]
     }
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/chat/routes/cells/router.py",
+     "lines": [
+      69,
+      69
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/models.py",
      "lines": [
@@ -420,31 +452,67 @@
       35
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/agent_framework/cell_runtime/models.py",
+     "lines": [
+      16,
+      35
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "api-cells",
+    "label": "Cells API",
     "source": {
-     "path": "backend/src/chat/routes/cells/deps.py",
+     "path": "backend/src/chat/routes/cells/router.py",
      "lines": [
-      6,
-      6
+      69,
+      69
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-http-api",
     "many": false,
     "details": [
      {
-      "text": "backend/src/chat/routes/cells — 3 files",
+      "text": "GET /cells",
       "sources": [
        {
-        "path": "backend/src/chat/routes/cells/deps.py",
+        "path": "backend/src/chat/routes/cells/router.py",
         "lines": [
-         6,
-         6
+         69,
+         69
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /cells/{cell_id}",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/cells/router.py",
+        "lines": [
+         78,
+         78
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /cells/{cell_id}/transcript",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/cells/router.py",
+        "lines": [
+         105,
+         105
         ]
        }
       ]
@@ -452,8 +520,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-agent-framework-cell-runtime",
+    "label": "Cell Runtime (library)",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
      "lines": [
@@ -462,65 +530,27 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/agent_framework/cell_runtime — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/outreach/seqregen_cell — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/outreach/seqregen_cell/dispatch.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-outreach-seqregen-cell",
+    "label": "Seqregen Cell (library)",
     "source": {
-     "path": "backend/src/agent_framework/cell_runtime/models.py",
+     "path": "backend/src/outreach/seqregen_cell/dispatch.py",
      "lines": [
-      16,
-      16
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/agent_framework/cell_runtime — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/cell_runtime/models.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-agent_cell",
+    "id": "store-agent-cell",
     "label": "agent_cell",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/models.py",
@@ -530,12 +560,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-cell_filesystem_association",
+    "id": "store-cell-filesystem-association",
     "label": "cell_filesystem_association",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/models.py",
@@ -545,81 +575,57 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
-     "lines": [
-      12,
-      12
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/chat/routes/cells/read_model.py",
-     "lines": [
-      28,
-      28
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-agent_cell",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/chat/routes/cells/read_model.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-agent_cell",
-    "label": "uses (3)",
-    "source": {
-     "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-cell_filesystem_association",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-agent_cell",
-    "label": "uses (1)",
+    "src": "api-cells",
+    "dst": "store-agent-cell",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/agent_framework/cell_runtime/models.py",
      "lines": [
       16,
       16
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-agent-framework-cell-runtime",
+    "dst": "store-agent-cell",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-agent-framework-cell-runtime",
+    "dst": "store-cell-filesystem-association",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/agent_framework/cell_runtime/filesystem.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-outreach-seqregen-cell",
+    "dst": "store-agent-cell",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/outreach/seqregen_cell/dispatch.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }
@@ -632,21 +638,7 @@
    "cell_filesystem_association"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "agent_cell",
-    "dst": "cell_filesystem_association",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/agent_framework/cell_runtime/models.py",
-     "lines": [
-      38,
-      38
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },

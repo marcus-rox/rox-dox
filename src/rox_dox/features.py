@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from tqdm import tqdm
 
 from rox_dox.relations import find_relation_candidates
@@ -88,6 +88,7 @@ class FeatureMap(BaseModel):
     threshold: float
     tables: list[str]
     features: list[Feature]
+    cross_links: list[TableLink] = Field(default_factory=list)
     uncovered: list[UncoveredFile]
     unmapped_tags: list[str]
     counts: FeatureCounts
@@ -644,6 +645,29 @@ def _table_links(
     return {pair: list(signals.values()) for pair, signals in links.items()}
 
 
+def _cross_feature_links(
+    links: Mapping[tuple[str, str], list[_RawLink]],
+    feature_by_table: Mapping[str, int],
+) -> list[TableLink]:
+    return [
+        TableLink(
+            a=link.a,
+            b=link.b,
+            signal=link.signal,
+            path=link.path,
+            line=link.line,
+        )
+        for pair in sorted(links)
+        for link in sorted(
+            links[pair],
+            key=lambda item: (item.a, item.b, item.signal, item.path, item.line),
+        )
+        if feature_by_table[link.a] != feature_by_table[link.b]
+        and link.signal != "same_file"
+        and not link.signal.endswith(":ambiguous")
+    ]
+
+
 def _clusters(
     tables: list[str],
     users: Mapping[str, set[str]],
@@ -1053,6 +1077,7 @@ def _build_feature_map(
     cluster_by_table = {
         table: index for index, cluster in enumerate(clusters) for table in cluster
     }
+    cross_links = _cross_feature_links(links, cluster_by_table)
     local_idf = {
         table: math.log(len(domain_files) / max(1, len(users[table])))
         for table in domain_table_names
@@ -1393,6 +1418,7 @@ def _build_feature_map(
         threshold=threshold,
         tables=domain_table_names,
         features=table_features,
+        cross_links=cross_links,
         uncovered=uncovered_files,
         unmapped_tags=sorted(unmapped_tags),
         counts=FeatureCounts(

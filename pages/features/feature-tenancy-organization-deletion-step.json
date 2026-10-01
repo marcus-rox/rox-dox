@@ -1,6 +1,6 @@
 {
  "id": "feature-tenancy-organization-deletion-step",
- "title": "Organization Deletion Step (+2 tables)",
+ "title": "Organization Deletion Step",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-tenancy",
@@ -505,7 +505,52 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: organization_deletion_request, organization_deletion_step.",
+    "text": "Runs 3 background workers and workflows: DynamicOrgDeletionOrchestrator, ExternalStorageDeletionExecutor, UniversalDeletionTask.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/org_deletion.py",
+      "lines": [
+       1979,
+       1979
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_deletion.py",
+      "lines": [
+       3451,
+       3451
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/org_deletion.py",
+      "lines": [
+       2105,
+       2105
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Calls outside services: Google APIs.",
+    "sources": [
+     {
+      "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+      "lines": [
+       5,
+       5
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: organization_deletion_request, organization_deletion_step.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/organization_deletion_request.py",
@@ -519,32 +564,6 @@
       "lines": [
        42,
        121
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 2, Business logic: 12, Models: 3.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/org_deletion.py",
-      "lines": [
-       53,
-       53
-      ]
-     },
-     {
-      "path": "backend/src/data_store/graph/snowflake_template.py",
-      "lines": [
-       3,
-       3
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/organization_deletion_request.py",
-      "lines": [
-       14,
-       14
       ]
      }
     ]
@@ -611,29 +630,47 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "2",
-     "0",
-     "backend/src/tasks (1), backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "organization_deletion_request, organization_deletion_step",
+     "—"
     ],
     [
-     "Business logic",
-     "12",
-     "0",
-     "backend/src/rox_core/api/azure_marketplace (3), backend/src/data_store/graph (2), backend/src/rox_core/api/organizations (2)"
+     "Graph (library)",
+     "Library code",
+     "—",
+     "Google APIs"
     ],
     [
-     "Models",
-     "3",
-     "0",
-     "backend/src/rox_core/models (3)"
+     "Organizations (library)",
+     "Library code",
+     "organization_deletion_step",
+     "—"
+    ],
+    [
+     "organization_deletion_request",
+     "Database",
+     "organization_deletion_request",
+     "—"
+    ],
+    [
+     "organization_deletion_step",
+     "Database",
+     "organization_deletion_step",
+     "—"
+    ],
+    [
+     "Google APIs",
+     "External service",
+     "—",
+     "Google APIs"
     ]
    ],
    "sources": [
@@ -654,22 +691,50 @@
     {
      "path": "backend/src/tasks/executors/org_deletion.py",
      "lines": [
-      53,
-      53
+      1979,
+      1979
      ]
     },
     {
-     "path": "backend/src/data_store/graph/snowflake_template.py",
+     "path": "backend/src/tasks/executors/org_deletion.py",
      "lines": [
-      3,
-      3
+      3451,
+      3451
      ]
     },
     {
-     "path": "backend/src/rox_core/models/organization_deletion_request.py",
+     "path": "backend/src/tasks/executors/org_deletion.py",
      "lines": [
-      14,
-      14
+      2105,
+      2105
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/deletion_state_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/organization_deletion_step.py",
+     "lines": [
+      42,
+      42
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -693,30 +758,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/org_deletion.py",
+     "lines": [
+      1979,
+      1979
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/org_deletion.py",
      "lines": [
-      53,
-      53
+      1979,
+      1979
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/data_store/graph/snowflake_template.py",
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
      "lines": [
-      3,
-      3
+      4,
+      4
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/organization_deletion_request.py",
      "lines": [
@@ -724,43 +802,79 @@
       245
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/organization_deletion_request.py",
+     "lines": [
+      185,
+      245
+     ]
+    },
+    "parent": "column-data-services"
+   },
+   {
+    "id": "group-external-services",
+    "label": "External services",
+    "source": {
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/org_deletion.py",
      "lines": [
-      53,
-      53
+      1979,
+      1979
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks — 1 files",
+      "text": "DynamicOrgDeletionOrchestrator",
       "sources": [
        {
         "path": "backend/src/tasks/executors/org_deletion.py",
         "lines": [
-         53,
-         53
+         1979,
+         1979
         ]
        }
       ]
      },
      {
-      "text": "backend/src/tasks/executors — 1 files",
+      "text": "ExternalStorageDeletionExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/org_deletion.py",
         "lines": [
-         23,
-         23
+         3451,
+         3451
+        ]
+       }
+      ]
+     },
+     {
+      "text": "UniversalDeletionTask",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/org_deletion.py",
+        "lines": [
+         2105,
+         2105
         ]
        }
       ]
@@ -768,123 +882,37 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-customer-graph",
+    "label": "Graph (library)",
     "source": {
-     "path": "backend/src/data_store/graph/snowflake_template.py",
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
      "lines": [
-      3,
-      3
+      4,
+      4
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/azure_marketplace — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/azure_marketplace/repository.py",
-        "lines": [
-         30,
-         30
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_store/graph — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/data_store/graph/snowflake_template.py",
-        "lines": [
-         3,
-         3
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/organizations — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/graph — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/graph/snowflake_graph_template_backfill_job.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/shim_layer/kv/providers — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/shim_layer/kv/providers/mongo_schema_driver.py",
-        "lines": [
-         11,
-         11
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/shim_layer/kv/schema — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/shim_layer/kv/providers/mongo_schema_driver.py",
-        "lines": [
-         12,
-         12
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-organizations",
+    "label": "Organizations (library)",
     "source": {
-     "path": "backend/src/rox_core/models/organization_deletion_request.py",
+     "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
      "lines": [
-      14,
-      14
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/organization_deletion_request.py",
-        "lines": [
-         14,
-         14
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-organization_deletion_request",
+    "id": "store-organization-deletion-request",
     "label": "organization_deletion_request",
     "source": {
      "path": "backend/src/rox_core/models/organization_deletion_request.py",
@@ -894,12 +922,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-organization_deletion_step",
+    "id": "store-organization-deletion-step",
     "label": "organization_deletion_step",
     "source": {
      "path": "backend/src/rox_core/models/organization_deletion_step.py",
@@ -909,64 +937,43 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "external-google-apis",
+    "label": "Google APIs",
+    "source": {
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    "kind": "external",
+    "group": "group-external-services",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (4)",
+    "src": "library-backend-src-rox-core-api-organizations",
+    "dst": "store-organization-deletion-step",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
      "lines": [
-      16,
-      16
+      1,
+      1
      ]
     }
    },
    {
-    "src": "logic",
-    "dst": "workers",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
-     "lines": [
-      24,
-      24
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/org_deletion.py",
-     "lines": [
-      23,
-      23
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/org_deletion.py",
-     "lines": [
-      30,
-      30
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-organization_deletion_request",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-organization-deletion-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/organizations/deletion_state_service.py",
      "lines": [
@@ -976,26 +983,26 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-organization_deletion_step",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/organizations/deletion_reconciler.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-organization_deletion_step",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-organization-deletion-step",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/organization_deletion_step.py",
      "lines": [
       42,
       42
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-customer-graph",
+    "dst": "external-google-apis",
+    "label": "calls Google APIs",
+    "source": {
+     "path": "backend/src/rox_customer/graph/warehouse_provisioner.py",
+     "lines": [
+      4,
+      4
      ]
     }
    }
@@ -1012,20 +1019,7 @@
    {
     "src": "organization_deletion_request",
     "dst": "organization_deletion_step",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/rox_core/api/organizations/deletion_state_service.py",
-     "lines": [
-      391,
-      391
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "organization_deletion_request",
-    "dst": "organization_deletion_step",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/organization_deletion_step.py",
      "lines": [

@@ -65,7 +65,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: model_token_rate.",
+    "text": "Stores data in: model_token_rate.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/model_token_rate.py",
@@ -77,20 +77,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/model_token_rate.py",
-      "lines": [
-       18,
-       18
       ]
      }
     ]
@@ -124,23 +117,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/rox_core/api/metering (1)"
+     "Metering (library)",
+     "Library code",
+     "model_token_rate",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "model_token_rate",
+     "—"
+    ],
+    [
+     "model_token_rate",
+     "Database",
+     "model_token_rate",
+     "—"
     ]
    ],
    "sources": [
@@ -186,8 +185,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
      "lines": [
@@ -197,19 +196,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/model_token_rate.py",
+     "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
      "lines": [
-      18,
-      18
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/model_token_rate.py",
      "lines": [
@@ -217,12 +217,24 @@
       65
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/model_token_rate.py",
+     "lines": [
+      18,
+      65
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-metering",
+    "label": "Metering (library)",
     "source": {
      "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
      "lines": [
@@ -231,26 +243,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/metering — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/model_token_rate.py",
      "lines": [
@@ -259,25 +258,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/model_token_rate.py",
-        "lines": [
-         18,
-         18
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-model_token_rate",
+    "id": "store-model-token-rate",
     "label": "model_token_rate",
     "source": {
      "path": "backend/src/rox_core/models/model_token_rate.py",
@@ -287,28 +273,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
-     "lines": [
-      40,
-      40
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-model_token_rate",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-metering",
+    "dst": "store-model-token-rate",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
      "lines": [
@@ -318,9 +292,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-model_token_rate",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-model-token-rate",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/model_token_rate.py",
      "lines": [

@@ -1,6 +1,6 @@
 {
  "id": "feature-people-byok-person",
- "title": "Byok Person (+6 tables)",
+ "title": "Byok Person",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -411,7 +411,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: byok_person, byok_position, contact_email, contact_linkedin, org_public_person, person_phone.",
+    "text": "Stores data in: byok_person, byok_position, contact_email, contact_linkedin, org_public_person, person_phone.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -458,20 +458,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 12, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/orum/dto.py",
       "lines": [
        8,
        8
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
-      "lines": [
-       19,
-       19
       ]
      }
     ]
@@ -519,23 +512,59 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "11",
-     "1",
-     "backend/src/rox_core/api/entities/people/interfaces (5), backend/src/ext_integrations/orum (2), backend/src/rox_core/api/people (2)"
+     "Interfaces (library)",
+     "Library code",
+     "byok_person, contact_email, contact_linkedin, org_public_person",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models/people (1)"
+     "Dialer (library)",
+     "Library code",
+     "person_phone",
+     "—"
+    ],
+    [
+     "byok_person",
+     "Database",
+     "byok_person",
+     "—"
+    ],
+    [
+     "byok_position",
+     "Database",
+     "byok_position",
+     "—"
+    ],
+    [
+     "contact_email",
+     "Database",
+     "contact_email",
+     "—"
+    ],
+    [
+     "contact_linkedin",
+     "Database",
+     "contact_linkedin",
+     "—"
+    ],
+    [
+     "org_public_person",
+     "Database",
+     "org_public_person",
+     "—"
+    ],
+    [
+     "person_phone",
+     "Database",
+     "person_phone",
+     "—"
     ]
    ],
    "sources": [
@@ -582,17 +611,38 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/orum/dto.py",
+     "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
      "lines": [
-      8,
-      8
+      1,
+      1
      ]
     },
     {
-     "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
+     "path": "backend/src/rox_core/api/entities/people/interfaces/contact_email_interface.py",
      "lines": [
-      19,
-      19
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/contact_linkedin_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/person_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/area_code_demand.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -600,7 +650,7 @@
   },
   "notes": [
    {
-    "text": "Shares 3 files with Rox Company (+4 tables).",
+    "text": "Shares 3 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/people_enrichment/rocket_reach_search_engine.py",
@@ -612,7 +662,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Clay Person (+19 tables).",
+    "text": "Shares 1 files with Clay Person.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/people/interface.py",
@@ -628,19 +678,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/ext_integrations/orum/dto.py",
+     "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
      "lines": [
-      8,
-      8
+      1,
+      1
      ]
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
      "lines": [
@@ -648,127 +710,53 @@
       220
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
+     "lines": [
+      135,
+      220
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/ext_integrations/orum/dto.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/entities/people/interfaces — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/ext_integrations/orum — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/orum/dto.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/people — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/people/prospect_phones.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/agents/outreach/dialer — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/agents/outreach/dialer/area_code_demand.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/enrichable — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/enrichable/service.py",
-        "lines": [
-         34,
-         34
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/people — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/people/resolution_engine.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "label": "Interfaces (library)",
     "source": {
      "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
      "lines": [
-      19,
-      19
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/people — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
-        "lines": [
-         19,
-         19
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-byok_person",
+    "id": "library-backend-src-rox-core-api-agents-outreach-dialer",
+    "label": "Dialer (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/area_code_demand.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-byok-person",
     "label": "byok_person",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -778,12 +766,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-byok_position",
+    "id": "store-byok-position",
     "label": "byok_position",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -793,12 +781,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contact_email",
+    "id": "store-contact-email",
     "label": "contact_email",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -808,12 +796,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-contact_linkedin",
+    "id": "store-contact-linkedin",
     "label": "contact_linkedin",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -823,12 +811,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-org_public_person",
+    "id": "store-org-public-person",
     "label": "org_public_person",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -838,12 +826,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-person_phone",
+    "id": "store-person-phone",
     "label": "person_phone",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
@@ -853,28 +841,28 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (7)",
+    "src": "library-backend-src-rox-core-api-agents-outreach-dialer",
+    "dst": "store-person-phone",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/area_code_demand.py",
      "lines": [
-      12,
-      12
+      1,
+      1
      ]
     }
    },
    {
-    "src": "logic",
-    "dst": "store-byok_person",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "dst": "store-byok-person",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/people/interfaces/byok_person_interface.py",
      "lines": [
@@ -884,9 +872,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-contact_email",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "dst": "store-contact-email",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/people/interfaces/contact_email_interface.py",
      "lines": [
@@ -896,9 +884,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-contact_linkedin",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "dst": "store-contact-linkedin",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/people/interfaces/contact_linkedin_interface.py",
      "lines": [
@@ -908,23 +896,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-org_public_person",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-entities-people-interfaces",
+    "dst": "store-org-public-person",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/people/interfaces/person_interface.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-person_phone",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/agents/outreach/dialer/area_code_demand.py",
      "lines": [
       1,
       1
@@ -944,203 +920,7 @@
    "person_phone"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "byok_person",
-    "dst": "byok_position",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      223,
-      223
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_person",
-    "dst": "contact_email",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      33,
-      33
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_person",
-    "dst": "contact_linkedin",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      66,
-      66
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_person",
-    "dst": "org_public_person",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      257,
-      257
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_person",
-    "dst": "person_phone",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_position",
-    "dst": "contact_email",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      33,
-      33
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_position",
-    "dst": "contact_linkedin",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      66,
-      66
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_position",
-    "dst": "org_public_person",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      257,
-      257
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "byok_position",
-    "dst": "person_phone",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contact_email",
-    "dst": "contact_linkedin",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      66,
-      66
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contact_email",
-    "dst": "org_public_person",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      257,
-      257
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contact_email",
-    "dst": "person_phone",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contact_linkedin",
-    "dst": "org_public_person",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      257,
-      257
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "contact_linkedin",
-    "dst": "person_phone",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "org_public_person",
-    "dst": "person_phone",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person_adjacent.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -1159,7 +939,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/people_enrichment/rocket_reach_search_engine.py",
@@ -1170,7 +950,7 @@
    }
   },
   {
-   "label": "Clay Person (+19 tables)",
+   "label": "Clay Person",
    "page": "feature-people-clay-person",
    "source": {
     "path": "backend/src/rox_core/api/entities/people/interface.py",

@@ -1,6 +1,6 @@
 {
  "id": "feature-people-rox-lead",
- "title": "Rox Lead (+3 tables)",
+ "title": "Rox Lead",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -360,7 +360,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: rox_lead, rox_lead_csv_data, rox_lead_unified_id_change_log.",
+    "text": "Stores data in: rox_lead, rox_lead_csv_data, rox_lead_unified_id_change_log.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/leads/public_lead.py",
@@ -386,20 +386,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 8, Models: 2.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/agent_framework/data_interface/lead/live.py",
       "lines": [
        2,
        2
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/leads/public_lead.py",
-      "lines": [
-       25,
-       25
       ]
      }
     ]
@@ -454,23 +447,47 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "8",
-     "0",
-     "backend/src/rox_core/api/leads (3), backend/src/agent_framework/data_interface/lead (2), backend/src/rox_core/api/entities/lead (2)"
+     "Leads (library)",
+     "Library code",
+     "rox_lead",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models/leads (1), backend/src/rox_customer/real_time/models/entity (1)"
+     "Lead (library)",
+     "Library code",
+     "rox_lead",
+     "—"
+    ],
+    [
+     "Leads (library)",
+     "Library code",
+     "rox_lead",
+     "—"
+    ],
+    [
+     "rox_lead",
+     "Database",
+     "rox_lead",
+     "—"
+    ],
+    [
+     "rox_lead_csv_data",
+     "Database",
+     "rox_lead_csv_data",
+     "—"
+    ],
+    [
+     "rox_lead_unified_id_change_log",
+     "Database",
+     "rox_lead_unified_id_change_log",
+     "—"
     ]
    ],
    "sources": [
@@ -496,10 +513,17 @@
      ]
     },
     {
-     "path": "backend/src/agent_framework/data_interface/lead/live.py",
+     "path": "backend/src/rox_core/api/leads/schema_routing.py",
      "lines": [
-      2,
-      2
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/lead/unified_lead_backfill_job.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
@@ -530,30 +554,31 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/agent_framework/data_interface/lead/live.py",
+     "path": "backend/src/rox_core/api/leads/schema_routing.py",
      "lines": [
-      2,
-      2
+      1,
+      1
      ]
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/leads/public_lead.py",
+     "path": "backend/src/rox_core/api/leads/schema_routing.py",
      "lines": [
-      25,
-      25
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
      "lines": [
@@ -561,76 +586,54 @@
       177
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/leads/public_lead.py",
+     "lines": [
+      25,
+      177
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-leads",
+    "label": "Leads (library)",
     "source": {
-     "path": "backend/src/agent_framework/data_interface/lead/live.py",
+     "path": "backend/src/rox_core/api/leads/schema_routing.py",
      "lines": [
-      2,
-      2
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/leads — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/leads/interface.py",
-        "lines": [
-         35,
-         35
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/data_interface/lead — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/data_interface/lead/live.py",
-        "lines": [
-         2,
-         2
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/lead — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/lead/resolution_engine.py",
-        "lines": [
-         21,
-         21
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/enrichment/providers/existing_lead — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/enrichment/providers/existing_lead/adapter.py",
-        "lines": [
-         16,
-         16
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-entities-lead",
+    "label": "Lead (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/entities/lead/unified_lead_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models-leads",
+    "label": "Leads (library)",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
      "lines": [
@@ -639,37 +642,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/leads — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/leads/public_lead.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/enrichment/providers/existing_lead/adapter.py",
-        "lines": [
-         17,
-         17
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-rox_lead",
+    "id": "store-rox-lead",
     "label": "rox_lead",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
@@ -679,12 +657,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_lead_csv_data",
+    "id": "store-rox-lead-csv-data",
     "label": "rox_lead_csv_data",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
@@ -694,12 +672,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_lead_unified_id_change_log",
+    "id": "store-rox-lead-unified-id-change-log",
     "label": "rox_lead_unified_id_change_log",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
@@ -709,28 +687,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (7)",
-    "source": {
-     "path": "backend/src/enrichment/providers/existing_lead/adapter.py",
-     "lines": [
-      17,
-      17
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-rox_lead",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-entities-lead",
+    "dst": "store-rox-lead",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/lead/unified_lead_backfill_job.py",
      "lines": [
@@ -740,9 +706,21 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_lead",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-leads",
+    "dst": "store-rox-lead",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/leads/schema_routing.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models-leads",
+    "dst": "store-rox-lead",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/leads/public_lead.py",
      "lines": [
@@ -761,47 +739,7 @@
    "rox_lead_unified_id_change_log"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "rox_lead",
-    "dst": "rox_lead_csv_data",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/leads/public_lead.py",
-     "lines": [
-      180,
-      180
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "rox_lead",
-    "dst": "rox_lead_unified_id_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/leads/public_lead.py",
-     "lines": [
-      283,
-      283
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "rox_lead_csv_data",
-    "dst": "rox_lead_unified_id_change_log",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/leads/public_lead.py",
-     "lines": [
-      283,
-      283
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },

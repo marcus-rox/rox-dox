@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-unified-catalog-entry",
- "title": "Unified Catalog Entry (+3 tables)",
+ "title": "Unified Catalog Entry",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -225,7 +225,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: unified_catalog_entry, unified_catalog_logical_name_allocation, unified_catalog_relationship.",
+    "text": "Stores data in: unified_catalog_entry, unified_catalog_logical_name_allocation, unified_catalog_relationship.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/unified_catalog.py",
@@ -251,15 +251,8 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 7, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/unified_data/catalog_entry_catalog.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
      {
       "path": "backend/src/rox_core/models/unified_catalog.py",
       "lines": [
@@ -312,23 +305,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "7",
-     "0",
-     "backend/src/unified_data (4), backend/src/unified_data/reserved_fields/lead (2), backend/src/unified_data/reserved_fields/shared (1)"
+     "Unified Data (library)",
+     "Library code",
+     "unified_catalog_entry, unified_catalog_logical_name_allocation, unified_catalog_relationship",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "unified_catalog_entry",
+     "—"
+    ],
+    [
+     "unified_catalog_entry",
+     "Database",
+     "unified_catalog_entry",
+     "—"
+    ],
+    [
+     "unified_catalog_logical_name_allocation",
+     "Database",
+     "unified_catalog_logical_name_allocation",
+     "—"
+    ],
+    [
+     "unified_catalog_relationship",
+     "Database",
+     "unified_catalog_relationship",
+     "—"
     ]
    ],
    "sources": [
@@ -355,6 +366,13 @@
     },
     {
      "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_relationship.py",
      "lines": [
       1,
       1
@@ -388,8 +406,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/unified_data/catalog_entry_catalog.py",
      "lines": [
@@ -399,8 +417,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
      "lines": [
@@ -408,12 +438,24 @@
       194
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/unified_catalog.py",
+     "lines": [
+      20,
+      194
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-unified-data",
+    "label": "Unified Data (library)",
     "source": {
      "path": "backend/src/unified_data/catalog_entry_catalog.py",
      "lines": [
@@ -422,50 +464,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/unified_data — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/catalog_entry_catalog.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/reserved_fields/lead — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/reserved_fields/lead/csv_fields.py",
-        "lines": [
-         6,
-         6
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/unified_data/reserved_fields/shared — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/unified_data/reserved_fields/shared/list_member.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
      "lines": [
@@ -474,25 +479,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/unified_catalog.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-unified_catalog_entry",
+    "id": "store-unified-catalog-entry",
     "label": "unified_catalog_entry",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
@@ -502,12 +494,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-unified_catalog_logical_name_allocation",
+    "id": "store-unified-catalog-logical-name-allocation",
     "label": "unified_catalog_logical_name_allocation",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
@@ -517,12 +509,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-unified_catalog_relationship",
+    "id": "store-unified-catalog-relationship",
     "label": "unified_catalog_relationship",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
@@ -532,69 +524,57 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/unified_data/catalog_entry_catalog.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-unified_catalog_entry",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/unified_data/catalog_entry_catalog.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-unified_catalog_logical_name_allocation",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/unified_data/catalog_entry_catalog.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-unified_catalog_relationship",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/unified_data/catalog_relationship.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-unified_catalog_entry",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-unified-catalog-entry",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/unified_catalog.py",
      "lines": [
       20,
       20
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data",
+    "dst": "store-unified-catalog-entry",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data",
+    "dst": "store-unified-catalog-logical-name-allocation",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-unified-data",
+    "dst": "store-unified-catalog-relationship",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/unified_data/catalog_relationship.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }
@@ -608,47 +588,7 @@
    "unified_catalog_relationship"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "unified_catalog_entry",
-    "dst": "unified_catalog_logical_name_allocation",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/unified_catalog.py",
-     "lines": [
-      197,
-      197
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "unified_catalog_entry",
-    "dst": "unified_catalog_relationship",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/unified_catalog.py",
-     "lines": [
-      243,
-      243
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "unified_catalog_logical_name_allocation",
-    "dst": "unified_catalog_relationship",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/unified_catalog.py",
-     "lines": [
-      243,
-      243
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },

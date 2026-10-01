@@ -271,7 +271,33 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: rox_linkedin_connection, rox_linkedin_message.",
+    "text": "Runs 3 background workers and workflows: LinkedInSchedulerCoordinatorTaskExecutor, LinkedInSchedulerTaskExecutor, LinkedInSendTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+      "lines": [
+       373,
+       373
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+      "lines": [
+       431,
+       431
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+      "lines": [
+       529,
+       529
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: rox_linkedin_connection, rox_linkedin_message.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
@@ -285,32 +311,6 @@
       "lines": [
        21,
        136
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 1, Business logic: 4, Models: 2.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
-      "lines": [
-       25,
-       25
       ]
      }
     ]
@@ -363,29 +363,35 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "rox_linkedin_connection, rox_linkedin_message",
+     "—"
     ],
     [
-     "Business logic",
-     "4",
-     "0",
-     "backend/src/rox_core/api/agents/outreach/sequence (2), backend/src/rox_core/api/integrations (2)"
+     "Integrations (library)",
+     "Library code",
+     "rox_linkedin_connection, rox_linkedin_message",
+     "—"
     ],
     [
-     "Models",
-     "2",
-     "0",
-     "backend/src/rox_core/models (2)"
+     "rox_linkedin_connection",
+     "Database",
+     "rox_linkedin_connection",
+     "—"
+    ],
+    [
+     "rox_linkedin_message",
+     "Database",
+     "rox_linkedin_message",
+     "—"
     ]
    ],
    "sources": [
@@ -406,8 +412,29 @@
     {
      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
      "lines": [
-      1,
-      1
+      373,
+      373
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      431,
+      431
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      529,
+      529
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
+     "lines": [
+      25,
+      25
      ]
     },
     {
@@ -418,10 +445,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
+     "path": "backend/src/rox_core/api/integrations/linkedin_connection_initial_sync_job.py",
      "lines": [
-      25,
-      25
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -457,30 +491,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+     "lines": [
+      373,
+      373
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
      "lines": [
-      1,
-      1
+      373,
+      373
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
+     "path": "backend/src/rox_core/api/integrations/linkedin_connection_initial_sync_job.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
      "lines": [
@@ -488,71 +535,67 @@
       104
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
+     "lines": [
+      25,
+      104
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/linkedin_scheduler.py",
      "lines": [
-      1,
-      1
+      373,
+      373
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 1 files",
+      "text": "LinkedInSchedulerCoordinatorTaskExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/linkedin_scheduler.py",
         "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/agents/outreach/sequence — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
-        "lines": [
-         1,
-         1
+         373,
+         373
         ]
        }
       ]
      },
      {
-      "text": "backend/src/rox_core/api/integrations — 2 files",
+      "text": "LinkedInSchedulerTaskExecutor",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/integrations/linkedin_connection_initial_sync_job.py",
+        "path": "backend/src/tasks/executors/linkedin_scheduler.py",
         "lines": [
-         1,
-         1
+         431,
+         431
+        ]
+       }
+      ]
+     },
+     {
+      "text": "LinkedInSendTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/linkedin_scheduler.py",
+        "lines": [
+         529,
+         529
         ]
        }
       ]
@@ -560,35 +603,22 @@
     ]
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-integrations",
+    "label": "Integrations (library)",
     "source": {
-     "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
+     "path": "backend/src/rox_core/api/integrations/linkedin_connection_initial_sync_job.py",
      "lines": [
-      25,
-      25
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
-        "lines": [
-         25,
-         25
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-rox_linkedin_connection",
+    "id": "store-rox-linkedin-connection",
     "label": "rox_linkedin_connection",
     "source": {
      "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
@@ -598,12 +628,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-rox_linkedin_message",
+    "id": "store-rox-linkedin-message",
     "label": "rox_linkedin_message",
     "source": {
      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
@@ -613,64 +643,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (6)",
-    "source": {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
-     "lines": [
-      444,
-      444
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
-     "lines": [
-      38,
-      38
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-rox_linkedin_message",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/linkedin_scheduler.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-rox_linkedin_connection",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-integrations",
+    "dst": "store-rox-linkedin-connection",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/integrations/linkedin_connection_initial_sync_job.py",
      "lines": [
@@ -680,11 +662,11 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-rox_linkedin_message",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-integrations",
+    "dst": "store-rox-linkedin-message",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
+     "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
      "lines": [
       1,
       1
@@ -692,9 +674,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_linkedin_connection",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-rox-linkedin-connection",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/rox_linkedin_connection.py",
      "lines": [
@@ -704,14 +686,14 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_linkedin_message",
-    "label": "uses (1)",
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-rox-linkedin-message",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
      "lines": [
-      21,
-      21
+      1,
+      1
      ]
     }
    }

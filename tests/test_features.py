@@ -7,6 +7,7 @@ from pathlib import Path
 from rox_dox import features as feature_module
 from rox_dox.features import (
     FeatureMap,
+    _RawLink,
     _domain_scope,
     _lowest_score_feature,
     _parse_graph,
@@ -302,6 +303,45 @@ def test_foreign_key_link_merges_clusters_at_default_threshold(
     assert len(feature_map.features) == 1
     assert set(feature_map.features[0].tables) == {"campaign", "sequence"}
     assert any(link.signal == "fk" for link in feature_map.features[0].table_links)
+
+
+def test_cross_links_keep_only_relations_between_distinct_features(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo, commit = _commit_sources(tmp_path, _base_sources())
+    path = "backend/src/rox_core/campaign.py"
+    links = [
+        _RawLink("campaign", "sequence", "fk", path, 1),
+        _RawLink("campaign", "sequence", "comparison", path, 1),
+        _RawLink("campaign", "sequence", "same_file", path, 1),
+        _RawLink("campaign", "sequence", "primaryjoin:ambiguous", path, 1),
+    ]
+    monkeypatch.setattr(
+        feature_module,
+        "_table_links",
+        lambda *_args: {("campaign", "sequence"): links},
+    )
+
+    feature_map = build_feature_map(
+        repo,
+        commit,
+        {"seq": ["campaign", "sequence"]},
+        "seq",
+        threshold=1.0,
+    )
+
+    owner = {
+        table: feature.id
+        for feature in feature_map.features
+        for table in feature.tables
+    }
+    assert len(set(owner.values())) == 2
+    assert [(link.a, link.b, link.signal) for link in feature_map.cross_links] == [
+        ("campaign", "sequence", "comparison"),
+        ("campaign", "sequence", "fk"),
+    ]
+    assert all(owner[link.a] != owner[link.b] for link in feature_map.cross_links)
 
 
 def test_evidence_check_reports_partnerless_file(tmp_path: Path) -> None:

@@ -51,7 +51,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: entity_artifact.",
+    "text": "Stores data in: entity_artifact.",
     "sources": [
      {
       "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
@@ -63,20 +63,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
-      "lines": [
-       9,
-       9
       ]
      }
     ]
@@ -110,23 +103,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/rox_core/api/content_indexing (1)"
+     "Content Indexing (library)",
+     "Library code",
+     "entity_artifact",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_customer/real_time/models/entity (1)"
+     "Entity (library)",
+     "Library code",
+     "entity_artifact",
+     "—"
+    ],
+    [
+     "entity_artifact",
+     "Database",
+     "entity_artifact",
+     "—"
     ]
    ],
    "sources": [
@@ -172,8 +171,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
      "lines": [
@@ -183,8 +182,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
      "lines": [
@@ -192,12 +203,24 @@
       36
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
+     "lines": [
+      9,
+      36
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-content-indexing",
+    "label": "Content Indexing (library)",
     "source": {
      "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
      "lines": [
@@ -206,26 +229,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/content_indexing — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-customer-real-time-models-entity",
+    "label": "Entity (library)",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
      "lines": [
@@ -234,25 +244,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/real_time/models/entity — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
-        "lines": [
-         9,
-         9
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-entity_artifact",
+    "id": "store-entity-artifact",
     "label": "entity_artifact",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
@@ -262,16 +259,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "store-entity_artifact",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-content-indexing",
+    "dst": "store-entity-artifact",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
      "lines": [
@@ -281,9 +278,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-entity_artifact",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-real-time-models-entity",
+    "dst": "store-entity-artifact",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
      "lines": [

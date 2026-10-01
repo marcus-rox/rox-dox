@@ -1,6 +1,6 @@
 {
  "id": "feature-activity-calendar-event",
- "title": "Calendar Event (+4 tables)",
+ "title": "Calendar events",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-activity",
@@ -876,7 +876,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: calendar_event, calendar_event_attendee, unified_adhoc_event, unified_calendar_event.",
+    "text": "Stores data in: calendar_event, calendar_event_attendee, unified_adhoc_event, unified_calendar_event.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/public_calendar_event.py",
@@ -909,34 +909,13 @@
     ]
    },
    {
-    "text": "Files by layer: HTTP routes: 1, Background workers: 1, Business logic: 19, Models: 6.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
-     {
-      "path": "backend/src/chat/routes/events/dto.py",
-      "lines": [
-       7,
-       7
-      ]
-     },
-     {
-      "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
      {
       "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
       "lines": [
        7,
        7
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/public_calendar_event.py",
-      "lines": [
-       13,
-       13
       ]
      }
     ]
@@ -1015,35 +994,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/chat/routes/events (1)"
+     "Models (library)",
+     "Library code",
+     "calendar_event, calendar_event_attendee, unified_adhoc_event",
+     "—"
     ],
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/generic_backfill (1)"
+     "Calendar Integration (library)",
+     "Library code",
+     "calendar_event",
+     "—"
     ],
     [
-     "Business logic",
-     "18",
-     "1",
-     "backend/src/ext_integrations/calendar_integration (3), backend/src/agent_framework/command_sdk/agents/tools (2), backend/src/agent_framework/modules/private_data_intel/search (2)"
+     "Generic Backfill (library)",
+     "Library code",
+     "unified_adhoc_event",
+     "—"
     ],
     [
-     "Models",
-     "6",
-     "0",
-     "backend/src/rox_core/models (4), backend/src/rox_customer/real_time/models/integration (2)"
+     "calendar_event",
+     "Database",
+     "calendar_event",
+     "—"
+    ],
+    [
+     "calendar_event_attendee",
+     "Database",
+     "calendar_event_attendee",
+     "—"
+    ],
+    [
+     "unified_adhoc_event",
+     "Database",
+     "unified_adhoc_event",
+     "—"
+    ],
+    [
+     "unified_calendar_event",
+     "Database",
+     "unified_calendar_event",
+     "—"
     ]
    ],
    "sources": [
@@ -1076,10 +1073,31 @@
      ]
     },
     {
-     "path": "backend/src/chat/routes/events/dto.py",
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
      "lines": [
-      7,
-      7
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
@@ -1088,27 +1106,13 @@
       1,
       1
      ]
-    },
-    {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
-     "lines": [
-      7,
-      7
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/models/public_calendar_event.py",
-     "lines": [
-      13,
-      13
-     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 1 files with Note.",
+    "text": "Shares 1 files with Notes.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
@@ -1120,7 +1124,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Calendar Event Metadata.",
+    "text": "Shares 1 files with Calendar event metadata.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
@@ -1136,30 +1140,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
-    "source": {
-     "path": "backend/src/chat/routes/events/dto.py",
-     "lines": [
-      7,
-      7
-     ]
-    }
-   },
-   {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event.py",
      "lines": [
@@ -1169,8 +1151,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event.py",
      "lines": [
@@ -1178,156 +1172,24 @@
       140
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/public_calendar_event.py",
+     "lines": [
+      13,
+      140
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
-    "source": {
-     "path": "backend/src/chat/routes/events/dto.py",
-     "lines": [
-      7,
-      7
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/chat/routes/events — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/events/dto.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/generic_backfill — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
-     "lines": [
-      7,
-      7
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-workers",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/ext_integrations/calendar_integration — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/command_sdk/agents/tools — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
-        "lines": [
-         7,
-         7
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/modules/private_data_intel/search — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/modules/private_data_intel/search/dto.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/outreach/tools — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/outreach/tools/calendar.py",
-        "lines": [
-         14,
-         14
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/research/tools — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/research/tools/meetings.py",
-        "lines": [
-         23,
-         23
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/entities/event_v2 — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/agent_framework/command_sdk/agents/tools/extract.py",
-        "lines": [
-         35,
-         35
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event.py",
      "lines": [
@@ -1336,37 +1198,42 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/public_calendar_event.py",
-        "lines": [
-         13,
-         13
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/models/integration — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
-        "lines": [
-         36,
-         36
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-calendar_event",
+    "id": "library-backend-src-ext-integrations-calendar-integration",
+    "label": "Calendar Integration (library)",
+    "source": {
+     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-tasks-generic-backfill",
+    "label": "Generic Backfill (library)",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-calendar-event",
     "label": "calendar_event",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event.py",
@@ -1376,12 +1243,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-calendar_event_attendee",
+    "id": "store-calendar-event-attendee",
     "label": "calendar_event_attendee",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
@@ -1391,12 +1258,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-unified_adhoc_event",
+    "id": "store-unified-adhoc-event",
     "label": "unified_adhoc_event",
     "source": {
      "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
@@ -1406,12 +1273,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-unified_calendar_event",
+    "id": "store-unified-calendar-event",
     "label": "unified_calendar_event",
     "source": {
      "path": "backend/src/rox_core/models/public_unified_calendar_event.py",
@@ -1421,64 +1288,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (14)",
-    "source": {
-     "path": "backend/src/chat/rox_agents/meeting_public_id_backfill_job.py",
-     "lines": [
-      34,
-      34
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/chat/routes/events/dto.py",
-     "lines": [
-      7,
-      7
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (4)",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-unified_adhoc_event",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-calendar_event",
-    "label": "uses (1)",
+    "src": "library-backend-src-ext-integrations-calendar-integration",
+    "dst": "store-calendar-event",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
      "lines": [
@@ -1488,9 +1307,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-calendar_event",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-calendar-event",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event.py",
      "lines": [
@@ -1500,9 +1319,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-calendar_event_attendee",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-calendar-event-attendee",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/public_calendar_event_attendee.py",
      "lines": [
@@ -1512,14 +1331,26 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-unified_adhoc_event",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-unified-adhoc-event",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/public_unified_adhoc_event.py",
      "lines": [
       14,
       14
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-generic-backfill",
+    "dst": "store-unified-adhoc-event",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/generic_backfill/meeting_public_id_resolution.py",
+     "lines": [
+      1,
+      1
      ]
     }
    }
@@ -1553,7 +1384,7 @@
    }
   },
   {
-   "label": "Note",
+   "label": "Notes",
    "page": "feature-activity-note",
    "source": {
     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",
@@ -1564,7 +1395,7 @@
    }
   },
   {
-   "label": "Calendar Event Metadata",
+   "label": "Calendar event metadata",
    "page": "feature-activity-calendar-event-metadata",
    "source": {
     "path": "backend/src/ext_integrations/calendar_integration/calendar_data_store_v2.py",

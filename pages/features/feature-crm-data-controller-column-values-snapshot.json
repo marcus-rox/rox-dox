@@ -93,7 +93,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: data_controller_column_values_snapshot.",
+    "text": "Stores data in: data_controller_column_values_snapshot.",
     "sources": [
      {
       "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
@@ -105,20 +105,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
-      "lines": [
-       18,
-       18
       ]
      }
     ]
@@ -152,23 +145,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "1",
-     "1",
-     "backend/src/rox_core/api/entities/column_values (2)"
+     "Column Values (library)",
+     "Library code",
+     "data_controller_column_values_snapshot",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_customer/batch/models/v4/entity (1)"
+     "Entity (library)",
+     "Library code",
+     "data_controller_column_values_snapshot",
+     "—"
+    ],
+    [
+     "data_controller_column_values_snapshot",
+     "Database",
+     "data_controller_column_values_snapshot",
+     "—"
     ]
    ],
    "sources": [
@@ -198,7 +197,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with External Entity Column Value (+4 tables).",
+    "text": "Shares 1 files with External Entity Column Value.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
@@ -214,8 +213,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
      "lines": [
@@ -225,19 +224,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
      "lines": [
-      18,
-      18
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
      "lines": [
@@ -245,12 +245,24 @@
       46
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "lines": [
+      18,
+      46
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-entities-column-values",
+    "label": "Column Values (library)",
     "source": {
      "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
      "lines": [
@@ -259,26 +271,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/entities/column_values — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-customer-batch-models-v4-entity",
+    "label": "Entity (library)",
     "source": {
      "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
      "lines": [
@@ -287,25 +286,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_customer/batch/models/v4/entity — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
-        "lines": [
-         18,
-         18
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-data_controller_column_values_snapshot",
+    "id": "store-data-controller-column-values-snapshot",
     "label": "data_controller_column_values_snapshot",
     "source": {
      "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
@@ -315,28 +301,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
-     "lines": [
-      10,
-      10
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-data_controller_column_values_snapshot",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-api-entities-column-values",
+    "dst": "store-data-controller-column-values-snapshot",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
      "lines": [
@@ -346,9 +320,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-data_controller_column_values_snapshot",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-customer-batch-models-v4-entity",
+    "dst": "store-data-controller-column-values-snapshot",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
      "lines": [
@@ -384,7 +358,7 @@
    }
   },
   {
-   "label": "External Entity Column Value (+4 tables)",
+   "label": "External Entity Column Value",
    "page": "feature-crm-external-entity-column-value",
    "source": {
     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",

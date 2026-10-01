@@ -1,6 +1,6 @@
 {
  "id": "feature-crm-erd-onboarding-proposal",
- "title": "Erd Onboarding Proposal (+4 tables)",
+ "title": "Erd Onboarding Proposal",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-crm",
@@ -912,7 +912,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: erd_onboarding_issue, erd_onboarding_mapping_item, erd_onboarding_proposal, erd_onboarding_relationship_item.",
+    "text": "Stores data in: erd_onboarding_issue, erd_onboarding_mapping_item, erd_onboarding_proposal, erd_onboarding_relationship_item.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
@@ -945,20 +945,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 21, Models: 4.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
       "lines": [
        12,
        12
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
-      "lines": [
-       21,
-       21
       ]
      }
     ]
@@ -1006,23 +999,53 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "19",
-     "2",
-     "backend/src/rox_core/api/graph/erd (13), backend/src/rox_core/api/integrations (5), backend/src/rox_customer/real_time/erd (2)"
+     "Erd (library)",
+     "Library code",
+     "erd_onboarding_issue, erd_onboarding_proposal, erd_onboarding_relationship_item",
+     "—"
     ],
     [
-     "Models",
-     "4",
-     "0",
-     "backend/src/rox_core/models (4)"
+     "Integrations (library)",
+     "Library code",
+     "erd_onboarding_proposal",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "erd_onboarding_issue, erd_onboarding_mapping_item, erd_onboarding_relationship_item",
+     "—"
+    ],
+    [
+     "erd_onboarding_issue",
+     "Database",
+     "erd_onboarding_issue",
+     "—"
+    ],
+    [
+     "erd_onboarding_mapping_item",
+     "Database",
+     "erd_onboarding_mapping_item",
+     "—"
+    ],
+    [
+     "erd_onboarding_proposal",
+     "Database",
+     "erd_onboarding_proposal",
+     "—"
+    ],
+    [
+     "erd_onboarding_relationship_item",
+     "Database",
+     "erd_onboarding_relationship_item",
+     "—"
     ]
    ],
    "sources": [
@@ -1055,10 +1078,31 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
+     "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
      "lines": [
-      12,
-      12
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/onboarding_graph_build_state_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_relationship_item_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/integrations/crm_object_sync_service.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
@@ -1067,13 +1111,27 @@
       21,
       21
      ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
+     "lines": [
+      25,
+      25
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
+     "lines": [
+      23,
+      23
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares 1 files with Entity Organization (+3 tables).",
+    "text": "Shares 1 files with Entity Organization.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/graph/erd/dto.py",
@@ -1085,7 +1143,7 @@
     ]
    },
    {
-    "text": "Shares 4 files with Erd Mapping (+3 tables).",
+    "text": "Shares 4 files with Erd Mapping.",
     "sources": [
      {
       "path": "backend/src/data_store/graph/store.py",
@@ -1097,7 +1155,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Graph Cdc (+3 tables).",
+    "text": "Shares 1 files with Graph Cdc.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/graph/erd/business.py",
@@ -1137,211 +1195,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
-    "source": {
-     "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-     "lines": [
-      12,
-      12
-     ]
-    }
-   },
-   {
-    "id": "group-stores",
-    "label": "Stores",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
-     "lines": [
-      21,
-      96
-     ]
-    }
-   }
-  ],
-  "nodes": [
-   {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-     "lines": [
-      12,
-      12
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/graph/erd — 13 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/graph/erd/business.py",
-        "lines": [
-         20,
-         20
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/integrations — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/integrations/crm_object_sync_service.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_customer/real_time/erd — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_customer/real_time/erd/dto.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/data_ingestion — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-        "lines": [
-         12,
-         12
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
-     "lines": [
-      21,
-      21
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
-        "lines": [
-         21,
-         21
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "store-erd_onboarding_issue",
-    "label": "erd_onboarding_issue",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
-     "lines": [
-      21,
-      96
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-erd_onboarding_mapping_item",
-    "label": "erd_onboarding_mapping_item",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
-     "lines": [
-      25,
-      238
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-erd_onboarding_proposal",
-    "label": "erd_onboarding_proposal",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_proposal.py",
-     "lines": [
-      27,
-      388
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-erd_onboarding_relationship_item",
-    "label": "erd_onboarding_relationship_item",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
-     "lines": [
-      23,
-      131
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   }
-  ],
-  "edges": [
-   {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (12)",
-    "source": {
-     "path": "backend/src/rox_core/api/graph/erd/business.py",
-     "lines": [
-      120,
-      120
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
-     "lines": [
-      20,
-      20
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-erd_onboarding_issue",
-    "label": "uses (1)",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
      "lines": [
@@ -1351,9 +1206,165 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-erd_onboarding_proposal",
-    "label": "uses (5)",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
+     "lines": [
+      21,
+      96
+     ]
+    }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
+     "lines": [
+      21,
+      96
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "library-backend-src-rox-core-api-graph-erd",
+    "label": "Erd (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-api-integrations",
+    "label": "Integrations (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/integrations/crm_object_sync_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
+     "lines": [
+      21,
+      21
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-erd-onboarding-issue",
+    "label": "erd_onboarding_issue",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
+     "lines": [
+      21,
+      96
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-erd-onboarding-mapping-item",
+    "label": "erd_onboarding_mapping_item",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
+     "lines": [
+      25,
+      238
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-erd-onboarding-proposal",
+    "label": "erd_onboarding_proposal",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_proposal.py",
+     "lines": [
+      27,
+      388
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-erd-onboarding-relationship-item",
+    "label": "erd_onboarding_relationship_item",
+    "source": {
+     "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
+     "lines": [
+      23,
+      131
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "library-backend-src-rox-core-api-graph-erd",
+    "dst": "store-erd-onboarding-issue",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-graph-erd",
+    "dst": "store-erd-onboarding-proposal",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/graph/erd/onboarding_graph_build_state_service.py",
      "lines": [
@@ -1363,9 +1374,9 @@
     }
    },
    {
-    "src": "logic",
-    "dst": "store-erd_onboarding_relationship_item",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-graph-erd",
+    "dst": "store-erd-onboarding-relationship-item",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_relationship_item_service.py",
      "lines": [
@@ -1375,9 +1386,21 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-erd_onboarding_issue",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-integrations",
+    "dst": "store-erd-onboarding-proposal",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/integrations/crm_object_sync_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-erd-onboarding-issue",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
      "lines": [
@@ -1387,9 +1410,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-erd_onboarding_mapping_item",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-erd-onboarding-mapping-item",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
      "lines": [
@@ -1399,9 +1422,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-erd_onboarding_relationship_item",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-erd-onboarding-relationship-item",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
      "lines": [
@@ -1425,7 +1448,7 @@
    {
     "src": "erd_onboarding_issue",
     "dst": "erd_onboarding_mapping_item",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
      "lines": [
@@ -1438,7 +1461,7 @@
    {
     "src": "erd_onboarding_issue",
     "dst": "erd_onboarding_proposal",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
      "lines": [
@@ -1451,7 +1474,7 @@
    {
     "src": "erd_onboarding_issue",
     "dst": "erd_onboarding_relationship_item",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_issue.py",
      "lines": [
@@ -1464,7 +1487,7 @@
    {
     "src": "erd_onboarding_mapping_item",
     "dst": "erd_onboarding_proposal",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_mapping_item.py",
      "lines": [
@@ -1477,7 +1500,7 @@
    {
     "src": "erd_onboarding_mapping_item",
     "dst": "erd_onboarding_relationship_item",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
      "lines": [
@@ -1490,7 +1513,7 @@
    {
     "src": "erd_onboarding_proposal",
     "dst": "erd_onboarding_relationship_item",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/erd_onboarding_relationship_item.py",
      "lines": [
@@ -1519,7 +1542,7 @@
    }
   },
   {
-   "label": "Entity Organization (+3 tables)",
+   "label": "Entity Organization",
    "page": "feature-crm-entity-organization",
    "source": {
     "path": "backend/src/rox_core/api/graph/erd/dto.py",
@@ -1530,7 +1553,7 @@
    }
   },
   {
-   "label": "Erd Mapping (+3 tables)",
+   "label": "Erd Mapping",
    "page": "feature-crm-erd-mapping",
    "source": {
     "path": "backend/src/data_store/graph/store.py",
@@ -1541,7 +1564,7 @@
    }
   },
   {
-   "label": "Graph Cdc (+3 tables)",
+   "label": "Graph Cdc",
    "page": "feature-crm-graph-cdc",
    "source": {
     "path": "backend/src/rox_core/api/graph/erd/business.py",

@@ -1,6 +1,6 @@
 {
  "id": "feature-agents-workflow-config-user-enablement",
- "title": "Workflow Config User Enablement (+2 tables)",
+ "title": "Workflow Config User Enablement",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-agents",
@@ -279,7 +279,19 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: workflow_clever_column_trigger, workflow_config_user_enablement.",
+    "text": "Runs 1 background workers and workflows: WorkflowBusinessEventTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/workflow_business_event.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: workflow_clever_column_trigger, workflow_config_user_enablement.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/workflow_clever_column_trigger.py",
@@ -293,32 +305,6 @@
       "lines": [
        27,
        246
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: Background workers: 1, Business logic: 4, Models: 3.",
-    "sources": [
-     {
-      "path": "backend/src/tasks/executors/workflow_business_event.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/workflow/config_access.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/clever_column_attribution.py",
-      "lines": [
-       1,
-       1
       ]
      }
     ]
@@ -378,29 +364,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Background workers",
-     "1",
-     "0",
-     "backend/src/tasks/executors (1)"
+     "Executors workers",
+     "Background workers / workflows",
+     "workflow_clever_column_trigger, workflow_config_user_enablement",
+     "—"
     ],
     [
-     "Business logic",
-     "4",
-     "0",
-     "backend/src/workflow (2), backend/src/workflow/execution_graph/packages/rox_actions (1), backend/src/workflow/triggers/handlers (1)"
+     "Models (library)",
+     "Library code",
+     "workflow_clever_column_trigger",
+     "—"
     ],
     [
-     "Models",
-     "3",
-     "0",
-     "backend/src/rox_core/models (3)"
+     "Handlers (library)",
+     "Library code",
+     "workflow_clever_column_trigger, workflow_config_user_enablement",
+     "—"
+    ],
+    [
+     "workflow_clever_column_trigger",
+     "Database",
+     "workflow_clever_column_trigger",
+     "—"
+    ],
+    [
+     "workflow_config_user_enablement",
+     "Database",
+     "workflow_config_user_enablement",
+     "—"
     ]
    ],
    "sources": [
@@ -421,19 +419,33 @@
     {
      "path": "backend/src/tasks/executors/workflow_business_event.py",
      "lines": [
-      1,
-      1
+      38,
+      38
      ]
     },
     {
-     "path": "backend/src/workflow/config_access.py",
+     "path": "backend/src/workflow/execution_service.py",
      "lines": [
       1,
       1
      ]
     },
     {
+     "path": "backend/src/rox_core/models/workflow_config_user_enablement.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
      "path": "backend/src/rox_core/models/clever_column_attribution.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/clever_column.py",
      "lines": [
       1,
       1
@@ -444,7 +456,7 @@
   },
   "notes": [
    {
-    "text": "Shares 2 files with Workflow Config (+6 tables).",
+    "text": "Shares 2 files with Workflow Config.",
     "sources": [
      {
       "path": "backend/src/tasks/executors/workflow_business_event.py",
@@ -460,30 +472,43 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-workers",
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/workflow_business_event.py",
+     "lines": [
+      38,
+      38
+     ]
+    }
+   },
+   {
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/workflow_business_event.py",
      "lines": [
-      1,
-      1
+      38,
+      38
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/workflow/config_access.py",
+     "path": "backend/src/rox_core/models/clever_column_attribution.py",
      "lines": [
       1,
       1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/workflow_clever_column_trigger.py",
      "lines": [
@@ -491,31 +516,43 @@
       179
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_clever_column_trigger.py",
+     "lines": [
+      17,
+      179
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "workers",
-    "label": "Background workers",
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
     "source": {
      "path": "backend/src/tasks/executors/workflow_business_event.py",
      "lines": [
-      1,
-      1
+      38,
+      38
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-background-workers",
     "many": false,
     "details": [
      {
-      "text": "backend/src/tasks/executors — 1 files",
+      "text": "WorkflowBusinessEventTaskExecutor",
       "sources": [
        {
         "path": "backend/src/tasks/executors/workflow_business_event.py",
         "lines": [
-         1,
-         1
+         38,
+         38
         ]
        }
       ]
@@ -523,60 +560,8 @@
     ]
    },
    {
-    "id": "logic",
-    "label": "Business logic",
-    "source": {
-     "path": "backend/src/workflow/config_access.py",
-     "lines": [
-      1,
-      1
-     ]
-    },
-    "kind": "component",
-    "group": "group-layer-logic",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/workflow — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/config_access.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/execution_graph/packages/rox_actions — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/execution_graph/packages/rox_actions/workflows.py",
-        "lines": [
-         24,
-         24
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/triggers/handlers — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/triggers/handlers/clever_column.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/clever_column_attribution.py",
      "lines": [
@@ -585,25 +570,27 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/clever_column_attribution.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-workflow_clever_column_trigger",
+    "id": "library-backend-src-workflow-triggers-handlers",
+    "label": "Handlers (library)",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/clever_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-workflow-clever-column-trigger",
     "label": "workflow_clever_column_trigger",
     "source": {
      "path": "backend/src/rox_core/models/workflow_clever_column_trigger.py",
@@ -613,12 +600,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-workflow_config_user_enablement",
+    "id": "store-workflow-config-user-enablement",
     "label": "workflow_config_user_enablement",
     "source": {
      "path": "backend/src/rox_core/models/workflow_config_user_enablement.py",
@@ -628,88 +615,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (5)",
-    "source": {
-     "path": "backend/src/workflow/config_access.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/workflow_business_event.py",
-     "lines": [
-      162,
-      162
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/workflow_business_event.py",
-     "lines": [
-      159,
-      159
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "store-workflow_config_user_enablement",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/workflow_business_event.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-workflow_clever_column_trigger",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/workflow/execution_service.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-workflow_config_user_enablement",
-    "label": "uses (2)",
-    "source": {
-     "path": "backend/src/workflow/config_access.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "store-workflow_clever_column_trigger",
-    "label": "uses (2)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-workflow-clever-column-trigger",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/clever_column_attribution.py",
      "lines": [
@@ -719,9 +634,45 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-workflow_config_user_enablement",
-    "label": "uses (1)",
+    "src": "library-backend-src-workflow-triggers-handlers",
+    "dst": "store-workflow-clever-column-trigger",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/clever_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow-triggers-handlers",
+    "dst": "store-workflow-config-user-enablement",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/triggers/handlers/clever_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-workflow-clever-column-trigger",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/execution_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "store-workflow-config-user-enablement",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/workflow_config_user_enablement.py",
      "lines": [
@@ -758,7 +709,7 @@
    }
   },
   {
-   "label": "Workflow Config (+6 tables)",
+   "label": "Workflow Config",
    "page": "feature-agents-workflow-config",
    "source": {
     "path": "backend/src/tasks/executors/workflow_business_event.py",

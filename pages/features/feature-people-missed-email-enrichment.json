@@ -1,6 +1,6 @@
 {
  "id": "feature-people-missed-email-enrichment",
- "title": "Missed Email Enrichment (+2 tables)",
+ "title": "Missed Email Enrichment",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-people",
@@ -79,7 +79,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: missed_email_enrichment, missed_enrichment_contact_candidate.",
+    "text": "Stores data in: missed_email_enrichment, missed_enrichment_contact_candidate.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/people/public_person.py",
@@ -98,20 +98,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 2, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/people/public_person.py",
-      "lines": [
-       308,
-       308
       ]
      }
     ]
@@ -152,23 +145,41 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "2",
-     "0",
-     "backend/src/people_enrichment (1), backend/src/rox_core/api/prospect_lists (1)"
+     "People Enrichment (library)",
+     "Library code",
+     "missed_email_enrichment",
+     "—"
     ],
     [
-     "Models",
-     "0",
-     "1",
-     "backend/src/rox_core/models/people (1)"
+     "Prospect Lists (library)",
+     "Library code",
+     "missed_email_enrichment",
+     "—"
+    ],
+    [
+     "People (library)",
+     "Library code",
+     "missed_email_enrichment",
+     "—"
+    ],
+    [
+     "missed_email_enrichment",
+     "Database",
+     "missed_email_enrichment",
+     "—"
+    ],
+    [
+     "missed_enrichment_contact_candidate",
+     "Database",
+     "missed_enrichment_contact_candidate",
+     "—"
     ]
    ],
    "sources": [
@@ -194,6 +205,13 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/prospect_lists/net_new_members.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/rox_core/models/people/public_person.py",
      "lines": [
       308,
@@ -205,7 +223,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Rox Company (+4 tables).",
+    "text": "Shares 1 files with Rox Company.",
     "sources": [
      {
       "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
@@ -217,7 +235,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Clay Person (+19 tables).",
+    "text": "Shares 1 files with Clay Person.",
     "sources": [
      {
       "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
@@ -233,8 +251,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic / Models",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
      "lines": [
@@ -244,8 +262,20 @@
     }
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person.py",
      "lines": [
@@ -253,12 +283,24 @@
       413
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/people/public_person.py",
+     "lines": [
+      308,
+      413
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-people-enrichment",
+    "label": "People Enrichment (library)",
     "source": {
      "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
      "lines": [
@@ -267,38 +309,28 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/people_enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/prospect_lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/prospect_lists/net_new_members.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-prospect-lists",
+    "label": "Prospect Lists (library)",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/net_new_members.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "library-backend-src-rox-core-models-people",
+    "label": "People (library)",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person.py",
      "lines": [
@@ -307,25 +339,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/people — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/people/public_person.py",
-        "lines": [
-         308,
-         308
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-missed_email_enrichment",
+    "id": "store-missed-email-enrichment",
     "label": "missed_email_enrichment",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person.py",
@@ -335,12 +354,12 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    },
    {
-    "id": "store-missed_enrichment_contact_candidate",
+    "id": "store-missed-enrichment-contact-candidate",
     "label": "missed_enrichment_contact_candidate",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person.py",
@@ -350,16 +369,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "store-missed_email_enrichment",
-    "label": "uses (2)",
+    "src": "library-backend-src-people-enrichment",
+    "dst": "store-missed-email-enrichment",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
      "lines": [
@@ -369,9 +388,21 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-missed_email_enrichment",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-prospect-lists",
+    "dst": "store-missed-email-enrichment",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/net_new_members.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-models-people",
+    "dst": "store-missed-email-enrichment",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/people/public_person.py",
      "lines": [
@@ -389,21 +420,7 @@
    "missed_enrichment_contact_candidate"
   ],
   "nosql": [],
-  "relations": [
-   {
-    "src": "missed_email_enrichment",
-    "dst": "missed_enrichment_contact_candidate",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/people/public_person.py",
-     "lines": [
-      421,
-      421
-     ]
-    },
-    "kind": "symbolic"
-   }
-  ],
+  "relations": [],
   "domains": [],
   "columns": []
  },
@@ -422,7 +439,7 @@
    }
   },
   {
-   "label": "Rox Company (+4 tables)",
+   "label": "Rox Company",
    "page": "feature-people-rox-company",
    "source": {
     "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",
@@ -433,7 +450,7 @@
    }
   },
   {
-   "label": "Clay Person (+19 tables)",
+   "label": "Clay Person",
    "page": "feature-people-clay-person",
    "source": {
     "path": "backend/src/people_enrichment/rox_people_waterfall_engine.py",

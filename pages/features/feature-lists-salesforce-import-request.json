@@ -65,7 +65,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: salesforce_import_request.",
+    "text": "Stores data in: salesforce_import_request.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
@@ -77,20 +77,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
-      "lines": [
-       15,
-       15
       ]
      }
     ]
@@ -124,23 +117,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/rox_core/api/salesforce_enrichment (1)"
+     "Salesforce Enrichment (library)",
+     "Library code",
+     "salesforce_import_request",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models/lists (1)"
+     "Lists (library)",
+     "Library code",
+     "salesforce_import_request",
+     "—"
+    ],
+    [
+     "salesforce_import_request",
+     "Database",
+     "salesforce_import_request",
+     "—"
     ]
    ],
    "sources": [
@@ -186,8 +185,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
      "lines": [
@@ -197,19 +196,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
+     "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
      "lines": [
-      15,
-      15
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
      "lines": [
@@ -217,12 +217,24 @@
       65
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
+     "lines": [
+      15,
+      65
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-salesforce-enrichment",
+    "label": "Salesforce Enrichment (library)",
     "source": {
      "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
      "lines": [
@@ -231,26 +243,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/salesforce_enrichment — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models-lists",
+    "label": "Lists (library)",
     "source": {
      "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
      "lines": [
@@ -259,25 +258,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models/lists — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
-        "lines": [
-         15,
-         15
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-salesforce_import_request",
+    "id": "store-salesforce-import-request",
     "label": "salesforce_import_request",
     "source": {
      "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
@@ -287,28 +273,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
-     "lines": [
-      14,
-      14
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-salesforce_import_request",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-salesforce-enrichment",
+    "dst": "store-salesforce-import-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
      "lines": [
@@ -318,9 +292,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-salesforce_import_request",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models-lists",
+    "dst": "store-salesforce-import-request",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
      "lines": [

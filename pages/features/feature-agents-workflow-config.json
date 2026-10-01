@@ -1,6 +1,6 @@
 {
  "id": "feature-agents-workflow-config",
- "title": "Workflow Config (+6 tables)",
+ "title": "Workflow Config",
  "kind": "feature",
  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
  "parent": "domain-agents",
@@ -1099,7 +1099,87 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: workflow_config, workflow_config_draft, workflow_config_version, workflow_inbox, workflow_run, workflow_step_output.",
+    "text": "Serves 43 HTTP endpoints in 6 API groups: Config, Conversation Link, Rox Traces, Run, Workflow, Workflow/sysadmin.",
+    "sources": [
+     {
+      "path": "backend/src/workflow/router/config.py",
+      "lines": [
+       97,
+       97
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/conversation_link/router.py",
+      "lines": [
+       70,
+       70
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/eval/rox_traces.py",
+      "lines": [
+       277,
+       277
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/run.py",
+      "lines": [
+       29,
+       29
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/inbox.py",
+      "lines": [
+       30,
+       30
+      ]
+     },
+     {
+      "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+      "lines": [
+       65,
+       65
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 4 background workers and workflows: UserDeactivationCleanupTaskExecutor, WorkflowBusinessEventTaskExecutor, create_agentflow_run, finalize_agentflow_run.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+      "lines": [
+       35,
+       35
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/workflow_business_event.py",
+      "lines": [
+       38,
+       38
+      ]
+     },
+     {
+      "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+      "lines": [
+       80,
+       80
+      ]
+     },
+     {
+      "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+      "lines": [
+       96,
+       96
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: workflow_config, workflow_config_draft, workflow_config_version, workflow_inbox, workflow_run, workflow_step_output.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/workflow_config.py",
@@ -1141,46 +1221,6 @@
       "lines": [
        152,
        210
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Files by layer: HTTP routes: 6, Background workers: 2, Business logic: 24, Models: 4, Agent skills: 1.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/conversation_link/business.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/run.py",
-      "lines": [
-       3,
-       3
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/workflow_config.py",
-      "lines": [
-       26,
-       26
-      ]
-     },
-     {
-      "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
-      "lines": [
-       86,
-       86
       ]
      }
     ]
@@ -1278,41 +1318,95 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "6",
-     "0",
-     "backend/src/workflow/router (3), backend/src/chat/routes/conversation_link (2), backend/src/chat/routes/eval (1)"
+     "Config API",
+     "HTTP API",
+     "—",
+     "—"
     ],
     [
-     "Background workers",
-     "1",
-     "1",
-     "backend/src/tasks/executors (2)"
+     "Conversation Link API",
+     "HTTP API",
+     "workflow_config_draft",
+     "—"
     ],
     [
-     "Business logic",
-     "22",
-     "2",
-     "backend/src/workflow (5), backend/src/workflow/agentflow/cell (3), backend/src/workflow/inbox (3)"
+     "Rox Traces API",
+     "HTTP API",
+     "workflow_run",
+     "—"
     ],
     [
-     "Models",
-     "4",
-     "0",
-     "backend/src/rox_core/models (4)"
+     "Run API",
+     "HTTP API",
+     "—",
+     "—"
     ],
     [
-     "Agent skills",
-     "1",
-     "0",
-     ".agents/skills/how-to-debug-outreach-traces (1)"
+     "Workflow API",
+     "HTTP API",
+     "workflow_inbox",
+     "—"
+    ],
+    [
+     "Workflow/sysadmin API",
+     "HTTP API",
+     "workflow_config",
+     "—"
+    ],
+    [
+     "Executors workers",
+     "Background workers / workflows",
+     "workflow_config, workflow_run",
+     "—"
+    ],
+    [
+     "Activities workflows",
+     "Background workers / workflows",
+     "—",
+     "—"
+    ],
+    [
+     "Workflow (library)",
+     "Library code",
+     "workflow_config, workflow_config_version",
+     "—"
+    ],
+    [
+     "Ownership (library)",
+     "Library code",
+     "workflow_config",
+     "—"
+    ],
+    [
+     "Record Display (library)",
+     "Library code",
+     "workflow_config",
+     "—"
+    ],
+    [
+     "Metering (library)",
+     "Library code",
+     "workflow_run",
+     "—"
+    ],
+    [
+     "Task Items (library)",
+     "Library code",
+     "workflow_config, workflow_inbox",
+     "—"
+    ],
+    [
+     "Database (6 tables)",
+     "Database",
+     "workflow_config, workflow_config_draft, workflow_config_version, workflow_inbox, workflow_run, workflow_step_output",
+     "—"
     ]
    ],
    "sources": [
@@ -1359,10 +1453,248 @@
      ]
     },
     {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      75,
+      75
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      290,
+      290
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      113,
+      113
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      189,
+      189
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/router.py",
+     "lines": [
+      70,
+      70
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/router.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation_link/router.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
      "path": "backend/src/chat/routes/conversation_link/business.py",
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      277,
+      277
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      369,
+      369
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      206,
+      206
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      245,
+      245
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      306,
+      306
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      342,
+      342
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      75,
+      75
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      47,
+      47
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      67,
+      67
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      90,
+      90
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      127,
+      127
+     ]
+    },
+    {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      166,
+      166
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      65,
+      65
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      190,
+      190
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      413,
+      413
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      392,
+      392
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      226,
+      226
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      365,
+      365
+     ]
+    },
+    {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/workflow_business_event.py",
+     "lines": [
+      38,
+      38
      ]
     },
     {
@@ -1373,24 +1705,52 @@
      ]
     },
     {
-     "path": "backend/src/workflow/router/run.py",
+     "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
      "lines": [
-      3,
-      3
+      80,
+      80
      ]
     },
     {
-     "path": "backend/src/rox_core/models/workflow_config.py",
+     "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
      "lines": [
-      26,
-      26
+      96,
+      96
      ]
     },
     {
-     "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "path": "backend/src/workflow/draft_service.py",
      "lines": [
-      86,
-      86
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -1398,7 +1758,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Skill (+2 tables).",
+    "text": "Shares 1 files with Skill.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
@@ -1410,7 +1770,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Conversation (+2 tables).",
+    "text": "Shares 1 files with Conversation.",
     "sources": [
      {
       "path": "backend/src/workflow/version_conversation_backfill_job.py",
@@ -1422,7 +1782,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Workflow Config User Enablement (+2 tables).",
+    "text": "Shares 2 files with Workflow Config User Enablement.",
     "sources": [
      {
       "path": "backend/src/tasks/executors/workflow_business_event.py",
@@ -1458,22 +1818,10 @@
     ]
    },
    {
-    "text": "Shares 1 files with Agent Actions Log (+3 tables).",
+    "text": "Shares 1 files with Agent Actions Log.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
-      "lines": [
-       1,
-       1
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Dropped 6 lower-volume block edges to satisfy the layout limit; their evidence remains in the \"Why these files are one feature\" table.",
-    "sources": [
-     {
-      "path": "backend/src/workflow/version_conversation_backfill_job.py",
       "lines": [
        1,
        1
@@ -1486,267 +1834,679 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
-     "path": "backend/src/chat/routes/conversation_link/business.py",
+     "path": "backend/src/workflow/router/config.py",
      "lines": [
-      1,
-      1
+      97,
+      97
      ]
     }
    },
    {
-    "id": "group-layer-workers",
-    "label": "Background workers / Business logic / Models / Agent skills",
+    "id": "group-http-api",
+    "label": "HTTP API",
     "source": {
-     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "path": "backend/src/workflow/router/config.py",
      "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "id": "group-stores",
-    "label": "Stores",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      144,
-      289
-     ]
-    }
-   }
-  ],
-  "nodes": [
-   {
-    "id": "routes",
-    "label": "HTTP routes",
-    "source": {
-     "path": "backend/src/chat/routes/conversation_link/business.py",
-     "lines": [
-      1,
-      1
+      97,
+      97
      ]
     },
-    "kind": "component",
-    "group": "group-layer-routes",
-    "many": false,
-    "details": [
-     {
-      "text": "backend/src/workflow/router — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/router/config.py",
-        "lines": [
-         31,
-         31
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/chat/routes/conversation_link — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/conversation_link/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/chat/routes/eval — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/eval/rox_traces.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "parent": "column-entry-points"
    },
    {
-    "id": "workers",
+    "id": "group-background-workers",
     "label": "Background workers",
     "source": {
      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
      "lines": [
+      35,
+      35
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      144,
+      289
+     ]
+    }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/workflow_config.py",
+     "lines": [
+      144,
+      289
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "api-config",
+    "label": "Config API",
+    "source": {
+     "path": "backend/src/workflow/router/config.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /config",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         97,
+         97
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /config",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         47,
+         47
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /config/create-with-builder",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         75,
+         75
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DELETE /config/{config_id}",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         290,
+         290
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /config/{config_id}",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         113,
+         113
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+9 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/config.py",
+        "lines": [
+         189,
+         189
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-conversation-link",
+    "label": "Conversation Link API",
+    "source": {
+     "path": "backend/src/chat/routes/conversation_link/router.py",
+     "lines": [
+      70,
+      70
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /conversation_link/outbound_agent/{outbound_agent_id}",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/conversation_link/router.py",
+        "lines": [
+         70,
+         70
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /conversation_link/settings",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/conversation_link/router.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /conversation_link/workflow_builder/{workflow_config_id}",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/conversation_link/router.py",
+        "lines": [
+         44,
+         44
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-rox-traces",
+    "label": "Rox Traces API",
+    "source": {
+     "path": "backend/src/chat/routes/eval/rox_traces.py",
+     "lines": [
+      277,
+      277
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "POST /rox_traces/auto_replies",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         277,
+         277
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /rox_traces/chat",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         369,
+         369
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /rox_traces/clever_column",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         206,
+         206
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /rox_traces/outreach",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         245,
+         245
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /rox_traces/sequence_policies",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         306,
+         306
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+1 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/chat/routes/eval/rox_traces.py",
+        "lines": [
+         342,
+         342
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-run",
+    "label": "Run API",
+    "source": {
+     "path": "backend/src/workflow/router/run.py",
+     "lines": [
+      29,
+      29
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /run/{run_id}",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/run.py",
+        "lines": [
+         29,
+         29
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /run/{run_id}/usage",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/run.py",
+        "lines": [
+         75,
+         75
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-workflow",
+    "label": "Workflow API",
+    "source": {
+     "path": "backend/src/workflow/router/inbox.py",
+     "lines": [
+      30,
+      30
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /inbox",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         30,
+         30
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /inbox/{item_id}",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         47,
+         47
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PATCH /inbox/{item_id}",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         67,
+         67
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /inbox/{item_id}/publish",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         90,
+         90
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /inbox/{item_id}/review",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         127,
+         127
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+1 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/workflow/router/inbox.py",
+        "lines": [
+         166,
+         166
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-workflow-sysadmin",
+    "label": "Workflow/sysadmin API",
+    "source": {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+     "lines": [
+      65,
+      65
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /workflow/sysadmin/config",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         65,
+         65
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /workflow/sysadmin/config",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         190,
+         190
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /workflow/sysadmin/config/bulk/delete",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         413,
+         413
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /workflow/sysadmin/config/bulk/update",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         392,
+         392
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /workflow/sysadmin/config/propagate",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         226,
+         226
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+7 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+        "lines": [
+         365,
+         365
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "task_executor-backend-src-tasks-executors",
+    "label": "Executors workers",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "lines": [
+      35,
+      35
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "UserDeactivationCleanupTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+        "lines": [
+         35,
+         35
+        ]
+       }
+      ]
+     },
+     {
+      "text": "WorkflowBusinessEventTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/workflow_business_event.py",
+        "lines": [
+         38,
+         38
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-workflow-agentflow-activities",
+    "label": "Activities workflows",
+    "source": {
+     "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+     "lines": [
+      80,
+      80
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "create_agentflow_run",
+      "sources": [
+       {
+        "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+        "lines": [
+         80,
+         80
+        ]
+       }
+      ]
+     },
+     {
+      "text": "finalize_agentflow_run",
+      "sources": [
+       {
+        "path": "backend/src/workflow/agentflow/activities/lifecycle.py",
+        "lines": [
+         96,
+         96
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "library-backend-src-workflow",
+    "label": "Workflow (library)",
+    "source": {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
       1,
       1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/tasks/executors — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-governance-ownership",
+    "label": "Ownership (library)",
     "source": {
-     "path": "backend/src/workflow/router/run.py",
+     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
      "lines": [
-      3,
-      3
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/workflow — 5 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/config_access.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/agentflow/cell — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
-        "lines": [
-         28,
-         28
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/inbox — 3 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/inbox/inbox_service.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/workflow/workflow_run — 2 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/router/run.py",
-        "lines": [
-         13,
-         13
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/agent_framework/trace_presentation — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/workflow/router/run.py",
-        "lines": [
-         3,
-         3
-        ]
-       }
-      ]
-     },
-     {
-      "text": "backend/src/rox_core/api/governance/ownership — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-api-governance-record-display",
+    "label": "Record Display (library)",
     "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
+     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
      "lines": [
-      26,
-      26
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 4 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/workflow_config.py",
-        "lines": [
-         26,
-         26
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "skills",
-    "label": "Agent skills",
+    "id": "library-backend-src-rox-core-api-metering",
+    "label": "Metering (library)",
     "source": {
-     "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
+     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
      "lines": [
-      86,
-      86
+      1,
+      1
      ]
     },
     "kind": "component",
-    "group": "group-layer-workers",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": ".agents/skills/how-to-debug-outreach-traces — 1 files",
-      "sources": [
-       {
-        "path": ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
-        "lines": [
-         86,
-         86
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-workflow_config",
-    "label": "workflow_config",
+    "id": "library-backend-src-task-items",
+    "label": "Task Items (library)",
+    "source": {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "database",
+    "label": "Database (6 tables)",
     "source": {
      "path": "backend/src/rox_core/models/workflow_config.py",
      "lines": [
@@ -1755,163 +2515,101 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
-    "details": []
-   },
-   {
-    "id": "store-workflow_config_draft",
-    "label": "workflow_config_draft",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config_draft.py",
-     "lines": [
-      24,
-      124
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-workflow_config_version",
-    "label": "workflow_config_version",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      30,
-      141
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-workflow_inbox",
-    "label": "workflow_inbox",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_inbox.py",
-     "lines": [
-      27,
-      158
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-workflow_run",
-    "label": "workflow_run",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_run.py",
-     "lines": [
-      24,
-      149
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
-   },
-   {
-    "id": "store-workflow_step_output",
-    "label": "workflow_step_output",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_run.py",
-     "lines": [
-      152,
-      210
-     ]
-    },
-    "kind": "store",
-    "group": "group-stores",
-    "many": false,
-    "details": []
+    "details": [
+     {
+      "text": "workflow_config",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_config.py",
+        "lines": [
+         144,
+         289
+        ]
+       }
+      ]
+     },
+     {
+      "text": "workflow_config_draft",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_config_draft.py",
+        "lines": [
+         24,
+         124
+        ]
+       }
+      ]
+     },
+     {
+      "text": "workflow_config_version",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_config.py",
+        "lines": [
+         30,
+         141
+        ]
+       }
+      ]
+     },
+     {
+      "text": "workflow_inbox",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_inbox.py",
+        "lines": [
+         27,
+         158
+        ]
+       }
+      ]
+     },
+     {
+      "text": "workflow_run",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_run.py",
+        "lines": [
+         24,
+         149
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+1 more tables",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/models/workflow_run.py",
+        "lines": [
+         152,
+         210
+        ]
+       }
+      ]
+     }
+    ]
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (17)",
-    "source": {
-     "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
-     "lines": [
-      32,
-      32
-     ]
-    }
-   },
-   {
-    "src": "models",
-    "dst": "logic",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      26,
-      26
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "logic",
-    "label": "imports (8)",
-    "source": {
-     "path": "backend/src/workflow/router/config.py",
-     "lines": [
-      31,
-      31
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (3)",
+    "src": "api-conversation-link",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/conversation_link/business.py",
      "lines": [
-      5,
-      5
+      1,
+      1
      ]
     }
    },
    {
-    "src": "workers",
-    "dst": "logic",
-    "label": "imports (2)",
-    "source": {
-     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
-     "lines": [
-      30,
-      30
-     ]
-    }
-   },
-   {
-    "src": "workers",
-    "dst": "models",
-    "label": "imports (3)",
-    "source": {
-     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
-     "lines": [
-      11,
-      11
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-workflow_run",
-    "label": "uses (1)",
+    "src": "api-rox-traces",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/eval/rox_traces.py",
      "lines": [
@@ -1921,11 +2619,23 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-workflow_config",
-    "label": "uses (2)",
+    "src": "api-workflow",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
-     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
+     "path": "backend/src/rox_core/models/workflow_inbox.py",
+     "lines": [
+      27,
+      27
+     ]
+    }
+   },
+   {
+    "src": "api-workflow-sysadmin",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
      "lines": [
       1,
       1
@@ -1933,23 +2643,71 @@
     }
    },
    {
-    "src": "workers",
-    "dst": "store-workflow_run",
-    "label": "uses (1)",
-    "source": {
-     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
-     "lines": [
-      1,
-      1
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-workflow_config",
-    "label": "uses (6)",
+    "src": "library-backend-src-rox-core-api-governance-ownership",
+    "dst": "database",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/governance/ownership/workflow_config_ownership_resolver.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-governance-record-display",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-metering",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-task-items",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-workflow",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/workflow/draft_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-tasks-executors",
+    "dst": "database",
+    "label": "reads/writes",
+    "source": {
+     "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
      "lines": [
       1,
       1
@@ -1973,7 +2731,7 @@
    {
     "src": "workflow_config",
     "dst": "workflow_config_draft",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_config_draft.py",
      "lines": [
@@ -1986,7 +2744,7 @@
    {
     "src": "workflow_config",
     "dst": "workflow_config_version",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_config.py",
      "lines": [
@@ -1998,47 +2756,8 @@
    },
    {
     "src": "workflow_config",
-    "dst": "workflow_config_version",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      223,
-      223
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_config",
-    "dst": "workflow_config_version",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      30,
-      30
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_config",
     "dst": "workflow_inbox",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
-     "lines": [
-      180,
-      180
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_config",
-    "dst": "workflow_inbox",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_inbox.py",
      "lines": [
@@ -2050,21 +2769,8 @@
    },
    {
     "src": "workflow_config",
-    "dst": "workflow_inbox",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_inbox.py",
-     "lines": [
-      102,
-      102
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_config",
     "dst": "workflow_run",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_run.py",
      "lines": [
@@ -2075,35 +2781,9 @@
     "kind": "enforced"
    },
    {
-    "src": "workflow_config",
-    "dst": "workflow_run",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_config.py",
-     "lines": [
-      213,
-      213
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "workflow_config_version",
     "dst": "workflow_run",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
-     "lines": [
-      292,
-      292
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_config_version",
-    "dst": "workflow_run",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_run.py",
      "lines": [
@@ -2114,35 +2794,9 @@
     "kind": "enforced"
    },
    {
-    "src": "workflow_config_version",
-    "dst": "workflow_run",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_run.py",
-     "lines": [
-      97,
-      97
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
     "src": "workflow_inbox",
     "dst": "workflow_run",
-    "label": "comparison",
-    "source": {
-     "path": "backend/src/task_items/workflow_inbox_backfill_job.py",
-     "lines": [
-      177,
-      177
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_inbox",
-    "dst": "workflow_run",
-    "label": "fk",
+    "label": "declared FK",
     "source": {
      "path": "backend/src/rox_core/models/workflow_inbox.py",
      "lines": [
@@ -2151,32 +2805,6 @@
      ]
     },
     "kind": "enforced"
-   },
-   {
-    "src": "workflow_inbox",
-    "dst": "workflow_run",
-    "label": "primaryjoin",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_inbox.py",
-     "lines": [
-      108,
-      108
-     ]
-    },
-    "kind": "symbolic"
-   },
-   {
-    "src": "workflow_run",
-    "dst": "workflow_step_output",
-    "label": "same_file",
-    "source": {
-     "path": "backend/src/rox_core/models/workflow_run.py",
-     "lines": [
-      152,
-      152
-     ]
-    },
-    "kind": "symbolic"
    }
   ],
   "domains": [],
@@ -2197,7 +2825,7 @@
    }
   },
   {
-   "label": "Skill (+2 tables)",
+   "label": "Skill",
    "page": "feature-agents-skill",
    "source": {
     "path": "backend/src/rox_core/api/governance/record_display/single_column.py",
@@ -2208,7 +2836,7 @@
    }
   },
   {
-   "label": "Conversation (+2 tables)",
+   "label": "Conversation",
    "page": "feature-agents-conversation",
    "source": {
     "path": "backend/src/workflow/version_conversation_backfill_job.py",
@@ -2219,7 +2847,7 @@
    }
   },
   {
-   "label": "Workflow Config User Enablement (+2 tables)",
+   "label": "Workflow Config User Enablement",
    "page": "feature-agents-workflow-config-user-enablement",
    "source": {
     "path": "backend/src/tasks/executors/workflow_business_event.py",
@@ -2252,7 +2880,7 @@
    }
   },
   {
-   "label": "Agent Actions Log (+3 tables)",
+   "label": "Agent Actions Log",
    "page": "feature-agents-agent-actions-log",
    "source": {
     "path": "backend/src/rox_core/api/metering/agent_actions_recompute_backfill_job.py",

@@ -66,6 +66,58 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     assert "<h3>Interesting Notes</h3>" in document
 
 
+def test_more_than_three_sources_collapse_in_claims_and_table(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    sources = [
+        {"path": f"pkg/source-{index}.py", "lines": [index, index]}
+        for index in range(1, 5)
+    ]
+    payload["tldr"]["summary"][0]["sources"] = sources
+    payload["tldr"]["table"]["sources"] = sources
+    page = _empty_page(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert (
+        document.count('<details class="citations"><summary>Sources (4)</summary>') == 2
+    )
+    assert (
+        '<div class="table-sources">Sources: '
+        '<details class="citations"><summary>Sources (4)</summary>'
+    ) in document
+    assert ".citation-links {\n  overflow-wrap: anywhere;" in document
+
+
+def test_three_or_fewer_sources_remain_inline(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["tldr"]["summary"][0]["sources"] = [
+        {"path": f"pkg/source-{index}.py", "lines": [index, index]}
+        for index in range(1, 4)
+    ]
+    page = _empty_page(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert '<span class="citations"><sup><a href="' in document
+    assert "<summary>Sources (3)</summary>" not in document
+
+
 def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
     page_data: dict[str, object],
     plantuml_jar: Path,

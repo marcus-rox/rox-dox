@@ -65,7 +65,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: command_config.",
+    "text": "Stores data in: command_config.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/command_config.py",
@@ -77,20 +77,13 @@
     ]
    },
    {
-    "text": "Files by layer: HTTP routes: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/chat/routes/conversation/business.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/command_config.py",
-      "lines": [
-       22,
-       22
       ]
      }
     ]
@@ -124,23 +117,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "HTTP routes",
-     "1",
-     "0",
-     "backend/src/chat/routes/conversation (1)"
+     "Conversation (library)",
+     "Library code",
+     "command_config",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "command_config",
+     "—"
+    ],
+    [
+     "command_config",
+     "Database",
+     "command_config",
+     "—"
     ]
    ],
    "sources": [
@@ -170,7 +169,7 @@
   },
   "notes": [
    {
-    "text": "Shares 1 files with Conversation (+2 tables).",
+    "text": "Shares 1 files with Conversation.",
     "sources": [
      {
       "path": "backend/src/chat/routes/conversation/business.py",
@@ -186,8 +185,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-routes",
-    "label": "HTTP routes",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/chat/routes/conversation/business.py",
      "lines": [
@@ -197,19 +196,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/command_config.py",
+     "path": "backend/src/chat/routes/conversation/business.py",
      "lines": [
-      22,
-      22
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/command_config.py",
      "lines": [
@@ -217,12 +217,24 @@
       128
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/command_config.py",
+     "lines": [
+      22,
+      128
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "routes",
-    "label": "HTTP routes",
+    "id": "library-backend-src-chat-routes-conversation",
+    "label": "Conversation (library)",
     "source": {
      "path": "backend/src/chat/routes/conversation/business.py",
      "lines": [
@@ -231,26 +243,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-routes",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/chat/routes/conversation — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/conversation/business.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/command_config.py",
      "lines": [
@@ -259,25 +258,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/command_config.py",
-        "lines": [
-         22,
-         22
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-command_config",
+    "id": "store-command-config",
     "label": "command_config",
     "source": {
      "path": "backend/src/rox_core/models/command_config.py",
@@ -287,28 +273,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "routes",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/chat/routes/conversation/business.py",
-     "lines": [
-      23,
-      23
-     ]
-    }
-   },
-   {
-    "src": "routes",
-    "dst": "store-command_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-chat-routes-conversation",
+    "dst": "store-command-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/chat/routes/conversation/business.py",
      "lines": [
@@ -318,9 +292,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-command_config",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-command-config",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/command_config.py",
      "lines": [
@@ -356,7 +330,7 @@
    }
   },
   {
-   "label": "Conversation (+2 tables)",
+   "label": "Conversation",
    "page": "feature-agents-conversation",
    "source": {
     "path": "backend/src/chat/routes/conversation/business.py",

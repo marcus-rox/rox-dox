@@ -65,7 +65,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Stores: rox_feature_actions.",
+    "text": "Stores data in: rox_feature_actions.",
     "sources": [
      {
       "path": "backend/src/rox_core/models/rox_feature_actions.py",
@@ -77,20 +77,13 @@
     ]
    },
    {
-    "text": "Files by layer: Business logic: 1, Models: 1.",
+    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
       "lines": [
        1,
        1
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/models/rox_feature_actions.py",
-      "lines": [
-       22,
-       22
       ]
      }
     ]
@@ -124,23 +117,29 @@
   ],
   "table": {
    "columns": [
-    "Layer",
-    "Primary",
-    "Shared",
-    "Top directories"
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
    ],
    "rows": [
     [
-     "Business logic",
-     "1",
-     "0",
-     "backend/src/rox_core/api/metering (1)"
+     "Metering (library)",
+     "Library code",
+     "rox_feature_actions",
+     "—"
     ],
     [
-     "Models",
-     "1",
-     "0",
-     "backend/src/rox_core/models (1)"
+     "Models (library)",
+     "Library code",
+     "rox_feature_actions",
+     "—"
+    ],
+    [
+     "rox_feature_actions",
+     "Database",
+     "rox_feature_actions",
+     "—"
     ]
    ],
    "sources": [
@@ -186,8 +185,8 @@
  "block": {
   "groups": [
    {
-    "id": "group-layer-logic",
-    "label": "Business logic",
+    "id": "column-entry-points",
+    "label": "Entry points",
     "source": {
      "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
      "lines": [
@@ -197,19 +196,20 @@
     }
    },
    {
-    "id": "group-layer-models",
-    "label": "Models",
+    "id": "group-library-code",
+    "label": "Library code",
     "source": {
-     "path": "backend/src/rox_core/models/rox_feature_actions.py",
+     "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
      "lines": [
-      22,
-      22
+      1,
+      1
      ]
-    }
+    },
+    "parent": "column-entry-points"
    },
    {
-    "id": "group-stores",
-    "label": "Stores",
+    "id": "column-data-services",
+    "label": "Data & services",
     "source": {
      "path": "backend/src/rox_core/models/rox_feature_actions.py",
      "lines": [
@@ -217,12 +217,24 @@
       81
      ]
     }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/rox_feature_actions.py",
+     "lines": [
+      22,
+      81
+     ]
+    },
+    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "logic",
-    "label": "Business logic",
+    "id": "library-backend-src-rox-core-api-metering",
+    "label": "Metering (library)",
     "source": {
      "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
      "lines": [
@@ -231,26 +243,13 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-logic",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/api/metering — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
-        "lines": [
-         1,
-         1
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "models",
-    "label": "Models",
+    "id": "library-backend-src-rox-core-models",
+    "label": "Models (library)",
     "source": {
      "path": "backend/src/rox_core/models/rox_feature_actions.py",
      "lines": [
@@ -259,25 +258,12 @@
      ]
     },
     "kind": "component",
-    "group": "group-layer-models",
+    "group": "group-library-code",
     "many": false,
-    "details": [
-     {
-      "text": "backend/src/rox_core/models — 1 files",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/models/rox_feature_actions.py",
-        "lines": [
-         22,
-         22
-        ]
-       }
-      ]
-     }
-    ]
+    "details": []
    },
    {
-    "id": "store-rox_feature_actions",
+    "id": "store-rox-feature-actions",
     "label": "rox_feature_actions",
     "source": {
      "path": "backend/src/rox_core/models/rox_feature_actions.py",
@@ -287,28 +273,16 @@
      ]
     },
     "kind": "store",
-    "group": "group-stores",
+    "group": "group-database",
     "many": false,
     "details": []
    }
   ],
   "edges": [
    {
-    "src": "logic",
-    "dst": "models",
-    "label": "imports (1)",
-    "source": {
-     "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
-     "lines": [
-      76,
-      76
-     ]
-    }
-   },
-   {
-    "src": "logic",
-    "dst": "store-rox_feature_actions",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-api-metering",
+    "dst": "store-rox-feature-actions",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/api/metering/feature_action_catalog.py",
      "lines": [
@@ -318,9 +292,9 @@
     }
    },
    {
-    "src": "models",
-    "dst": "store-rox_feature_actions",
-    "label": "uses (1)",
+    "src": "library-backend-src-rox-core-models",
+    "dst": "store-rox-feature-actions",
+    "label": "reads/writes",
     "source": {
      "path": "backend/src/rox_core/models/rox_feature_actions.py",
      "lines": [
