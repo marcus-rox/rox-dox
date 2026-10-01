@@ -157,7 +157,7 @@ def test_group_ids_must_be_unique(page_data: dict[str, object]) -> None:
         Page.model_validate(page_data)
 
 
-def test_group_and_node_ids_can_match(
+def test_group_and_node_ids_must_be_unique(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -169,13 +169,9 @@ def test_group_and_node_ids_can_match(
             "source": {"path": "pkg/a.py", "lines": [1, 3]},
         }
     ]
-    nodes = block["nodes"]
-    assert isinstance(nodes, list)
-    node = nodes[0]
-    assert isinstance(node, dict)
-    node["group"] = "api"
 
-    Page.model_validate(page_data)
+    with pytest.raises(ValidationError, match="duplicate group/node id 'api'"):
+        Page.model_validate(page_data)
 
 
 def test_block_figure_ids_must_be_unique(page_data: dict[str, object]) -> None:

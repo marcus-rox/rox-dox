@@ -130,6 +130,13 @@ class BlockDiagram(Model):
             raise ValueError(f"block diagram: duplicate node id '{duplicate_id}'")
 
         declared_groups = set(group_ids)
+        shared_id = next(
+            (group_id for group_id in group_ids if group_id in declared_nodes),
+            None,
+        )
+        if shared_id is not None:
+            raise ValueError(f"block diagram: duplicate group/node id '{shared_id}'")
+
         groups_by_id = {group.id: group for group in self.groups}
         for group in self.groups:
             if group.parent is not None and group.parent not in declared_groups:

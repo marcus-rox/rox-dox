@@ -2062,7 +2062,7 @@ block_figures = [
         ],
         "block": {
             "groups": [
-                {"id": "app", "label": "Business logic", "source": s_rn},
+                {"id": "business", "label": "Business logic", "source": s_rn},
                 {
                     "id": "ext_int",
                     "label": "ext_integrations/",
@@ -2088,7 +2088,7 @@ block_figures = [
                 N(
                     "app",
                     "rox_core/api, chat, tasks",
-                    "app",
+                    "business",
                     s_rn,
                     [],
                 ),
