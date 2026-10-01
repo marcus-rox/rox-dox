@@ -1016,13 +1016,14 @@ def _page_tree_item(
 ) -> str:
     page = tree.pages[page_id]
     css_class = "page current" if page_id == current.id else "page"
+    child_ids = tree.children_of(page_id)
+    chevron = CHEVRON_ICON if child_ids else SPACER_ICON
     row = _explorer_row(
-        CHEVRON_ICON + FOLDER_ICON,
+        chevron + FOLDER_ICON,
         page.title,
         page_href(current.id, page_id),
         css_class,
     )
-    child_ids = tree.children_of(page_id)
     if not child_ids:
         return f"<li>{row}</li>"
     open_attribute = " open" if page_id in expanded_ids else ""

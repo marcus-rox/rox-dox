@@ -715,6 +715,42 @@ def test_feature_tree_and_explorer_are_separate(
     assert max(folder_positions) < min(file_positions)
 
 
+def test_feature_tree_leaf_row_has_no_chevron(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"] = []
+    payload["block"]["edges"] = []
+    payload["data"]["sql_tables"] = []
+    payload["data"]["nosql"] = []
+    payload["sequences"] = []
+    payload["states"] = []
+    root = Page.model_validate(payload)
+    tree = build_tree([root])
+    document = render_page(
+        root,
+        tree=tree,
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+    feature_tree = re.search(
+        r'<nav id="feature-tree" aria-label="Feature tree">(.*?)</nav>',
+        document,
+        re.DOTALL,
+    )
+    assert feature_tree is not None
+    leaf_row = re.search(
+        r'<li>(<a class="row page current".*?</a>)</li>',
+        feature_tree.group(1),
+        re.DOTALL,
+    )
+    assert leaf_row is not None
+    assert 'class="chevron-spacer"' in leaf_row.group(1)
+    assert 'class="chevron"' not in leaf_row.group(1)
+
+
 def test_feature_tree_expands_current_path_and_labels_children(
     page_data: dict[str, object],
     plantuml_jar: Path,
