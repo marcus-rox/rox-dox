@@ -129,6 +129,10 @@ class _Placement:
     evidence: list[FeatureEvidence]
 
 
+def _most_common_lowest(counter: Counter[int]) -> int:
+    return min(counter, key=lambda feature: (-counter[feature], feature))
+
+
 _GENERATED_ROUTE = re.compile(r"generated/(?:core/)?([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)")
 _TS_IMPORT = re.compile(
     r"""(?:\bfrom\s*["']([^"']+)["']|\bfrom\s+["']([^"']+)["']|"""
@@ -136,12 +140,22 @@ _TS_IMPORT = re.compile(
     r"""\brequire\s*\(\s*["']([^"']+)["']\s*\))"""
 )
 _NAMESPACE_CALL = "FlaskRestxNamespace"
+_SCORE_TIE_EPSILON = 1e-9
 _DEPLOYMENT_ROOTS = (
     "k8s/",
     "cicd/",
     ".circleci/",
     ".github/workflows/",
 )
+
+
+def _lowest_score_feature(scores: list[float]) -> int:
+    highest = max(scores)
+    return min(
+        feature
+        for feature, score in enumerate(scores)
+        if score >= highest - _SCORE_TIE_EPSILON
+    )
 
 
 def _is_excluded(path: str) -> bool:
@@ -267,14 +281,15 @@ def _attribute_parts(expression: ast.expr) -> list[str] | None:
     return [expression.id, *reversed(parts)]
 
 
-def _relative_module(module: str, node: ast.ImportFrom) -> str:
-    package_parts = module.split(".")
-    if module and not node.level:
+def _relative_module(
+    module: str,
+    node: ast.ImportFrom,
+    *,
+    is_package: bool,
+) -> str:
+    if not node.level:
         return node.module or ""
-    if module:
-        package_parts = (
-            package_parts if module.endswith("__init__") else package_parts[:-1]
-        )
+    package_parts = module.split(".") if is_package else module.split(".")[:-1]
     base = package_parts[: len(package_parts) - node.level + 1]
     return ".".join([*base, *([node.module] if node.module else [])])
 
@@ -335,7 +350,11 @@ def _parse_graph(
         touched: set[str] = set()
         for node in ast.walk(graph_file.tree):
             if isinstance(node, ast.ImportFrom):
-                module = _relative_module(graph_file.module, node)
+                module = _relative_module(
+                    graph_file.module,
+                    node,
+                    is_package=path.endswith("/__init__.py"),
+                )
                 if not module or module.split(".")[0] not in packages:
                     continue
                 for alias in node.names:
@@ -378,9 +397,13 @@ def _parse_graph(
         graph_file.defines = defined
         for module in graph_file.imports:
             graph_file.import_lines[module] = _first_import_line(
-                graph_file.tree, module, module_to_path
+                graph_file.tree,
+                graph_file.module,
+                path.endswith("/__init__.py"),
+                module,
+                module_to_path,
             )
-        for table_name in touched:
+        for table_name in sorted(touched):
             graph_file.table_lines[table_name] = _table_line(
                 path, table_name, tables, graph_file.tree
             )
@@ -389,6 +412,8 @@ def _parse_graph(
 
 def _first_import_line(
     tree: ast.Module,
+    importing_module: str,
+    is_package: bool,
     target: str,
     module_to_path: Mapping[str, str],
 ) -> int:
@@ -400,7 +425,11 @@ def _first_import_line(
             if any(alias.name == target_module for alias in node.names):
                 return node.lineno
         elif isinstance(node, ast.ImportFrom):
-            module = _relative_module("", node)
+            module = _relative_module(
+                importing_module,
+                node,
+                is_package=is_package,
+            )
             if module == target_module or any(
                 f"{module}.{alias.name}" == target_module for alias in node.names
             ):
@@ -450,7 +479,7 @@ def _domain_scope(
         ):
             continue
         scores = Counter()
-        for table in graph_file.tables:
+        for table in sorted(graph_file.tables):
             domain_id = table_domain.get(table)
             if domain_id is not None and table in idf:
                 scores[domain_id] += idf[table]
@@ -477,7 +506,8 @@ def _domain_scope(
         total = sum(1 for neighbor in neighbors if neighbor in domains)
         if not total or not counter:
             return None
-        domain_id, count = counter.most_common(1)[0]
+        domain_id = min(counter, key=lambda item: (-counter[item], item))
+        count = counter[domain_id]
         return domain_id if count / total > share else None
 
     for _ in range(2):
@@ -492,14 +522,17 @@ def _domain_scope(
             domains[path] = [domain_id]
             reasons[path] = "calls"
 
+    new: dict[str, str] = {}
     for path in sorted(graph):
         if path in domains:
             continue
         domain_id = vote(importers[path], 0.999)
         if domain_id is not None:
-            domains[path] = [domain_id]
-            reasons[path] = "called_by"
-    for path, domain_ids in domains.items():
+            new[path] = domain_id
+    for path, domain_id in new.items():
+        domains[path] = [domain_id]
+        reasons[path] = "called_by"
+    for path, domain_ids in sorted(domains.items()):
         graph[path].domains = domain_ids
         graph[path].domain_reason = reasons[path]
     return domains, reasons
@@ -677,7 +710,7 @@ def _backend_evidence(
                     line=graph_file.table_lines.get(table, 1),
                 )
             )
-    for imported in graph_file.imports:
+    for imported in sorted(graph_file.imports):
         if owner.get(imported) == feature and imported != path:
             evidence.append(
                 FeatureEvidence(
@@ -687,7 +720,8 @@ def _backend_evidence(
                     line=graph_file.import_lines.get(imported, 1),
                 )
             )
-    for importer, importer_file in graph.items():
+    for importer in sorted(graph):
+        importer_file = graph[importer]
         if owner.get(importer) != feature or importer == path:
             continue
         if path not in importer_file.imports:
@@ -805,15 +839,23 @@ def _external_placements(
     graph: Mapping[str, _GraphFile],
     category_paths: Collection[str],
 ) -> dict[str, list[_Placement]]:
-    primary_tokens: list[tuple[str, str, int]] = []
-    for path, feature in primary_owner.items():
+    token_targets: defaultdict[str, list[tuple[str, int]]] = defaultdict(list)
+    for path, feature in sorted(primary_owner.items()):
         relative = path.removeprefix("backend/src/")
         if len(PurePosixPath(relative).parts) >= 2:
-            primary_tokens.append((path, path, feature))
-            primary_tokens.append((relative, path, feature))
+            token_targets[path].append((path, feature))
+            token_targets[relative].append((path, feature))
         module = graph[path].module
         if len(module.split(".")) >= 2:
-            primary_tokens.append((module, path, feature))
+            token_targets[module].append((path, feature))
+    reference_pattern = re.compile(
+        r"(?<![\w])(?:"
+        + "|".join(
+            re.escape(token)
+            for token in sorted(token_targets, key=lambda value: (-len(value), value))
+        )
+        + r")(?![\w])"
+    )
 
     results: dict[str, list[_Placement]] = {}
     for path in sorted(category_paths):
@@ -821,24 +863,25 @@ def _external_placements(
         by_feature: Counter[int] = Counter()
         evidence_by_feature: defaultdict[int, list[FeatureEvidence]] = defaultdict(list)
         for line_number, line in enumerate(source.splitlines(), 1):
-            for token, target_path, feature in primary_tokens:
-                if not re.search(rf"(?<![\w]){re.escape(token)}(?![\w])", line):
+            seen_tokens = set()
+            for match in reference_pattern.finditer(line):
+                token = match.group()
+                if token in seen_tokens:
                     continue
-                by_feature[feature] += 1
-                evidence_by_feature[feature].append(
-                    FeatureEvidence(
-                        kind="reference",
-                        target=token,
-                        path=path,
-                        line=line_number,
+                seen_tokens.add(token)
+                for _, feature in sorted(token_targets[token]):
+                    by_feature[feature] += 1
+                    evidence_by_feature[feature].append(
+                        FeatureEvidence(
+                            kind="reference",
+                            target=token,
+                            path=path,
+                            line=line_number,
+                        )
                     )
-                )
         if not by_feature:
             continue
-        highest = max(by_feature.values())
-        primary = min(
-            feature for feature, count in by_feature.items() if count == highest
-        )
+        primary = _most_common_lowest(by_feature)
         results[path] = [
             _Placement(
                 feature=feature,
@@ -927,12 +970,12 @@ def build_feature_map(
         scores = [
             sum(
                 local_idf[table]
-                for table in touch[path]
+                for table in sorted(touch[path])
                 if cluster_by_table[table] == feature
             )
             for feature in range(len(clusters))
         ]
-        owner[path] = max(range(len(clusters)), key=lambda feature: scores[feature])
+        owner[path] = _lowest_score_feature(scores)
     imports = {
         path: set(graph[path].imports) & set(domain_files) for path in domain_files
     }
@@ -941,7 +984,9 @@ def build_feature_map(
             if path in owner:
                 continue
             neighbors = [
-                owner[neighbor] for neighbor in imports[path] if neighbor in owner
+                owner[neighbor]
+                for neighbor in sorted(imports[path])
+                if neighbor in owner
             ]
             neighbors.extend(
                 owner[neighbor]
@@ -949,7 +994,7 @@ def build_feature_map(
                 if path in imports[neighbor] and neighbor in owner
             )
             if neighbors:
-                owner[path] = Counter(neighbors).most_common(1)[0][0]
+                owner[path] = _most_common_lowest(Counter(neighbors))
 
     primary_files = {
         feature: {
@@ -961,7 +1006,7 @@ def build_feature_map(
     }
     valid_owner: dict[str, int] = {}
     uncovered: dict[str, str] = {}
-    for path, feature in owner.items():
+    for path, feature in sorted(owner.items()):
         if _has_backend_evidence(
             path,
             feature,
@@ -975,7 +1020,7 @@ def build_feature_map(
             uncovered[path] = "no shared table or call in its feature"
 
     placements: defaultdict[str, list[_Placement]] = defaultdict(list)
-    for path, feature in valid_owner.items():
+    for path, feature in sorted(valid_owner.items()):
         reason = domain_reasons[path]
         placements[path].append(
             _Placement(
@@ -1002,7 +1047,7 @@ def build_feature_map(
         if touch[path]:
             primary_score = sum(
                 local_idf[table]
-                for table in touch[path]
+                for table in sorted(touch[path])
                 if cluster_by_table[table] == feature
             )
             for other_feature in range(len(clusters)):
@@ -1010,7 +1055,7 @@ def build_feature_map(
                     continue
                 other_score = sum(
                     local_idf[table]
-                    for table in touch[path]
+                    for table in sorted(touch[path])
                     if cluster_by_table[table] == other_feature
                 )
                 if other_score == 0 or other_score < 0.5 * primary_score:
@@ -1083,16 +1128,9 @@ def build_feature_map(
             )
         if not feature_tags:
             continue
-        primary = min(
-            (
-                feature
-                for feature, tagged in feature_tags.items()
-                if len(tagged) == max(len(items) for items in feature_tags.values())
-            ),
-            default=None,
+        primary = _most_common_lowest(
+            Counter({feature: len(tagged) for feature, tagged in feature_tags.items()})
         )
-        if primary is None:
-            continue
         web_placements[path] = [
             _Placement(
                 feature=feature,
@@ -1107,12 +1145,12 @@ def build_feature_map(
         for path in web_paths:
             if path in web_placements or _route_tags(path, snapshot.files[path]):
                 continue
-            imported_paths = [
+            imported_paths = sorted(
                 resolved
                 for imported, _ in _web_imports(path, snapshot.files[path])
                 if (resolved := _resolve_web_import(path, imported, web_files))
                 and resolved in web_placements
-            ]
+            )
             imported_features = [
                 placement.feature
                 for imported_path in imported_paths
@@ -1122,7 +1160,8 @@ def build_feature_map(
             if not imported_features:
                 continue
             counts = Counter(imported_features)
-            feature, count = counts.most_common(1)[0]
+            feature = _most_common_lowest(counts)
+            count = counts[feature]
             if count / len(imported_paths) <= 0.5:
                 continue
             evidence = [
@@ -1171,7 +1210,7 @@ def build_feature_map(
         deployment_paths | skill_paths,
     )
     feature_files: defaultdict[int, list[FeatureFile]] = defaultdict(list)
-    for path, file_placements in placements.items():
+    for path, file_placements in sorted(placements.items()):
         for placement in file_placements:
             feature_files[placement.feature].append(
                 FeatureFile(
@@ -1181,7 +1220,7 @@ def build_feature_map(
                     evidence=placement.evidence,
                 )
             )
-    for path, file_placements in web_placements.items():
+    for path, file_placements in sorted(web_placements.items()):
         for placement in file_placements:
             feature_files[placement.feature].append(
                 FeatureFile(
@@ -1191,7 +1230,7 @@ def build_feature_map(
                     evidence=placement.evidence,
                 )
             )
-    for path, file_placements in external_placements.items():
+    for path, file_placements in sorted(external_placements.items()):
         for placement in file_placements:
             feature_files[placement.feature].append(
                 FeatureFile(

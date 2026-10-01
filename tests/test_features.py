@@ -7,6 +7,7 @@ from pathlib import Path
 from rox_dox.features import (
     FeatureMap,
     _domain_scope,
+    _lowest_score_feature,
     _parse_graph,
     _snapshot,
     build_feature_map,
@@ -158,7 +159,6 @@ def test_domain_scope_clustering_and_call_propagation(tmp_path: Path) -> None:
         file.path for file in campaign.files
     }
     assert "backend/src/rox_core/shared.py" in {file.path for file in sequence.files}
-    assert "backend/src/rox_core/split.py" in {file.path for file in campaign.files}
 
 
 def test_domain_scope_split_vote_stays_unassigned(tmp_path: Path) -> None:
@@ -173,6 +173,123 @@ def test_domain_scope_split_vote_stays_unassigned(tmp_path: Path) -> None:
     )
 
     assert "backend/src/rox_core/split.py" not in domains
+
+
+def test_relative_imports_resolve_for_packages_and_modules(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/pkg/thing.py": (
+            "from sqlalchemy import Column, Integer\n"
+            "\n"
+            "class Thing:\n"
+            '    __tablename__ = "thing"\n'
+            "    id = Column(Integer, primary_key=True)\n"
+        ),
+        "backend/src/pkg/service.py": (
+            "from .thing import Thing\n"
+            "\n"
+            "def get_thing() -> Thing:\n"
+            "    return Thing()\n"
+        ),
+        "backend/src/pkg/__init__.py": "from .service import Thing\n",
+        "backend/src/pkg/a.py": "from .b import x\n",
+        "backend/src/pkg/b.py": "x = 1\n",
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    snapshot = _snapshot(repo, commit)
+    tables = extract_tables(repo, commit)
+    graph, _ = _parse_graph(snapshot, tables, {"thing"})
+    package_init = "backend/src/pkg/__init__.py"
+    service = "backend/src/pkg/service.py"
+    assert graph[package_init].imports == [service]
+    assert graph["backend/src/pkg/a.py"].imports == ["backend/src/pkg/b.py"]
+
+    feature_map = build_feature_map(repo, commit, {"seq": ["thing"]}, "seq")
+    package_entry = next(
+        file
+        for feature in feature_map.features
+        for file in feature.files
+        if file.path == package_init
+    )
+    import_evidence = next(
+        evidence
+        for evidence in package_entry.evidence
+        if evidence.kind == "call" and evidence.to == service
+    )
+    assert import_evidence.line == 1
+
+
+def test_called_by_pass_does_not_cascade(tmp_path: Path) -> None:
+    sources = {
+        "backend/src/pkg/a.py": (
+            "from sqlalchemy import Column, Integer\n"
+            "from .b import value\n"
+            "\n"
+            "class Sequence:\n"
+            '    __tablename__ = "sequence"\n'
+            "    id = Column(Integer, primary_key=True)\n"
+        ),
+        "backend/src/pkg/b.py": "from .c import value\n",
+        "backend/src/pkg/c.py": "value = 1\n",
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    snapshot = _snapshot(repo, commit)
+    tables = extract_tables(repo, commit)
+    graph, _ = _parse_graph(snapshot, tables, {"sequence"})
+
+    domains, reasons = _domain_scope(graph, {"seq": ["sequence"]})
+
+    assert domains["backend/src/pkg/a.py"] == ["seq"]
+    assert domains["backend/src/pkg/b.py"] == ["seq"]
+    assert reasons["backend/src/pkg/b.py"] == "called_by"
+    assert "backend/src/pkg/c.py" not in domains
+
+
+def test_tableless_call_tie_uses_lowest_feature_index(tmp_path: Path) -> None:
+    sources = {
+        "backend/src/pkg/alpha.py": (
+            "from sqlalchemy import Column, Integer\n"
+            "\n"
+            "class Alpha:\n"
+            '    __tablename__ = "alpha"\n'
+            "    id = Column(Integer, primary_key=True)\n"
+            "\n"
+            "def get_alpha():\n"
+            "    return Alpha()\n"
+        ),
+        "backend/src/pkg/zeta.py": (
+            "from sqlalchemy import Column, Integer\n"
+            "\n"
+            "class Zeta:\n"
+            '    __tablename__ = "zeta"\n'
+            "    id = Column(Integer, primary_key=True)\n"
+            "\n"
+            "def get_zeta():\n"
+            "    return Zeta()\n"
+        ),
+        "backend/src/pkg/choice.py": (
+            "from .alpha import get_alpha\nfrom .zeta import get_zeta\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    feature_map = build_feature_map(
+        repo,
+        commit,
+        {"seq": ["alpha", "zeta"]},
+        "seq",
+    )
+
+    alpha = _feature_by_table(feature_map, "alpha")
+    assert any(
+        file.path == "backend/src/pkg/choice.py" and file.primary
+        for file in alpha.files
+    )
+
+
+def test_table_score_tie_uses_epsilon_and_lowest_feature_index() -> None:
+    assert _lowest_score_feature([0.7 - 0.5e-9, 0.7]) == 0
+    assert _lowest_score_feature([0.7 - 2e-9, 0.7]) == 1
 
 
 def test_foreign_key_link_merges_clusters_at_default_threshold(
