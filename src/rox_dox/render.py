@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import html
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
+from types import MappingProxyType
+from urllib.parse import quote
 
+from rox_dox.block_svg import block_svg
 from rox_dox.diagrams import (
-    block_plantuml,
     emit_diagram_warnings,
     schema_plantuml,
     sequence_plantuml,
@@ -18,14 +20,18 @@ from rox_dox.model import (
     NotionDoc,
     Page,
     Related,
-    Sequence,
+    Sequence as SequenceDiagram,
     Source,
     StateMachine,
     page_sources,
 )
 from rox_dox.plantuml import DiagramError, render_svg
+from rox_dox.repo_tree import RepoEntry
 from rox_dox.schema import Table
 from rox_dox.tree import SiteTree
+
+
+NO_ENTRIES: Mapping[str, Sequence[RepoEntry]] = MappingProxyType({})
 
 
 PAGE_CSS = """\
@@ -90,50 +96,103 @@ body {
 #context > h2:not(:first-child) {
   margin-top: 1.25rem;
 }
-.notion-doc + .notion-doc {
-  padding-top: 0.75rem;
-  border-top: 1px solid #e2e7ee;
-}
-.notion-doc h3 {
-  margin: 0.5rem 0;
-  overflow-wrap: anywhere;
-}
-.context-meta {
+.notion-list {
   margin: 0;
-  color: #667085;
-  font-size: 0.85rem;
+  padding: 0;
+  list-style: none;
 }
-.notion-doc blockquote {
-  margin: 0.5rem 0 1rem;
+.notion-doc {
+  padding: 0.45rem 0;
+  border-top: 1px solid #eef1f5;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+.notion-doc:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.notion-doc a {
+  color: #182230;
+  text-decoration: none;
+}
+.notion-doc a:hover {
+  color: #145bc4;
+  text-decoration: underline;
 }
 .page-main {
   grid-area: main;
   min-width: 0;
 }
+#site-nav > h2 {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #667085;
+}
 .page-tree, .page-tree ul {
   margin: 0;
-  padding-left: 1rem;
+  padding: 0;
   list-style: none;
 }
 .page-tree {
-  padding-left: 0;
+  font: 13px/1.2 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-.page-tree li {
-  margin: 0.25rem 0;
+.page-tree ul {
+  margin-left: 11px;
+  padding-left: 6px;
+  border-left: 1px solid #e6e9ef;
 }
 .page-tree summary {
+  list-style: none;
   cursor: pointer;
 }
-.page-tree a {
-  display: inline-block;
-  padding: 0.2rem 0.4rem;
-  border-radius: 6px;
-  text-decoration: none;
+.page-tree summary::-webkit-details-marker {
+  display: none;
 }
-.page-tree a.current {
-  background: #E8F0FE;
-  color: #182230;
-  font-weight: 700;
+.page-tree .row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 6px 0 2px;
+  border-radius: 4px;
+  color: #26323f;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.page-tree .row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.page-tree .row:hover {
+  background: #f0f3f7;
+}
+.page-tree .row.current {
+  background: #e3ecfb;
+  color: #0f3f8c;
+  font-weight: 600;
+}
+.page-tree .row.pending, .page-tree .row.file {
+  color: #7a8594;
+}
+.page-tree .chevron, .page-tree .chevron-spacer {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  color: #7a8594;
+  transition: transform 0.1s;
+}
+.page-tree details[open] > summary .chevron {
+  transform: rotate(90deg);
+}
+.page-tree .icon {
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  color: #8a94a6;
+}
+.page-tree .row.page .icon {
+  color: #145bc4;
 }
 .breadcrumbs {
   margin: 0.25rem 0 1rem;
@@ -236,6 +295,43 @@ th {
   border: 1px solid #e8ecf2;
   border-radius: 10px;
   background: #fff;
+}
+.figure-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.figure-bar .collapse, .block-figure:target .figure-bar .expand {
+  display: none;
+}
+.block-figure:target .figure-bar .collapse {
+  display: inline;
+}
+.block-figure:target {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 1rem 1.5rem;
+  overflow: auto;
+  background: #fff;
+}
+.block-figure:target .block-scroll {
+  border: 0;
+}
+.block-scroll svg {
+  max-width: none !important;
+  margin: 0 !important;
+}
+.block-svg a:hover text {
+  text-decoration: underline;
+}
+.block-svg .edge-label {
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 .diagram svg {
   display: block;
@@ -489,7 +585,7 @@ def _diagram_card(
     )
 
 
-def _block_section(page: Page, *, repo_url: str, jar: Path) -> str:
+def _block_section(page: Page, *, repo_url: str) -> str:
     if not page.block.nodes:
         return _section(
             "block", "Block diagram", f'<p class="empty">{EMPTY_MESSAGE}</p>'
@@ -499,14 +595,14 @@ def _block_section(page: Page, *, repo_url: str, jar: Path) -> str:
         for label, source in page_sources(page)
         if label.startswith(("block group ", "block node ", "block edge "))
     ]
-    diagram = block_plantuml(page, repo_url=repo_url)
-    card = _diagram_card(
-        "System overview",
-        diagram,
-        elements,
-        page=page,
-        repo_url=repo_url,
-        jar=jar,
+    card = (
+        '<article class="diagram-card block-figure" id="block-figure">'
+        '<div class="figure-bar"><h3>System overview</h3>'
+        '<a class="expand" href="#block-figure">Expand full screen</a>'
+        '<a class="collapse" href="#block">Close</a></div>'
+        f'<div class="diagram block-scroll">{block_svg(page, repo_url=repo_url)}</div>'
+        f"{_sources_details(elements, page=page, repo_url=repo_url)}"
+        "</article>"
     )
     return _section("block", "Block diagram", card)
 
@@ -546,7 +642,7 @@ def _schema_section(
     return _section("schema", "Schema", card)
 
 
-def _sequence_elements(sequence: Sequence) -> list[tuple[str, Source]]:
+def _sequence_elements(sequence: SequenceDiagram) -> list[tuple[str, Source]]:
     elements = [
         (
             f"sequence '{sequence.title}' participant {participant.id}",
@@ -659,35 +755,121 @@ def _current_page_link(tree: SiteTree, from_id: str, page_id: str) -> str:
     )
 
 
+CHEVRON_ICON = (
+    '<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">'
+    '<path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+)
+FOLDER_ICON = (
+    '<svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 3.5h4.5l1.5 '
+    '1.5h7v8h-13z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>'
+)
+FILE_ICON = (
+    '<svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.5h6l3 3v10h-9z'
+    'M9.5 1.5v3h3" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>'
+)
+SPACER_ICON = '<span class="chevron-spacer" aria-hidden="true"></span>'
+
+
+def _entry_href(entry: RepoEntry, *, page: Page, repo_url: str) -> str:
+    kind = "tree" if entry.is_dir else "blob"
+    return f"{repo_url.rstrip('/')}/{kind}/{page.commit}/{quote(entry.path, safe='/')}"
+
+
+def _explorer_row(
+    icon: str, label: str, href: str, css_class: str, title: str = ""
+) -> str:
+    title_attribute = f' title="{_escape(title)}"' if title else ""
+    current = ' aria-current="page"' if "current" in css_class else ""
+    return (
+        f'<a class="row {css_class}" href="{_escape(href)}"{title_attribute}{current}>'
+        f"{icon}<span>{_escape(label)}</span></a>"
+    )
+
+
+def _sort_key(item: tuple[bool, str, str]) -> tuple[int, str]:
+    is_dir, label, _markup = item
+    return (0 if is_dir else 1, label.lower())
+
+
 def _tree_item(
     tree: SiteTree,
-    current_id: str,
+    current: Page,
     page_id: str,
-    ancestors: set[str],
+    *,
+    expanded_ids: set[str],
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
 ) -> str:
-    link = (
-        _current_page_link(tree, current_id, page_id)
-        if page_id == current_id
-        else _page_link(tree, current_id, page_id)
+    page = tree.pages[page_id]
+    css_class = "page current" if page_id == current.id else "page"
+    row = _explorer_row(
+        CHEVRON_ICON + FOLDER_ICON,
+        page.title,
+        page_href(current.id, page_id),
+        css_class,
     )
     child_ids = tree.children_of(page_id)
-    if not child_ids:
-        return f"<li>{link}</li>"
-
-    expanded = page_id == tree.root or page_id in ancestors or page_id == current_id
-    open_attribute = " open" if expanded else ""
-    items = "".join(
-        _tree_item(tree, current_id, child_id, ancestors) for child_id in child_ids
+    documented_paths = {
+        path for child_id in child_ids for path in tree.pages[child_id].paths
+    }
+    items: list[tuple[bool, str, str]] = [
+        (
+            True,
+            tree.pages[child_id].title,
+            _tree_item(
+                tree,
+                current,
+                child_id,
+                expanded_ids=expanded_ids,
+                entries=entries,
+                repo_url=repo_url,
+            ),
+        )
+        for child_id in child_ids
+    ]
+    for entry in entries.get(page_id, []):
+        if entry.path in documented_paths:
+            continue
+        href = _entry_href(entry, page=current, repo_url=repo_url)
+        if entry.is_dir:
+            markup = _explorer_row(
+                SPACER_ICON + FOLDER_ICON,
+                entry.name,
+                href,
+                "folder pending",
+                "No page yet",
+            )
+        else:
+            markup = _explorer_row(SPACER_ICON + FILE_ICON, entry.name, href, "file")
+        items.append((entry.is_dir, entry.name, f"<li>{markup}</li>"))
+    if not items:
+        return f"<li>{row}</li>"
+    open_attribute = " open" if page_id in expanded_ids else ""
+    children = "".join(
+        markup for _is_dir, _label, markup in sorted(items, key=_sort_key)
     )
     return (
-        f"<li><details{open_attribute}><summary>{link}</summary>"
-        f"<ul>{items}</ul></details></li>"
+        f"<li><details{open_attribute}><summary>{row}</summary>"
+        f"<ul>{children}</ul></details></li>"
     )
 
 
-def _site_nav_html(tree: SiteTree, page: Page) -> str:
-    ancestors = set(tree.ancestors(page.id))
-    root_item = _tree_item(tree, page.id, tree.root, ancestors)
+def _site_nav_html(
+    tree: SiteTree,
+    page: Page,
+    *,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+) -> str:
+    expanded_ids = {tree.root, page.id, *tree.ancestors(page.id)}
+    root_item = _tree_item(
+        tree,
+        page,
+        tree.root,
+        expanded_ids=expanded_ids,
+        entries=entries,
+        repo_url=repo_url,
+    )
     return (
         '<nav id="site-nav" aria-label="Site navigation">'
         "<h2>Explorer</h2>"
@@ -725,20 +907,14 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
 
 
 def _notion_doc_html(document: NotionDoc) -> str:
-    last_edited = document.last_edited.isoformat()
-    return (
-        '<article class="notion-doc">'
-        f"<h3>{_anchor(document.url, document.title)}</h3>"
-        f'<p class="context-meta">Last edited <time datetime="{last_edited}">'
-        f"{last_edited}</time></p>"
-        f"<blockquote>{_escape(document.excerpt)}</blockquote>"
-        "</article>"
-    )
+    return f'<li class="notion-doc">{_anchor(document.url, document.title)}</li>'
 
 
 def _context_panel_html(page: Page) -> str:
     notion_content = "".join(_notion_doc_html(document) for document in page.notion)
-    if not notion_content:
+    if notion_content:
+        notion_content = f'<ul class="notion-list">{notion_content}</ul>'
+    else:
         notion_content = '<p class="empty">No related Notion pages.</p>'
     return (
         '<aside id="context" aria-label="Context">'
@@ -754,13 +930,14 @@ def render_page(
     repo_url: str,
     tables: Mapping[str, Table],
     jar: Path,
+    entries: Mapping[str, Sequence[RepoEntry]] = NO_ENTRIES,
 ) -> str:
     emit_diagram_warnings(page)
     page_header = _page_header_html(tree, page)
     sections = "".join(
         [
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
-            _block_section(page, repo_url=repo_url, jar=jar),
+            _block_section(page, repo_url=repo_url),
             _schema_section(page, repo_url=repo_url, tables=tables, jar=jar),
             _sequence_section(page, repo_url=repo_url, jar=jar),
             _state_section(page, repo_url=repo_url, jar=jar),
@@ -774,7 +951,8 @@ def render_page(
         f"<title>{_escape(page.title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
         f'<body><div class="page-shell"><div id="sidebar">'
-        f"{_table_of_contents()}{_site_nav_html(tree, page)}</div>"
+        f"{_table_of_contents()}"
+        f"{_site_nav_html(tree, page, entries=entries, repo_url=repo_url)}</div>"
         f'<main class="page-main">{_breadcrumbs_html(tree, page)}'
         f"{page_header}{sections}</main>"
         f"{_context_panel_html(page)}</div></body></html>"

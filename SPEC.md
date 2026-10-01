@@ -72,14 +72,13 @@ sections at the top of the left panel, above the navigation tree.
 
 *Level 2 · context panel · serves `R-1`*
 
-Every page SHALL show, in a panel on the right, the Notion pages related to its module, each
-with its title, link, last-edited date and a short excerpt, above a Slack section marked as
-not yet available.
+Every page SHALL show, in a panel on the right, the Notion pages related to its module, each as
+its linked title, above a Slack section marked as not yet available.
 
 #### Scenario: related docs exist
 - GIVEN a module discussed in Notion
 - WHEN its page opens
-- THEN the right panel lists those Notion pages with excerpts and working links
+- THEN the right panel lists each Notion page as its linked title
 
 ### R-4 — Every claim is cited
 

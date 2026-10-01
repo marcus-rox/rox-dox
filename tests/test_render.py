@@ -6,6 +6,7 @@ from pathlib import Path
 
 from rox_dox.links import source_url
 from rox_dox.model import Page
+from rox_dox.repo_tree import RepoEntry
 from rox_dox.render import page_href, render_page
 from rox_dox.tree import build_tree
 
@@ -293,3 +294,86 @@ def test_block_sources_table_includes_group_and_detail_citations(
     assert '<th scope="row">block node api detail 1</th>' in block_html
     assert f'<a href="{group_url}">Source</a>' in block_html
     assert f'<a href="{detail_url}">Source</a>' in block_html
+
+
+def test_explorer_shows_documented_pages_and_pending_repository_entries(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["data"]["sql_tables"] = []
+    payload["data"]["nosql"] = []
+    payload["sequences"] = []
+    payload["states"] = []
+    root = Page.model_validate(payload)
+    child_payload = copy.deepcopy(payload)
+    child_payload.update(
+        {
+            "id": "rox-core/pkg",
+            "title": "pkg",
+            "parent": "rox-core",
+            "paths": ["pkg"],
+        }
+    )
+    child = Page.model_validate(child_payload)
+    tree = build_tree([root, child])
+    entries = {
+        root.id: [
+            RepoEntry(path="pkg", is_dir=True),
+            RepoEntry(path="models", is_dir=True),
+            RepoEntry(path="README.md", is_dir=False),
+            RepoEntry(path="pyproject.toml", is_dir=False),
+        ],
+        child.id: [],
+    }
+
+    document = render_page(
+        root,
+        tree=tree,
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+        entries=entries,
+    )
+    site_nav = re.search(
+        r'<nav id="site-nav" aria-label="Site navigation">(.*?)</nav>',
+        document,
+        re.DOTALL,
+    )
+    assert site_nav is not None
+    nav_html = site_nav.group(1)
+    rows = []
+    for match in re.finditer(
+        r'<a class="row ([^"]+)" href="([^"]+)"[^>]*>(.*?)</a>',
+        nav_html,
+        re.DOTALL,
+    ):
+        label = re.search(r"<span>(.*?)</span>", match.group(3), re.DOTALL)
+        assert label is not None
+        rows.append((match.group(1), match.group(2), label.group(1)))
+
+    assert any(
+        "page" in classes and href == page_href(root.id, child.id) and label == "pkg"
+        for classes, href, label in rows
+    )
+    assert any(
+        "pending" in classes
+        and href == f"{REPO_URL}/tree/{root.commit}/models"
+        and label == "models"
+        for classes, href, label in rows
+    )
+    assert any(
+        "file" in classes
+        and href == f"{REPO_URL}/blob/{root.commit}/README.md"
+        and label == "README.md"
+        for classes, href, label in rows
+    )
+    assert 'aria-current="page"' in nav_html
+    folder_positions = [
+        nav_html.index(f"<span>{label}</span>") for label in ("pkg", "models")
+    ]
+    file_positions = [
+        nav_html.index(f"<span>{label}</span>")
+        for label in ("README.md", "pyproject.toml")
+    ]
+    assert max(folder_positions) < min(file_positions)

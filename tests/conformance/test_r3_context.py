@@ -50,14 +50,11 @@ def test_notion_context_and_slack_placeholder_render_on_every_page(
     notion_panel = _context_fragment(root)
     assert "<h2>Notion</h2>" in notion_panel
     assert (
-        '<h3><a href="https://www.notion.so/rox/API-guide-123">API guide</a></h3>'
-        in notion_panel
+        '<li class="notion-doc"><a href="https://www.notion.so/rox/API-guide-123">'
+        "API guide</a></li>" in notion_panel
     )
-    assert 'Last edited <time datetime="2026-06-10">2026-06-10</time>' in notion_panel
-    assert (
-        "<blockquote>Reference material for &lt;API&gt; &amp; clients.</blockquote>"
-        in notion_panel
-    )
+    assert "2026-06-10" not in notion_panel
+    assert "Reference material for" not in notion_panel
 
     for document in (root, child, leaf):
         context = _context_fragment(document)

@@ -57,9 +57,9 @@ def test_three_page_navigation_and_relative_links_resolve(
     assert "rox-core.html" in root_hrefs
     assert "rox-core/pkg.html" in root_hrefs
     assert "rox-core/pkg/sub.html" in root_hrefs
-    assert '<details open><summary><a class="current"' in root
+    assert '<details open><summary><a class="row page current"' in root
     assert len(re.findall(r"<details open>", child)) == 2
-    assert len(re.findall(r"<details open>", leaf)) == 2
+    assert len(re.findall(r"<details open>", leaf)) == 3
     assert "Covers: <code>.</code>" in root
     assert "Covers: <code>pkg</code>" in child
     assert "Covers: <code>pkg/sub</code>" in leaf
@@ -69,7 +69,7 @@ def test_three_page_navigation_and_relative_links_resolve(
     assert "Submodules:" not in leaf
     assert '<a href="../../rox-core.html">rox-core</a>' in leaf
     assert '<a href="../pkg.html">pkg</a>' in leaf
-    assert "<details open><summary><a href=" in leaf
+    assert '<details open><summary><a class="row page current"' in leaf
 
     for html_file, document in (
         (root_file, root),

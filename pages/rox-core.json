@@ -1,0 +1,1664 @@
+{
+  "id": "rox-core",
+  "title": "rox-core",
+  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+  "parent": null,
+  "paths": [
+    "."
+  ],
+  "tldr": {
+    "summary": [
+      {
+        "text": "rox-core is a monorepo: Python backend, Next.js web, SwiftUI iOS, and the rox-cloud CI CLI.",
+        "sources": [
+          {
+            "path": "README.md",
+            "lines": [
+              1,
+              16
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Every backend service runs the same image; DEPLOY_TARGET picks a FastAPI server, Flask on Gunicorn, an SQS consumer, Temporal workers, or the agent cell scheduler.",
+        "sources": [
+          {
+            "path": "backend/entry-point.sh",
+            "lines": [
+              17,
+              24
+            ]
+          },
+          {
+            "path": "backend/entry-point.sh",
+            "lines": [
+              32,
+              52
+            ]
+          },
+          {
+            "path": "backend/entry-point.sh",
+            "lines": [
+              67,
+              82
+            ]
+          }
+        ]
+      }
+    ],
+    "key_points": [
+      {
+        "text": "Flask route registration covers 20 deploy targets; any other value raises ValueError.",
+        "sources": [
+          {
+            "path": "backend/src/rox_core/api/register_namespaces.py",
+            "lines": [
+              156,
+              415
+            ]
+          },
+          {
+            "path": "backend/src/rox_core/api/register_namespaces.py",
+            "lines": [
+              415,
+              415
+            ]
+          }
+        ]
+      },
+      {
+        "text": "11 targets consume SQS; each maps to one QueueType enum in tasks.types.",
+        "sources": [
+          {
+            "path": "backend/src/util/listener_utils.py",
+            "lines": [
+              14,
+              26
+            ]
+          }
+        ]
+      },
+      {
+        "text": "The SQS listener checks task_run state first: finished messages are deleted, stuck or failed tasks are reset to QUEUED.",
+        "sources": [
+          {
+            "path": "backend/src/tasks/listeners/base.py",
+            "lines": [
+              919,
+              960
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Chat turns are decoupled from HTTP: reserve stream, persist message, spawn producer; the reply is a resumable SSE read from Redis.",
+        "sources": [
+          {
+            "path": "backend/src/chat/background_execution/service.py",
+            "lines": [
+              85,
+              88
+            ]
+          },
+          {
+            "path": "backend/src/chat/routes/conversation/router.py",
+            "lines": [
+              398,
+              403
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Public API jobs: the Postgres api_jobs row is accepted first, then a Temporal workflow is started with a deterministic, duplicate-rejecting id.",
+        "sources": [
+          {
+            "path": "backend/src/public_api/async_jobs/jobs/service.py",
+            "lines": [
+              67,
+              86
+            ]
+          },
+          {
+            "path": "backend/src/public_api/async_jobs/temporal/dispatch.py",
+            "lines": [
+              56,
+              62
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Queues and KV go through shim_layer; KV defaults to DynamoDB with MongoDB as the alternative.",
+        "sources": [
+          {
+            "path": "docs/queue-abstraction.md",
+            "lines": [
+              5,
+              9
+            ]
+          },
+          {
+            "path": "backend/src/shim_layer/kv/factory.py",
+            "lines": [
+              17,
+              19
+            ]
+          }
+        ]
+      }
+    ],
+    "table": {
+      "columns": [
+        "DEPLOY_TARGET",
+        "Process",
+        "Role"
+      ],
+      "rows": [
+        [
+          "INTERACTION",
+          "Gunicorn (Flask), 2×50, timeout 123s",
+          "Main REST API + interaction queues"
+        ],
+        [
+          "CHAT · FASTAPI_INTERACTION · EVAL",
+          "uvicorn",
+          "Chat turns + SSE; FastAPI REST; evals"
+        ],
+        [
+          "PUBLIC_API",
+          "uvicorn",
+          "External API, async jobs"
+        ],
+        [
+          "MCP",
+          "uvicorn (Starlette)",
+          "MCP server"
+        ],
+        [
+          "WEBHOOK",
+          "Gunicorn, timeout 0",
+          "circleback, slack_agent, sequence tracking"
+        ],
+        [
+          "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · SOR · BATCH · BACKFILL · INTEGRATION · OUTREACH · WORKFLOWSCHEDULER",
+          "Gunicorn + in-process SQS listeners",
+          "Queue workers"
+        ],
+        [
+          "ASYNC_AGENT",
+          "run_async_listeners.py",
+          "Async SQS consumer only"
+        ],
+        [
+          "TEMPORAL_WORKER · ENRICHMENT_TEMPORAL_WORKER · WORKFLOW_TEMPORAL_WORKER",
+          "Gunicorn + Temporal worker",
+          "Durable workflows"
+        ],
+        [
+          "CELL",
+          "run_cell.py",
+          "CellScheduler for agent cells"
+        ]
+      ],
+      "sources": [
+        {
+          "path": "backend/entry-point.sh",
+          "lines": [
+            17,
+            24
+          ]
+        },
+        {
+          "path": "backend/entry-point.sh",
+          "lines": [
+            32,
+            52
+          ]
+        },
+        {
+          "path": "backend/entry-point.sh",
+          "lines": [
+            67,
+            82
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            156,
+            415
+          ]
+        },
+        {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            14,
+            26
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/__init__.py",
+          "lines": [
+            600,
+            600
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/__init__.py",
+          "lines": [
+            648,
+            648
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/__init__.py",
+          "lines": [
+            714,
+            714
+          ]
+        },
+        {
+          "path": "backend/run_cell.py",
+          "lines": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    "notes": [
+      {
+        "text": "devtool/ is marked legacy in the root README.",
+        "sources": [
+          {
+            "path": "README.md",
+            "lines": [
+              16,
+              17
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Locally, docker-compose stands in Postgres, Redis, Mongo, LocalStack and Temporal for AWS and cloud services.",
+        "sources": [
+          {
+            "path": "backend/docker-compose-infra.yaml",
+            "lines": [
+              10,
+              11
+            ]
+          },
+          {
+            "path": "backend/docker-compose-infra.yaml",
+            "lines": [
+              92,
+              93
+            ]
+          },
+          {
+            "path": "backend/docker-compose-infra.yaml",
+            "lines": [
+              138,
+              139
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "block": {
+    "groups": [
+      {
+        "id": "clients",
+        "label": "Clients",
+        "source": {
+          "path": "README.md",
+          "lines": [
+            1,
+            16
+          ]
+        }
+      },
+      {
+        "id": "http",
+        "label": "HTTP services",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            156,
+            415
+          ]
+        }
+      },
+      {
+        "id": "queues",
+        "label": "Queues + workflow engine",
+        "source": {
+          "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+          "lines": [
+            7,
+            14
+          ]
+        }
+      },
+      {
+        "id": "workers_col",
+        "label": "Background workers",
+        "source": {
+          "path": "backend/entry-point.sh",
+          "lines": [
+            17,
+            24
+          ]
+        }
+      },
+      {
+        "id": "workers",
+        "label": "SQS listener targets",
+        "parent": "workers_col",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            14,
+            26
+          ]
+        }
+      },
+      {
+        "id": "durable",
+        "label": "Durable / long-running",
+        "parent": "workers_col",
+        "source": {
+          "path": "backend/src/rox_core/__init__.py",
+          "lines": [
+            600,
+            600
+          ]
+        }
+      },
+      {
+        "id": "data",
+        "label": "Stores",
+        "source": {
+          "path": "backend/docker-compose-infra.yaml",
+          "lines": [
+            10,
+            11
+          ]
+        }
+      },
+      {
+        "id": "external",
+        "label": "External providers",
+        "source": {
+          "path": "ascii_architecture.md",
+          "lines": [
+            135,
+            164
+          ]
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "id": "web",
+        "label": "web (Next.js 14)",
+        "group": "clients",
+        "source": {
+          "path": "web/AGENTS.md",
+          "lines": [
+            3,
+            3
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "pnpm monorepo; app in web/apps/web",
+            "sources": [
+              {
+                "path": "web/AGENTS.md",
+                "lines": [
+                  3,
+                  3
+                ]
+              }
+            ]
+          },
+          {
+            "text": "react-query hooks generated by orval from swagger",
+            "sources": [
+              {
+                "path": "web/AGENTS.md",
+                "lines": [
+                  9,
+                  9
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ios",
+        "label": "ios (SwiftUI)",
+        "group": "clients",
+        "source": {
+          "path": "ios/README.md",
+          "lines": [
+            3,
+            4
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "RoxIOS app + RoxVoiceWidget Live Activity",
+            "sources": [
+              {
+                "path": "ios/README.md",
+                "lines": [
+                  3,
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "text": "WebRTC realtime voice; generated API client",
+            "sources": [
+              {
+                "path": "ios/README.md",
+                "lines": [
+                  8,
+                  9
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Auth0 login via Swift package",
+            "sources": [
+              {
+                "path": "ios/README.md",
+                "lines": [
+                  14,
+                  15
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "interaction",
+        "label": "INTERACTION (Flask)",
+        "group": "http",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            156,
+            320
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "Main REST API: /user, /integrations, /sequences, /dialer, /billing…",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  156,
+                  320
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Gunicorn 2 workers × 50 threads, timeout 123s",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  83,
+                  96
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Keep-alive 200s outlasts the ALB 180s idle timeout",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  86,
+                  86
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Also consumes InteractionQueueType SQS queues",
+            "sources": [
+              {
+                "path": "backend/src/util/listener_utils.py",
+                "lines": [
+                  14,
+                  26
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chat",
+        "label": "CHAT (FastAPI)",
+        "group": "http",
+        "source": {
+          "path": "backend/run_chat.py",
+          "lines": [
+            5,
+            17
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "uvicorn chat.server.fastapi_app",
+            "sources": [
+              {
+                "path": "backend/run_chat.py",
+                "lines": [
+                  5,
+                  17
+                ]
+              }
+            ]
+          },
+          {
+            "text": "POST /message/{id} starts a background turn",
+            "sources": [
+              {
+                "path": "backend/src/chat/routes/conversation/router.py",
+                "lines": [
+                  281,
+                  289
+                ]
+              }
+            ]
+          },
+          {
+            "text": "GET /message/stream/{id} serves SSE, resumable",
+            "sources": [
+              {
+                "path": "backend/src/chat/routes/conversation/router.py",
+                "lines": [
+                  322,
+                  323
+                ]
+              },
+              {
+                "path": "backend/src/chat/routes/conversation/router.py",
+                "lines": [
+                  398,
+                  403
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Sibling uvicorn apps: FASTAPI_INTERACTION, EVAL",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  17,
+                  24
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "public_api",
+        "label": "PUBLIC_API (FastAPI)",
+        "group": "http",
+        "source": {
+          "path": "backend/run_public_api.py",
+          "lines": [
+            5,
+            10
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "uvicorn public_api.server.app",
+            "sources": [
+              {
+                "path": "backend/run_public_api.py",
+                "lines": [
+                  5,
+                  10
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Async jobs accepted into Postgres api_jobs",
+            "sources": [
+              {
+                "path": "backend/src/public_api/async_jobs/jobs/service.py",
+                "lines": [
+                  67,
+                  86
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Each job dispatched as a Temporal workflow",
+            "sources": [
+              {
+                "path": "backend/src/public_api/async_jobs/temporal/dispatch.py",
+                "lines": [
+                  56,
+                  62
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "webhook",
+        "label": "WEBHOOK (Flask)",
+        "group": "http",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            407,
+            412
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "/circleback, /slack_agent, /sequences_tracking",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  407,
+                  412
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Gunicorn 2 × 50 threads, no worker timeout",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  97,
+                  99
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mcp",
+        "label": "MCP server",
+        "group": "http",
+        "source": {
+          "path": "backend/run_mcp.py",
+          "lines": [
+            16,
+            20
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "uvicorn external_mcp.mcp_server Starlette app",
+            "sources": [
+              {
+                "path": "backend/run_mcp.py",
+                "lines": [
+                  16,
+                  20
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent_workers",
+        "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+        "group": "workers",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            14,
+            26
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "AGENT: /tasks, /insights, /digests, /graph",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  351,
+                  383
+                ]
+              }
+            ]
+          },
+          {
+            "text": "REALTIMEAGENT: research and enrichment routes",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  320,
+                  331
+                ]
+              }
+            ]
+          },
+          {
+            "text": "REALTIMEAGENT/OUTREACH can run a standalone consumer",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  38,
+                  44
+                ]
+              }
+            ]
+          },
+          {
+            "text": "ASYNC_AGENT runs only async listeners, no Gunicorn",
+            "sources": [
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  100,
+                  101
+                ]
+              },
+              {
+                "path": "backend/entry-point.sh",
+                "lines": [
+                  32,
+                  37
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "data_workers",
+        "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+        "group": "workers",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            14,
+            26
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "SOR: graph + system-of-record task routes",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  331,
+                  339
+                ]
+              }
+            ]
+          },
+          {
+            "text": "BATCH: batch task routes",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  339,
+                  346
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Each target polls its own QueueType enum",
+            "sources": [
+              {
+                "path": "backend/src/util/listener_utils.py",
+                "lines": [
+                  14,
+                  26
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "outreach_sched",
+        "label": "OUTREACH · WORKFLOWSCHEDULER",
+        "group": "workers",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            24,
+            25
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "OutreachQueueType / WorkflowSchedulerQueueType",
+            "sources": [
+              {
+                "path": "backend/src/util/listener_utils.py",
+                "lines": [
+                  24,
+                  25
+                ]
+              }
+            ]
+          },
+          {
+            "text": "WORKFLOWSCHEDULER runs leader election",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/__init__.py",
+                "lines": [
+                  775,
+                  780
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "temporal_workers",
+        "label": "Temporal workers (3 targets)",
+        "group": "durable",
+        "source": {
+          "path": "backend/src/rox_core/__init__.py",
+          "lines": [
+            600,
+            600
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "TEMPORAL_WORKER, ENRICHMENT_…, WORKFLOW_TEMPORAL_WORKER",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/__init__.py",
+                "lines": [
+                  600,
+                  600
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/__init__.py",
+                "lines": [
+                  648,
+                  648
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/__init__.py",
+                "lines": [
+                  714,
+                  714
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Task queues: rox-flow, enrichment, outbound-prospecting…",
+            "sources": [
+              {
+                "path": "backend/src/temporal/queues.py",
+                "lines": [
+                  1,
+                  7
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cell",
+        "label": "CELL (agent cell runtime)",
+        "group": "durable",
+        "source": {
+          "path": "backend/run_cell.py",
+          "lines": [
+            1,
+            1
+          ]
+        },
+        "kind": "component",
+        "details": [
+          {
+            "text": "No queue listeners; runs CellScheduler",
+            "sources": [
+              {
+                "path": "backend/run_cell.py",
+                "lines": [
+                  1,
+                  1
+                ]
+              },
+              {
+                "path": "backend/run_cell.py",
+                "lines": [
+                  50,
+                  51
+                ]
+              }
+            ]
+          },
+          {
+            "text": "One scheduler per process; tick = one scheduling round",
+            "sources": [
+              {
+                "path": "backend/src/agent_framework/cell_runtime/scheduler.py",
+                "lines": [
+                  56,
+                  57
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Cell lease + runtime rows in Mongo agent_cell_runtime",
+            "sources": [
+              {
+                "path": "backend/src/agent_framework/cell_runtime/scheduler.py",
+                "lines": [
+                  67,
+                  70
+                ]
+              },
+              {
+                "path": "backend/src/agent_framework/cell_runtime/models.py",
+                "lines": [
+                  17,
+                  24
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "postgres",
+        "label": "PostgreSQL + pgvector",
+        "group": "data",
+        "source": {
+          "path": "backend/docker-compose-infra.yaml",
+          "lines": [
+            10,
+            11
+          ]
+        },
+        "kind": "store",
+        "details": [
+          {
+            "text": "Primary DB behind SQLAlchemy models",
+            "sources": [
+              {
+                "path": "ascii_architecture.md",
+                "lines": [
+                  3,
+                  42
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Holds task_run, conversation, api_jobs, agent_cell…",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/models/task.py",
+                "lines": [
+                  52,
+                  52
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/conversation/conversation.py",
+                "lines": [
+                  32,
+                  32
+                ]
+              },
+              {
+                "path": "backend/src/public_api/async_jobs/jobs/models.py",
+                "lines": [
+                  27,
+                  32
+                ]
+              },
+              {
+                "path": "backend/src/agent_framework/cell_runtime/models.py",
+                "lines": [
+                  17,
+                  24
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "redis",
+        "label": "Redis",
+        "group": "data",
+        "source": {
+          "path": "backend/docker-compose-infra.yaml",
+          "lines": [
+            46,
+            47
+          ]
+        },
+        "kind": "store",
+        "details": [
+          {
+            "text": "Chat turn stream chat:conversation:{id}:stream:{sid}",
+            "sources": [
+              {
+                "path": "backend/src/chat/background_execution/stream_runner.py",
+                "lines": [
+                  33,
+                  34
+                ]
+              }
+            ]
+          },
+          {
+            "text": "XADD message / heartbeat events",
+            "sources": [
+              {
+                "path": "backend/src/shim_layer/redis_shim/redis_stream_shim.py",
+                "lines": [
+                  166,
+                  171
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sqs",
+        "label": "SQS queues (QueueShim)",
+        "group": "queues",
+        "source": {
+          "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+          "lines": [
+            7,
+            14
+          ]
+        },
+        "kind": "queue",
+        "details": [
+          {
+            "text": "App code never calls boto3 SQS directly",
+            "sources": [
+              {
+                "path": "docs/queue-abstraction.md",
+                "lines": [
+                  5,
+                  9
+                ]
+              }
+            ]
+          },
+          {
+            "text": "QueueRouter fans one queue type out by priority",
+            "sources": [
+              {
+                "path": "backend/src/tasks/types.py",
+                "lines": [
+                  291,
+                  293
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Local stand-in: LocalStack",
+            "sources": [
+              {
+                "path": "backend/docker-compose-infra.yaml",
+                "lines": [
+                  92,
+                  93
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kv",
+        "label": "KV store (DynamoDB or Mongo)",
+        "group": "data",
+        "source": {
+          "path": "backend/src/shim_layer/kv/factory.py",
+          "lines": [
+            17,
+            19
+          ]
+        },
+        "kind": "store",
+        "details": [
+          {
+            "text": "KV_PROVIDER selects provider; default dynamodb",
+            "sources": [
+              {
+                "path": "backend/src/shim_layer/kv/factory.py",
+                "lines": [
+                  17,
+                  19
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Provider-agnostic interface for DynamoDB + MongoDB",
+            "sources": [
+              {
+                "path": "docs/kv-store-abstraction.md",
+                "lines": [
+                  5,
+                  5
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Mongo also runs locally in docker-compose",
+            "sources": [
+              {
+                "path": "backend/docker-compose-infra.yaml",
+                "lines": [
+                  60,
+                  61
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "temporal_srv",
+        "label": "Temporal server",
+        "group": "queues",
+        "source": {
+          "path": "backend/docker-compose-infra.yaml",
+          "lines": [
+            138,
+            139
+          ]
+        },
+        "kind": "queue",
+        "details": [
+          {
+            "text": "Durable workflow engine for jobs and flows",
+            "sources": [
+              {
+                "path": "backend/docker-compose-infra.yaml",
+                "lines": [
+                  138,
+                  139
+                ]
+              },
+              {
+                "path": "backend/src/public_api/async_jobs/temporal/dispatch.py",
+                "lines": [
+                  56,
+                  62
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "llm",
+        "label": "LLM providers",
+        "group": "external",
+        "source": {
+          "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+          "lines": [
+            99,
+            99
+          ]
+        },
+        "kind": "external",
+        "details": [
+          {
+            "text": "Anthropic",
+            "sources": [
+              {
+                "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+                "lines": [
+                  99,
+                  99
+                ]
+              }
+            ]
+          },
+          {
+            "text": "OpenAI Responses",
+            "sources": [
+              {
+                "path": "backend/src/agent_framework/model/rox_openai_responses_model.py",
+                "lines": [
+                  7,
+                  7
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Vertex AI and SambaNova via LiteLLM",
+            "sources": [
+              {
+                "path": "backend/src/agent_framework/model/rox_litellm_vertex_ai_model.py",
+                "lines": [
+                  44,
+                  44
+                ]
+              },
+              {
+                "path": "backend/src/agent_framework/model/rox_litellm_sambanova_model.py",
+                "lines": [
+                  13,
+                  13
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "crm",
+        "label": "CRM + workspace APIs",
+        "group": "external",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            300,
+            303
+          ]
+        },
+        "kind": "external",
+        "details": [
+          {
+            "text": "Salesforce and HubSpot enrichment routes",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  300,
+                  303
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Google, Slack, Microsoft APIs",
+            "sources": [
+              {
+                "path": "ascii_architecture.md",
+                "lines": [
+                  135,
+                  164
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "twilio",
+        "label": "Twilio",
+        "group": "external",
+        "source": {
+          "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+          "lines": [
+            98,
+            106
+          ]
+        },
+        "kind": "external",
+        "details": [
+          {
+            "text": "TwilioShim wraps twilio Client per org",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+                "lines": [
+                  98,
+                  106
+                ]
+              }
+            ]
+          },
+          {
+            "text": "/dialer and /twilio_webhook_v2 routes",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  259,
+                  260
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "auth0",
+        "label": "Auth0",
+        "group": "external",
+        "source": {
+          "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+          "lines": [
+            155,
+            155
+          ]
+        },
+        "kind": "external",
+        "details": [
+          {
+            "text": "Auth0Shim; /auth0 namespace",
+            "sources": [
+              {
+                "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+                "lines": [
+                  155,
+                  155
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/api/register_namespaces.py",
+                "lines": [
+                  251,
+                  251
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "src": "web",
+        "dst": "interaction",
+        "label": "REST (orval hooks)",
+        "source": {
+          "path": "web/AGENTS.md",
+          "lines": [
+            9,
+            9
+          ]
+        }
+      },
+      {
+        "src": "web",
+        "dst": "chat",
+        "label": "POST message, then SSE",
+        "source": {
+          "path": "backend/src/chat/routes/conversation/router.py",
+          "lines": [
+            303,
+            316
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "sqs",
+        "label": "enqueue task",
+        "source": {
+          "path": "ascii_architecture.md",
+          "lines": [
+            3,
+            42
+          ]
+        }
+      },
+      {
+        "src": "sqs",
+        "dst": "agent_workers",
+        "label": "long-poll, execute_task",
+        "source": {
+          "path": "backend/src/tasks/listeners/base.py",
+          "lines": [
+            868,
+            868
+          ]
+        }
+      },
+      {
+        "src": "sqs",
+        "dst": "data_workers",
+        "label": "per-target queue types",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            14,
+            26
+          ]
+        }
+      },
+      {
+        "src": "sqs",
+        "dst": "outreach_sched",
+        "label": "per-target queue types",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            24,
+            25
+          ]
+        }
+      },
+      {
+        "src": "agent_workers",
+        "dst": "postgres",
+        "label": "check task_run state",
+        "source": {
+          "path": "backend/src/tasks/listeners/base.py",
+          "lines": [
+            919,
+            960
+          ]
+        }
+      },
+      {
+        "src": "chat",
+        "dst": "redis",
+        "label": "append turn events",
+        "source": {
+          "path": "backend/src/chat/background_execution/stream_runner.py",
+          "lines": [
+            231,
+            231
+          ]
+        }
+      },
+      {
+        "src": "chat",
+        "dst": "llm",
+        "label": "turn model calls",
+        "source": {
+          "path": "backend/src/chat/background_execution/service.py",
+          "lines": [
+            127,
+            127
+          ]
+        }
+      },
+      {
+        "src": "public_api",
+        "dst": "postgres",
+        "label": "accept api_jobs row",
+        "source": {
+          "path": "backend/src/public_api/async_jobs/jobs/service.py",
+          "lines": [
+            67,
+            86
+          ]
+        }
+      },
+      {
+        "src": "public_api",
+        "dst": "temporal_srv",
+        "label": "start_workflow",
+        "source": {
+          "path": "backend/src/public_api/async_jobs/temporal/dispatch.py",
+          "lines": [
+            56,
+            62
+          ]
+        }
+      },
+      {
+        "src": "temporal_srv",
+        "dst": "temporal_workers",
+        "label": "task queues",
+        "source": {
+          "path": "backend/src/temporal/queues.py",
+          "lines": [
+            1,
+            7
+          ]
+        }
+      },
+      {
+        "src": "cell",
+        "dst": "kv",
+        "label": "lease runtime rows",
+        "source": {
+          "path": "backend/src/agent_framework/cell_runtime/scheduler.py",
+          "lines": [
+            67,
+            70
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "crm",
+        "label": "enrichment",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            300,
+            303
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "twilio",
+        "label": "dialer + webhooks",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            259,
+            260
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "auth0",
+        "label": "/auth0",
+        "source": {
+          "path": "backend/src/rox_core/api/register_namespaces.py",
+          "lines": [
+            251,
+            251
+          ]
+        }
+      }
+    ]
+  },
+  "data": {
+    "sql_tables": [],
+    "nosql": []
+  },
+  "sequences": [],
+  "states": [],
+  "related": [],
+  "notion": [
+    {
+      "title": "REST API Layer",
+      "url": "https://www.notion.so/376fe3091319814ebe00c88e8f1a4735",
+      "last_edited": "2026-06-05",
+      "excerpt": "Builds the Flask app, configures CORS/OTel/DB/migrations/bcrypt, registers K8s probes, initializes FlaskExecutor, registers blueprints, and starts in-process listeners for some deploy targets."
+    },
+    {
+      "title": "Backend Layering",
+      "url": "https://www.notion.so/376fe3091319812996d7c57c2cef876c",
+      "last_edited": "2026-06-05",
+      "excerpt": "How to run each backend service locally by DEPLOY_TARGET (REALTIMEAGENT on 5003, SOR on 5004, …) and how the backend layers fit together."
+    },
+    {
+      "title": "Rox In-VPC Deployment",
+      "url": "https://www.notion.so/3dffe309131980e69fe9db18762c706d",
+      "last_edited": "2026-09-22",
+      "excerpt": "Reference deployment: eval, public-api and webhook autoscale on CPU up to 3; async-agent (1-6) and core-backfill (1-8) autoscale on queue depth."
+    },
+    {
+      "title": "K8s Migration High Level",
+      "url": "https://www.notion.so/31efe309131980108e54cb0a8e0cac65",
+      "last_edited": "2026-06-22",
+      "excerpt": "Workload deployment definitions live in rox-core so the same commit history captures the code, build inputs and deploy intent for each service."
+    },
+    {
+      "title": "Long-Lived Idle Sessions and Connection Pooling RCA",
+      "url": "https://www.notion.so/337fe309131981a58d75f43dbc8a718b",
+      "last_edited": "2026-04-03",
+      "excerpt": "discover_listeners_for_deploy_target() walks every queue type for the deploy target; for targets in QUEUE_CONFIGS, create_app() starts listeners in-process."
+    }
+  ]
+}
