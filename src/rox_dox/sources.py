@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 
@@ -11,6 +12,7 @@ from rox_dox.model import (
     Source,
     page_sources,
 )
+from rox_dox.schema import Table
 
 
 def _valid_notion_url(url: str) -> bool:
@@ -101,7 +103,12 @@ def _source_problem(
     return _code_source_problems(label, source, page.commit, repo, line_count_cache)
 
 
-def page_problems(page: Page, repo: Path) -> list[str]:
+def page_problems(
+    page: Page,
+    repo: Path,
+    *,
+    tables: Mapping[str, Table] | None = None,
+) -> list[str]:
     commit_result = subprocess.run(
         [
             "git",
@@ -121,7 +128,7 @@ def page_problems(page: Page, repo: Path) -> list[str]:
         problems.append(f"commit '{page.commit}' not found in repository")
 
     line_count_cache: dict[tuple[str, str], int | None] = {}
-    for label, source in page_sources(page):
+    for label, source in page_sources(page, tables=tables):
         problems.extend(
             _source_problem(label, source, page, repo, line_count_cache, commit_exists)
         )

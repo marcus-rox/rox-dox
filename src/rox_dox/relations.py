@@ -6,6 +6,7 @@ import subprocess
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from pathlib import PurePosixPath
 
 from rox_dox.schema import extract_tables
 
@@ -112,54 +113,59 @@ def _candidate_for_columns(
     left: tuple[str, str],
     right: tuple[str, str],
     *,
-    class_to_table: dict[str, str],
+    class_to_tables: dict[str, tuple[str, ...]],
+    imported_tables: dict[str, tuple[str, ...]],
     selected_tables: set[str],
     signal: str,
     path: str,
     line: int,
-) -> RelationCandidate | None:
-    src_table = class_to_table.get(left[0])
-    dst_table = class_to_table.get(right[0])
-    if (
-        src_table is None
-        or dst_table is None
-        or src_table not in selected_tables
-        or dst_table not in selected_tables
-    ):
-        return None
-    return RelationCandidate(
-        src=f"{src_table}.{left[1]}",
-        dst=f"{dst_table}.{right[1]}",
-        signal=signal,
-        path=path,
-        line=line,
-    )
+) -> list[RelationCandidate]:
+    src_tables = imported_tables.get(left[0], class_to_tables.get(left[0], ()))
+    dst_tables = imported_tables.get(right[0], class_to_tables.get(right[0], ()))
+    if not src_tables or not dst_tables:
+        return []
+    ambiguous = len(src_tables) > 1 or len(dst_tables) > 1
+    candidate_signal = f"{signal}:ambiguous" if ambiguous else signal
+    return [
+        RelationCandidate(
+            src=f"{src_table}.{left[1]}",
+            dst=f"{dst_table}.{right[1]}",
+            signal=candidate_signal,
+            path=path,
+            line=line,
+        )
+        for src_table in src_tables
+        for dst_table in dst_tables
+        if src_table in selected_tables and dst_table in selected_tables
+    ]
 
 
 def _comparison_candidate(
     expression: ast.expr,
     *,
-    class_to_table: dict[str, str],
+    class_to_tables: dict[str, tuple[str, ...]],
+    imported_tables: dict[str, tuple[str, ...]],
     selected_tables: set[str],
     signal: str,
     path: str,
     line: int,
-) -> RelationCandidate | None:
+) -> list[RelationCandidate]:
     if (
         not isinstance(expression, ast.Compare)
         or len(expression.ops) != 1
         or not isinstance(expression.ops[0], ast.Eq)
         or len(expression.comparators) != 1
     ):
-        return None
+        return []
     left = _column_reference(expression.left)
     right = _column_reference(expression.comparators[0])
     if left is None or right is None:
-        return None
+        return []
     return _candidate_for_columns(
         left,
         right,
-        class_to_table=class_to_table,
+        class_to_tables=class_to_tables,
+        imported_tables=imported_tables,
         selected_tables=selected_tables,
         signal=signal,
         path=path,
@@ -213,7 +219,8 @@ def _primaryjoin_candidates(
     module: ast.Module,
     *,
     path: str,
-    class_to_table: dict[str, str],
+    class_to_tables: dict[str, tuple[str, ...]],
+    imported_tables: dict[str, tuple[str, ...]],
     selected_tables: set[str],
 ) -> list[RelationCandidate]:
     candidates = []
@@ -232,16 +239,17 @@ def _primaryjoin_candidates(
             except SyntaxError:
                 continue
             for node in ast.walk(expression):
-                candidate = _comparison_candidate(
-                    node,
-                    class_to_table=class_to_table,
-                    selected_tables=selected_tables,
-                    signal="primaryjoin",
-                    path=path,
-                    line=keyword.value.lineno,
+                candidates.extend(
+                    _comparison_candidate(
+                        node,
+                        class_to_tables=class_to_tables,
+                        imported_tables=imported_tables,
+                        selected_tables=selected_tables,
+                        signal="primaryjoin",
+                        path=path,
+                        line=keyword.value.lineno,
+                    )
                 )
-                if candidate is not None:
-                    candidates.append(candidate)
     return candidates
 
 
@@ -249,29 +257,77 @@ def _comparison_candidates(
     module: ast.Module,
     *,
     path: str,
-    class_to_table: dict[str, str],
+    class_to_tables: dict[str, tuple[str, ...]],
+    imported_tables: dict[str, tuple[str, ...]],
     selected_tables: set[str],
 ) -> list[RelationCandidate]:
     candidates = []
     for node in ast.walk(module):
-        candidate = _comparison_candidate(
-            node,
-            class_to_table=class_to_table,
-            selected_tables=selected_tables,
-            signal="comparison",
-            path=path,
-            line=getattr(node, "lineno", 1),
+        candidates.extend(
+            _comparison_candidate(
+                node,
+                class_to_tables=class_to_tables,
+                imported_tables=imported_tables,
+                selected_tables=selected_tables,
+                signal="comparison",
+                path=path,
+                line=getattr(node, "lineno", 1),
+            )
         )
-        if candidate is not None:
-            candidates.append(candidate)
     return candidates
+
+
+def _imported_class_tables(
+    module: ast.Module,
+    *,
+    path: str,
+    tables_by_path: dict[str, list[tuple[str, str]]],
+) -> dict[str, tuple[str, ...]]:
+    source_path = PurePosixPath(path)
+    source_parts = source_path.with_suffix("").parts
+    try:
+        source_root = source_parts.index("src")
+    except ValueError:
+        return {}
+    package_parts = source_parts[source_root + 1 : -1]
+    imported: dict[str, tuple[str, ...]] = {}
+    for node in ast.walk(module):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        module_parts = (node.module or "").split(".") if node.module else []
+        if node.level:
+            base_parts = package_parts[: len(package_parts) - node.level + 1]
+            module_parts = [*base_parts, *module_parts]
+        if not module_parts:
+            continue
+        candidate_paths = [
+            f"backend/src/{'/'.join(module_parts)}.py",
+            f"backend/src/{'/'.join(module_parts)}/__init__.py",
+        ]
+        imported_tables = [
+            (class_name, table_name)
+            for candidate_path in candidate_paths
+            for class_name, table_name in tables_by_path.get(candidate_path, [])
+        ]
+        for alias in node.names:
+            if alias.name == "*":
+                continue
+            local_name = alias.asname or alias.name
+            matches = tuple(
+                table_name
+                for class_name, table_name in imported_tables
+                if class_name == alias.name
+            )
+            imported[local_name] = tuple(sorted(set(matches)))
+    return imported
 
 
 def _file_candidates(
     path: str,
     source: str,
     *,
-    class_to_table: dict[str, str],
+    class_to_tables: dict[str, tuple[str, ...]],
+    tables_by_path: dict[str, list[tuple[str, str]]],
     selected_tables: set[str],
 ) -> list[RelationCandidate]:
     try:
@@ -281,24 +337,32 @@ def _file_candidates(
             f"could not parse {path}: line {error.lineno}: {error.msg}"
         ) from error
     source_lines = source.splitlines()
+    imported_tables = _imported_class_tables(
+        module,
+        path=path,
+        tables_by_path=tables_by_path,
+    )
+    local_class_tables = dict(tables_by_path.get(path, []))
     return [
         *_commented_foreign_key_candidates(
             module,
             source_lines,
             path=path,
-            class_to_table=class_to_table,
+            class_to_table=local_class_tables,
             selected_tables=selected_tables,
         ),
         *_primaryjoin_candidates(
             module,
             path=path,
-            class_to_table=class_to_table,
+            class_to_tables=class_to_tables,
+            imported_tables=imported_tables,
             selected_tables=selected_tables,
         ),
         *_comparison_candidates(
             module,
             path=path,
-            class_to_table=class_to_table,
+            class_to_tables=class_to_tables,
+            imported_tables=imported_tables,
             selected_tables=selected_tables,
         ),
     ]
@@ -310,9 +374,16 @@ def find_relation_candidates(
     tables: Sequence[str],
 ) -> list[RelationCandidate]:
     extracted_tables = extract_tables(repo, commit)
-    class_to_table = {
-        table.class_name: table.name for table in extracted_tables.values()
-    }
+    class_to_tables: dict[str, tuple[str, ...]] = {}
+    tables_by_path: dict[str, list[tuple[str, str]]] = {}
+    for table in extracted_tables.values():
+        class_to_tables.setdefault(table.class_name, ())
+        class_to_tables[table.class_name] = tuple(
+            sorted({*class_to_tables[table.class_name], table.name})
+        )
+        tables_by_path.setdefault(table.source.path, []).append(
+            (table.class_name, table.name)
+        )
     selected_tables = set(tables)
     candidates = []
     for path in _candidate_paths(repo, commit):
@@ -321,7 +392,8 @@ def find_relation_candidates(
             _file_candidates(
                 path,
                 source,
-                class_to_table=class_to_table,
+                class_to_tables=class_to_tables,
+                tables_by_path=tables_by_path,
                 selected_tables=selected_tables,
             )
         )

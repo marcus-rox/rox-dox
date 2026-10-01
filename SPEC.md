@@ -54,9 +54,11 @@ whole tree with the current page highlighted.
 
 Every page SHALL present, in order: a collapsible section with links to related modules and
 systems, a TLDR in the recap format (Summary, Key Points, Table, Interesting Notes), a UML
-block diagram, a UML schema diagram of the SQL and NoSQL data the module owns, UML sequence
-diagrams for its happy paths, and UML state diagrams for its stateful entities; and SHALL show
-a table of contents of those sections at the top of the left panel, above the navigation tree.
+block diagram, a static SVG schema diagram of its SQL and NoSQL data, UML sequence diagrams
+for its happy paths, and UML state diagrams for its stateful entities; the root schema SHALL
+show one card per domain with key tables, while submodule schemas SHALL show every in-scope
+table and column; and each page SHALL show a table of contents of those sections at the top of
+the left panel, above the navigation tree.
 
 #### Scenario: complete page
 - GIVEN any generated page

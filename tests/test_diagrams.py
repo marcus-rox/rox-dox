@@ -1,21 +1,23 @@
 from __future__ import annotations
 
 import copy
+import json
 import re
 from pathlib import Path
 
 import pytest
 
+from rox_dox.block_svg import block_layout_problems
 from rox_dox.diagrams import (
     emit_diagram_warnings,
-    schema_plantuml,
     sequence_plantuml,
     state_plantuml,
 )
 from rox_dox.links import source_url
-from rox_dox.model import Page
+from rox_dox.model import BlockDiagram, Page
 from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.schema import extract_tables
+from rox_dox.schema_svg import schema_svg
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 
@@ -36,31 +38,66 @@ def test_node_kind_defaults_to_component(page_data: dict[str, object]) -> None:
     page = _page(page_data)
 
     assert page.block.nodes[0].kind == "component"
+    assert page.block.nodes[0].many is False
+
+
+def test_authored_integration_layer_has_adjacent_column_edges() -> None:
+    pages_path = Path(__file__).resolve().parents[1] / "pages/rox-core.json"
+    payload = json.loads(pages_path.read_text(encoding="utf-8"))
+    figure_data = next(
+        figure
+        for figure in payload["block_figures"]
+        if figure["id"] == "integration-layer"
+    )
+    diagram = BlockDiagram.model_validate(figure_data["block"])
+
+    assert block_layout_problems(diagram) == []
+
+
+def test_authored_many_flags_match_plural_runtime_nodes() -> None:
+    pages_path = Path(__file__).resolve().parents[1] / "pages/rox-core.json"
+    payload = json.loads(pages_path.read_text(encoding="utf-8"))
+    figures = {
+        figure["id"]: figure["block"]["nodes"] for figure in payload["block_figures"]
+    }
+
+    assert {node["id"] for node in payload["block"]["nodes"] if node["many"]} == {
+        "interaction",
+        "webhook",
+        "agent_workers",
+        "data_workers",
+        "outreach_sched",
+        "temporal_workers",
+        "sqs",
+    }
+    assert {node["id"] for node in figures["task-pipeline"] if node["many"]} == {
+        "sqs",
+        "executor",
+    }
+    assert {node["id"] for node in figures["integration-layer"] if node["many"]} == {
+        "listener",
+        "sqs_aws",
+    }
+    assert {
+        node["id"] for node in figures["connect-google-workspace"] if node["many"]
+    } == {"fanout"}
+    assert not any(node["many"] for node in figures["chat-turn"])
 
 
 def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
-    plantuml_jar: Path,
 ) -> None:
     repo, commit = git_repo
     page = _page(page_data)
     tables = extract_tables(repo, commit)
-    source = schema_plantuml(page, repo_url=REPO_URL, tables=tables)
-    svg = render_svg(source, plantuml_jar)
+    svg = schema_svg(page, repo_url=REPO_URL, tables=tables)
 
-    assert "hide circle" in source
-    assert "hide empty methods" in source
-    assert "id: Integer <<PK>>" in source
-    assert "user_id: Integer <<FK>>" in source
-    assert all(marker in svg for marker in ("PK", "FK", "redis"))
-    assert "sql_1 --> sql_0" in source
-    assert "  key" in source
-    assert "  value" in source
-    assert (
-        f"sql_1 --> sql_0 : [[{source_url(tables['sessions'].source, repo_url=REPO_URL, commit=commit)}"
-        in source
+    assert re.search(
+        r'<svg[^>]+width="\d+" height="\d+" viewBox="0 0 \d+ \d+"',
+        svg,
     )
+    assert all(marker in svg for marker in ("users", "sessions", "redis"))
     assert all(
         source_url(tables[name].source, repo_url=REPO_URL, commit=page.commit)
         in _links(svg)
@@ -73,18 +110,13 @@ def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
     ) in _links(svg)
 
     page.data.sql_tables = ["sessions"]
-    out_of_scope_source = schema_plantuml(
-        page,
-        repo_url=REPO_URL,
-        tables=tables,
-    )
-    assert "sql_0 -->" not in out_of_scope_source
+    out_of_scope_svg = schema_svg(page, repo_url=REPO_URL, tables=tables)
+    assert 'marker-start="url(#arrow-enforced)"' not in out_of_scope_svg
 
 
 def test_schema_relations_render_as_linked_dashed_edges(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
-    plantuml_jar: Path,
 ) -> None:
     repo, commit = git_repo
     payload = copy.deepcopy(page_data)
@@ -112,17 +144,14 @@ def test_schema_relations_render_as_linked_dashed_edges(
     page = _page(payload)
     tables = extract_tables(repo, commit)
 
-    source = schema_plantuml(page, repo_url=REPO_URL, tables=tables)
-    svg = render_svg(source, plantuml_jar)
+    svg = schema_svg(page, repo_url=REPO_URL, tables=tables)
     relation_url = source_url(
         page.data.relations[0].source,
         repo_url=REPO_URL,
         commit=page.commit,
     )
 
-    assert f"sql_1 ..> sql_0 : [[{relation_url}" in source
-    assert "sql_1 ..> sql_1 :" in source
-    assert "nosql_0 ..> sql_0 :" in source
+    assert 'stroke-dasharray="6 4"' in svg
     assert "implicit foreign key" in svg
     assert "self relation" in svg
     assert "NoSQL field is free text" in svg
@@ -158,7 +187,7 @@ def test_schema_relation_endpoints_must_be_declared(
     page = _page(payload)
 
     with pytest.raises(DiagramError) as error:
-        schema_plantuml(
+        schema_svg(
             page,
             repo_url=REPO_URL,
             tables=extract_tables(repo, commit),

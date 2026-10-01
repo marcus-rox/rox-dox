@@ -10,7 +10,6 @@ from urllib.parse import quote
 from rox_dox.block_svg import block_svg
 from rox_dox.diagrams import (
     emit_diagram_warnings,
-    schema_plantuml,
     sequence_plantuml,
     state_plantuml,
 )
@@ -28,6 +27,7 @@ from rox_dox.model import (
 from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.repo_tree import RepoEntry
 from rox_dox.schema import Table
+from rox_dox.schema_svg import schema_svg
 from rox_dox.tree import SiteTree
 
 
@@ -309,6 +309,13 @@ a:hover {
 .toc li, .claim-list li, .related-list li {
   margin: 0.35rem 0;
 }
+.figure-notes {
+  font-size: 0.88rem;
+}
+.figure-notes .claim-list {
+  margin-top: 0.3rem;
+  margin-bottom: 0.5rem;
+}
 .citations {
   margin-left: 0.2rem;
   white-space: nowrap;
@@ -380,11 +387,57 @@ th {
 .block-svg a:hover text {
   text-decoration: underline;
 }
-.block-svg .edge-label {
-  paint-order: stroke;
-  stroke: #fff;
-  stroke-width: 4px;
-  stroke-linejoin: round;
+.schema-legend {
+  margin: 0 0 0.75rem;
+  color: #475467;
+  font-size: 0.85rem;
+}
+.schema-legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.4rem;
+  margin: 0.4rem 0;
+  padding: 0;
+  list-style: none;
+}
+.schema-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.schema-pk {
+  color: #b45309;
+  font-weight: 700;
+}
+.schema-fk {
+  color: #2563eb;
+  font-weight: 600;
+}
+.schema-boilerplate {
+  color: #9ca3af;
+}
+.schema-line {
+  display: inline-block;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+.schema-line-enforced {
+  color: #2563eb;
+}
+.schema-line-symbolic {
+  color: #9ca3af;
+  border-top-style: dashed;
+}
+.schema-line-blob {
+  color: #d97706;
+  border-top-style: dotted;
+}
+.schema-table-list {
+  font-family: Menlo, Consolas, monospace;
+  line-height: 1.8;
 }
 .diagram svg {
   display: block;
@@ -392,7 +445,7 @@ th {
   height: auto;
   margin: 0 auto;
 }
-.diagram-scroll svg {
+.block-scroll svg {
   max-width: none;
 }
 .sources {
@@ -431,11 +484,11 @@ blockquote {
   margin-bottom: 0.75rem;
 }
 #related summary h2::before {
-  content: "\25B8\00A0";
+  content: "▸ ";
   color: #6b7686;
 }
 #related details[open] summary h2::before {
-  content: "\25BE\00A0";
+  content: "▾ ";
 }
 @media (max-width: 1100px) {
   .page-shell {
@@ -643,7 +696,7 @@ def _encode_url_schemes(value: str) -> str:
 
 def _diagram_markup(source: str, *, jar: Path) -> str:
     return (
-        f'<div class="diagram diagram-scroll">'
+        f'<div class="diagram block-scroll">'
         f"{_inline_svg(render_svg(source, jar))}</div>"
     )
 
@@ -676,35 +729,83 @@ def _diagram_card(
 
 
 def _block_section(page: Page, *, repo_url: str) -> str:
-    if not page.block.nodes:
+    if not page.block.nodes and not page.block_figures:
         return _section(
             "block", "Block diagram", f'<p class="empty">{EMPTY_MESSAGE}</p>'
         )
-    elements = [
-        (label, source)
-        for label, source in page_sources(page)
-        if label.startswith(("block group ", "block node ", "block edge "))
-    ]
-    card = (
-        '<article class="diagram-card zoom-figure" id="block-figure">'
-        '<div class="figure-bar"><h3>System overview</h3>'
-        '<a class="expand" href="#block-figure">Expand full screen</a>'
-        '<a class="collapse" href="#block">Close</a></div>'
-        f'<div class="diagram block-scroll">{block_svg(page, repo_url=repo_url)}</div>'
-        f"{_sources_details(elements, page=page, repo_url=repo_url)}"
-        "</article>"
-    )
-    return _section("block", "Block diagram", card)
+    cards = []
+    if page.block.nodes:
+        elements = [
+            (label, source)
+            for label, source in page_sources(page)
+            if label.startswith(("block group ", "block node ", "block edge "))
+        ]
+        cards.append(
+            '<article class="diagram-card zoom-figure" id="block-figure">'
+            '<div class="figure-bar"><h3>Figure 1. System overview</h3>'
+            '<a class="expand" href="#block-figure">Expand full screen</a>'
+            '<a class="collapse" href="#block">Close</a></div>'
+            f'<div class="diagram block-scroll">'
+            f"{block_svg(page.block, page=page, repo_url=repo_url)}</div>"
+            f"{_sources_details(elements, page=page, repo_url=repo_url)}"
+            "</article>"
+        )
+    for figure_number, figure in enumerate(page.block_figures, start=2):
+        figure_prefix = f"block figure {figure.id} "
+        elements = [
+            (label, source)
+            for label, source in page_sources(page)
+            if label.startswith(figure_prefix)
+        ]
+        notes = (
+            f'<div class="figure-notes">'
+            f"{_claim_list(figure.notes, page=page, repo_url=repo_url)}</div>"
+            if figure.notes
+            else ""
+        )
+        figure_id = f"block-figure-{figure.id}"
+        cards.append(
+            f'<article class="diagram-card zoom-figure" id="{_escape(figure_id)}">'
+            '<div class="figure-bar">'
+            f"<h3>Figure {figure_number}. {_escape(figure.title)}</h3>"
+            f'<a class="expand" href="#{_escape(figure_id)}">Expand full screen</a>'
+            '<a class="collapse" href="#block">Close</a></div>'
+            f"{notes}"
+            f'<div class="diagram block-scroll">'
+            f"{block_svg(figure.block, page=page, repo_url=repo_url)}</div>"
+            f"{_sources_details(elements, page=page, repo_url=repo_url)}"
+            "</article>"
+        )
+    return _section("block", "Block diagram", "".join(cards))
 
 
 def _schema_sources(
     page: Page,
     tables: Mapping[str, Table],
 ) -> list[tuple[str, Source]]:
-    elements = [
-        (f"SQL table {table_name}", tables[table_name].source)
-        for table_name in page.data.sql_tables
-    ]
+    if page.data.domains:
+        elements = [
+            (
+                f"schema domain {domain.id} key table {table_name}",
+                tables[table_name].source,
+            )
+            for domain in page.data.domains
+            for table_name in domain.key_tables
+        ]
+    else:
+        elements = [
+            (f"SQL table {table_name}", tables[table_name].source)
+            for table_name in page.data.sql_tables
+        ]
+    elements.extend(
+        (
+            f"schema domain {domain.id} note {note_number}",
+            source,
+        )
+        for domain in page.data.domains
+        for note_number, note in enumerate(domain.notes, start=1)
+        for source in note.sources
+    )
     elements.extend(
         (f"NoSQL store {store.name}", store.source) for store in page.data.nosql
     )
@@ -715,27 +816,84 @@ def _schema_sources(
     return elements
 
 
+def _schema_legend(page: Page) -> str:
+    domain_note = (
+        "<p>Each card is a domain; rows are its key tables; the keys the arrows use "
+        "are listed on the right.</p>"
+        if page.data.domains
+        else ""
+    )
+    return (
+        '<div class="schema-legend">'
+        "<strong>Legend</strong>"
+        '<ul class="schema-legend-list">'
+        '<li><span class="schema-pk">PK</span> orange = primary / referenced key</li>'
+        '<li><span class="schema-fk">FK</span> blue = referencing (FK-like) column</li>'
+        '<li><span class="schema-line schema-line-enforced" aria-hidden="true"></span> '
+        "solid blue = DB-enforced FK</li>"
+        '<li><span class="schema-line schema-line-symbolic" aria-hidden="true"></span> '
+        "dashed grey = symbolic reference (no constraint)</li>"
+        '<li><span class="schema-line schema-line-blob" aria-hidden="true"></span> '
+        "dotted amber = blob pointer</li>"
+        "<li>dot = referenced (one) side; arrow = many side</li>"
+        '<li><span class="schema-boilerplate">grey</span> = shared boilerplate columns</li>'
+        "</ul>"
+        f"{domain_note}</div>"
+    )
+
+
+def _schema_table_guide(
+    page: Page,
+    *,
+    repo_url: str,
+    tables: Mapping[str, Table],
+) -> str:
+    if not page.data.domains:
+        return ""
+    guides = []
+    for domain in page.data.domains:
+        links = " ".join(
+            f'<a href="{_escape(_source_href(tables[table_name].source, page=page, repo_url=repo_url))}">'
+            f"<code>{_escape(table_name)}</code></a>"
+            for table_name in domain.tables
+        )
+        guides.append(
+            f'<details id="schema-guide-{_escape(domain.id)}">'
+            f"<summary>{_escape(domain.title)} — {len(domain.tables)} tables</summary>"
+            f'<p class="schema-table-list">{links}</p></details>'
+        )
+    return f"<h3>Table guide</h3>{''.join(guides)}"
+
+
 def _schema_section(
     page: Page,
     *,
     repo_url: str,
     tables: Mapping[str, Table],
-    jar: Path,
 ) -> str:
-    if not page.data.sql_tables and not page.data.nosql and not page.data.relations:
+    if (
+        not page.data.domains
+        and not page.data.sql_tables
+        and not page.data.nosql
+        and not page.data.relations
+    ):
         return _section("schema", "Schema", f'<p class="empty">{EMPTY_MESSAGE}</p>')
-    diagram = schema_plantuml(page, repo_url=repo_url, tables=tables)
-    card = _diagram_card(
-        "Data stores",
-        diagram,
-        _schema_sources(page, tables),
-        diagram_id="fig-schema",
-        section_id="schema",
-        page=page,
-        repo_url=repo_url,
-        jar=jar,
+    try:
+        diagram = schema_svg(page, repo_url=repo_url, tables=tables)
+    except DiagramError as error:
+        raise DiagramError(f"Data stores: {error}") from error
+    card = (
+        '<article class="diagram-card zoom-figure" id="fig-schema">'
+        '<div class="figure-bar"><h3>Data stores</h3>'
+        '<a class="expand" href="#fig-schema">Expand full screen</a>'
+        '<a class="collapse" href="#schema">Close</a></div>'
+        f"{_schema_legend(page)}"
+        f'<div class="diagram block-scroll">{_inline_svg(diagram)}</div>'
+        f"{_sources_details(_schema_sources(page, tables), page=page, repo_url=repo_url)}"
+        "</article>"
     )
-    return _section("schema", "Schema", card)
+    guide = _schema_table_guide(page, repo_url=repo_url, tables=tables)
+    return _section("schema", "Schema", f"{card}{guide}")
 
 
 def _sequence_elements(sequence: SequenceDiagram) -> list[tuple[str, Source]]:
@@ -1046,7 +1204,7 @@ def render_page(
             _related_section(page, repo_url=repo_url),
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
             _block_section(page, repo_url=repo_url),
-            _schema_section(page, repo_url=repo_url, tables=tables, jar=jar),
+            _schema_section(page, repo_url=repo_url, tables=tables),
             _sequence_section(page, repo_url=repo_url, jar=jar),
             _state_section(page, repo_url=repo_url, jar=jar),
         ]

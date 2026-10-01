@@ -94,3 +94,72 @@ def test_relations_cli_reports_pinned_candidates_sorted_and_filtered(
     ]
     assert "outside.run_id" not in output.out
     assert "worktree.py" not in output.out
+
+
+def test_relations_resolve_duplicate_class_names_from_imports_and_mark_ambiguity(
+    git_repo: tuple[Path, str],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repo, _ = git_repo
+    sources = {
+        "backend/src/a/person.py": (
+            'class Person:\n    __tablename__ = "person"\n    id = Column()\n'
+        ),
+        "backend/src/b/person.py": (
+            'class Person:\n    __tablename__ = "entity_person"\n    id = Column()\n'
+        ),
+        "backend/src/imported_query.py": (
+            "from a.person import Person\n"
+            "from b.person import Person as EntityPerson\n"
+            "\n"
+            "resolved = Person.id == EntityPerson.id\n"
+        ),
+        "backend/src/ambiguous_query.py": ("ambiguous = Person.id == Person.id\n"),
+    }
+    for relative_path, source in sources.items():
+        path = repo / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source, encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", *sources],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "Add duplicate class fixture"],
+        check=True,
+        capture_output=True,
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    assert (
+        cli.main(
+            [
+                "relations",
+                "--repo",
+                str(repo),
+                "--commit",
+                commit,
+                "--tables",
+                "person,entity_person",
+            ]
+        )
+        == 0
+    )
+    output = capsys.readouterr()
+
+    assert output.err == ""
+    assert "person.id\tentity_person.id\tcomparison\t" in output.out
+    ambiguous_candidates = {
+        line for line in output.out.splitlines() if "ambiguous_query.py" in line
+    }
+    assert ambiguous_candidates == {
+        f"{src}.id\t{dst}.id\tcomparison:ambiguous\tbackend/src/ambiguous_query.py:1"
+        for src in ("person", "entity_person")
+        for dst in ("person", "entity_person")
+    }

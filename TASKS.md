@@ -189,9 +189,9 @@ Out of scope:
 
 - Depends on Task 1.
 - Diagrams are UML.
-- The approximately 24-box readability guide applies to block diagrams; sequence and state
-  diagrams use an approximately 12-element guide. Schema diagrams are explicitly exempt and
-  must show all tables in scope.
+- Block diagrams use an approximately 24-box readability guide; sequence and state diagrams
+  use an approximately 12-element guide. The root schema is a domain overview; submodule
+  schema pages show all in-scope tables and columns.
 
 ## Proof of value
 
@@ -482,9 +482,10 @@ Out of scope:
 ## Dependencies and constraints
 
 - Depends on Tasks 3 and 4.
-- Schema diagrams show all tables in scope, even when there are 37 or more.
+- The root schema shows one card per domain with key tables; submodule schema pages show every
+  in-scope table and column.
 - Block diagrams follow an approximate 24-box readability guide; sequence and state diagrams
-  follow an approximate 12-element guide. Schema diagrams show every table in scope.
+  follow an approximate 12-element guide.
 
 ## Proof of value
 
