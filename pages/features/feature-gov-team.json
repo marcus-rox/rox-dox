@@ -494,18 +494,24 @@
     [
      "Eval API",
      "HTTP API",
-     "team, team_account, team_config",
+     "team, team_account, team_config, team_member",
      "OpenAI"
     ],
     [
      "Permission API",
      "HTTP API",
-     "team, team_account, team_config",
+     "team, team_account, team_config, team_member",
+     "—"
+    ],
+    [
+     "User Company Post Association queue",
+     "Task queue",
+     "—",
      "—"
     ],
     [
      "Userdeactivationcleanup workers",
-     "Background workers / workflows",
+     "Queue worker",
      "—",
      "—"
     ],
@@ -637,17 +643,31 @@
      ]
     },
     {
-     "path": "backend/src/agent_evals_v2/eval_org_builder.py",
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      176,
+      176
      ]
     },
     {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      388,
+      388
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
+     "lines": [
+      1230,
+      1230
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
+     "lines": [
+      186,
+      186
      ]
     },
     {
@@ -690,6 +710,20 @@
      "lines": [
       26,
       26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2399,
+      2399
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      623,
+      623
      ]
     },
     {
@@ -783,16 +817,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2399,
+      2399
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
      "lines": [
       35,
       35
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -1034,7 +1078,35 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-dataextractionagentqueuetypev2-user-company-post-association",
+    "label": "User Company Post Association queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2399,
+      2399
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "USER_DEACTIVATION_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2399,
+         2399
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-agents-workflow-config",
     "label": "Userdeactivationcleanup workers",
     "source": {
      "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
@@ -1045,7 +1117,7 @@
     },
     "link": "feature-agents-workflow-config",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -1152,74 +1224,110 @@
   ],
   "edges": [
    {
+    "src": "queue-dataextractionagentqueuetypev2-user-company-post-association",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-agents-workflow-config",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      623,
+      623
+     ]
+    }
+   },
+   {
     "src": "api-eval",
     "dst": "store-team",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
-     "path": "backend/src/agent_evals_v2/eval_org_builder.py",
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      176,
+      176
      ]
     }
    },
    {
     "src": "api-eval",
     "dst": "store-team-account",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      388,
+      388
      ]
     }
    },
    {
     "src": "api-eval",
     "dst": "store-team-config",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      1230,
+      1230
+     ]
+    }
+   },
+   {
+    "src": "api-eval",
+    "dst": "store-team-member",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
+     "lines": [
+      186,
+      186
      ]
     }
    },
    {
     "src": "api-permission",
     "dst": "store-team",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      176,
+      176
      ]
     }
    },
    {
     "src": "api-permission",
     "dst": "store-team-account",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      388,
+      388
      ]
     }
    },
    {
     "src": "api-permission",
     "dst": "store-team-config",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/multiplayer/team/business.py",
      "lines": [
-      1,
-      1
+      1230,
+      1230
+     ]
+    }
+   },
+   {
+    "src": "api-permission",
+    "dst": "store-team-member",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/multiplayer/team/business.py",
+     "lines": [
+      186,
+      186
      ]
     }
    },
@@ -1262,8 +1370,21 @@
    },
    {
     "src": "team",
+    "dst": "team_config",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/multiplayer/team.py",
+     "lines": [
+      356,
+      356
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "team",
     "dst": "team_member",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/multiplayer/team.py",
      "lines": [
@@ -1271,7 +1392,7 @@
       175
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    },
    {
     "src": "team_account",

@@ -235,8 +235,20 @@
    ],
    "rows": [
     [
+     "Writeback (library)",
+     "Library code",
+     "crm_writeback_audit_log",
+     "—"
+    ],
+    [
+     "Table Cleanup queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Writeback workers",
-     "Background workers / workflows",
+     "Queue worker",
      "crm_writeback_audit_log",
      "—"
     ],
@@ -261,7 +273,13 @@
     [
      "Models (library)",
      "Library code",
-     "crm_writeback_entity_snapshot",
+     "crm_writeback_audit_log, crm_writeback_entity_snapshot",
+     "—"
+    ],
+    [
+     "Writeback (library)",
+     "Library code",
+     "crm_writeback_audit_log",
      "—"
     ]
    ],
@@ -283,6 +301,48 @@
     {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      129,
+      129
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2257,
+      2257
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      600,
+      600
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
       97,
       97
      ]
@@ -295,17 +355,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    {
      "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      17
      ]
     },
     {
@@ -341,22 +401,44 @@
     "source": {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
-      97,
-      97
+      1,
+      1
      ]
     }
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
       97,
       97
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -384,7 +466,75 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors-writeback",
+    "id": "library-backend-src-tasks-executors-writeback",
+    "label": "Writeback (library)",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": [
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         129,
+         129
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-batchqueuetypev2-table-cleanup",
+    "label": "Table Cleanup queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2251,
+         2251
+        ]
+       }
+      ]
+     },
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2257,
+         2257
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
     "label": "Writeback workers",
     "source": {
      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
@@ -394,7 +544,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -456,14 +606,50 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors-writeback",
-    "dst": "store-crm-writeback-audit-log",
-    "label": "reads/writes",
+    "src": "library-backend-src-tasks-executors-writeback",
+    "dst": "queue-batchqueuetypev2-table-cleanup",
+    "label": "enqueues AUDIT_LOGGER_CLEANUP_TASK",
     "source": {
-     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
      "lines": [
-      17,
-      17
+      129,
+      129
+     ]
+    }
+   },
+   {
+    "src": "queue-batchqueuetypev2-table-cleanup",
+    "dst": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      600,
+      600
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-executors-writeback",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
      ]
     }
    }

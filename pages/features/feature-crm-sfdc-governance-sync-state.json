@@ -1043,13 +1043,19 @@
     [
      "Governance workers",
      "Background workers / workflows",
+     "sfdc_governance_sync_state",
+     "—"
+    ],
+    [
+     "Integration queue",
+     "Task queue",
      "—",
      "—"
     ],
     [
      "Sfdcgovernancereconcile + 2 more workers",
-     "Background workers / workflows",
-     "—",
+     "Queue worker",
+     "sfdc_governance_sync_state",
      "—"
     ],
     [
@@ -1130,6 +1136,41 @@
      ]
     },
     {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "lines": [
+      428,
+      428
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3152,
+      3152
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3180,
+      3180
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      733,
+      733
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
      "lines": [
       90,
@@ -1199,6 +1240,28 @@
      ]
     },
     "parent": "column-entry-points"
+   },
+   {
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
+    "source": {
+     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
+     "lines": [
+      90,
+      90
+     ]
+    }
    },
    {
     "id": "column-data-services",
@@ -1309,7 +1372,59 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-integrationqueuetype-integration",
+    "label": "Integration queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "SFDC_GOVERNANCE_RECONCILE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3173,
+         3173
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SFDC_GOVERNANCE_SYNC_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3152,
+         3152
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SFDC_GOVERNANCE_TRANSLATION_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3180,
+         3180
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
     "label": "Sfdcgovernancereconcile + 2 more workers",
     "source": {
      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
@@ -1319,7 +1434,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -1376,7 +1491,44 @@
     "details": []
    }
   ],
-  "edges": []
+  "edges": [
+   {
+    "src": "queue-integrationqueuetype-integration",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      733,
+      733
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
+    "dst": "store-sfdc-governance-sync-state",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "lines": [
+      428,
+      428
+     ]
+    }
+   },
+   {
+    "src": "task_executor-backend-src-ext-integrations-integration-crm-salesforce-governance",
+    "dst": "store-sfdc-governance-sync-state",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/sync_state_service.py",
+     "lines": [
+      428,
+      428
+     ]
+    }
+   }
+  ]
  },
  "block_figures": [],
  "data": {

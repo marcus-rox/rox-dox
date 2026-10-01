@@ -227,8 +227,14 @@
      "—"
     ],
     [
+     "Backfill Contact Resolution queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Mergeunifiedlead + 1 more workers",
-     "Background workers / workflows",
+     "Queue worker",
      "entity_column_value",
      "—"
     ],
@@ -248,6 +254,12 @@
      "entity_column_value_state",
      "Database",
      "entity_column_value_state",
+     "—"
+    ],
+    [
+     "People (library)",
+     "Library code",
+     "entity_column_value",
      "—"
     ]
    ],
@@ -309,6 +321,27 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2340,
+      2340
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2346,
+      2346
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      614,
+      614
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/merge_unified_lead.py",
      "lines": [
       10,
@@ -331,6 +364,13 @@
     },
     {
      "path": "backend/src/tasks/executors/merge_unified_person.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/merge_service.py",
      "lines": [
       1,
       1
@@ -380,16 +420,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2340,
+      2340
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/merge_unified_lead.py",
      "lines": [
       10,
       10
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -518,7 +568,47 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-backfillqueuetype-backfill-contact-resolution",
+    "label": "Backfill Contact Resolution queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2340,
+      2340
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "MERGE_UNIFIED_LEAD_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2340,
+         2340
+        ]
+       }
+      ]
+     },
+     {
+      "text": "MERGE_UNIFIED_PERSON_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2346,
+         2346
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
     "label": "Mergeunifiedlead + 1 more workers",
     "source": {
      "path": "backend/src/tasks/executors/merge_unified_lead.py",
@@ -528,7 +618,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -624,9 +714,21 @@
   ],
   "edges": [
    {
+    "src": "queue-backfillqueuetype-backfill-contact-resolution",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      614,
+      614
+     ]
+    }
+   },
+   {
     "src": "api-leads",
     "dst": "store-entity-column-value",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/leads/merge_service.py",
      "lines": [
@@ -636,9 +738,9 @@
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-entity-column-value",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/leads/merge_service.py",
      "lines": [
@@ -657,7 +759,34 @@
    "entity_column_value_state"
   ],
   "nosql": [],
-  "relations": [],
+  "relations": [
+   {
+    "src": "archived_entity_column_value",
+    "dst": "entity_column_value",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/clever_column/entity_column_value.py",
+     "lines": [
+      230,
+      230
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "entity_column_value",
+    "dst": "entity_column_value_state",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/clever_column/entity_column_value.py",
+     "lines": [
+      189,
+      189
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
   "domains": [],
   "columns": []
  },

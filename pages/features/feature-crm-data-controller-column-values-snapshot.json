@@ -171,14 +171,32 @@
    ],
    "rows": [
     [
+     "Data Controller Column Coordinator queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Data Controller workers",
-     "Background workers / workflows",
+     "Queue worker",
      "data_controller_column_values_snapshot",
      "—"
     ],
     [
      "data_controller_column_values_snapshot",
      "Database",
+     "data_controller_column_values_snapshot",
+     "—"
+    ],
+    [
+     "Column Values (library)",
+     "Library code",
+     "data_controller_column_values_snapshot",
+     "—"
+    ],
+    [
+     "Entity (library)",
+     "Library code",
      "data_controller_column_values_snapshot",
      "—"
     ]
@@ -189,6 +207,20 @@
      "lines": [
       18,
       46
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      695,
+      695
      ]
     },
     {
@@ -210,6 +242,20 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "lines": [
+      18,
+      18
      ]
     }
    ],
@@ -233,8 +279,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
@@ -242,18 +299,6 @@
       46
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-     "lines": [
-      46,
-      46
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -281,7 +326,35 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-rox-core-api-data-controller",
+    "id": "queue-sorqueuetypev2-data-controller-column-coordinator",
+    "label": "Data Controller Column Coordinator queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "DATA_CONTROLLER_SINGLE_COLUMN_REFRESH_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2899,
+         2899
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
     "label": "Data Controller workers",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
@@ -292,7 +365,7 @@
     },
     "link": "feature-crm-external-entity-column-value",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -339,9 +412,21 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-rox-core-api-data-controller",
+    "src": "queue-sorqueuetypev2-data-controller-column-coordinator",
+    "dst": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      695,
+      695
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
     "dst": "store-data-controller-column-values-snapshot",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
      "lines": [

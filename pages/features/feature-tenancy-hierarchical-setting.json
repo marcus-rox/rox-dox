@@ -369,8 +369,26 @@
      "—"
     ],
     [
+     "Orum Integration queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Orum Sync Coordinator queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Orum Sync Worker queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Orumschemasync + 2 more workers",
-     "Background workers / workflows",
+     "Queue worker",
      "hierarchical_setting",
      "—"
     ],
@@ -434,6 +452,48 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2083,
+      2083
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      572,
+      572
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2089,
+      2089
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      573,
+      573
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2095,
+      2095
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      574,
+      574
      ]
     },
     {
@@ -534,16 +594,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2083,
+      2083
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/orum_schema_sync.py",
      "lines": [
       156,
       156
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -672,7 +742,91 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-outreachqueuetype-orum-integration",
+    "label": "Orum Integration queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2083,
+      2083
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "ORUM_SCHEMA_SYNC_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2083,
+         2083
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-outreachqueuetype-orum-sync-coordinator",
+    "label": "Orum Sync Coordinator queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2089,
+      2089
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "ORUM_SYNC_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2089,
+         2089
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-outreachqueuetype-orum-sync-worker",
+    "label": "Orum Sync Worker queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2095,
+      2095
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "ORUM_SYNC_WORKER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2095,
+         2095
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
     "label": "Orumschemasync + 2 more workers",
     "source": {
      "path": "backend/src/tasks/executors/orum_schema_sync.py",
@@ -683,7 +837,7 @@
     },
     "link": "feature-seq-sequence",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -754,9 +908,45 @@
   ],
   "edges": [
    {
+    "src": "queue-outreachqueuetype-orum-integration",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      572,
+      572
+     ]
+    }
+   },
+   {
+    "src": "queue-outreachqueuetype-orum-sync-coordinator",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      573,
+      573
+     ]
+    }
+   },
+   {
+    "src": "queue-outreachqueuetype-orum-sync-worker",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      574,
+      574
+     ]
+    }
+   },
+   {
     "src": "api-sequences-settings",
     "dst": "store-hierarchical-setting",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/settings/sequences/dto.py",
      "lines": [
@@ -766,9 +956,9 @@
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
     "dst": "store-hierarchical-setting",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/settings/sequences/dto.py",
      "lines": [

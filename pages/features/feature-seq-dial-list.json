@@ -653,13 +653,19 @@
     [
      "Dialer API",
      "HTTP API",
-     "dial_list, dial_list_member, dial_list_task",
+     "dial_list, dial_list_member, dial_list_task, twilio_phone_number",
      "Twilio"
     ],
     [
+     "Webhook Worker queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Finalizerealtimetranscript workers",
-     "Background workers / workflows",
-     "dial_list, dial_list_member, dial_list_task",
+     "Queue worker",
+     "dial_list, dial_list_member, dial_list_task, twilio_phone_number",
      "Twilio"
     ],
     [
@@ -778,10 +784,38 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      1908,
+      1908
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
      "lines": [
-      1,
-      1
+      134,
+      134
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
+     "lines": [
+      215,
+      215
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
+     "lines": [
+      235,
+      235
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      448,
+      448
      ]
     },
     {
@@ -789,6 +823,20 @@
      "lines": [
       36,
       36
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2203,
+      2203
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      592,
+      592
      ]
     },
     {
@@ -820,10 +868,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/dial_list.py",
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
      "lines": [
-      76,
-      76
+      1197,
+      1197
      ]
     },
     {
@@ -877,16 +925,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2203,
+      2203
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
      "lines": [
       11,
       11
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -1034,7 +1092,35 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-asyncagentqueuetype-webhook-worker",
+    "label": "Webhook Worker queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2203,
+      2203
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "FINALIZE_REALTIME_TRANSCRIPT_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2203,
+         2203
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
     "label": "Finalizerealtimetranscript workers",
     "source": {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
@@ -1044,7 +1130,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -1152,44 +1238,80 @@
   "edges": [
    {
     "src": "api-dialer",
+    "dst": "queue-asyncagentqueuetype-webhook-worker",
+    "label": "enqueues FINALIZE_REALTIME_TRANSCRIPT_TASK",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      1908,
+      1908
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-webhook-worker",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      592,
+      592
+     ]
+    }
+   },
+   {
+    "src": "api-dialer",
     "dst": "store-dial-list",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
      "lines": [
-      1,
-      1
+      134,
+      134
      ]
     }
    },
    {
     "src": "api-dialer",
     "dst": "store-dial-list-member",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
      "lines": [
-      1,
-      1
+      215,
+      215
      ]
     }
    },
    {
     "src": "api-dialer",
     "dst": "store-dial-list-task",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/dial_list/business.py",
      "lines": [
-      1,
-      1
+      235,
+      235
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "api-dialer",
+    "dst": "store-twilio-phone-number",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      448,
+      448
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-dial-list",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/models/dial_list.py",
      "lines": [
@@ -1199,9 +1321,9 @@
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-dial-list-member",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/models/dial_list.py",
      "lines": [
@@ -1211,14 +1333,26 @@
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-dial-list-task",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
-     "path": "backend/src/rox_core/models/dial_list.py",
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
      "lines": [
-      76,
-      76
+      1197,
+      1197
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
+    "dst": "store-twilio-phone-number",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+     "lines": [
+      448,
+      448
      ]
     }
    },
@@ -1235,7 +1369,7 @@
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "external-twilio",
     "label": "calls Twilio",
     "source": {
@@ -1260,6 +1394,19 @@
   "relations": [
    {
     "src": "dial_list",
+    "dst": "dial_list_member",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/dial_list.py",
+     "lines": [
+      203,
+      203
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "dial_list",
     "dst": "dial_list_task",
     "label": "query join",
     "source": {
@@ -1267,6 +1414,19 @@
      "lines": [
       1198,
       1198
+     ]
+    },
+    "kind": "symbolic"
+   },
+   {
+    "src": "dial_list_member",
+    "dst": "dial_list_task",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/dial_list.py",
+     "lines": [
+      94,
+      94
      ]
     },
     "kind": "symbolic"

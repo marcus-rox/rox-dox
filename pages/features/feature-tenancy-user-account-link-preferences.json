@@ -355,8 +355,14 @@
      "—"
     ],
     [
+     "Auth0 On Demand queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Userassignmentprediction workers",
-     "Background workers / workflows",
+     "Queue worker",
      "user_account_link_preferences, user_account_link_preferences_filters",
      "—"
     ],
@@ -376,6 +382,12 @@
      "user_account_link_preferences_relationships",
      "Database",
      "user_account_link_preferences_relationships",
+     "—"
+    ],
+    [
+     "Assignment Prediction (library)",
+     "Library code",
+     "user_account_link_preferences",
      "—"
     ]
    ],
@@ -439,8 +451,29 @@
     {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
-      1,
-      1
+      426,
+      426
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/account/business.py",
+     "lines": [
+      593,
+      593
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2990,
+      2990
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      708,
+      708
      ]
     },
     {
@@ -469,6 +502,13 @@
      "lines": [
       13,
       13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/assignment_prediction/sfdc_service.py",
+     "lines": [
+      1,
+      1
      ]
     }
    ],
@@ -515,16 +555,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2990,
+      2990
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/user_assignment_prediction.py",
      "lines": [
       26,
       26
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -653,7 +703,35 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-sorqueuetypev2-auth0-on-demand",
+    "label": "Auth0 On Demand queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2990,
+      2990
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "USER_ASSIGNMENT_PREDICTION_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2990,
+         2990
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
     "label": "Userassignmentprediction workers",
     "source": {
      "path": "backend/src/tasks/executors/user_assignment_prediction.py",
@@ -663,7 +741,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -754,50 +832,62 @@
   ],
   "edges": [
    {
+    "src": "queue-sorqueuetypev2-auth0-on-demand",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      708,
+      708
+     ]
+    }
+   },
+   {
     "src": "api-user-account-link-preferences",
     "dst": "store-user-account-link-preferences",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
-      1,
-      1
+      426,
+      426
      ]
     }
    },
    {
     "src": "api-user-account-link-preferences",
     "dst": "store-user-account-link-preferences-filters",
-    "label": "reads/writes",
+    "label": "writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
-      1,
-      1
+      593,
+      593
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-user-account-link-preferences",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
-      1,
-      1
+      426,
+      426
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-user-account-link-preferences-filters",
-    "label": "reads/writes",
+    "label": "writes",
     "source": {
      "path": "backend/src/rox_core/api/account/business.py",
      "lines": [
-      1,
-      1
+      593,
+      593
      ]
     }
    }
@@ -815,7 +905,7 @@
    {
     "src": "user_account_link_preferences",
     "dst": "user_account_link_preferences_filters",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -823,12 +913,12 @@
       192
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    },
    {
     "src": "user_account_link_preferences",
     "dst": "user_account_link_preferences_relationships",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/account/user_account_link_preferences.py",
      "lines": [
@@ -836,7 +926,7 @@
       171
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    }
   ],
   "domains": [],

@@ -270,14 +270,26 @@
      "—"
     ],
     [
+     "Sequences Task queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Regeneratesequence workers",
-     "Background workers / workflows",
+     "Queue worker",
      "sequence_policy",
      "—"
     ],
     [
      "sequence_policy",
      "Database",
+     "sequence_policy",
+     "—"
+    ],
+    [
+     "Outreach (library)",
+     "Library code",
      "sequence_policy",
      "—"
     ]
@@ -328,8 +340,22 @@
     {
      "path": "backend/src/rox_core/api/sequence_policy/business.py",
      "lines": [
-      1,
-      1
+      48,
+      48
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      644,
+      644
      ]
     },
     {
@@ -344,6 +370,13 @@
      "lines": [
       37,
       37
+     ]
+    },
+    {
+     "path": "backend/src/outreach/policy_engine.py",
+     "lines": [
+      190,
+      190
      ]
     },
     {
@@ -397,16 +430,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
       2841,
       2841
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -542,7 +585,35 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-outreachqueuetype-sequences-task",
+    "label": "Sequences Task queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "REGENERATE_SEQUENCE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2543,
+         2543
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
     "label": "Regeneratesequence workers",
     "source": {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
@@ -553,7 +624,7 @@
     },
     "link": "feature-seq-sequence",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -600,26 +671,38 @@
   ],
   "edges": [
    {
-    "src": "api-sequence-policy",
-    "dst": "store-sequence-policy",
-    "label": "reads/writes",
+    "src": "queue-outreachqueuetype-sequences-task",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "label": "consumed by",
     "source": {
-     "path": "backend/src/rox_core/api/sequence_policy/business.py",
+     "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      1,
-      1
+      644,
+      644
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "api-sequence-policy",
     "dst": "store-sequence-policy",
-    "label": "reads/writes",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/sequence_policy/business.py",
+     "lines": [
+      48,
+      48
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "dst": "store-sequence-policy",
+    "label": "reads",
     "source": {
      "path": "backend/src/outreach/policy_engine.py",
      "lines": [
-      1,
-      1
+      190,
+      190
      ]
     }
    }

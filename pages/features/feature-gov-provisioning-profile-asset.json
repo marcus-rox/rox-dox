@@ -573,13 +573,19 @@
     [
      "User Profile Template API",
      "HTTP API",
-     "provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping",
+     "provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping, provisioning_profile_assignment",
+     "—"
+    ],
+    [
+     "Propagation queue",
+     "Task queue",
+     "—",
      "—"
     ],
     [
      "Applyprovisioningprofileuser + 2 more workers",
-     "Background workers / workflows",
-     "provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping",
+     "Queue worker",
+     "provisioning_profile, provisioning_profile_apply_run, provisioning_profile_asset, provisioning_profile_asset_mapping, provisioning_profile_assignment",
      "—"
     ],
     [
@@ -686,15 +692,71 @@
     {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      966,
+      966
      ]
     },
     {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
      "lines": [
-      1,
-      1
+      134,
+      134
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
+     "lines": [
+      215,
+      215
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
+     "lines": [
+      365,
+      365
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
+     "lines": [
+      167,
+      167
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
+     "lines": [
+      1644,
+      1644
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2969,
+      2969
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2983,
+      2983
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2976,
+      2976
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      705,
+      705
      ]
     },
     {
@@ -797,16 +859,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2969,
+      2969
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/provisioning_profile_application.py",
      "lines": [
       15,
       15
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -935,7 +1007,59 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-batchqueuetypev2-propagation",
+    "label": "Propagation queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2969,
+      2969
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "APPLY_PROVISIONING_PROFILE_USER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2969,
+         2969
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUSH_PROVISIONING_CAMPAIGN_USER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2983,
+         2983
+        ]
+       }
+      ]
+     },
+     {
+      "text": "REMOVE_PROVISIONING_PROFILE_USER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2976,
+         2976
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
     "label": "Applyprovisioningprofileuser + 2 more workers",
     "source": {
      "path": "backend/src/tasks/executors/provisioning_profile_application.py",
@@ -945,7 +1069,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -1084,97 +1208,145 @@
   "edges": [
    {
     "src": "api-user-profile-template",
-    "dst": "store-provisioning-profile",
-    "label": "reads/writes",
+    "dst": "queue-batchqueuetypev2-propagation",
+    "label": "enqueues 3 task types",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      966,
+      966
+     ]
+    }
+   },
+   {
+    "src": "queue-batchqueuetypev2-propagation",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      705,
+      705
+     ]
+    }
+   },
+   {
+    "src": "api-user-profile-template",
+    "dst": "store-provisioning-profile",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
+     "lines": [
+      134,
+      134
      ]
     }
    },
    {
     "src": "api-user-profile-template",
     "dst": "store-provisioning-profile-apply-run",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      215,
+      215
      ]
     }
    },
    {
     "src": "api-user-profile-template",
     "dst": "store-provisioning-profile-asset",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
      "lines": [
-      1,
-      1
+      365,
+      365
      ]
     }
    },
    {
     "src": "api-user-profile-template",
     "dst": "store-provisioning-profile-asset-mapping",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      167,
+      167
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "api-user-profile-template",
+    "dst": "store-provisioning-profile-assignment",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
+     "lines": [
+      1644,
+      1644
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-provisioning-profile",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
      "lines": [
-      1,
-      1
+      134,
+      134
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-provisioning-profile-apply-run",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      215,
+      215
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-provisioning-profile-asset",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
      "lines": [
-      1,
-      1
+      365,
+      365
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-outside",
     "dst": "store-provisioning-profile-asset-mapping",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
-     "path": "backend/src/rox_core/api/provisioning_profiles/applicators/account_tab.py",
+     "path": "backend/src/rox_core/api/provisioning_profiles/campaign_push.py",
      "lines": [
-      1,
-      1
+      167,
+      167
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
+    "dst": "store-provisioning-profile-assignment",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/provisioning_profiles/service.py",
+     "lines": [
+      1644,
+      1644
      ]
     }
    }
@@ -1194,7 +1366,7 @@
    {
     "src": "provisioning_profile",
     "dst": "provisioning_profile_apply_run",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -1202,12 +1374,12 @@
       623
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    },
    {
     "src": "provisioning_profile",
     "dst": "provisioning_profile_asset",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -1215,12 +1387,12 @@
       201
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    },
    {
     "src": "provisioning_profile",
     "dst": "provisioning_profile_assignment",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -1228,12 +1400,12 @@
       407
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    },
    {
     "src": "provisioning_profile_asset",
     "dst": "provisioning_profile_asset_mapping",
-    "label": "declared FK",
+    "label": "model ForeignKey",
     "source": {
      "path": "backend/src/rox_core/models/provisioning_profile.py",
      "lines": [
@@ -1241,7 +1413,7 @@
       763
      ]
     },
-    "kind": "enforced"
+    "kind": "symbolic"
    }
   ],
   "domains": [],

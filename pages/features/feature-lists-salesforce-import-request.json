@@ -143,14 +143,44 @@
    ],
    "rows": [
     [
-     "Hubspotimport + 1 more workers",
-     "Background workers / workflows",
+     "Prospect Ingestion queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Table Cleanup queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Hubspotimport workers",
+     "Queue worker",
+     "salesforce_import_request",
+     "—"
+    ],
+    [
+     "Prospectlistdeletecleanup workers",
+     "Queue worker",
      "salesforce_import_request",
      "—"
     ],
     [
      "salesforce_import_request",
      "Database",
+     "salesforce_import_request",
+     "—"
+    ],
+    [
+     "Salesforce Enrichment (library)",
+     "Library code",
+     "salesforce_import_request",
+     "—"
+    ],
+    [
+     "Lists (library)",
+     "Library code",
      "salesforce_import_request",
      "—"
     ]
@@ -164,17 +194,38 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2149,
+      2149
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      583,
+      583
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2137,
+      2137
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      581,
+      581
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/hubspot_import.py",
      "lines": [
       73,
       73
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/prospect_list_delete_cleanup.py",
-     "lines": [
-      861,
-      861
      ]
     },
     {
@@ -185,6 +236,20 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_delete_cleanup.py",
+     "lines": [
+      861,
+      861
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/prospect_list_delete_cleanup.py",
      "lines": [
       20,
@@ -192,10 +257,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
+     "path": "backend/src/rox_core/models/lists/salesforce_import_request.py",
      "lines": [
-      1,
-      1
+      15,
+      15
      ]
     }
    ],
@@ -219,8 +284,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2149,
+      2149
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/hubspot_import.py",
      "lines": [
@@ -228,18 +304,6 @@
       73
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/hubspot_import.py",
-     "lines": [
-      73,
-      73
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -267,8 +331,64 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
-    "label": "Hubspotimport + 1 more workers",
+    "id": "queue-asyncagentqueuetype-prospect-ingestion",
+    "label": "Prospect Ingestion queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2149,
+      2149
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "HUBSPOT_IMPORT_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2149,
+         2149
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-batchqueuetypev2-table-cleanup",
+    "label": "Table Cleanup queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2137,
+      2137
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "PROSPECT_LIST_DELETE_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2137,
+         2137
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "Hubspotimport workers",
     "source": {
      "path": "backend/src/tasks/executors/hubspot_import.py",
      "lines": [
@@ -276,9 +396,8 @@
       73
      ]
     },
-    "link": "feature-lists-prospect-source-integration",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -294,6 +413,35 @@
       ]
      },
      {
+      "text": "Calls into this feature from outside any feature",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/hubspot_import.py",
+        "lines": [
+         24,
+         24
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
+    "label": "Prospectlistdeletecleanup workers",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_delete_cleanup.py",
+     "lines": [
+      861,
+      861
+     ]
+    },
+    "link": "feature-lists-prospect-source-integration",
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
       "text": "ProspectListDeleteCleanupTaskExecutor",
       "sources": [
        {
@@ -306,15 +454,8 @@
       ]
      },
      {
-      "text": "Calls into this feature from Prospect Source Integration, outside any feature",
+      "text": "Calls into this feature from Prospect Source Integration",
       "sources": [
-       {
-        "path": "backend/src/tasks/executors/hubspot_import.py",
-        "lines": [
-         24,
-         24
-        ]
-       },
        {
         "path": "backend/src/tasks/executors/prospect_list_delete_cleanup.py",
         "lines": [
@@ -344,9 +485,45 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-asyncagentqueuetype-prospect-ingestion",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      583,
+      583
+     ]
+    }
+   },
+   {
+    "src": "queue-batchqueuetypev2-table-cleanup",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      581,
+      581
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
     "dst": "store-salesforce-import-request",
-    "label": "reads/writes",
+    "label": "uses",
+    "source": {
+     "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
+    "dst": "store-salesforce-import-request",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/salesforce_enrichment/routing.py",
      "lines": [

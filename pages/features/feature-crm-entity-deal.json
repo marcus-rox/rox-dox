@@ -513,14 +513,26 @@
    ],
    "rows": [
     [
+     "Data Controller Column Coordinator queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Graph queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Data Controller workers",
-     "Background workers / workflows",
+     "Queue worker",
      "entity_deal",
      "—"
     ],
     [
      "Entitydeletioncascade workers",
-     "Background workers / workflows",
+     "Queue worker",
      "entity_deal, entity_tag",
      "—"
     ],
@@ -561,6 +573,18 @@
      "—"
     ],
     [
+     "Data Controller (library)",
+     "Library code",
+     "entity_deal",
+     "—"
+    ],
+    [
+     "Deal (library)",
+     "Library code",
+     "entity_deal, entity_tag",
+     "—"
+    ],
+    [
      "Cascade (library)",
      "Library code",
      "entity_deal",
@@ -576,6 +600,12 @@
      "Record Display (library)",
      "Library code",
      "entity_deal",
+     "—"
+    ],
+    [
+     "Entities (library)",
+     "Library code",
+     "entity_tag",
      "—"
     ],
     [
@@ -645,6 +675,34 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      695,
+      695
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      530,
+      530
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
       46,
@@ -661,8 +719,8 @@
     {
      "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
      "lines": [
-      1,
-      1
+      89,
+      89
      ]
     },
     {
@@ -682,8 +740,15 @@
     {
      "path": "backend/src/rox_core/api/entities/deal/service.py",
      "lines": [
-      1,
-      1
+      867,
+      867
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/deal/service.py",
+     "lines": [
+      2635,
+      2635
      ]
     },
     {
@@ -708,6 +773,20 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/entities/deal/service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
      "lines": [
       1,
@@ -726,6 +805,13 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/entities/tags.py",
+     "lines": [
+      81,
+      81
      ]
     },
     {
@@ -803,8 +889,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
      "lines": [
@@ -812,18 +909,6 @@
       46
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-     "lines": [
-      46,
-      46
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -851,7 +936,63 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-rox-core-api-data-controller",
+    "id": "queue-sorqueuetypev2-data-controller-column-coordinator",
+    "label": "Data Controller Column Coordinator queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2899,
+      2899
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "DATA_CONTROLLER_SINGLE_COLUMN_REFRESH_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2899,
+         2899
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-sorqueuetypev2-graph",
+    "label": "Graph queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "ENTITY_DELETION_CASCADE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         1828,
+         1828
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
     "label": "Data Controller workers",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
@@ -862,7 +1003,7 @@
     },
     "link": "feature-crm-external-entity-column-value",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -892,7 +1033,7 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
     "label": "Entitydeletioncascade workers",
     "source": {
      "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
@@ -903,7 +1044,7 @@
     },
     "link": "feature-crm-graph-entity-deletion-event",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -995,38 +1136,62 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-rox-core-api-data-controller",
+    "src": "queue-sorqueuetypev2-data-controller-column-coordinator",
+    "dst": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      695,
+      695
+     ]
+    }
+   },
+   {
+    "src": "queue-sorqueuetypev2-graph",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      530,
+      530
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
     "dst": "store-entity-deal",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
      "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
      "lines": [
-      1,
-      1
+      89,
+      89
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
     "dst": "store-entity-deal",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/rox_core/api/entities/deal/service.py",
      "lines": [
-      1,
-      1
+      867,
+      867
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
     "dst": "store-entity-tag",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
      "path": "backend/src/rox_core/api/entities/deal/service.py",
      "lines": [
-      1,
-      1
+      2635,
+      2635
      ]
     }
    }

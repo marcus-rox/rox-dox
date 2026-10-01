@@ -355,14 +355,32 @@
      "—"
     ],
     [
+     "Sequences Task queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Regeneratesequence workers",
-     "Background workers / workflows",
+     "Queue worker",
      "sequence_task_ghost",
      "—"
     ],
     [
      "sequence_task_ghost",
      "Database",
+     "sequence_task_ghost",
+     "—"
+    ],
+    [
+     "Analysis Modules (library)",
+     "Library code",
+     "sequence_task_ghost",
+     "—"
+    ],
+    [
+     "Executors (library)",
+     "Library code",
      "sequence_task_ghost",
      "—"
     ]
@@ -427,8 +445,8 @@
     {
      "path": "backend/src/chat/routes/eval/sequences.py",
      "lines": [
-      1,
-      1
+      220,
+      220
      ]
     },
     {
@@ -453,6 +471,20 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      644,
+      644
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
       2841,
@@ -461,6 +493,20 @@
     },
     {
      "path": "backend/src/agents_core/agents_core_v2/modules/analysis_modules/sequence_generation_module_v5.py",
+     "lines": [
+      881,
+      881
+     ]
+    },
+    {
+     "path": "backend/src/agents_core/agents_core_v2/modules/analysis_modules/sequence_generation_module_v5.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
       1,
       1
@@ -546,16 +592,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
       2841,
       2841
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -736,7 +792,35 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-outreachqueuetype-sequences-task",
+    "label": "Sequences Task queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2543,
+      2543
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "REGENERATE_SEQUENCE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2543,
+         2543
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
     "label": "Regeneratesequence workers",
     "source": {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
@@ -746,7 +830,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -781,38 +865,50 @@
   ],
   "edges": [
    {
+    "src": "queue-outreachqueuetype-sequences-task",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      644,
+      644
+     ]
+    }
+   },
+   {
     "src": "api-eval",
     "dst": "store-sequence-task-ghost",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
      "path": "backend/src/chat/routes/eval/sequences.py",
      "lines": [
-      1,
-      1
+      220,
+      220
      ]
     }
    },
    {
     "src": "api-sequences",
     "dst": "store-sequence-task-ghost",
-    "label": "reads/writes",
+    "label": "reads",
     "source": {
      "path": "backend/src/chat/routes/eval/sequences.py",
      "lines": [
-      1,
-      1
+      220,
+      220
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-feature-seq-sequence",
     "dst": "store-sequence-task-ghost",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/agents_core/agents_core_v2/modules/analysis_modules/sequence_generation_module_v5.py",
      "lines": [
-      1,
-      1
+      881,
+      881
      ]
     }
    }

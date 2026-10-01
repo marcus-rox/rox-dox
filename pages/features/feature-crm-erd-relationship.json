@@ -285,14 +285,26 @@
    ],
    "rows": [
     [
+     "Integration queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Integration workers",
-     "Background workers / workflows",
+     "Queue worker",
      "erd_relationship",
      "—"
     ],
     [
      "erd_relationship",
      "Database",
+     "erd_relationship",
+     "—"
+    ],
+    [
+     "Erd (library)",
+     "Library code",
      "erd_relationship",
      "—"
     ],
@@ -309,7 +321,7 @@
      "—"
     ],
     [
-     "Erd (library)",
+     "Models (library)",
      "Library code",
      "erd_relationship",
      "—"
@@ -321,6 +333,20 @@
      "lines": [
       21,
       146
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1624,
+      1624
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      496,
+      496
      ]
     },
     {
@@ -345,6 +371,13 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
      "path": "backend/src/data_store/graph/v4/rox_entity_mapping_creator.py",
      "lines": [
       1,
@@ -359,10 +392,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/graph/erd/relationship_service.py",
+     "path": "backend/src/rox_core/models/erd_relationship.py",
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/erd_relationship.py",
+     "lines": [
+      21,
+      21
      ]
     }
    ],
@@ -410,8 +450,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1624,
+      1624
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/integration.py",
      "lines": [
@@ -419,18 +470,6 @@
       59
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/integration.py",
-     "lines": [
-      59,
-      59
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -458,7 +497,35 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-integrationqueuetype-integration",
+    "label": "Integration queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1624,
+      1624
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "INTEGRATION_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         1624,
+         1624
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-entity-organization",
     "label": "Integration workers",
     "source": {
      "path": "backend/src/tasks/executors/integration.py",
@@ -469,7 +536,7 @@
     },
     "link": "feature-crm-entity-organization",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -516,9 +583,21 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-integrationqueuetype-integration",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-entity-organization",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      496,
+      496
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-entity-organization",
     "dst": "store-erd-relationship",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/graph/erd/service.py",
      "lines": [

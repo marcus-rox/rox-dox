@@ -253,8 +253,14 @@
    ],
    "rows": [
     [
+     "Graph queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Entitydeletioncascade + 2 more workers",
-     "Background workers / workflows",
+     "Queue worker",
      "graph_entity_deletion_event, graph_entity_deletion_event_processing",
      "—"
     ],
@@ -268,6 +274,18 @@
      "graph_entity_deletion_event_processing",
      "Database",
      "graph_entity_deletion_event_processing",
+     "—"
+    ],
+    [
+     "Executors (library)",
+     "Library code",
+     "graph_entity_deletion_event, graph_entity_deletion_event_processing",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "graph_entity_deletion_event, graph_entity_deletion_event_processing",
      "—"
     ]
    ],
@@ -284,6 +302,34 @@
      "lines": [
       150,
       243
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1834,
+      1834
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1840,
+      1840
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      530,
+      530
      ]
     },
     {
@@ -308,10 +354,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/graph_entity_deletion_event.py",
+     "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
      "lines": [
-      47,
-      47
+      101,
+      101
      ]
     },
     {
@@ -319,6 +365,34 @@
      "lines": [
       150,
       150
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/entity_deletion_coordinator.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/entity_deletion_handler.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/graph_entity_deletion_event.py",
+     "lines": [
+      47,
+      47
      ]
     }
    ],
@@ -342,8 +416,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
      "lines": [
@@ -351,18 +436,6 @@
       54
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
-     "lines": [
-      54,
-      54
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -390,7 +463,59 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-sorqueuetypev2-graph",
+    "label": "Graph queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      1828,
+      1828
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "ENTITY_DELETION_CASCADE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         1828,
+         1828
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ENTITY_DELETION_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         1834,
+         1834
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ENTITY_DELETION_HANDLER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         1840,
+         1840
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
     "label": "Entitydeletioncascade + 2 more workers",
     "source": {
      "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
@@ -400,7 +525,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -474,21 +599,33 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors",
-    "dst": "store-graph-entity-deletion-event",
-    "label": "reads/writes",
+    "src": "queue-sorqueuetypev2-graph",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
+    "label": "consumed by",
     "source": {
-     "path": "backend/src/rox_core/models/graph_entity_deletion_event.py",
+     "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      47,
-      47
+      530,
+      530
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
+    "dst": "store-graph-entity-deletion-event",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/tasks/executors/entity_deletion_cascade.py",
+     "lines": [
+      101,
+      101
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-graph-entity-deletion-event",
     "dst": "store-graph-entity-deletion-event-processing",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/models/graph_entity_deletion_event.py",
      "lines": [

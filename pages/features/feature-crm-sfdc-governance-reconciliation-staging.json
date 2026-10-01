@@ -229,14 +229,32 @@
    ],
    "rows": [
     [
+     "Integration queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Sfdcgovernancereconcile + 1 more workers",
-     "Background workers / workflows",
+     "Queue worker",
      "sfdc_governance_reconciliation_staging",
      "—"
     ],
     [
      "sfdc_governance_reconciliation_staging",
      "Database",
+     "sfdc_governance_reconciliation_staging",
+     "—"
+    ],
+    [
+     "Reconcile (library)",
+     "Library code",
+     "sfdc_governance_reconciliation_staging",
+     "—"
+    ],
+    [
+     "Sfdc (library)",
+     "Library code",
      "sfdc_governance_reconciliation_staging",
      "—"
     ]
@@ -247,6 +265,27 @@
      "lines": [
       12,
       42
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3152,
+      3152
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      733,
+      733
      ]
     },
     {
@@ -294,8 +333,36 @@
     {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/diff.py",
      "lines": [
+      145,
+      145
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/diff.py",
+     "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/id_fetch.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/staging.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_reconciliation.py",
+     "lines": [
+      12,
+      12
      ]
     }
    ],
@@ -319,8 +386,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
      "lines": [
@@ -328,18 +406,6 @@
       90
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
-     "lines": [
-      90,
-      90
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -367,7 +433,47 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-integrationqueuetype-integration",
+    "label": "Integration queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3173,
+      3173
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "SFDC_GOVERNANCE_RECONCILE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3173,
+         3173
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SFDC_GOVERNANCE_SYNC_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3152,
+         3152
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
     "label": "Sfdcgovernancereconcile + 1 more workers",
     "source": {
      "path": "backend/src/tasks/executors/sfdc_governance_reconcile.py",
@@ -378,7 +484,7 @@
     },
     "link": "feature-crm-sfdc-governance-sync-state",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -458,14 +564,26 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors",
+    "src": "queue-integrationqueuetype-integration",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      733,
+      733
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-crm-sfdc-governance-sync-state",
     "dst": "store-sfdc-governance-reconciliation-staging",
-    "label": "reads/writes",
+    "label": "writes",
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/reconcile/diff.py",
      "lines": [
-      1,
-      1
+      145,
+      145
      ]
     }
    }

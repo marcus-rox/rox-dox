@@ -406,8 +406,14 @@
      "—"
     ],
     [
+     "Slack Summary queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Mention Agent workers",
-     "Background workers / workflows",
+     "Queue worker",
      "chat_prompt_user_ordering, prompt",
      "—"
     ],
@@ -497,8 +503,64 @@
     {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
-      1,
-      1
+      93,
+      93
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/chat_prompts/business.py",
+     "lines": [
+      176,
+      176
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2675,
+      2675
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2669,
+      2669
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2662,
+      2662
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2682,
+      2682
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2801,
+      2801
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2794,
+      2794
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      661,
+      661
      ]
     },
     {
@@ -601,16 +663,26 @@
     "parent": "column-entry-points"
    },
    {
-    "id": "group-background-workers",
-    "label": "Background workers",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2675,
+      2675
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
      "lines": [
       1556,
       1556
      ]
-    },
-    "parent": "column-entry-points"
+    }
    },
    {
     "id": "column-data-services",
@@ -739,7 +811,95 @@
     ]
    },
    {
-    "id": "task_executor-backend-src-ext-integrations-slack-integration-mention-agent",
+    "id": "queue-asyncagentqueuetype-slack-summary",
+    "label": "Slack Summary queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2675,
+      2675
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "SLACK_APP_HOME_OPENED_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2675,
+         2675
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SLACK_ASSISTANT_THREAD_STARTED_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2669,
+         2669
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SLACK_BOT_DM_PROCESSING_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2662,
+         2662
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SLACK_CHANNEL_MESSAGE_PROCESSING_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2682,
+         2682
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SLACK_CTA_CONVERSATION_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2801,
+         2801
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+2 more task types",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2794,
+         2794
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-ext-integrations-slack-integration-mention-agent-feature-tasks-user-task",
     "label": "Mention Agent workers",
     "source": {
      "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
@@ -750,7 +910,7 @@
     },
     "link": "feature-tasks-user-task",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -872,50 +1032,62 @@
   ],
   "edges": [
    {
+    "src": "queue-asyncagentqueuetype-slack-summary",
+    "dst": "queue-worker-backend-src-ext-integrations-slack-integration-mention-agent-feature-tasks-user-task",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      661,
+      661
+     ]
+    }
+   },
+   {
     "src": "api-admin-chat-prompts",
     "dst": "store-chat-prompt-user-ordering",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
-      1,
-      1
+      93,
+      93
      ]
     }
    },
    {
     "src": "api-admin-chat-prompts",
     "dst": "store-prompt",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
-      1,
-      1
+      176,
+      176
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-ext-integrations-slack-integration-mention-agent",
+    "src": "queue-worker-backend-src-ext-integrations-slack-integration-mention-agent-feature-tasks-user-task",
     "dst": "store-chat-prompt-user-ordering",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
-      1,
-      1
+      93,
+      93
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-ext-integrations-slack-integration-mention-agent",
+    "src": "queue-worker-backend-src-ext-integrations-slack-integration-mention-agent-feature-tasks-user-task",
     "dst": "store-prompt",
-    "label": "reads/writes",
+    "label": "reads & writes",
     "source": {
      "path": "backend/src/chat/routes/chat_prompts/business.py",
      "lines": [
-      1,
-      1
+      176,
+      176
      ]
     }
    }
@@ -928,7 +1100,21 @@
    "prompt"
   ],
   "nosql": [],
-  "relations": [],
+  "relations": [
+   {
+    "src": "chat_prompt_user_ordering",
+    "dst": "prompt",
+    "label": "ID column name",
+    "source": {
+     "path": "backend/src/rox_core/models/chat_prompt_user_ordering.py",
+     "lines": [
+      27,
+      27
+     ]
+    },
+    "kind": "symbolic"
+   }
+  ],
   "domains": [],
   "columns": []
  },

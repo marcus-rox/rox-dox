@@ -116,14 +116,32 @@
      "—"
     ],
     [
-     "Entity (library)",
-     "Library code",
-     "entity_artifact",
+     "User Artifact Processing queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Artifactprocessor workers",
+     "Queue worker",
+     "—",
      "—"
     ],
     [
      "entity_artifact",
      "Database",
+     "entity_artifact",
+     "—"
+    ],
+    [
+     "Content Indexing (library)",
+     "Library code",
+     "entity_artifact",
+     "—"
+    ],
+    [
+     "Entity (library)",
+     "Library code",
      "entity_artifact",
      "—"
     ]
@@ -141,6 +159,34 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
+     "lines": [
+      210,
+      210
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2843,
+      2843
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      687,
+      687
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/artifact_processor.py",
+     "lines": [
+      27,
+      27
      ]
     },
     {
@@ -194,6 +240,28 @@
     "parent": "column-entry-points"
    },
    {
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2843,
+      2843
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
+    "source": {
+     "path": "backend/src/tasks/executors/artifact_processor.py",
+     "lines": [
+      27,
+      27
+     ]
+    }
+   },
+   {
     "id": "column-data-services",
     "label": "Data & services",
     "source": {
@@ -231,22 +299,76 @@
     "kind": "component",
     "group": "group-library-code",
     "many": false,
-    "details": []
+    "details": [
+     {
+      "text": "ARTIFACT_PROCESSOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
+        "lines": [
+         210,
+         210
+        ]
+       }
+      ]
+     }
+    ]
    },
    {
-    "id": "library-backend-src-rox-customer-real-time-models-entity",
-    "label": "Entity (library)",
+    "id": "queue-batchqueuetypev2-user-artifact-processing",
+    "label": "User Artifact Processing queue",
     "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
+     "path": "backend/src/tasks/types.py",
      "lines": [
-      9,
-      9
+      2843,
+      2843
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "ARTIFACT_PROCESSOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2843,
+         2843
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "Artifactprocessor workers",
+    "source": {
+     "path": "backend/src/tasks/executors/artifact_processor.py",
+     "lines": [
+      27,
+      27
      ]
     },
     "kind": "component",
-    "group": "group-library-code",
+    "group": "column-queue-workers",
     "many": false,
-    "details": []
+    "details": [
+     {
+      "text": "ArtifactProcessorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/artifact_processor.py",
+        "lines": [
+         27,
+         27
+        ]
+       }
+      ]
+     }
+    ]
    },
    {
     "id": "store-entity-artifact",
@@ -267,25 +389,37 @@
   "edges": [
    {
     "src": "library-backend-src-rox-core-api-content-indexing",
+    "dst": "queue-batchqueuetypev2-user-artifact-processing",
+    "label": "enqueues ARTIFACT_PROCESSOR_TASK",
+    "source": {
+     "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
+     "lines": [
+      210,
+      210
+     ]
+    }
+   },
+   {
+    "src": "queue-batchqueuetypev2-user-artifact-processing",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      687,
+      687
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-rox-core-api-content-indexing",
     "dst": "store-entity-artifact",
-    "label": "reads/writes",
+    "label": "uses",
     "source": {
      "path": "backend/src/rox_core/api/content_indexing/reindex_content_backfill_job.py",
      "lines": [
       1,
       1
-     ]
-    }
-   },
-   {
-    "src": "library-backend-src-rox-customer-real-time-models-entity",
-    "dst": "store-entity-artifact",
-    "label": "reads/writes",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/entity/artifact.py",
-     "lines": [
-      9,
-      9
      ]
     }
    }

@@ -331,8 +331,14 @@
    ],
    "rows": [
     [
+     "Custom Column Generation queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
      "Customcolumnrefreshdispatch workers",
-     "Background workers / workflows",
+     "Queue worker",
      "unified_catalog_entry, unified_catalog_logical_name_allocation",
      "—"
     ],
@@ -359,6 +365,12 @@
      "Library code",
      "unified_catalog_entry, unified_catalog_logical_name_allocation, unified_catalog_relationship",
      "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "unified_catalog_entry",
+     "—"
     ]
    ],
    "sources": [
@@ -384,6 +396,20 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2292,
+      2292
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      606,
+      606
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
      "lines": [
       536,
@@ -398,10 +424,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/unified_catalog.py",
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
      "lines": [
-      20,
-      20
+      237,
+      237
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      615,
+      615
      ]
     },
     {
@@ -423,6 +456,13 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/unified_catalog.py",
+     "lines": [
+      20,
+      20
      ]
     }
    ],
@@ -446,8 +486,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2292,
+      2292
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
      "lines": [
@@ -455,18 +506,6 @@
       536
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
-     "lines": [
-      536,
-      536
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -494,7 +533,35 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-realtimeagentqueuetype-custom-column-generation",
+    "label": "Custom Column Generation queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2292,
+      2292
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "CUSTOM_COLUMN_REFRESH_DISPATCH_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2292,
+         2292
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-column-alert",
     "label": "Customcolumnrefreshdispatch workers",
     "source": {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
@@ -505,7 +572,7 @@
     },
     "link": "feature-lists-column-alert",
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -582,26 +649,38 @@
   ],
   "edges": [
    {
-    "src": "task_executor-backend-src-tasks-executors",
-    "dst": "store-unified-catalog-entry",
-    "label": "reads/writes",
+    "src": "queue-realtimeagentqueuetype-custom-column-generation",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-column-alert",
+    "label": "consumed by",
     "source": {
-     "path": "backend/src/rox_core/models/unified_catalog.py",
+     "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      20,
-      20
+      606,
+      606
      ]
     }
    },
    {
-    "src": "task_executor-backend-src-tasks-executors",
-    "dst": "store-unified-catalog-logical-name-allocation",
-    "label": "reads/writes",
+    "src": "queue-worker-backend-src-tasks-executors-feature-lists-column-alert",
+    "dst": "store-unified-catalog-entry",
+    "label": "reads",
     "source": {
      "path": "backend/src/unified_data/catalog_entry_catalog.py",
      "lines": [
-      1,
-      1
+      237,
+      237
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-lists-column-alert",
+    "dst": "store-unified-catalog-logical-name-allocation",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/unified_data/catalog_entry_catalog.py",
+     "lines": [
+      615,
+      615
      ]
     }
    }

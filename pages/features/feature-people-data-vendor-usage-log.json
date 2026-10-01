@@ -567,9 +567,15 @@
    ],
    "rows": [
     [
-     "Datavendorusage workers",
-     "Background workers / workflows",
+     "Internal Audit queue",
+     "Task queue",
      "—",
+     "—"
+    ],
+    [
+     "Datavendorusage workers",
+     "Queue worker",
+     "data_vendor_usage_log",
      "—"
     ],
     [
@@ -588,6 +594,20 @@
      ]
     },
     {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2035,
+      2035
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      564,
+      564
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/data_vendor_usage.py",
      "lines": [
       8,
@@ -599,6 +619,13 @@
      "lines": [
       1,
       1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/visibility/business.py",
+     "lines": [
+      230,
+      230
      ]
     }
    ],
@@ -622,8 +649,19 @@
  "block": {
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2035,
+      2035
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
     "source": {
      "path": "backend/src/tasks/executors/data_vendor_usage.py",
      "lines": [
@@ -631,18 +669,6 @@
       8
      ]
     }
-   },
-   {
-    "id": "group-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/tasks/executors/data_vendor_usage.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    "parent": "column-entry-points"
    },
    {
     "id": "column-data-services",
@@ -670,7 +696,35 @@
   ],
   "nodes": [
    {
-    "id": "task_executor-backend-src-tasks-executors",
+    "id": "queue-sorqueuetypev2-internal-audit",
+    "label": "Internal Audit queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2035,
+      2035
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "DATA_VENDOR_USAGE_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2035,
+         2035
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
     "label": "Datavendorusage workers",
     "source": {
      "path": "backend/src/tasks/executors/data_vendor_usage.py",
@@ -680,7 +734,7 @@
      ]
     },
     "kind": "component",
-    "group": "group-background-workers",
+    "group": "column-queue-workers",
     "many": false,
     "details": [
      {
@@ -725,7 +779,32 @@
     "details": []
    }
   ],
-  "edges": []
+  "edges": [
+   {
+    "src": "queue-sorqueuetypev2-internal-audit",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      564,
+      564
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
+    "dst": "store-data-vendor-usage-log",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/visibility/business.py",
+     "lines": [
+      230,
+      230
+     ]
+    }
+   }
+  ]
  },
  "block_figures": [],
  "data": {
