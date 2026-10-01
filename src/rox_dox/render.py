@@ -339,6 +339,9 @@ th {
   height: auto;
   margin: 0 auto;
 }
+.diagram-scroll svg {
+  max-width: none;
+}
 .sources {
   margin-top: 0.75rem;
   color: #475467;
@@ -560,7 +563,10 @@ def _encode_url_schemes(value: str) -> str:
 
 
 def _diagram_markup(source: str, *, jar: Path) -> str:
-    return f'<div class="diagram">{_inline_svg(render_svg(source, jar))}</div>'
+    return (
+        f'<div class="diagram diagram-scroll">'
+        f"{_inline_svg(render_svg(source, jar))}</div>"
+    )
 
 
 def _diagram_card(

@@ -64,6 +64,24 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     assert "<h3>Interesting Notes</h3>" in document
 
 
+def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    page = _empty_page(page_data)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    expected_diagrams = len(page.sequences) + len(page.states)
+    assert document.count('<div class="diagram diagram-scroll">') == expected_diagrams
+    assert ".diagram-scroll svg {\n  max-width: none;\n}" in document
+
+
 def test_related_page_links_are_relative_and_external_targets_link_out(
     page_data: dict[str, object],
     plantuml_jar: Path,

@@ -115,6 +115,20 @@ def test_sequence_diagram_autonumbers_and_links_participants_and_steps(
     ) in _links(svg)
 
 
+def test_sequence_step_message_with_braces_renders_literal_label(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["sequences"][0]["steps"][0]["message"] = "POST /message/{x}"
+    page = _page(payload)
+    source = sequence_plantuml(page, page.sequences[0], repo_url=REPO_URL)
+    svg = render_svg(source, plantuml_jar)
+
+    assert "POST /message/&#123;x&#125;" in source
+    assert "POST /message/{x}" in svg
+
+
 def test_state_diagram_links_states_initial_arrow_and_transitions(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],

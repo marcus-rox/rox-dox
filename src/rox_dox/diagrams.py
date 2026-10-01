@@ -57,7 +57,13 @@ def _plantuml_url(url: str) -> str:
 
 
 def _linked_label(url: str, label: str) -> str:
-    escaped_label = _escape_label(label).replace("[", "~[").replace("]", "~]")
+    escaped_label = (
+        _escape_label(label)
+        .replace("[", "~[")
+        .replace("]", "~]")
+        .replace("{", "&#123;")
+        .replace("}", "&#125;")
+    )
     return f"[[{_plantuml_url(url)}{{{LINK_TOOLTIP}}} {escaped_label}]]"
 
 
