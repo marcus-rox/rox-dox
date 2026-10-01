@@ -7,7 +7,7 @@
 Marcus can open the rox-core root, click a domain, then a feature, and see that feature end to
 end: its routes, logic, background workers, web UI and the tables it reads and writes, with
 every box, arrow and sentence cited to rox-core code. One scheduled run rebuilds the whole site
-from the latest `main`. A new SPEC.md states this as requirements once this plan is approved.
+from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
 
 ![Figure 1 — the feature tree](docs/feature-tree.svg)
 
@@ -62,18 +62,20 @@ from the latest `main`. A new SPEC.md states this as requirements once this plan
   block-, schema-, sequence- and state-diagram).
 - **Left panel:** table of contents, then the feature tree, then the file Explorer. Clicking a
   folder opens a docs page listing the feature pages that cover its files, never GitHub.
-- **Every run rebuilds every page from scratch** at the latest `main`; no change detection yet.
+- **Every run rebuilds every page from scratch** at the latest `main` and opens a rox-dox PR
+  from a new branch; no change detection yet.
+- **Documented files are backend, web, agent skills and deployment config.** Tests and
+  migrations are not documented, and the root page says so.
 - **Accuracy and readability come before run cost.**
-- **No automatic Notion lookup.**
+- **No Notion on pages** (SPEC `R-3` retired).
 - **Superseded documents are renamed `*_deprecated.md`**, not deleted.
 
 ## Out of scope
 
 - Regenerating only changed pages — every run rebuilds everything for now.
 - Running on every rox-core PR — there are too many; the schedule is enough.
-- Automatic Notion lookup — dropped by Marcus.
+- Notion context and the right-hand panel — `R-3` retired by Marcus.
 - Pages per folder — folders only list the feature pages that cover them.
-- Slack content — the panel stays a placeholder.
 
 ## Open
 
@@ -86,5 +88,3 @@ from the latest `main`. A new SPEC.md states this as requirements once this plan
   routes; checked in step 1.
 - **Code used by many features** (shared models, utilities). Shown on every feature that uses
   it; whether it also gets its own page is decided in step 1.
-- **The new SPEC.md.** R-1 is rewritten for the feature tree; R-2 to R-4 likely carry over.
-  Drafted with Marcus after this plan is approved.
