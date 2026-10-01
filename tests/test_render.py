@@ -79,8 +79,8 @@ def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
     )
 
     expected_diagrams = len(page.sequences) + len(page.states)
-    assert document.count('<div class="diagram diagram-scroll">') == expected_diagrams
-    assert ".diagram-scroll svg {\n  max-width: none;\n}" in document
+    assert document.count('<div class="diagram block-scroll">') == expected_diagrams
+    assert ".block-scroll svg {\n  max-width: none;\n}" in document
     assert (
         ".diagram svg {\n"
         "  display: block;\n"
@@ -137,8 +137,8 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
         "states",
         "states",
     ]
-    assert document.count('<div class="diagram diagram-scroll">') == (
-        1 + len(page.sequences) + len(page.states)
+    assert document.count('<div class="diagram block-scroll">') == (
+        2 + len(page.sequences) + len(page.states)
     )
 
     left_toggle = '<input class="panel-toggle" id="toggle-left" type="checkbox">'
@@ -212,6 +212,58 @@ def test_schema_sources_include_authored_relations(
     )
     assert "relation sessions.user_id -&gt; users.id" in schema.group(1)
     assert relation_url in schema.group(1)
+
+
+def test_domain_schema_renders_legend_table_guide_and_key_table_sources(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["sql_tables"] = []
+    payload["data"]["columns"] = [["identity", "cache"]]
+    payload["data"]["domains"] = [
+        {
+            "id": "identity",
+            "title": "Identity",
+            "tables": ["users", "sessions"],
+            "key_tables": ["users"],
+            "notes": [
+                {
+                    "text": "Tenant keys are summarized.",
+                    "sources": [{"path": "pkg/a.py", "lines": [1, 2]}],
+                }
+            ],
+        }
+    ]
+    page = Page.model_validate(payload)
+    tables = extract_tables(repo, commit)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=tables,
+        jar=plantuml_jar,
+    )
+
+    schema = re.search(r'<section id="schema">(.*?)</section>', document, re.DOTALL)
+    assert schema is not None
+    guide = schema.group(1)
+    assert "Each card is a domain" in guide
+    assert "solid" in guide and "dashed" in guide and "dotted" in guide
+    assert "keys the arrows use are listed on the right" in guide
+    assert "<h3>Table guide</h3>" in guide
+    assert (
+        '<details id="schema-guide-identity"><summary>Identity — 2 tables</summary>'
+        in guide
+    )
+    assert (
+        f'<a href="{source_url(tables["sessions"].source, repo_url=REPO_URL, commit=page.commit)}">'
+        "<code>sessions</code></a>" in guide
+    )
+    assert "schema domain identity key table users" in guide
+    assert "schema domain identity note 1" in guide
 
 
 def test_related_page_links_are_relative_and_external_targets_link_out(

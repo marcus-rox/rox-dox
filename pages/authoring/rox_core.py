@@ -3,6 +3,9 @@ import json
 import subprocess
 from pathlib import Path
 
+import rox_core_domains
+from rox_dox.schema import extract_tables
+
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
 argument_parser = argparse.ArgumentParser(
     description="Regenerate the rox-core root page JSON."
@@ -1114,14 +1117,25 @@ states = [
     },
 ]
 
+
+DEAL = "backend/src/rox_core/models/entities/deal.py"
+COLMETA = "backend/src/rox_core/models/column_metadata.py"
+SEQ = "backend/src/rox_core/models/sequence.py"
+COST = "backend/src/rox_core/models/cost_meter.py"
+
+
+def T(table: str) -> str:
+    return f'__tablename__ = "{table}"'
+
+
+def R(
+    src: str, dst: str, label: str, kind: str, source: dict[str, object]
+) -> dict[str, object]:
+    return {"src": src, "dst": dst, "label": label, "kind": kind, "source": source}
+
+
 data = {
-    "sql_tables": [
-        "task_run",
-        "task_run_log",
-        "user_task_run",
-        "conversation",
-        "api_jobs",
-    ],
+    "sql_tables": [],
     "nosql": [
         {
             "name": "chat:conversation:{conversation_id}:stream:{stream_id}",
@@ -1145,75 +1159,297 @@ data = {
         },
     ],
     "relations": [
-        {
-            "src": "user_task_run.run_id",
-            "dst": "task_run.run_id",
-            "label": "ORM primaryjoin",
-            "source": S(
-                "backend/src/rox_core/models/task.py",
-                "user_task_run = relationship(",
+        R(
+            "deal.rox_company_id",
+            "rox_company.rox_company_id",
+            "declared FK",
+            "enforced",
+            S(DEAL, 'ForeignKey("rox_company.rox_company_id")', after=T("deal")),
+        ),
+        R(
+            "deal.sub_org_id",
+            "sub_organization.public_id",
+            "declared FK",
+            "enforced",
+            S(DEAL, 'ForeignKey("sub_organization.public_id"', after=T("deal")),
+        ),
+        R(
+            "deal_person.person_id",
+            "rox_person.rox_person_id",
+            "declared FK",
+            "enforced",
+            S(DEAL, 'ForeignKey("rox_person.rox_person_id")', after=T("deal_person")),
+        ),
+        R(
+            "entity_company.rox_id",
+            "rox_company.rox_company_id",
+            "query join: CRM account to Rox company",
+            "symbolic",
+            S(
+                "backend/src/ext_integrations/integration/crm/salesforce/"
+                "writeback_engine_query_generator.py",
+                ".outerjoin(Account, Account.rox_id == RoxCompany.rox_company_id)",
+            ),
+        ),
+        R(
+            "external_column_mapping.column_id",
+            "column_metadata.public_id",
+            "ORM primaryjoin",
+            "symbolic",
+            S(
+                COLMETA,
+                'primaryjoin="ColumnMetadata.public_id=='
+                'foreign(ExternalColumnMapping.column_id)"',
+            ),
+        ),
+        R(
+            "crm_field.data_source_public_id",
+            "data_source.public_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/crm_field.py",
+                'ForeignKey("data_source.public_id")',
+            ),
+        ),
+        R(
+            "profile_permission.profile_id",
+            "user_profile.profile_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/multiplayer/user_profile.py",
+                'ForeignKey("user_profile.profile_id")',
+                after=T("profile_permission"),
+            ),
+        ),
+        R(
+            "tab_company.rox_company_id",
+            "rox_company.rox_company_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/tab.py",
+                'ForeignKey("rox_company.rox_company_id")',
+                after=T("tab_company"),
+            ),
+        ),
+        R(
+            "rox_list_member.entity_id",
+            "rox_lead.rox_lead_id",
+            "query join: list member is a lead",
+            "symbolic",
+            S(
+                "backend/src/rox_customer/real_time/models/entity/lead.py",
+                "RoxListMember.entity_id == cls.rox_lead_id,",
+            ),
+        ),
+        R(
+            "sequence.rox_person_id",
+            "rox_person.rox_person_id",
+            "symbolic FK (model comment)",
+            "symbolic",
+            S(
+                SEQ,
+                "rox_person_id: Mapped[str | None] = mapped_column(",
                 span=2,
+                after=T("sequence"),
             ),
-        },
-        {
-            "src": "task_run_log.run_id",
-            "dst": "task_run.run_id",
-            "label": "written at queue time",
-            "source": S(
-                "backend/src/rox_core/api/tasks/business.py",
-                "task_run_log = TaskRunLog(",
-                span=2,
+        ),
+        R(
+            "sequence.rox_lead_id",
+            "rox_lead.rox_lead_id",
+            "symbolic FK (model comment)",
+            "symbolic",
+            S(
+                SEQ,
+                "# Symbolic fk w/ rox_lead table.",
+                end_needle="rox_lead_id: Mapped",
             ),
-        },
-        {
-            "src": "task_run.parent_task_run_id",
-            "dst": "task_run.run_id",
-            "label": "parent in a task chain",
-            "source": S(
+        ),
+        R(
+            "sequence_agent_cell.cell_id",
+            "agent_cell.cell_id",
+            "one regen cell per sequence",
+            "symbolic",
+            S(
+                "backend/src/outreach/seqregen_cell/models.py",
+                '"""One row per sequence with a regen cell',
+                end_needle="cell_id: Mapped[str] = mapped_column(",
+            ),
+        ),
+        R(
+            "campaign_mailbox_assoc.integration_id",
+            "integration.public_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/campaign_request.py",
+                'ForeignKey("integration.public_id"',
+                after=T("campaign_mailbox_assoc"),
+            ),
+        ),
+        R(
+            "rox_email.message_id",
+            "email_message.message_id",
+            "ORM primaryjoin",
+            "symbolic",
+            S(
+                "backend/src/rox_core/models/rox_email.py",
+                "primaryjoin=lambda: and_(",
+                end_needle="RoxEmail.creator_email_address == foreign(PublicEmailMessage.email),",
+                after="public_email_message: Mapped",
+            ),
+        ),
+        R(
+            "integration.created_by",
+            "user.rox_user_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/integration.py",
+                "created_by: Mapped[str] = mapped_column(",
+                span=1,
+                after=T("integration"),
+            ),
+        ),
+        R(
+            "agent_actions_log.rox_company_id",
+            "rox_company.rox_company_id",
+            "commented-out FK",
+            "symbolic",
+            S(
+                COST,
+                '# ForeignKey("rox_company.rox_company_id")',
+                after=T("agent_actions_log"),
+            ),
+        ),
+        R(
+            "agent_actions_log.run_id",
+            "task_run.run_id",
+            "commented-out FK",
+            "symbolic",
+            S(COST, '# ForeignKey("task_run.run_id")', after=T("agent_actions_log")),
+        ),
+        R(
+            "user_artifact_processing_task_request.extraction_task_id",
+            "extraction_task_status.extraction_task_id",
+            "declared FK",
+            "enforced",
+            S(
+                "backend/src/rox_core/models/user_artifact_processing_task_request.py",
+                'ForeignKey("extraction_task_status.extraction_task_id")',
+            ),
+        ),
+        R(
+            "user_task_run.rox_company_id",
+            "rox_company.rox_company_id",
+            "commented-out FK",
+            "symbolic",
+            S(
                 "backend/src/rox_core/models/task.py",
-                "parent_task_run_id: Mapped[str | None] = mapped_column(",
-                span=6,
+                '# ForeignKey("rox_company.rox_company_id")',
+                after=T("user_task_run"),
             ),
-        },
-        {
-            "src": "task_run.root_task_run_id",
-            "dst": "task_run.run_id",
-            "label": "root of a task chain",
-            "source": S(
-                "backend/src/rox_core/api/tasks/business.py",
-                "root_task_run_id = task_run_id",
-                end_needle="root_task_run_id = parent_task_run.root_task_run_id",
+        ),
+        R(
+            "cost_meter_log.run_id",
+            "workflow_run.temporal_workflow_run_id",
+            "run cost summed per workflow run",
+            "symbolic",
+            S(
+                "backend/src/workflow/workflow_run/workflow_run_service.py",
+                "CostMeterLog.run_id == WorkflowRun.temporal_workflow_run_id,",
             ),
-        },
-        {
-            "src": "conversation messages::conversation_id",
-            "dst": "conversation.public_id",
-            "label": "lookup by public_id",
-            "source": S(
+        ),
+        R(
+            "company_request_status.parent_task_run_id",
+            "task_run.run_id",
+            "commented-out FK",
+            "symbolic",
+            S(
+                "backend/src/rox_core/models/data_extraction_company_request_status.py",
+                '# ForeignKey("task_run.run_id")',
+                after="parent_task_run_id",
+            ),
+        ),
+        R(
+            "conversation messages::conversation_id",
+            "conversation.public_id",
+            "lookup by public_id",
+            "symbolic",
+            S(
                 "backend/src/chat/routes/conversation/service.py",
                 "conversation = Conversation.find_by_public_id(",
                 span=1,
                 after="def get_tag_mapping(",
             ),
-        },
-        {
-            "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
-            "dst": "conversation.public_id",
-            "label": "key embeds conversation id",
-            "source": S(
+        ),
+        R(
+            "chat:conversation:{conversation_id}:stream:{stream_id}",
+            "conversation.public_id",
+            "key embeds conversation id",
+            "symbolic",
+            S(
                 "backend/src/chat/background_execution/stream_runner.py",
                 "def _get_stream_key(conversation_id: str, stream_id: str) -> str:",
                 span=1,
             ),
-        },
-        {
-            "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
-            "dst": "conversation.redis_stream_id",
-            "label": "stream id reserved on conversation",
-            "source": s_reserve,
-        },
+        ),
+        R(
+            "chat:conversation:{conversation_id}:stream:{stream_id}",
+            "conversation.redis_stream_id",
+            "stream id reserved on conversation",
+            "symbolic",
+            s_reserve,
+        ),
     ],
 }
+
+tables = extract_tables(REPO, COMMIT)
+domain_tables = rox_core_domains.assign(list(tables))
+organization_model = "backend/src/rox_core/models/organization.py"
+subscription_model = "backend/src/rox_core/models/subscription.py"
+tenancy_fk_count = sum(
+    column.foreign_key
+    in {
+        "organization.rox_org_id",
+        "user.rox_user_id",
+    }
+    for table in tables.values()
+    for column in table.columns
+)
+domains = []
+for domain_id, title, _, key_tables in rox_core_domains.DOMAINS:
+    domain = {
+        "id": domain_id,
+        "title": title,
+        "tables": domain_tables[domain_id],
+        "key_tables": key_tables,
+    }
+    if domain_id == "tenancy":
+        domain["notes"] = [
+            C(
+                "rox_org_id → organization and rox_user_id → user on most tables "
+                f"({tenancy_fk_count} declared FK columns)",
+                S(
+                    organization_model,
+                    "rox_org_id: Mapped[str] = mapped_column(",
+                    after=T("organization"),
+                ),
+                S(
+                    subscription_model,
+                    'ForeignKey("organization.rox_org_id")',
+                    after=T("subscription"),
+                ),
+            )
+        ]
+    else:
+        domain["notes"] = []
+    domains.append(domain)
+data["domains"] = domains
+data["columns"] = rox_core_domains.ROOT_COLUMNS
+
 
 related = [
     {

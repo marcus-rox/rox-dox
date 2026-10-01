@@ -1623,13 +1623,7 @@
     ]
   },
   "data": {
-    "sql_tables": [
-      "task_run",
-      "task_run_log",
-      "user_task_run",
-      "conversation",
-      "api_jobs"
-    ],
+    "sql_tables": [],
     "nosql": [
       {
         "name": "chat:conversation:{conversation_id}:stream:{stream_id}",
@@ -1666,50 +1660,275 @@
     ],
     "relations": [
       {
-        "src": "user_task_run.run_id",
-        "dst": "task_run.run_id",
+        "src": "deal.rox_company_id",
+        "dst": "rox_company.rox_company_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/entities/deal.py",
+          "lines": [
+            249,
+            249
+          ]
+        }
+      },
+      {
+        "src": "deal.sub_org_id",
+        "dst": "sub_organization.public_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/entities/deal.py",
+          "lines": [
+            259,
+            259
+          ]
+        }
+      },
+      {
+        "src": "deal_person.person_id",
+        "dst": "rox_person.rox_person_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/entities/deal.py",
+          "lines": [
+            422,
+            422
+          ]
+        }
+      },
+      {
+        "src": "entity_company.rox_id",
+        "dst": "rox_company.rox_company_id",
+        "label": "query join: CRM account to Rox company",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
+          "lines": [
+            678,
+            678
+          ]
+        }
+      },
+      {
+        "src": "external_column_mapping.column_id",
+        "dst": "column_metadata.public_id",
         "label": "ORM primaryjoin",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/column_metadata.py",
+          "lines": [
+            150,
+            150
+          ]
+        }
+      },
+      {
+        "src": "crm_field.data_source_public_id",
+        "dst": "data_source.public_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/crm_field.py",
+          "lines": [
+            48,
+            48
+          ]
+        }
+      },
+      {
+        "src": "profile_permission.profile_id",
+        "dst": "user_profile.profile_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/multiplayer/user_profile.py",
+          "lines": [
+            167,
+            167
+          ]
+        }
+      },
+      {
+        "src": "tab_company.rox_company_id",
+        "dst": "rox_company.rox_company_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/tab.py",
+          "lines": [
+            132,
+            132
+          ]
+        }
+      },
+      {
+        "src": "rox_list_member.entity_id",
+        "dst": "rox_lead.rox_lead_id",
+        "label": "query join: list member is a lead",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_customer/real_time/models/entity/lead.py",
+          "lines": [
+            262,
+            262
+          ]
+        }
+      },
+      {
+        "src": "sequence.rox_person_id",
+        "dst": "rox_person.rox_person_id",
+        "label": "symbolic FK (model comment)",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/sequence.py",
+          "lines": [
+            532,
+            534
+          ]
+        }
+      },
+      {
+        "src": "sequence.rox_lead_id",
+        "dst": "rox_lead.rox_lead_id",
+        "label": "symbolic FK (model comment)",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/sequence.py",
+          "lines": [
+            536,
+            539
+          ]
+        }
+      },
+      {
+        "src": "sequence_agent_cell.cell_id",
+        "dst": "agent_cell.cell_id",
+        "label": "one regen cell per sequence",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/outreach/seqregen_cell/models.py",
+          "lines": [
+            18,
+            28
+          ]
+        }
+      },
+      {
+        "src": "campaign_mailbox_assoc.integration_id",
+        "dst": "integration.public_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/campaign_request.py",
+          "lines": [
+            432,
+            432
+          ]
+        }
+      },
+      {
+        "src": "rox_email.message_id",
+        "dst": "email_message.message_id",
+        "label": "ORM primaryjoin",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/rox_email.py",
+          "lines": [
+            184,
+            188
+          ]
+        }
+      },
+      {
+        "src": "integration.created_by",
+        "dst": "user.rox_user_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/integration.py",
+          "lines": [
+            160,
+            161
+          ]
+        }
+      },
+      {
+        "src": "agent_actions_log.rox_company_id",
+        "dst": "rox_company.rox_company_id",
+        "label": "commented-out FK",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/cost_meter.py",
+          "lines": [
+            218,
+            218
+          ]
+        }
+      },
+      {
+        "src": "agent_actions_log.run_id",
+        "dst": "task_run.run_id",
+        "label": "commented-out FK",
+        "kind": "symbolic",
+        "source": {
+          "path": "backend/src/rox_core/models/cost_meter.py",
+          "lines": [
+            230,
+            230
+          ]
+        }
+      },
+      {
+        "src": "user_artifact_processing_task_request.extraction_task_id",
+        "dst": "extraction_task_status.extraction_task_id",
+        "label": "declared FK",
+        "kind": "enforced",
+        "source": {
+          "path": "backend/src/rox_core/models/user_artifact_processing_task_request.py",
+          "lines": [
+            89,
+            89
+          ]
+        }
+      },
+      {
+        "src": "user_task_run.rox_company_id",
+        "dst": "rox_company.rox_company_id",
+        "label": "commented-out FK",
+        "kind": "symbolic",
         "source": {
           "path": "backend/src/rox_core/models/task.py",
           "lines": [
-            120,
-            122
+            385,
+            385
           ]
         }
       },
       {
-        "src": "task_run_log.run_id",
-        "dst": "task_run.run_id",
-        "label": "written at queue time",
+        "src": "cost_meter_log.run_id",
+        "dst": "workflow_run.temporal_workflow_run_id",
+        "label": "run cost summed per workflow run",
+        "kind": "symbolic",
         "source": {
-          "path": "backend/src/rox_core/api/tasks/business.py",
+          "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
           "lines": [
-            344,
-            346
+            276,
+            276
           ]
         }
       },
       {
-        "src": "task_run.parent_task_run_id",
+        "src": "company_request_status.parent_task_run_id",
         "dst": "task_run.run_id",
-        "label": "parent in a task chain",
+        "label": "commented-out FK",
+        "kind": "symbolic",
         "source": {
-          "path": "backend/src/rox_core/models/task.py",
+          "path": "backend/src/rox_core/models/data_extraction_company_request_status.py",
           "lines": [
-            63,
-            69
-          ]
-        }
-      },
-      {
-        "src": "task_run.root_task_run_id",
-        "dst": "task_run.run_id",
-        "label": "root of a task chain",
-        "source": {
-          "path": "backend/src/rox_core/api/tasks/business.py",
-          "lines": [
-            301,
-            312
+            108,
+            108
           ]
         }
       },
@@ -1717,6 +1936,7 @@
         "src": "conversation messages::conversation_id",
         "dst": "conversation.public_id",
         "label": "lookup by public_id",
+        "kind": "symbolic",
         "source": {
           "path": "backend/src/chat/routes/conversation/service.py",
           "lines": [
@@ -1729,6 +1949,7 @@
         "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
         "dst": "conversation.public_id",
         "label": "key embeds conversation id",
+        "kind": "symbolic",
         "source": {
           "path": "backend/src/chat/background_execution/stream_runner.py",
           "lines": [
@@ -1741,6 +1962,7 @@
         "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
         "dst": "conversation.redis_stream_id",
         "label": "stream id reserved on conversation",
+        "kind": "symbolic",
         "source": {
           "path": "backend/src/chat/background_execution/stream_runner.py",
           "lines": [
@@ -1749,6 +1971,703 @@
           ]
         }
       }
+    ],
+    "domains": [
+      {
+        "id": "tasks",
+        "title": "Background tasks, jobs & metering",
+        "tables": [
+          "api_jobs",
+          "cost_meter_log",
+          "data_extraction_cost_meter_log",
+          "data_processing_task",
+          "databricks_job_run",
+          "digest_task",
+          "digest_task_request",
+          "extraction_task_status",
+          "extraction_task_status_log",
+          "generic_backfill_run",
+          "generic_backfill_verification",
+          "generic_backfill_work_item",
+          "insight_cost_meter_log",
+          "invoice_task",
+          "priorities",
+          "rox_task",
+          "schema_router_config",
+          "task_item",
+          "task_item_entity_link",
+          "task_item_step",
+          "task_params_log",
+          "task_run",
+          "task_run_log",
+          "user_task",
+          "user_task_run"
+        ],
+        "key_tables": [
+          "task_run",
+          "user_task_run",
+          "api_jobs",
+          "extraction_task_status",
+          "cost_meter_log",
+          "generic_backfill_run"
+        ],
+        "notes": []
+      },
+      {
+        "id": "deals",
+        "title": "Deals, quotes & contracts",
+        "tables": [
+          "contract",
+          "contract_bundle",
+          "contract_cycle_details",
+          "contract_document",
+          "contract_document_clause",
+          "contract_document_link",
+          "contract_document_party",
+          "contract_line_item",
+          "deal",
+          "deal_line_item",
+          "deal_log",
+          "deal_person",
+          "deal_stage",
+          "product",
+          "product_family",
+          "product_group",
+          "product_pricebook_entry",
+          "quote",
+          "quote_line_item"
+        ],
+        "key_tables": [
+          "deal",
+          "deal_person",
+          "deal_stage",
+          "contract",
+          "quote",
+          "product"
+        ],
+        "notes": []
+      },
+      {
+        "id": "gov",
+        "title": "Governance & permissions",
+        "tables": [
+          "governance_version",
+          "governed_resource_owner",
+          "impersonation_access",
+          "impersonation_access_log",
+          "org_wide_default",
+          "permission",
+          "permission_set",
+          "permission_set_assignment",
+          "permission_set_custom_verb",
+          "permission_set_field",
+          "permission_set_resource",
+          "pod",
+          "pod_hierarchy",
+          "pod_membership",
+          "pod_record_access",
+          "profile_permission",
+          "provisioning_profile",
+          "provisioning_profile_apply_run",
+          "provisioning_profile_asset",
+          "provisioning_profile_asset_mapping",
+          "provisioning_profile_assignment",
+          "record_access",
+          "resource_access_cascade",
+          "rox_organization_user_roles",
+          "security_entity",
+          "team",
+          "team_account",
+          "team_config",
+          "team_member",
+          "validation_rule"
+        ],
+        "key_tables": [
+          "security_entity",
+          "permission_set",
+          "permission_set_assignment",
+          "profile_permission",
+          "pod",
+          "team"
+        ],
+        "notes": []
+      },
+      {
+        "id": "crm",
+        "title": "CRM mirror (entity_*, sfdc_*, graph)",
+        "tables": [
+          "archived_entity_column_value",
+          "crm_audit_log",
+          "crm_field",
+          "crm_writeback_audit_log",
+          "crm_writeback_entity_snapshot",
+          "crm_writeback_graph_staging",
+          "data_controller_column_values_snapshot",
+          "entity_artifact",
+          "entity_campaign",
+          "entity_campaign_cdc",
+          "entity_campaign_member",
+          "entity_campaign_member_cdc",
+          "entity_campaign_member_staging",
+          "entity_campaign_staging",
+          "entity_column_value",
+          "entity_column_value_state",
+          "entity_company",
+          "entity_company_cdc",
+          "entity_company_staging",
+          "entity_contract",
+          "entity_contract_cdc",
+          "entity_contract_staging",
+          "entity_deal",
+          "entity_deal_cdc",
+          "entity_deal_staging",
+          "entity_event",
+          "entity_event_cdc",
+          "entity_event_staging",
+          "entity_lead",
+          "entity_lead_cdc",
+          "entity_lead_staging",
+          "entity_link",
+          "entity_link_cdc",
+          "entity_link_staging",
+          "entity_opportunity_contact_role",
+          "entity_opportunity_contact_role_cdc",
+          "entity_opportunity_contact_role_staging",
+          "entity_organization",
+          "entity_organization_cdc",
+          "entity_organization_staging",
+          "entity_person",
+          "entity_person_cdc",
+          "entity_person_failed",
+          "entity_person_staging",
+          "entity_rox_company_data",
+          "entity_tag",
+          "entity_user",
+          "entity_user_cdc",
+          "entity_user_staging",
+          "erd_mapping",
+          "erd_onboarding_issue",
+          "erd_onboarding_mapping_item",
+          "erd_onboarding_proposal",
+          "erd_onboarding_relationship_item",
+          "erd_relationship",
+          "explicit_name",
+          "external_column_mapping",
+          "external_entity_column_value",
+          "external_entity_column_value_cdc",
+          "external_entity_column_value_staging",
+          "external_entity_column_version",
+          "graph",
+          "graph_cdc",
+          "graph_entity_deletion_event",
+          "graph_entity_deletion_event_processing",
+          "graph_staging",
+          "graph_version",
+          "relationships",
+          "resolved_entity_column_value",
+          "sfdc_account_share",
+          "sfdc_account_team_member",
+          "sfdc_contact_share",
+          "sfdc_field_permission",
+          "sfdc_governance_reconciliation_staging",
+          "sfdc_governance_sync_state",
+          "sfdc_group",
+          "sfdc_group_member",
+          "sfdc_lead_share",
+          "sfdc_object_permission",
+          "sfdc_object_territory_association",
+          "sfdc_opportunity_share",
+          "sfdc_opportunity_team_member",
+          "sfdc_org_wide_default",
+          "sfdc_organization",
+          "sfdc_permission_set",
+          "sfdc_permission_set_assignment",
+          "sfdc_permission_set_group",
+          "sfdc_permission_set_group_component",
+          "sfdc_profile",
+          "sfdc_sharing_rule",
+          "sfdc_territory2",
+          "sfdc_territory2_model",
+          "sfdc_user",
+          "sfdc_user_record_access",
+          "sfdc_user_role",
+          "sfdc_user_territory_association",
+          "unified_catalog_entry",
+          "unified_catalog_logical_name_allocation",
+          "unified_catalog_relationship"
+        ],
+        "key_tables": [
+          "entity_company",
+          "entity_person",
+          "entity_deal",
+          "external_column_mapping",
+          "crm_field",
+          "graph"
+        ],
+        "notes": []
+      },
+      {
+        "id": "tenancy",
+        "title": "Tenancy: orgs, users, auth & billing",
+        "tables": [
+          "api_key",
+          "auth0_connection",
+          "auth0_invitation",
+          "auth0_organization",
+          "auth0_organization_connections",
+          "auth0_organization_user_roles",
+          "auth0_organization_users",
+          "auth0_role",
+          "auth0_state",
+          "auth0_user",
+          "auto_reload_config",
+          "chat_user_preferences",
+          "delete_user_request",
+          "downgrade_request",
+          "enterprise_subscription",
+          "feature_waitlist",
+          "hierarchical_setting",
+          "mcp_org_access",
+          "model_token_rate",
+          "org_default_enrichment_waterfall",
+          "org_extra",
+          "org_secret",
+          "organization",
+          "organization_agent_context",
+          "organization_config",
+          "organization_ddb_config",
+          "organization_deletion_request",
+          "organization_deletion_step",
+          "organization_graph_config",
+          "organization_owner",
+          "organization_storage_config",
+          "payment_processor_customer",
+          "payment_processor_organization",
+          "plan",
+          "provider_credit_usage_event",
+          "purchased_actions_log",
+          "push_device",
+          "remaining_agents_change_log",
+          "rox_customer",
+          "rox_feature_actions",
+          "starter_action_grant",
+          "sub_organization",
+          "sub_organization_product_mapping",
+          "subscription",
+          "subscription_change_log",
+          "subscription_schedule",
+          "usage_notification_log",
+          "user",
+          "user_account_link_preferences",
+          "user_account_link_preferences_filters",
+          "user_account_link_preferences_relationships",
+          "user_account_research_section",
+          "user_extra",
+          "user_limit_subscription",
+          "user_platform_presence",
+          "user_preferences",
+          "user_profile",
+          "workspace_setup_admin_request"
+        ],
+        "key_tables": [
+          "organization",
+          "user",
+          "user_profile",
+          "sub_organization",
+          "subscription",
+          "auth0_organization"
+        ],
+        "notes": [
+          {
+            "text": "rox_org_id → organization and rox_user_id → user on most tables (87 declared FK columns)",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/models/organization.py",
+                "lines": [
+                  81,
+                  81
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/subscription.py",
+                "lines": [
+                  167,
+                  167
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "people",
+        "title": "Companies & people",
+        "tables": [
+          "account_migration_request",
+          "account_research_section",
+          "byok_person",
+          "byok_position",
+          "clay_person",
+          "clay_position",
+          "clay_webhook",
+          "company",
+          "company_registration_request",
+          "company_registration_task",
+          "company_request_status",
+          "company_request_status_log",
+          "contact_email",
+          "contact_linkedin",
+          "country",
+          "crustdata_company_data",
+          "data_vendor_usage_log",
+          "do_not_call",
+          "email_domain_fact",
+          "email_domain_judgment",
+          "email_domain_mapping",
+          "email_domain_observation",
+          "email_verification_verdict",
+          "employee",
+          "enrichment_link",
+          "linkedin_company",
+          "linkedin_profile",
+          "linkedin_profile_position3",
+          "linkedin_seniority",
+          "marketing_leads",
+          "missed_email_enrichment",
+          "missed_enrichment_contact_candidate",
+          "mixrank_company_data_synced",
+          "mixrank_person",
+          "mixrank_position",
+          "org_chart",
+          "org_chart_edge",
+          "org_chart_generate_response",
+          "org_chart_node",
+          "org_chart_node_position",
+          "org_chart_person",
+          "org_chart_staged_person",
+          "org_chart_v2",
+          "org_public_person",
+          "org_sender_mapping",
+          "people_data_labs_person",
+          "people_data_labs_position",
+          "people_registration_details",
+          "perplexity_company_data",
+          "person",
+          "person_change_log",
+          "person_phone",
+          "person_position",
+          "proxycurl_person",
+          "proxycurl_position",
+          "rocket_reach_person",
+          "rocket_reach_position",
+          "rox_company",
+          "rox_company_hierarchy",
+          "rox_company_merge",
+          "rox_enriched_company",
+          "rox_lead",
+          "rox_lead_csv_data",
+          "rox_lead_unified_id_change_log",
+          "rox_person",
+          "rox_person_attribute_change_log",
+          "rox_person_change_log",
+          "rox_person_csv_change_log",
+          "rox_person_csv_data",
+          "rox_person_metadata",
+          "rox_person_user_field_access",
+          "rox_person_user_field_validation",
+          "rox_user_selected_person_relationship",
+          "saved_people_search",
+          "zoominfo_company_data"
+        ],
+        "key_tables": [
+          "rox_company",
+          "rox_person",
+          "rox_lead",
+          "person",
+          "company",
+          "company_request_status"
+        ],
+        "notes": []
+      },
+      {
+        "id": "lists",
+        "title": "Lists, tabs, columns & insights",
+        "tables": [
+          "clever_column_attribution",
+          "column_alert",
+          "column_data_fetcher_mapping",
+          "column_metadata",
+          "column_refresh_schedule",
+          "column_request",
+          "contacts_csv_upload_task",
+          "csv_upload_task_request",
+          "custom_column_generation_feedback",
+          "custom_data_store",
+          "data_source",
+          "filters",
+          "folder",
+          "insight",
+          "insight_config",
+          "insight_feedback",
+          "insight_filtering",
+          "insight_task",
+          "insight_user_status",
+          "list_runs",
+          "nba_generation_config",
+          "prospect_list_csv_upload_request",
+          "prospect_source_integration",
+          "prospect_source_integration_preferences",
+          "prospect_source_integration_target_list",
+          "public_data_source",
+          "rox_default_view",
+          "rox_list",
+          "rox_list_column_data_fetcher_mapping",
+          "rox_list_column_mapping",
+          "rox_list_column_metadata",
+          "rox_list_column_value",
+          "rox_list_column_value_state",
+          "rox_list_default_view",
+          "rox_list_enrichment_flow",
+          "rox_list_flow_dependency",
+          "rox_list_flow_waterfall_step",
+          "rox_list_member",
+          "rox_list_metadata",
+          "rox_list_view",
+          "salesforce_import_request",
+          "source",
+          "tab",
+          "tab_column",
+          "tab_company",
+          "tab_filter",
+          "tab_group",
+          "tab_group_user_association",
+          "table_metadata",
+          "tag",
+          "user_insight_company"
+        ],
+        "key_tables": [
+          "rox_list",
+          "rox_list_member",
+          "column_metadata",
+          "data_source",
+          "tab",
+          "tab_company",
+          "insight"
+        ],
+        "notes": []
+      },
+      {
+        "id": "seq",
+        "title": "Sequences & outreach",
+        "tables": [
+          "call_disposition_label",
+          "campaign_mailbox_assoc",
+          "campaign_request",
+          "campaign_step_config",
+          "campaign_user_role",
+          "custom_email_tracking_domain",
+          "custom_email_tracking_domain_user_association",
+          "dial_list",
+          "dial_list_member",
+          "dial_list_task",
+          "email_ingestion_decision",
+          "email_ingestion_decision_log",
+          "outbound_agent",
+          "outbound_agent_prospect",
+          "outbound_agent_prospecting_state",
+          "rox_call",
+          "rox_email",
+          "rox_email_event",
+          "rox_linkedin_connection",
+          "rox_linkedin_message",
+          "rox_phone_number",
+          "sequence",
+          "sequence_agent_action",
+          "sequence_agent_cell",
+          "sequence_auto_reply_task",
+          "sequence_build",
+          "sequence_build_step",
+          "sequence_build_step_user_template_association",
+          "sequence_email_reply",
+          "sequence_linkedin_reply",
+          "sequence_policy",
+          "sequence_task",
+          "sequence_task_audit",
+          "sequence_task_ghost",
+          "sequence_task_ghost_feedback",
+          "sequence_task_ghost_promotion",
+          "sequences_export_log",
+          "tracking_domain_email_assoc",
+          "twilio_account",
+          "twilio_call",
+          "twilio_phone_number",
+          "user_template",
+          "voicemail_drop"
+        ],
+        "key_tables": [
+          "campaign_request",
+          "sequence",
+          "sequence_task",
+          "sequence_agent_cell",
+          "campaign_mailbox_assoc",
+          "rox_email",
+          "rox_call"
+        ],
+        "notes": []
+      },
+      {
+        "id": "activity",
+        "title": "Activity integrations: email, calendar, meetings, Slack",
+        "tables": [
+          "adhoc_event",
+          "adhoc_event_attendee",
+          "attention_event_attendee",
+          "attention_event_metadata",
+          "avoma_event_attendee",
+          "avoma_event_metadata",
+          "calendar_event",
+          "calendar_event_attendee",
+          "calendar_event_metadata",
+          "circleback_event_attendee",
+          "circleback_event_metadata",
+          "email_message",
+          "email_message_recipient",
+          "gong_event_attendee",
+          "gong_event_metadata",
+          "integration",
+          "integration_calendar_email_mapping",
+          "integration_email_mapping",
+          "integration_external_mapping",
+          "integration_linkedin_mapping",
+          "integration_preferences",
+          "integration_status",
+          "ms_teams_bot_channel",
+          "ms_teams_bot_personal_chat",
+          "ms_teams_bot_team",
+          "ms_teams_event_attendee",
+          "ms_teams_event_metadata",
+          "ms_teams_organizer_cursor",
+          "ms_teams_transcript_artifact",
+          "note",
+          "notification",
+          "notification_delivery",
+          "notification_preference",
+          "orgwide_integration_consent_log",
+          "rox_activity",
+          "slack_app_mention",
+          "slack_channel",
+          "slack_channel_bot_membership",
+          "slack_channel_partition",
+          "slack_channel_rox_company_link",
+          "slack_integration",
+          "slack_message_log",
+          "slack_org_wide_integration",
+          "slack_user",
+          "slack_user_channel_membership",
+          "transcript_v2",
+          "unified_adhoc_event",
+          "unified_calendar_event",
+          "webhook_config",
+          "webhook_integration",
+          "webhook_integration_action",
+          "zoom_event_attendee",
+          "zoom_event_metadata",
+          "zoom_user_cursor"
+        ],
+        "key_tables": [
+          "integration",
+          "email_message",
+          "calendar_event",
+          "transcript_v2",
+          "slack_channel",
+          "webhook_config"
+        ],
+        "notes": []
+      },
+      {
+        "id": "agents",
+        "title": "Agents, chat, workflows & artifacts",
+        "tables": [
+          "agent_actions_log",
+          "agent_cell",
+          "agent_outcomes_log",
+          "agent_state",
+          "agentflow_idea",
+          "app",
+          "app_build",
+          "app_platform_view_definition",
+          "app_source_version",
+          "artifact",
+          "artifact_chunk",
+          "artifact_entity_link",
+          "artifact_feature_link",
+          "artifact_internal_link",
+          "artifact_summary",
+          "artifact_task",
+          "cell_agentflow_association",
+          "cell_filesystem_association",
+          "cell_metadata",
+          "chat_prompt_user_ordering",
+          "command_config",
+          "conversation",
+          "conversation_run_mapping",
+          "conversation_share",
+          "conversation_ticket",
+          "domain_agent_context",
+          "prompt",
+          "rox_file",
+          "shareable_document",
+          "skill",
+          "skill_user_enablement",
+          "user_artifact_processing_task_request",
+          "workflow_clever_column_trigger",
+          "workflow_config",
+          "workflow_config_draft",
+          "workflow_config_user_enablement",
+          "workflow_config_version",
+          "workflow_entity_timer",
+          "workflow_inbox",
+          "workflow_run",
+          "workflow_schedule",
+          "workflow_step_output",
+          "workflow_timer_trigger_config",
+          "workflow_webhook"
+        ],
+        "key_tables": [
+          "conversation",
+          "agent_cell",
+          "agent_actions_log",
+          "workflow_config",
+          "workflow_run",
+          "artifact",
+          "user_artifact_processing_task_request"
+        ],
+        "notes": []
+      }
+    ],
+    "columns": [
+      [
+        "tenancy",
+        "gov"
+      ],
+      [
+        "lists",
+        "crm"
+      ],
+      [
+        "people",
+        "deals"
+      ],
+      [
+        "seq",
+        "activity"
+      ],
+      [
+        "agents",
+        "tasks",
+        "conversation messages",
+        "chat:conversation:{conversation_id}:stream:{stream_id}"
+      ]
     ]
   },
   "sequences": [

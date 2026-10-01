@@ -98,7 +98,7 @@ def test_build_renders_all_pages_before_writing_any(
     exit_code = cli.main(_build_args(pages_dir, git_repo[0], output_dir, plantuml_jar))
 
     assert exit_code == 1
-    assert "z-second.json: Data stores: synthetic syntax failure" in (
+    assert "z-second.json: send message: synthetic syntax failure" in (
         capsys.readouterr().out
     )
     assert not output_dir.exists()

@@ -10,7 +10,6 @@ from urllib.parse import quote
 from rox_dox.block_svg import block_svg
 from rox_dox.diagrams import (
     emit_diagram_warnings,
-    schema_plantuml,
     sequence_plantuml,
     state_plantuml,
 )
@@ -28,6 +27,7 @@ from rox_dox.model import (
 from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.repo_tree import RepoEntry
 from rox_dox.schema import Table
+from rox_dox.schema_svg import schema_svg
 from rox_dox.tree import SiteTree
 
 
@@ -386,13 +386,52 @@ th {
   stroke-width: 4px;
   stroke-linejoin: round;
 }
+.schema-legend {
+  margin: 0 0 0.75rem;
+  color: #475467;
+  font-size: 0.85rem;
+}
+.schema-legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.4rem 0;
+  padding-left: 1.2rem;
+}
+.schema-pk {
+  color: #b45309;
+  font-weight: 700;
+}
+.schema-fk {
+  color: #2563eb;
+  font-weight: 600;
+}
+.schema-boilerplate {
+  color: #9ca3af;
+}
+.schema-line {
+  font-weight: 600;
+}
+.schema-line-enforced {
+  color: #2563eb;
+}
+.schema-line-symbolic {
+  color: #9ca3af;
+}
+.schema-line-blob {
+  color: #d97706;
+}
+.schema-table-list {
+  font-family: Menlo, Consolas, monospace;
+  line-height: 1.8;
+}
 .diagram svg {
   display: block;
   max-width: 100%;
   height: auto;
   margin: 0 auto;
 }
-.diagram-scroll svg {
+.block-scroll svg {
   max-width: none;
 }
 .sources {
@@ -643,7 +682,7 @@ def _encode_url_schemes(value: str) -> str:
 
 def _diagram_markup(source: str, *, jar: Path) -> str:
     return (
-        f'<div class="diagram diagram-scroll">'
+        f'<div class="diagram block-scroll">'
         f"{_inline_svg(render_svg(source, jar))}</div>"
     )
 
@@ -701,10 +740,29 @@ def _schema_sources(
     page: Page,
     tables: Mapping[str, Table],
 ) -> list[tuple[str, Source]]:
-    elements = [
-        (f"SQL table {table_name}", tables[table_name].source)
-        for table_name in page.data.sql_tables
-    ]
+    if page.data.domains:
+        elements = [
+            (
+                f"schema domain {domain.id} key table {table_name}",
+                tables[table_name].source,
+            )
+            for domain in page.data.domains
+            for table_name in domain.key_tables
+        ]
+    else:
+        elements = [
+            (f"SQL table {table_name}", tables[table_name].source)
+            for table_name in page.data.sql_tables
+        ]
+    elements.extend(
+        (
+            f"schema domain {domain.id} note {note_number}",
+            source,
+        )
+        for domain in page.data.domains
+        for note_number, note in enumerate(domain.notes, start=1)
+        for source in note.sources
+    )
     elements.extend(
         (f"NoSQL store {store.name}", store.source) for store in page.data.nosql
     )
@@ -715,27 +773,82 @@ def _schema_sources(
     return elements
 
 
+def _schema_legend(page: Page) -> str:
+    domain_note = (
+        "<p>Each card is a domain; rows are its key tables; the keys the arrows use "
+        "are listed on the right.</p>"
+        if page.data.domains
+        else ""
+    )
+    return (
+        '<div class="schema-legend">'
+        "<strong>Legend</strong>"
+        '<ul class="schema-legend-list">'
+        '<li><span class="schema-pk">PK</span> primary key; '
+        '<span class="schema-fk">FK column</span> foreign-key-like column</li>'
+        '<li><span class="schema-line schema-line-enforced">solid</span> '
+        'DB-enforced FK; <span class="schema-line schema-line-symbolic">dashed</span> '
+        "symbolic reference (no constraint); "
+        '<span class="schema-line schema-line-blob">dotted</span> blob pointer</li>'
+        "<li>dot = referenced (one) side; arrow = many side</li>"
+        '<li><span class="schema-boilerplate">grey</span> shared boilerplate columns</li>'
+        "</ul>"
+        f"{domain_note}</div>"
+    )
+
+
+def _schema_table_guide(
+    page: Page,
+    *,
+    repo_url: str,
+    tables: Mapping[str, Table],
+) -> str:
+    if not page.data.domains:
+        return ""
+    guides = []
+    for domain in page.data.domains:
+        links = " ".join(
+            f'<a href="{_escape(_source_href(tables[table_name].source, page=page, repo_url=repo_url))}">'
+            f"<code>{_escape(table_name)}</code></a>"
+            for table_name in domain.tables
+        )
+        guides.append(
+            f'<details id="schema-guide-{_escape(domain.id)}">'
+            f"<summary>{_escape(domain.title)} — {len(domain.tables)} tables</summary>"
+            f'<p class="schema-table-list">{links}</p></details>'
+        )
+    return f"<h3>Table guide</h3>{''.join(guides)}"
+
+
 def _schema_section(
     page: Page,
     *,
     repo_url: str,
     tables: Mapping[str, Table],
-    jar: Path,
 ) -> str:
-    if not page.data.sql_tables and not page.data.nosql and not page.data.relations:
+    if (
+        not page.data.domains
+        and not page.data.sql_tables
+        and not page.data.nosql
+        and not page.data.relations
+    ):
         return _section("schema", "Schema", f'<p class="empty">{EMPTY_MESSAGE}</p>')
-    diagram = schema_plantuml(page, repo_url=repo_url, tables=tables)
-    card = _diagram_card(
-        "Data stores",
-        diagram,
-        _schema_sources(page, tables),
-        diagram_id="fig-schema",
-        section_id="schema",
-        page=page,
-        repo_url=repo_url,
-        jar=jar,
+    try:
+        diagram = schema_svg(page, repo_url=repo_url, tables=tables)
+    except DiagramError as error:
+        raise DiagramError(f"Data stores: {error}") from error
+    card = (
+        '<article class="diagram-card zoom-figure" id="fig-schema">'
+        '<div class="figure-bar"><h3>Data stores</h3>'
+        '<a class="expand" href="#fig-schema">Expand full screen</a>'
+        '<a class="collapse" href="#schema">Close</a></div>'
+        f"{_schema_legend(page)}"
+        f'<div class="diagram block-scroll">{_inline_svg(diagram)}</div>'
+        f"{_sources_details(_schema_sources(page, tables), page=page, repo_url=repo_url)}"
+        "</article>"
     )
-    return _section("schema", "Schema", card)
+    guide = _schema_table_guide(page, repo_url=repo_url, tables=tables)
+    return _section("schema", "Schema", f"{card}{guide}")
 
 
 def _sequence_elements(sequence: SequenceDiagram) -> list[tuple[str, Source]]:
@@ -1046,7 +1159,7 @@ def render_page(
             _related_section(page, repo_url=repo_url),
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
             _block_section(page, repo_url=repo_url),
-            _schema_section(page, repo_url=repo_url, tables=tables, jar=jar),
+            _schema_section(page, repo_url=repo_url, tables=tables),
             _sequence_section(page, repo_url=repo_url, jar=jar),
             _state_section(page, repo_url=repo_url, jar=jar),
         ]
