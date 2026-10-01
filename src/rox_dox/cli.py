@@ -6,7 +6,9 @@ import os
 import subprocess
 import sys
 import time
+from collections import defaultdict
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -168,30 +170,46 @@ def _folder_output_relative(folder: str) -> Path:
     return Path("folders/index.html" if folder == "." else f"folders/{folder}.html")
 
 
-def _subtree(path: str, folder: str) -> bool:
-    return folder == "." or path == folder or path.startswith(f"{folder}/")
+@dataclass
+class _FolderFeatureStats:
+    paths: set[str] = field(default_factory=set)
+    primary_count: int = 0
+    file_count: int = 0
 
 
-def _tree_directories(paths: Sequence[str]) -> list[str]:
+def _folder_index(
+    paths: Sequence[str],
+) -> tuple[
+    list[str],
+    dict[str, list[str]],
+    dict[str, list[str]],
+    dict[str, tuple[str, ...]],
+]:
     directories = {"."}
+    children: defaultdict[str, set[str]] = defaultdict(set)
+    files_by_folder: defaultdict[str, list[str]] = defaultdict(list)
+    ancestors_by_path = {}
     for path in paths:
         parts = PurePosixPath(path).parts
+        ancestors = ["."]
+        files_by_folder["."].append(path)
         for depth in range(1, len(parts)):
-            directories.add("/".join(parts[:depth]))
-    return sorted(directories)
-
-
-def _child_directories(folder: str, directories: Sequence[str]) -> list[str]:
-    children = []
-    for directory in directories:
-        if directory == ".":
-            continue
-        parent = str(PurePosixPath(directory).parent)
-        if parent == ".":
-            parent = "."
-        if parent == folder:
-            children.append(directory)
-    return children
+            directory = "/".join(parts[:depth])
+            parent = "." if depth == 1 else "/".join(parts[: depth - 1])
+            directories.add(directory)
+            children[parent].add(directory)
+            files_by_folder[directory].append(path)
+            ancestors.append(directory)
+        ancestors_by_path[path] = tuple(ancestors)
+    return (
+        sorted(directories),
+        {
+            folder: sorted(child_directories)
+            for folder, child_directories in children.items()
+        },
+        dict(files_by_folder),
+        ancestors_by_path,
+    )
 
 
 def _build_folder_pages(
@@ -203,7 +221,9 @@ def _build_folder_pages(
     feature_maps: Sequence[FeatureMap],
     all_paths: Sequence[str],
 ) -> tuple[list[tuple[Path, str]], int] | list[str]:
-    directories = _tree_directories(all_paths)
+    directories, child_directories, subtree_paths_by_folder, ancestors_by_path = (
+        _folder_index(all_paths)
+    )
     in_scope = {path for path in all_paths if is_feature_path(path)}
     placed = {
         feature_file.path
@@ -212,6 +232,11 @@ def _build_folder_pages(
         for feature_file in feature.files
     }
     globally_uncovered = sorted(in_scope - placed)
+    uncovered_by_folder: defaultdict[str, int] = defaultdict(int)
+    for path in globally_uncovered:
+        for folder in ancestors_by_path[path]:
+            uncovered_by_folder[folder] += 1
+
     per_map_reasons: dict[str, list[tuple[str, str]]] = {}
     map_reports = []
     for feature_map in sorted(feature_maps, key=lambda item: item.domain):
@@ -222,59 +247,62 @@ def _build_folder_pages(
         for path, reason in current_report:
             per_map_reasons.setdefault(path, []).append((feature_map.domain, reason))
 
-    output_root = args.out.resolve()
-    rendered: list[tuple[Path, str]] = []
-    for folder in directories:
-        subtree_paths = [path for path in all_paths if _subtree(path, folder)]
-        uncovered_count = sum(
-            1 for path in globally_uncovered if _subtree(path, folder)
-        )
-        feature_rows = []
-        for feature_map in feature_maps:
-            domain_id = f"domain-{feature_map.domain}"
-            domain_page = tree.pages.get(domain_id)
-            if domain_page is None:
+    feature_rows_by_folder: defaultdict[str, list[tuple]] = defaultdict(list)
+    for feature_map in feature_maps:
+        domain_id = f"domain-{feature_map.domain}"
+        domain_page = tree.pages.get(domain_id)
+        if domain_page is None:
+            continue
+        for feature in feature_map.features:
+            feature_id = (
+                f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
+            )
+            feature_page = tree.pages.get(feature_id)
+            if feature_page is None:
                 continue
-            for feature in feature_map.features:
-                feature_id = (
-                    f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
-                )
-                feature_page = tree.pages.get(feature_id)
-                if feature_page is None:
+
+            folder_stats: defaultdict[str, _FolderFeatureStats] = defaultdict(
+                _FolderFeatureStats
+            )
+            for item in feature.files:
+                if item.path not in in_scope:
                     continue
-                files = [
-                    item
-                    for item in feature.files
-                    if _subtree(item.path, folder) and item.path in in_scope
-                ]
-                if not files:
-                    continue
-                primary = sum(item.primary for item in files)
-                feature_rows.append(
+                for folder in ancestors_by_path[item.path]:
+                    stats = folder_stats[folder]
+                    stats.paths.add(item.path)
+                    stats.primary_count += item.primary
+                    stats.file_count += 1
+            for folder, stats in folder_stats.items():
+                feature_rows_by_folder[folder].append(
                     (
                         feature_page.title,
                         feature_id,
                         domain_page.title,
                         domain_id,
-                        len({item.path for item in files}),
-                        primary,
-                        len(files) - primary,
+                        len(stats.paths),
+                        stats.primary_count,
+                        stats.file_count - stats.primary_count,
                     )
                 )
+
+    output_root = args.out.resolve()
+    rendered: list[tuple[Path, str]] = []
+    for folder in directories:
+        subtree_paths = subtree_paths_by_folder.get(folder, [])
         tests_only = bool(subtree_paths) and all(
             is_excluded_path(path) for path in subtree_paths
         )
         child_folders = [
             (str(PurePosixPath(child).name), child)
-            for child in _child_directories(folder, directories)
+            for child in child_directories.get(folder, [])
         ]
         document = render_folder_page(
             folder_path=folder,
             tree=tree,
             entries=entries,
             repo_url=args.repo_url,
-            feature_rows=sorted(feature_rows),
-            uncovered_count=uncovered_count,
+            feature_rows=sorted(feature_rows_by_folder.get(folder, [])),
+            uncovered_count=uncovered_by_folder[folder],
             child_folders=child_folders,
             tests_only=tests_only,
         )
