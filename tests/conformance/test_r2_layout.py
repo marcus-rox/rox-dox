@@ -7,11 +7,11 @@ from pathlib import Path
 from rox_dox.model import Page
 from rox_dox.render import render_page
 from rox_dox.schema import extract_tables
+from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 SECTION_IDS = [
     "tldr",
-    "contents",
     "block",
     "schema",
     "sequences",
@@ -47,6 +47,7 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
     tables = extract_tables(repo, commit)
     document = render_page(
         page,
+        tree=build_tree([page]),
         repo_url=REPO_URL,
         tables=tables,
         jar=plantuml_jar,
@@ -74,7 +75,19 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
             "states",
         )
     )
-    toc = re.search(r'<ul class="toc">(.*?)</ul>', document, re.DOTALL)
+    sidebar = re.search(r'<div id="sidebar">(.*?)</div>', document, re.DOTALL)
+    assert sidebar is not None
+    sidebar_html = sidebar.group(1)
+    toc_position = sidebar_html.index('<nav id="toc" aria-label="On this page">')
+    explorer_position = sidebar_html.index(
+        '<nav id="site-nav" aria-label="Site navigation">'
+    )
+    assert toc_position < explorer_position
+    toc = re.search(
+        r'<nav id="toc" aria-label="On this page">(.*?)</nav>',
+        sidebar_html,
+        re.DOTALL,
+    )
     assert toc is not None
     assert re.findall(r'href="#([^"]+)"', toc.group(1)) == [
         "tldr",
@@ -114,7 +127,13 @@ def test_empty_sections_remain_with_explanatory_message(
     payload["related"] = []
     page = Page.model_validate(payload)
 
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert re.findall(r'<section id="([^"]+)">', document) == SECTION_IDS
     for section_id in ("block", "schema", "sequences", "states", "related"):
