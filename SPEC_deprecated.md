@@ -1,6 +1,6 @@
 # rox-docs — specification
 
-**Status · 2026-09-30 · 4 requirements, 4 unbound (nothing built yet).**
+**Status · 2026-10-01 · deprecated.** Superseded by the feature-tree plan in PLAN.md; a new SPEC.md is drafted after that plan is approved.
 
 ## Requirement levels
 

@@ -1,31 +1,90 @@
-# rox-dox — linked HTML design docs for rox-core, one module deeper per click
+# rox-dox — a feature tree of cited design docs for rox-core, regenerated on a schedule
 
-**Status · 2026-09-30 · planned.** Sprint tasks approved in TASKS.md; nothing built yet.
+**Status · 2026-10-01 · planned.** Root page shipped (PRs 8–11); the folder-tree plan is closed in PLAN_deprecated.md. Next: step 1.
 
 ## The objective
 
-Marcus can start at the rox-core root page and, by clicking, reach any folder's block, schema,
-sequence and state diagrams with every element cited (SPEC R-1 to R-4).
+Marcus can open the rox-core root, click a domain, then a feature, and see that feature end to
+end: its routes, logic, background workers, web UI and the tables it reads and writes, with
+every box, arrow and sentence cited to rox-core code. One scheduled run rebuilds the whole site
+from the latest `main`. A new SPEC.md states this as requirements once this plan is approved.
 
-![rox-dox architecture: sources → authoring → build → output](docs/architecture.svg)
+![Figure 1 — the feature tree](docs/feature-tree.svg)
+
+![Figure 2 — one scheduled regeneration run](docs/regeneration-run.svg)
 
 ## Constraints
 
-- Block diagrams have a soft limit of about 24 boxes; sequence and state diagrams have about 12 elements. The root schema is a high-level view with one card per domain and key tables; submodule schema pages show every table and column in scope. More than those diagram guides is unreadable, and the CIAO study found generated diagrams to be the weakest output.
-- Facts come from code, and the narrative comes from the model. An uncited element fails the build. DeepWiki-style made-up architecture is the failure this prevents.
-- Pages are self-contained HTML (inline SVG and CSS) and open from a local clone.
+1. **Every element is cited at one pinned commit; an uncited or stale element fails the build.**
+   Prevents made-up architecture, the DeepWiki failure the project exists to avoid.
+2. **Diagrams already in rox-core's docs are hypotheses until checked against code.** None of
+   the seven architecture-doc diagrams was correct as written, and two could not be checked.
+3. **Pages are grouped by what the code does, not by folder.** rox-core is split by layer, so a
+   folder tree splits one feature across distant pages (`chat/routes/org_chart_v2` vs
+   `rox_core/api/org_chart_v2`).
+4. **A block figure with more than five layout problems fails the build.** Arrows routed through
+   the bottom bundle were unreadable.
+5. **Pages are self-contained HTML** that open offline from a local clone.
+
+## Previous steps
+
+| Step | Outcome | What it established |
+|---|---|---|
+| Root page: overview, domain schema, four checked flow figures | ✅ | Page format, renderers, citation check and diagram skills work · PRs 8–11 |
+| Root → chat → leaf as folder pages (old step 1, rest) | ❌ | Removed unrun — superseded by the feature tree |
+| Whole repo as a folder tree (old step 2) | ❌ | Removed unrun — folders split features across layers |
+| Overlap between sibling folders in `chat` and `chat/routes` | ✅ | Siblings barely overlap; one feature spans distant folders · this session |
+| Prior work and brainstorm on parent → child generation | ✅ | Adopted an explicit page tree and full rebuilds; rejected writing parents from children · this session |
 
 ## Next steps
 
-1. **Generator plus 3 real pages** (root → chat → one leaf); TASKS.md Tasks 1–5. The generator is the page-model JSON, the renderer, the SQLAlchemy schema extractor and the citation check. *Falsifier:* Marcus says the pages don't read like the EvalKit doc, or the citation check can't reject a bad source. *Cost:* about 1 session.
-2. **Whole rox-core tree** via the `generate-rox-docs` skill, run as one child session per top-level folder; TASKS.md Task 6. *Falsifier:* spot-checked pages contradict the code. *Cost:* about 1 session, mostly parallel child sessions.
+1. **Feature map for one domain, Sequences & outreach.** Assign every backend and web file that
+   uses the domain's tables, or is called by code that does, to a feature by overlap (shared
+   tables plus calls). Output: a reviewable list of features → files → tables, plus the files
+   that fit nowhere. *Falsifier:* Marcus judges the groups are not features, or much of the
+   domain's code can't be placed. *Cost:* about half a session.
+2. **Pages for that domain.** The domain page and each feature page, written with the existing
+   page and diagram skills, linked through the left panel. *Falsifier:* Marcus can't tell from a
+   feature page what it stores and how it runs, or a spot check contradicts the code. *Cost:*
+   about 1 session.
+3. **All ten domains plus the scheduled run.** One command regenerates the tree and every page
+   at the latest `main`; a weekly schedule runs it. *Falsifier:* an unattended run fails, or
+   spot-checked pages are wrong. *Cost:* 1–2 sessions, mostly agent time.
 
 ## Decided
 
-- **Model first, then render.** Devin writes a JSON page model (nodes, edges, messages, transitions, each with a source), and a deterministic renderer turns block and schema diagrams into inline SVG, sequence and state diagrams into PlantUML, and the page into HTML. This keeps layout stable between runs and makes R-4 checkable.
-- **Schema tables come from parsing the SQLAlchemy models in code.** The root domain assignment is authored in ordered rules that fail on unassigned tables; NoSQL stores (Redis, Mongo, OpenSearch, S3) are modelled by Devin, with sources.
-- **The page tree covers every folder in rox-core**, including `web/`, `k8s/` and `.agents/skills/`. Folders that are too large or too small are regrouped by dependencies, as in CodeWiki, so the ~3,051 folders stay navigable.
-- **PlantUML with Smetana layout for sequence and state diagrams**, which is pure Java and needs no Graphviz; block and schema diagrams use custom inline SVG.
-- **TLDR uses the `recap` format.**
-- **Pages are viewed from a local clone** in VS Code or Cursor.
-- **The `generate-rox-docs` skill lives in rox-dox under `.agents/skills/`.**
+- **Feature tree, not folder tree.** Level 1 is the ten schema domains the root already shows;
+  the root page stays as it is.
+- **One algorithm at every level:** take the page's code, group it by overlap, make each group a
+  child page, and repeat on each child until it is a leaf.
+- **Overlap decides the number of children; there is no cap.**
+- **Page content and diagrams use the existing skills unchanged** (generate-rox-docs,
+  block-, schema-, sequence- and state-diagram).
+- **Left panel:** table of contents, then the feature tree, then the file Explorer. Clicking a
+  folder opens a docs page listing the feature pages that cover its files, never GitHub.
+- **Every run rebuilds every page from scratch** at the latest `main`; no change detection yet.
+- **Accuracy and readability come before run cost.**
+- **No automatic Notion lookup.**
+- **Superseded documents are renamed `*_deprecated.md`**, not deleted.
+
+## Out of scope
+
+- Regenerating only changed pages — every run rebuilds everything for now.
+- Running on every rox-core PR — there are too many; the schedule is enough.
+- Automatic Notion lookup — dropped by Marcus.
+- Pages per folder — folders only list the feature pages that cover them.
+- Slack content — the panel stays a placeholder.
+
+## Open
+
+- **Where code that touches no table goes** (shims, the agent framework, the LLM client).
+  Step 1 shows how much there is; a "Platform" domain at level 1 is the likely answer.
+- **The exact overlap measure and when two groups count as one feature.** Tuned in step 1
+  against Marcus's review of the groups.
+- **When a feature is a leaf.** Decided on the first features in step 2.
+- **How web (TypeScript) code joins a feature.** Matching the API routes it calls to backend
+  routes; checked in step 1.
+- **Code used by many features** (shared models, utilities). Shown on every feature that uses
+  it; whether it also gets its own page is decided in step 1.
+- **The new SPEC.md.** R-1 is rewritten for the feature tree; R-2 to R-4 likely carry over.
+  Drafted with Marcus after this plan is approved.

@@ -1,6 +1,6 @@
 # rox-dox sprint tasks
 
-**Status:** Approved 2026-09-30.
+**Status:** Deprecated 2026-10-01. Superseded by the feature-tree plan in PLAN.md.
 
 ## Manifest
 
@@ -119,8 +119,8 @@ not a structural citation failure and must be caught by review of generated page
 
 ## References
 
-- Design: PLAN.md — Model first, then render.
-- Technical specification: SPEC.md — R-4.
+- Design: PLAN_deprecated.md — Model first, then render.
+- Technical specification: SPEC_deprecated.md — R-4.
 - Related issues: Task 2 — Render one complete offline design-doc page.
 
 ## Delivery
@@ -220,8 +220,8 @@ readability guide requires review of the rendered page before this task is accep
 
 ## References
 
-- Design: PLAN.md — self-contained HTML, UML, and readability guide.
-- Technical specification: SPEC.md — R-2 and R-4.
+- Design: PLAN_deprecated.md — self-contained HTML, UML, and readability guide.
+- Technical specification: SPEC_deprecated.md — R-2 and R-4.
 - Related issues: Task 1 — Define the page model and citation validator; Task 3 — Add recursive navigation and page linking.
 
 ## Delivery
@@ -314,12 +314,12 @@ explicit and complete, not silently omitted.
 **Falsifier:** An in-scope folder cannot be reached from the root or a generated link resolves to
 no page.
 
-**Verdict:** Proved given the dependency-based regrouping approved in PLAN.md.
+**Verdict:** Proved given the dependency-based regrouping approved in PLAN_deprecated.md.
 
 ## References
 
-- Design: PLAN.md — module tree and progressively lower abstraction.
-- Technical specification: SPEC.md — R-1.
+- Design: PLAN_deprecated.md — module tree and progressively lower abstraction.
+- Technical specification: SPEC_deprecated.md — R-1.
 - Related issues: Task 2 — Render one complete offline design-doc page; Task 4 — Add Notion context to generated pages.
 
 ## Delivery
@@ -414,8 +414,8 @@ snapshot; regeneration is responsible for refreshing it.
 
 ## References
 
-- Design: PLAN.md — model-first rendering and Notion context.
-- Technical specification: SPEC.md — R-3.
+- Design: PLAN_deprecated.md — model-first rendering and Notion context.
+- Technical specification: SPEC_deprecated.md — R-3.
 - Related issues: Task 2 — Render one complete offline design-doc page; Task 5 — Generate the first three real rox-core pages.
 
 ## Delivery
@@ -514,8 +514,8 @@ as k8s or skills. Those are deferred to Task 6's whole-tree coverage.
 
 ## References
 
-- Design: PLAN.md — Next step 1.
-- Technical specification: SPEC.md — R-1 through R-4.
+- Design: PLAN_deprecated.md — Next step 1.
+- Technical specification: SPEC_deprecated.md — R-1 through R-4.
 - Related issues: Task 3 — Add recursive navigation and page linking; Task 4 — Add Notion context to generated pages.
 
 ## Delivery
@@ -617,8 +617,8 @@ uncited, stale, or contradictory page.
 
 ## References
 
-- Design: PLAN.md — Next step 2 and decided model-first architecture.
-- Technical specification: SPEC.md — R-1 through R-4.
+- Design: PLAN_deprecated.md — Next step 2 and decided model-first architecture.
+- Technical specification: SPEC_deprecated.md — R-1 through R-4.
 - Related issues: Task 5 — Generate the first three real rox-core pages.
 
 ## Delivery
