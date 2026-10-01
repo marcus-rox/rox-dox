@@ -632,6 +632,12 @@ groups = [
     },
     {"id": "data", "label": "Stores", "source": s_pg},
     {"id": "external", "label": "External providers", "source": s_ascii_int},
+    {
+        "id": "providers",
+        "label": "Integration providers",
+        "parent": "external",
+        "source": s_rn_sf,
+    },
 ]
 
 
@@ -885,32 +891,35 @@ nodes = [
     N(
         "crm",
         "CRM + workspace APIs",
-        "external",
+        "providers",
         s_rn_sf,
         [
             D("Salesforce and HubSpot enrichment routes", s_rn_sf),
             D("Google, Slack, Microsoft APIs", s_ascii_int),
+            D("INTERACTION calls: enrichment", s_rn_sf),
         ],
         kind="external",
     ),
     N(
         "twilio",
         "Twilio",
-        "external",
+        "providers",
         s_twilio,
         [
             D("TwilioShim wraps twilio Client per org", s_twilio),
             D("/dialer and /twilio_webhook_v2 routes", s_rn_dialer),
+            D("INTERACTION calls: dialer + webhooks", s_rn_dialer),
         ],
         kind="external",
     ),
     N(
         "auth0",
         "Auth0",
-        "external",
+        "providers",
         s_auth0,
         [
             D("Auth0Shim; /auth0 namespace", s_auth0, s_rn_auth0),
+            D("INTERACTION calls: /auth0", s_rn_auth0),
         ],
         kind="external",
     ),
@@ -940,9 +949,7 @@ edges = [
     E("public_api", "temporal_srv", "start_workflow", s_dispatch),
     E("temporal_srv", "temporal_workers", "task queues", s_tq),
     E("cell", "kv", "lease runtime rows", s_sched_mongo),
-    E("interaction", "crm", "enrichment", s_rn_sf),
-    E("interaction", "twilio", "dialer + webhooks", s_rn_dialer),
-    E("interaction", "auth0", "/auth0", s_rn_auth0),
+    E("interaction", "providers", "provider calls", s_rn_sf),
 ]
 
 tldr = {
@@ -2405,9 +2412,19 @@ block_figures = [
                     "source": s_workspace_admin_executor,
                 },
                 {
-                    "id": "out",
-                    "label": "Downstream",
+                    "id": "fanout_col",
+                    "label": "Fan-out",
                     "source": s_integration_fanout,
+                },
+                {
+                    "id": "runners",
+                    "label": "Runners",
+                    "source": s_temporal_calendar_workflow,
+                },
+                {
+                    "id": "google_col",
+                    "label": "Google APIs",
+                    "source": s_google_calendar,
                 },
             ],
             "nodes": [
@@ -2476,7 +2493,7 @@ block_figures = [
                 N(
                     "fanout",
                     "fan_out_tasks_for_integrations()",
-                    "out",
+                    "fanout_col",
                     s_integration_fanout,
                     [
                         D(
@@ -2499,7 +2516,7 @@ block_figures = [
                 N(
                     "temporal",
                     "Temporal (org-wide calendar/email workflows)",
-                    "out",
+                    "runners",
                     s_temporal_calendar_workflow,
                     [],
                     kind="queue",
@@ -2507,7 +2524,7 @@ block_figures = [
                 N(
                     "sqs_tasks",
                     "SQS extraction tasks",
-                    "out",
+                    "runners",
                     s_sqs_calendar_tasks,
                     [],
                     kind="queue",
@@ -2515,7 +2532,7 @@ block_figures = [
                 N(
                     "google",
                     "Google Calendar / Gmail APIs",
-                    "out",
+                    "google_col",
                     s_google_calendar,
                     [],
                     kind="external",

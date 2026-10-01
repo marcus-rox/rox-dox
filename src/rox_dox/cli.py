@@ -8,7 +8,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from rox_dox.block_svg import block_layout_problems
+from rox_dox.block_svg import MAX_LAYOUT_PROBLEMS, block_layout_problems
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
@@ -211,14 +211,25 @@ def _build_pages(args: argparse.Namespace) -> int:
             print(f"{page_file}: {problem}")
         return 1
 
+    layout_limit_exceeded = False
     for page in valid_pages:
         diagrams = [
             ("overview", page.block),
             *((figure.id, figure.block) for figure in page.block_figures),
         ]
         for figure_id, diagram in diagrams:
-            for problem in block_layout_problems(diagram):
+            layout_problems = block_layout_problems(diagram)
+            for problem in layout_problems:
                 print(f"warning: {page.id} {figure_id}: {problem}")
+            if len(layout_problems) > MAX_LAYOUT_PROBLEMS:
+                print(
+                    f"error: {page.id} {figure_id}: {len(layout_problems)} layout "
+                    f"problems (max {MAX_LAYOUT_PROBLEMS})"
+                )
+                layout_limit_exceeded = True
+
+    if layout_limit_exceeded:
+        return 1
 
     tree = build_tree(valid_pages)
     entries = {

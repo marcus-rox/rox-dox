@@ -19,7 +19,7 @@ description: Author and verify source-cited block diagrams for rox-core. Use whe
 
 ## Layout and visual language
 
-Columns read left to right, and every arrow goes from one column to the next. No backward, same-column or column-skipping arrows: reorder the columns, nest groups inside one column, or split the figure. `rox-dox build` warns on violations; fix every warning.
+Columns read left to right. Aim for every arrow to go to the next column; a few non-adjacent arrows are acceptable when they stay traceable. `rox-dox build` warns on each one and fails when a figure has more than 5 layout problems. Above that, reorder columns, nest groups, use group endpoints, or split the figure.
 
 When one box talks to every box in a group, draw one arrow to the group, not one per box.
 

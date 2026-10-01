@@ -615,6 +615,9 @@ def _layout(
     return columns, cards, routes, width, height
 
 
+MAX_LAYOUT_PROBLEMS = 5
+
+
 def block_layout_problems(diagram: BlockDiagram) -> list[str]:
     top_level_groups = [group for group in diagram.groups if group.parent is None]
     groups_by_id = {group.id: group for group in diagram.groups}
