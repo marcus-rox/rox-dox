@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from rox_dox.cli import main
-from rox_dox.model import NotionDoc, Page
+from rox_dox.model import NotionDoc, Page, page_sources
 
 
 def test_valid_page_passes_check_command(
@@ -50,6 +50,245 @@ def test_node_ids_must_be_unique(page_data: dict[str, object]) -> None:
 
     with pytest.raises(ValidationError, match="duplicate node id 'api'"):
         Page.model_validate(page_data)
+
+
+def test_node_cannot_reference_an_unknown_group(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "missing"
+
+    with pytest.raises(ValidationError, match="node 'api'.*unknown group 'missing'"):
+        Page.model_validate(page_data)
+
+
+def test_group_parent_must_reference_a_declared_group(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+            "parent": "missing",
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="group 'backend'.*unknown parent 'missing'",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_group_parent_cycles_are_rejected(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+            "parent": "workers",
+        },
+        {
+            "id": "workers",
+            "label": "Workers",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+            "parent": "backend",
+        },
+    ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    nodes[0]["group"] = "backend"
+    nodes[1]["group"] = "workers"
+
+    with pytest.raises(ValidationError, match="group parent cycle"):
+        Page.model_validate(page_data)
+
+
+def test_group_without_nodes_or_children_is_rejected(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "empty",
+            "label": "Empty",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="group 'empty' has no nodes or child groups",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_group_ids_must_be_unique(page_data: dict[str, object]) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+        },
+        {
+            "id": "backend",
+            "label": "Other backend",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+        },
+    ]
+
+    with pytest.raises(ValidationError, match="duplicate group id 'backend'"):
+        Page.model_validate(page_data)
+
+
+def test_group_and_node_ids_must_be_unique(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "api",
+            "label": "API group",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+        }
+    ]
+
+    with pytest.raises(ValidationError, match="duplicate group/node id 'api'"):
+        Page.model_validate(page_data)
+
+
+def test_node_details_are_limited_to_six(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["details"] = [
+        {
+            "text": f"Detail {detail_number}",
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+        for detail_number in range(1, 8)
+    ]
+
+    with pytest.raises(ValidationError, match="block node 'api' has 7 details"):
+        Page.model_validate(page_data)
+
+
+def test_node_detail_text_is_limited_to_ninety_characters(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["details"] = [
+        {
+            "text": "x" * 91,
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="block node 'api' detail 1: text length 91",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_node_detail_text_accepts_ninety_characters(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["details"] = [
+        {
+            "text": "x" * 90,
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    ]
+
+    page = Page.model_validate(page_data)
+
+    assert len(page.block.nodes[0].details[0].text) == 90
+
+
+def test_node_detail_text_cannot_be_empty(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["details"] = [
+        {
+            "text": "",
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="block node 'api' detail 1: text length 0",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_page_sources_include_group_and_node_detail_citations(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": source,
+        }
+    ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "backend"
+    node["details"] = [{"text": "Handles requests", "sources": [source]}]
+    page = Page.model_validate(page_data)
+
+    sources = page_sources(page)
+
+    assert ("block group backend", page.block.groups[0].source) in sources
+    assert (
+        "block node api detail 1",
+        page.block.nodes[0].details[0].sources[0],
+    ) in sources
 
 
 def test_summary_table_rows_must_match_column_count(

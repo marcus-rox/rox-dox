@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from urllib.parse import quote
 
 from rox_dox.links import page_href, source_url
-from rox_dox.model import Page, Sequence, Source, StateMachine
+from rox_dox.model import Group, Node, Page, Sequence, Source, StateMachine
 from rox_dox.plantuml import DiagramError
 from rox_dox.schema import Table
 
@@ -78,23 +78,119 @@ def _element_url(page: Page, repo_url: str, source: Source) -> str:
     return source_url(source, repo_url=repo_url, commit=page.commit)
 
 
+def _node_plantuml(
+    node: Node,
+    *,
+    alias: str,
+    page: Page,
+    repo_url: str,
+    indentation: str,
+) -> list[str]:
+    label = node.label
+    if node.details:
+        detail_lines = [f"<size:11>{detail.text}</size>" for detail in node.details]
+        label = f"**{label}**\n" + "\n".join(detail_lines)
+    target = (
+        page_href(page.id, node.link)
+        if node.link is not None
+        else _element_url(page, repo_url, node.source)
+    )
+    return [
+        f"{indentation}{NODE_SHAPES[node.kind]} {_quoted_label(label)} as {alias}",
+        f"{indentation}url of {alias} is [[{_plantuml_url(target)}]]",
+    ]
+
+
+def _group_plantuml(
+    group: Group,
+    *,
+    group_aliases: Mapping[str, str],
+    child_groups: Mapping[str, list[Group]],
+    group_nodes: Mapping[str, list[Node]],
+    node_aliases: Mapping[str, str],
+    page: Page,
+    repo_url: str,
+    indentation: str,
+) -> list[str]:
+    alias = group_aliases[group.id]
+    child_indentation = f"{indentation}  "
+    lines = [
+        f"{indentation}rectangle {_quoted_label(group.label)} as {alias} #F7F9FC {{"
+    ]
+    for child_group in child_groups[group.id]:
+        lines.extend(
+            _group_plantuml(
+                child_group,
+                group_aliases=group_aliases,
+                child_groups=child_groups,
+                group_nodes=group_nodes,
+                node_aliases=node_aliases,
+                page=page,
+                repo_url=repo_url,
+                indentation=child_indentation,
+            )
+        )
+    for node in group_nodes[group.id]:
+        lines.extend(
+            _node_plantuml(
+                node,
+                alias=node_aliases[node.id],
+                page=page,
+                repo_url=repo_url,
+                indentation=child_indentation,
+            )
+        )
+    lines.append(f"{indentation}}}")
+    url = _element_url(page, repo_url, group.source)
+    lines.append(f"{indentation}url of {alias} is [[{_plantuml_url(url)}]]")
+    return lines
+
+
 def _aliases(ids: list[str], prefix: str) -> dict[str, str]:
     return {element_id: f"{prefix}_{index}" for index, element_id in enumerate(ids)}
 
 
 def block_plantuml(page: Page, *, repo_url: str) -> str:
     node_aliases = _aliases([node.id for node in page.block.nodes], "node")
+    group_aliases = _aliases([group.id for group in page.block.groups], "group")
     lines = _diagram_header(smetana=True)
+    if page.block.direction == "left-right":
+        lines.append("left to right direction")
+
+    child_groups: dict[str, list[Group]] = {group.id: [] for group in page.block.groups}
+    group_nodes: dict[str, list[Node]] = {group.id: [] for group in page.block.groups}
+    for group in page.block.groups:
+        if group.parent is not None:
+            child_groups[group.parent].append(group)
     for node in page.block.nodes:
-        alias = node_aliases[node.id]
-        shape = NODE_SHAPES[node.kind]
-        lines.append(f"{shape} {_quoted_label(node.label)} as {alias}")
-        target = (
-            page_href(page.id, node.link)
-            if node.link is not None
-            else _element_url(page, repo_url, node.source)
-        )
-        lines.append(f"url of {alias} is [[{_plantuml_url(target)}]]")
+        if node.group is not None:
+            group_nodes[node.group].append(node)
+
+    for group in page.block.groups:
+        if group.parent is None:
+            lines.extend(
+                _group_plantuml(
+                    group,
+                    group_aliases=group_aliases,
+                    child_groups=child_groups,
+                    group_nodes=group_nodes,
+                    node_aliases=node_aliases,
+                    page=page,
+                    repo_url=repo_url,
+                    indentation="",
+                )
+            )
+    for node in page.block.nodes:
+        if node.group is None:
+            lines.extend(
+                _node_plantuml(
+                    node,
+                    alias=node_aliases[node.id],
+                    page=page,
+                    repo_url=repo_url,
+                    indentation="",
+                )
+            )
 
     for edge in page.block.edges:
         url = _element_url(page, repo_url, edge.source)

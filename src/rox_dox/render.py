@@ -497,7 +497,7 @@ def _block_section(page: Page, *, repo_url: str, jar: Path) -> str:
     elements = [
         (label, source)
         for label, source in page_sources(page)
-        if label.startswith(("block node ", "block edge "))
+        if label.startswith(("block group ", "block node ", "block edge "))
     ]
     diagram = block_plantuml(page, repo_url=repo_url)
     card = _diagram_card(

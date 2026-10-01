@@ -128,6 +128,134 @@ def test_quoted_multiline_diagram_labels_render(
     assert svg.startswith("<svg")
 
 
+def test_block_plantuml_emits_nested_groups_details_and_direction(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+) -> None:
+    _, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    payload["block"]["groups"] = [
+        {"id": "backend", "label": "Backend", "source": source},
+        {
+            "id": "workers",
+            "label": "Workers",
+            "source": source,
+            "parent": "backend",
+        },
+    ]
+    nodes = payload["block"]["nodes"]
+    nodes[0].update({"label": "API", "group": "backend"})
+    nodes[1].update(
+        {
+            "id": "worker-a",
+            "label": "Worker A",
+            "group": "workers",
+            "details": [
+                {"text": "Consumes messages", "sources": [source]},
+            ],
+        }
+    )
+    payload["block"]["edges"][0]["dst"] = "worker-a"
+    page = _page(payload)
+
+    plantuml = block_plantuml(page, repo_url=REPO_URL)
+
+    backend_start = plantuml.index('rectangle "Backend" as group_0 #F7F9FC {')
+    workers_start = plantuml.index('rectangle "Workers" as group_1 #F7F9FC {')
+    worker_start = plantuml.index(
+        'rectangle "**Worker A**\\n<size:11>Consumes messages</size>" as node_1'
+    )
+    workers_close = plantuml.index("  }", workers_start)
+    api_node = plantuml.index('  rectangle "API" as node_0')
+    assert backend_start < workers_start < worker_start < workers_close < api_node
+    assert "left to right direction" in plantuml
+    assert (
+        f"url of group_0 is [[{source_url(page.block.groups[0].source, repo_url=REPO_URL, commit=commit)}]]"
+        in plantuml
+    )
+
+    payload["block"]["direction"] = "top-down"
+
+    assert "left to right direction" not in block_plantuml(
+        _page(payload),
+        repo_url=REPO_URL,
+    )
+
+
+def test_nested_groups_and_cross_boundary_edges_render_with_smetana(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    payload["block"]["groups"] = [
+        {"id": "backend", "label": "Backend", "source": source},
+        {
+            "id": "workers",
+            "label": "Workers",
+            "source": source,
+            "parent": "backend",
+        },
+    ]
+    nodes = payload["block"]["nodes"]
+    nodes[0].update({"id": "api", "label": "API", "group": "backend"})
+    nodes[1].update(
+        {
+            "id": "worker-a",
+            "label": "Worker A",
+            "group": "workers",
+            "details": [
+                {"text": "Consumes commands", "sources": [source]},
+            ],
+        }
+    )
+    nodes.extend(
+        [
+            {
+                "id": "worker-b",
+                "label": "Worker B",
+                "group": "workers",
+                "details": [{"text": "Persists results", "sources": [source]}],
+                "source": source,
+            },
+            {
+                "id": "external",
+                "label": "External",
+                "kind": "external",
+                "source": source,
+            },
+        ]
+    )
+    edges = payload["block"]["edges"]
+    edges[0].update({"src": "worker-a", "dst": "external"})
+    edges.append(
+        {
+            "src": "api",
+            "dst": "worker-b",
+            "label": "dispatches",
+            "source": source,
+        }
+    )
+    page = _page(payload)
+
+    svg = render_svg(block_plantuml(page, repo_url=REPO_URL), plantuml_jar)
+
+    assert all(
+        label in svg
+        for label in (
+            "Backend",
+            "Workers",
+            "API",
+            "Worker A",
+            "Worker B",
+            "External",
+            "Consumes commands",
+            "Persists results",
+        )
+    )
+
+
 def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
