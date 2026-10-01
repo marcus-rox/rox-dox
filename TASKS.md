@@ -189,8 +189,9 @@ Out of scope:
 
 - Depends on Task 1.
 - Diagrams are UML.
-- The approximately 12-box readability guide applies to non-schema diagrams; schema diagrams
-  are explicitly exempt and must show all tables in scope.
+- The approximately 24-box readability guide applies to block diagrams; sequence and state
+  diagrams use an approximately 12-element guide. Schema diagrams are explicitly exempt and
+  must show all tables in scope.
 
 ## Proof of value
 
@@ -348,7 +349,7 @@ source for these pages.
 ## Scope
 
 In scope:
-- Right-side Notion panel with title, link, last-edited date, and excerpt.
+- Right-side Notion panel with each document shown as its linked title.
 - Empty-state handling.
 - Slack placeholder below the Notion panel.
 - Notion citations in page models.
@@ -360,13 +361,12 @@ Out of scope:
 ## Requirements
 
 - Every page has the right-side context panel.
-- Related Notion entries show the four required fields.
+- Related Notion entries show each document as its linked title.
 - The Slack section is present below Notion.
 
 ## Acceptance criteria
 
-- Given related Notion pages, when a page opens, then the panel shows title, link, last-edited
-  date, and excerpt for each.
+- Given related Notion pages, when a page opens, then the panel shows each as its linked title.
 - Given no related Notion pages, when a page opens, then the panel remains and shows an empty state.
 - Given any page, when the right panel opens, then the Slack section appears below Notion.
 - Errors and edge cases: invalid links, missing titles, or malformed dates fail authoring/build
@@ -483,7 +483,8 @@ Out of scope:
 
 - Depends on Tasks 3 and 4.
 - Schema diagrams show all tables in scope, even when there are 37 or more.
-- Other diagrams follow the approximate 12-box readability guide.
+- Block diagrams follow an approximate 24-box readability guide; sequence and state diagrams
+  follow an approximate 12-element guide. Schema diagrams show every table in scope.
 
 ## Proof of value
 

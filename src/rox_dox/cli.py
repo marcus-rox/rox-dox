@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
 from rox_dox.render import render_page
+from rox_dox.repo_tree import list_entries
 from rox_dox.schema import Table, extract_tables
 from rox_dox.sources import page_problems
 from rox_dox.tree import build_tree, tree_problems
@@ -161,6 +162,14 @@ def _build_pages(args: argparse.Namespace) -> int:
         return 1
 
     tree = build_tree(valid_pages)
+    entries = {
+        page.id: [
+            entry
+            for path in page.paths
+            for entry in list_entries(args.repo, page.commit, path)
+        ]
+        for page in valid_pages
+    }
     rendered_pages: list[tuple[Path, str]] = []
     render_problems: list[tuple[Path, str]] = []
     for page_file, page, tables, output_path in pages_to_render:
@@ -171,6 +180,7 @@ def _build_pages(args: argparse.Namespace) -> int:
                 repo_url=args.repo_url,
                 tables=tables,
                 jar=args.plantuml_jar,
+                entries=entries,
             )
         except DiagramError as error:
             render_problems.append((page_file, str(error)))

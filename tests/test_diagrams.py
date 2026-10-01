@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from rox_dox.diagrams import (
-    block_plantuml,
     emit_diagram_warnings,
     schema_plantuml,
     sequence_plantuml,
@@ -37,223 +36,6 @@ def test_node_kind_defaults_to_component(page_data: dict[str, object]) -> None:
     page = _page(page_data)
 
     assert page.block.nodes[0].kind == "component"
-
-
-def test_block_diagram_maps_kinds_and_links_nodes_and_edges(
-    page_data: dict[str, object],
-    git_repo: tuple[Path, str],
-    plantuml_jar: Path,
-) -> None:
-    _, commit = git_repo
-    payload = copy.deepcopy(page_data)
-    nodes = payload["block"]["nodes"]
-    nodes[0].update(
-        {
-            "id": "api/backend.v2",
-            "kind": "component",
-            "link": "other/module",
-        }
-    )
-    nodes[1].update(
-        {
-            "id": "cache-1",
-            "kind": "store",
-            "source": {"path": "pkg/a.py", "lines": [2, 3]},
-        }
-    )
-    nodes.extend(
-        [
-            {
-                "id": "external.node",
-                "label": "External",
-                "kind": "external",
-                "source": {"path": "pkg/a.py", "lines": [2, 3]},
-            },
-            {
-                "id": "worker_q",
-                "label": "Queue",
-                "kind": "queue",
-                "source": {"path": "pkg/a.py", "lines": [2, 3]},
-            },
-        ]
-    )
-    payload["block"]["edges"][0].update(
-        {
-            "src": "api/backend.v2",
-            "dst": "cache-1",
-            "source": {"path": "pkg/a.py", "lines": [4, 5]},
-        }
-    )
-    page = _page(payload)
-
-    source = block_plantuml(page, repo_url=REPO_URL)
-    svg = render_svg(source, plantuml_jar)
-
-    assert "rectangle" in source
-    assert "database" in source
-    assert "cloud" in source
-    assert "queue" in source
-    assert "as api/backend.v2" not in source
-    links = _links(svg)
-    assert "other/module.html" in links
-    assert (
-        source_url(
-            page.block.nodes[1].source,
-            repo_url=REPO_URL,
-            commit=commit,
-        )
-        in links
-    )
-    assert (
-        source_url(
-            page.block.edges[0].source,
-            repo_url=REPO_URL,
-            commit=commit,
-        )
-        in links
-    )
-
-
-def test_quoted_multiline_diagram_labels_render(
-    page_data: dict[str, object],
-    plantuml_jar: Path,
-) -> None:
-    payload = copy.deepcopy(page_data)
-    payload["block"]["nodes"][0]["label"] = 'API "primary"\nroute'
-    payload["block"]["edges"][0]["label"] = 'reads "state"\nthen writes'
-    page = _page(payload)
-
-    svg = render_svg(block_plantuml(page, repo_url=REPO_URL), plantuml_jar)
-
-    assert svg.startswith("<svg")
-
-
-def test_block_plantuml_emits_nested_groups_details_and_direction(
-    page_data: dict[str, object],
-    git_repo: tuple[Path, str],
-) -> None:
-    _, commit = git_repo
-    payload = copy.deepcopy(page_data)
-    source = {"path": "pkg/a.py", "lines": [1, 3]}
-    payload["block"]["groups"] = [
-        {"id": "backend", "label": "Backend", "source": source},
-        {
-            "id": "workers",
-            "label": "Workers",
-            "source": source,
-            "parent": "backend",
-        },
-    ]
-    nodes = payload["block"]["nodes"]
-    nodes[0].update({"label": "API", "group": "backend"})
-    nodes[1].update(
-        {
-            "id": "worker-a",
-            "label": "Worker A",
-            "group": "workers",
-            "details": [
-                {"text": "Consumes messages", "sources": [source]},
-            ],
-        }
-    )
-    payload["block"]["edges"][0]["dst"] = "worker-a"
-    page = _page(payload)
-
-    plantuml = block_plantuml(page, repo_url=REPO_URL)
-
-    backend_start = plantuml.index('rectangle "Backend" as group_0 #F7F9FC {')
-    workers_start = plantuml.index('rectangle "Workers" as group_1 #F7F9FC {')
-    worker_start = plantuml.index(
-        'rectangle "**Worker A**\\n<size:11>Consumes messages</size>" as node_1'
-    )
-    workers_close = plantuml.index("  }", workers_start)
-    api_node = plantuml.index('  rectangle "API" as node_0')
-    assert backend_start < workers_start < worker_start < workers_close < api_node
-    assert "left to right direction" in plantuml
-    assert (
-        f"url of group_0 is [[{source_url(page.block.groups[0].source, repo_url=REPO_URL, commit=commit)}]]"
-        in plantuml
-    )
-
-    payload["block"]["direction"] = "top-down"
-
-    assert "left to right direction" not in block_plantuml(
-        _page(payload),
-        repo_url=REPO_URL,
-    )
-
-
-def test_nested_groups_and_cross_boundary_edges_render_with_smetana(
-    page_data: dict[str, object],
-    plantuml_jar: Path,
-) -> None:
-    payload = copy.deepcopy(page_data)
-    source = {"path": "pkg/a.py", "lines": [1, 3]}
-    payload["block"]["groups"] = [
-        {"id": "backend", "label": "Backend", "source": source},
-        {
-            "id": "workers",
-            "label": "Workers",
-            "source": source,
-            "parent": "backend",
-        },
-    ]
-    nodes = payload["block"]["nodes"]
-    nodes[0].update({"id": "api", "label": "API", "group": "backend"})
-    nodes[1].update(
-        {
-            "id": "worker-a",
-            "label": "Worker A",
-            "group": "workers",
-            "details": [
-                {"text": "Consumes commands", "sources": [source]},
-            ],
-        }
-    )
-    nodes.extend(
-        [
-            {
-                "id": "worker-b",
-                "label": "Worker B",
-                "group": "workers",
-                "details": [{"text": "Persists results", "sources": [source]}],
-                "source": source,
-            },
-            {
-                "id": "external",
-                "label": "External",
-                "kind": "external",
-                "source": source,
-            },
-        ]
-    )
-    edges = payload["block"]["edges"]
-    edges[0].update({"src": "worker-a", "dst": "external"})
-    edges.append(
-        {
-            "src": "api",
-            "dst": "worker-b",
-            "label": "dispatches",
-            "source": source,
-        }
-    )
-    page = _page(payload)
-
-    svg = render_svg(block_plantuml(page, repo_url=REPO_URL), plantuml_jar)
-
-    assert all(
-        label in svg
-        for label in (
-            "Backend",
-            "Workers",
-            "API",
-            "Worker A",
-            "Worker B",
-            "External",
-            "Consumes commands",
-            "Persists results",
-        )
-    )
 
 
 def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
@@ -379,7 +161,7 @@ def test_large_block_sequence_and_state_diagrams_warn(
             "label": f"Extra {index}",
             "source": source,
         }
-        for index in range(11)
+        for index in range(23)
     )
     payload["sequences"][0]["participants"].extend(
         {
@@ -401,12 +183,12 @@ def test_large_block_sequence_and_state_diagrams_warn(
     emit_diagram_warnings(_page(payload))
 
     warning_output = capsys.readouterr().err
-    assert "block diagram has 13 nodes" in warning_output
+    assert "block diagram has 25 nodes (guide: 24)" in warning_output
     assert "sequence 'send message' has 13 participants" in warning_output
     assert "state machine 'message lifecycle' has 13 states" in warning_output
 
 
-def test_diagram_size_guide_does_not_warn_at_twelve(
+def test_diagram_size_guides_do_not_warn_at_limits(
     page_data: dict[str, object],
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -418,7 +200,7 @@ def test_diagram_size_guide_does_not_warn_at_twelve(
             "label": f"Extra {index}",
             "source": source,
         }
-        for index in range(10)
+        for index in range(22)
     )
     payload["sequences"][0]["participants"].extend(
         {

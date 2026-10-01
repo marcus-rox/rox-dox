@@ -103,7 +103,6 @@ class Edge(Model):
 
 
 class BlockDiagram(Model):
-    direction: Literal["left-right", "top-down"] = "left-right"
     groups: list[Group] = Field(default_factory=list)
     nodes: list[Node]
     edges: list[Edge]

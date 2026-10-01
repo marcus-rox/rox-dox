@@ -28,6 +28,7 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
     repo.mkdir()
     (repo / "pkg").mkdir()
     (repo / "pkg" / "sub").mkdir()
+    (repo / "README.md").write_text("Repository fixture\n", encoding="utf-8")
     source_file = repo / "pkg" / "a.py"
     source_file.write_text(
         "\n".join(f"line {line_number}" for line_number in range(1, 11)) + "\n",
@@ -63,6 +64,7 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
             "pkg/a.py",
             "pkg/sub/b.py",
             "models/user.py",
+            "README.md",
         ],
         check=True,
         capture_output=True,
