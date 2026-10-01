@@ -7,7 +7,9 @@ from rox_dox.features import build_feature_map, build_feature_maps
 from rox_dox.schema import extract_tables
 
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
-DEFAULT_COMMIT = "315a00b5b4ecbd6970b537c3e20b1d827ae3b845"
+DEFAULT_COMMIT = Path(__file__).with_name("COMMIT").read_text(
+    encoding="utf-8"
+).strip()
 
 
 def main() -> None:

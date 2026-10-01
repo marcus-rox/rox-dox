@@ -12,7 +12,7 @@ argument_parser = argparse.ArgumentParser(
 )
 argument_parser.add_argument("--repo", type=Path, default=DEFAULT_REPO)
 REPO = argument_parser.parse_args().repo.resolve()
-COMMIT = "315a00b5b4ecbd6970b537c3e20b1d827ae3b845"
+COMMIT = Path(__file__).with_name("COMMIT").read_text(encoding="utf-8").strip()
 _cache: dict[str, list[str]] = {}
 
 
