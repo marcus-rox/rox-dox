@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
+import time
 from collections.abc import Mapping, Sequence
+from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
 from pydantic import ValidationError
@@ -17,6 +21,11 @@ from rox_dox.features import (
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
+from rox_dox.rebuild import (
+    TOKEN_ENV,
+    GitHubPublisher,
+    run_rebuild,
+)
 from rox_dox.render import render_folder_page, render_page, render_uncovered_page
 from rox_dox.repo_tree import list_entries, list_tree_paths
 from rox_dox.schema import Table, extract_tables
@@ -56,6 +65,12 @@ def _parser() -> argparse.ArgumentParser:
     relations.add_argument("--repo", type=Path, required=True)
     relations.add_argument("--commit", required=True)
     relations.add_argument("--tables", type=_parse_tables, required=True)
+
+    rebuild = commands.add_parser("rebuild")
+    rebuild.add_argument("--repo", type=Path, required=True)
+    rebuild.add_argument("--commit")
+    rebuild.add_argument("--out", type=Path)
+    rebuild.add_argument("--open-pr", action="store_true")
     return parser
 
 
@@ -477,10 +492,38 @@ def _print_relation_candidates(
     return 0
 
 
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _rebuild(args: argparse.Namespace) -> int:
+    project_root = Path(__file__).resolve().parents[2]
+    publisher = None
+    if args.open_pr:
+        publisher = GitHubPublisher(
+            project_root,
+            token=os.environ.get(TOKEN_ENV),
+            unix_timestamp=int(time.time()),
+            command_runner=subprocess.run,
+        )
+    return run_rebuild(
+        repo=args.repo,
+        requested_commit=args.commit,
+        output_dir=args.out,
+        open_pr=args.open_pr,
+        project_root=project_root,
+        command_runner=subprocess.run,
+        clock=_utc_now,
+        publisher=publisher,
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "relations":
         return _print_relation_candidates(args.repo, args.commit, args.tables)
+    if args.command == "rebuild":
+        return _rebuild(args)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")
