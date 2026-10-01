@@ -430,6 +430,13 @@ blockquote {
 #related details[open] summary {
   margin-bottom: 0.75rem;
 }
+#related summary h2::before {
+  content: "\25B8\00A0";
+  color: #6b7686;
+}
+#related details[open] summary h2::before {
+  content: "\25BE\00A0";
+}
 @media (max-width: 1100px) {
   .page-shell {
     grid-template-columns: minmax(0, 1fr);
