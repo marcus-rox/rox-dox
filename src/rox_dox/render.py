@@ -309,6 +309,13 @@ a:hover {
 .toc li, .claim-list li, .related-list li {
   margin: 0.35rem 0;
 }
+.figure-notes {
+  font-size: 0.88rem;
+}
+.figure-notes .claim-list {
+  margin-top: 0.3rem;
+  margin-bottom: 0.5rem;
+}
 .citations {
   margin-left: 0.2rem;
   white-space: nowrap;
@@ -722,25 +729,54 @@ def _diagram_card(
 
 
 def _block_section(page: Page, *, repo_url: str) -> str:
-    if not page.block.nodes:
+    if not page.block.nodes and not page.block_figures:
         return _section(
             "block", "Block diagram", f'<p class="empty">{EMPTY_MESSAGE}</p>'
         )
-    elements = [
-        (label, source)
-        for label, source in page_sources(page)
-        if label.startswith(("block group ", "block node ", "block edge "))
-    ]
-    card = (
-        '<article class="diagram-card zoom-figure" id="block-figure">'
-        '<div class="figure-bar"><h3>System overview</h3>'
-        '<a class="expand" href="#block-figure">Expand full screen</a>'
-        '<a class="collapse" href="#block">Close</a></div>'
-        f'<div class="diagram block-scroll">{block_svg(page, repo_url=repo_url)}</div>'
-        f"{_sources_details(elements, page=page, repo_url=repo_url)}"
-        "</article>"
-    )
-    return _section("block", "Block diagram", card)
+    cards = []
+    if page.block.nodes:
+        elements = [
+            (label, source)
+            for label, source in page_sources(page)
+            if label.startswith(("block group ", "block node ", "block edge "))
+        ]
+        cards.append(
+            '<article class="diagram-card zoom-figure" id="block-figure">'
+            '<div class="figure-bar"><h3>Figure 1. System overview</h3>'
+            '<a class="expand" href="#block-figure">Expand full screen</a>'
+            '<a class="collapse" href="#block">Close</a></div>'
+            f'<div class="diagram block-scroll">'
+            f"{block_svg(page.block, page=page, repo_url=repo_url)}</div>"
+            f"{_sources_details(elements, page=page, repo_url=repo_url)}"
+            "</article>"
+        )
+    for figure_number, figure in enumerate(page.block_figures, start=2):
+        figure_prefix = f"block figure {figure.id} "
+        elements = [
+            (label, source)
+            for label, source in page_sources(page)
+            if label.startswith(figure_prefix)
+        ]
+        notes = (
+            f'<div class="figure-notes">'
+            f"{_claim_list(figure.notes, page=page, repo_url=repo_url)}</div>"
+            if figure.notes
+            else ""
+        )
+        figure_id = f"block-figure-{figure.id}"
+        cards.append(
+            f'<article class="diagram-card zoom-figure" id="{_escape(figure_id)}">'
+            '<div class="figure-bar">'
+            f"<h3>Figure {figure_number}. {_escape(figure.title)}</h3>"
+            f'<a class="expand" href="#{_escape(figure_id)}">Expand full screen</a>'
+            '<a class="collapse" href="#block">Close</a></div>'
+            f"{notes}"
+            f'<div class="diagram block-scroll">'
+            f"{block_svg(figure.block, page=page, repo_url=repo_url)}</div>"
+            f"{_sources_details(elements, page=page, repo_url=repo_url)}"
+            "</article>"
+        )
+    return _section("block", "Block diagram", "".join(cards))
 
 
 def _schema_sources(

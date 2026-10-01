@@ -16,7 +16,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 from rox_dox.links import page_href, source_url
-from rox_dox.model import Edge, Group, Node, Page, Source
+from rox_dox.model import BlockDiagram, Edge, Group, Node, Page, Source
 
 
 FONT_FAMILY = "Arial, Helvetica, sans-serif"
@@ -109,6 +109,52 @@ def _text_width(value: str, font_size: float) -> float:
     return len(value) * font_size * TEXT_WIDTH_EM
 
 
+def _wrap_long_word(word: str, max_width: float, font_size: float) -> list[str]:
+    boundaries = [
+        index
+        for index in range(1, len(word))
+        if word[index] in "/.-"
+        or (word[index - 1].islower() and word[index].isupper())
+        or (
+            word[index - 1].isupper()
+            and word[index].isupper()
+            and index + 1 < len(word)
+            and word[index + 1].islower()
+        )
+    ]
+    pieces = []
+    start = 0
+    for boundary in boundaries:
+        pieces.append(word[start:boundary])
+        start = boundary
+    pieces.append(word[start:])
+
+    chars_per_line = max(1, math.floor(max_width / (font_size * TEXT_WIDTH_EM)))
+    lines = []
+    current = ""
+    for piece in pieces:
+        if _text_width(piece, font_size) > max_width:
+            if current:
+                lines.append(current)
+                current = ""
+            chunks = textwrap.wrap(
+                piece,
+                chars_per_line,
+                break_long_words=True,
+                break_on_hyphens=False,
+            )
+            lines.extend(chunks[:-1])
+            current = chunks[-1]
+        elif current and _text_width(current + piece, font_size) > max_width:
+            lines.append(current)
+            current = piece
+        else:
+            current += piece
+    if current:
+        lines.append(current)
+    return lines or [word]
+
+
 def _wrap(
     text: str,
     *,
@@ -117,8 +163,32 @@ def _wrap(
     prefix_chars: int = 0,
 ) -> list[str]:
     available_width = max_width - prefix_chars * font_size * TEXT_WIDTH_EM
-    chars_per_line = max(1, math.floor(available_width / (font_size * TEXT_WIDTH_EM)))
-    return textwrap.wrap(text, chars_per_line) or [text]
+    if not text.strip():
+        return [text]
+
+    lines = []
+    current = ""
+    for word in text.split():
+        if _text_width(word, font_size) <= available_width:
+            candidate = f"{current} {word}".strip()
+            if _text_width(candidate, font_size) <= available_width:
+                current = candidate
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+            continue
+
+        if current:
+            lines.append(current)
+            current = ""
+        wrapped = _wrap_long_word(word, available_width, font_size)
+        lines.extend(wrapped[:-1])
+        current = wrapped[-1]
+
+    if current:
+        lines.append(current)
+    return lines or [text]
 
 
 def _title_lines(node: Node) -> list[str]:
@@ -203,8 +273,7 @@ def _place_group_contents(
     return y
 
 
-def _columns(page: Page) -> list[_Column]:
-    block = page.block
+def _columns(block: BlockDiagram) -> list[_Column]:
     children: dict[str, list[Group]] = {group.id: [] for group in block.groups}
     members: dict[str | None, list[Node]] = {group.id: [] for group in block.groups}
     members[None] = []
@@ -271,16 +340,16 @@ def _port_y(card: _Card, index: int, count: int) -> float:
 
 
 def _layout(
-    page: Page,
+    diagram: BlockDiagram,
 ) -> tuple[list[_Column], dict[str, _Card], list[_Route], float, float]:
-    columns = _columns(page)
+    columns = _columns(diagram)
     cards = {card.node.id: card for column in columns for card in column.cards}
     column_of = {
         card.node.id: index
         for index, column in enumerate(columns)
         for card in column.cards
     }
-    edges = page.block.edges
+    edges = diagram.edges
     for edge in edges:
         cards[edge.src].outgoing.append(edge)
         cards[edge.dst].incoming.append(edge)
@@ -667,8 +736,13 @@ def _legend_svg(height: float) -> str:
     return "".join(parts)
 
 
-def block_svg(page: Page, *, repo_url: str) -> str:
-    columns, cards, routes, width, height = _layout(page)
+def block_svg(
+    diagram: BlockDiagram,
+    *,
+    page: Page,
+    repo_url: str,
+) -> str:
+    columns, cards, routes, width, height = _layout(diagram)
     width = max(width, _legend_width())
     body = [
         f'<rect class="block-canvas" width="{width:.0f}" '

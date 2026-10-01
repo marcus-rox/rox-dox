@@ -1622,6 +1622,2665 @@
       }
     ]
   },
+  "block_figures": [
+    {
+      "id": "task-pipeline",
+      "title": "Background task pipeline",
+      "notes": [
+        {
+          "text": "Based on ascii_architecture.md §4 (Task Executor Pattern), corrected",
+          "sources": [
+            {
+              "path": "ascii_architecture.md",
+              "lines": [
+                110,
+                110
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Doc's CalendarSyncTaskExecutor / DataExtractionTaskExecutor don't exist; current names shown",
+          "sources": [
+            {
+              "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+              "lines": [
+                103,
+                103
+              ]
+            },
+            {
+              "path": "backend/src/tasks/executors/data_extraction_coordinator_executor.py",
+              "lines": [
+                34,
+                34
+              ]
+            }
+          ]
+        }
+      ],
+      "block": {
+        "groups": [
+          {
+            "id": "producer",
+            "label": "Any service",
+            "source": {
+              "path": "backend/src/rox_core/api/tasks/business.py",
+              "lines": [
+                640,
+                640
+              ]
+            }
+          },
+          {
+            "id": "transport",
+            "label": "Queue",
+            "source": {
+              "path": "backend/src/tasks/queue_registry.py",
+              "lines": [
+                165,
+                165
+              ]
+            }
+          },
+          {
+            "id": "worker",
+            "label": "Worker process (DEPLOY_TARGET)",
+            "source": {
+              "path": "backend/src/tasks/listeners/base.py",
+              "lines": [
+                788,
+                788
+              ]
+            }
+          },
+          {
+            "id": "run",
+            "label": "Execution",
+            "source": {
+              "path": "backend/src/tasks/task_handler.py",
+              "lines": [
+                32,
+                32
+              ]
+            }
+          },
+          {
+            "id": "deps",
+            "label": "Dependencies",
+            "source": {
+              "path": "backend/docker-compose-infra.yaml",
+              "lines": [
+                10,
+                11
+              ]
+            }
+          }
+        ],
+        "nodes": [
+          {
+            "id": "caller",
+            "label": "queue_task()",
+            "group": "producer",
+            "source": {
+              "path": "backend/src/rox_core/api/tasks/business.py",
+              "lines": [
+                640,
+                640
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "records a task_run row, then sends task JSON to SQS",
+                "sources": [
+                  {
+                    "path": "backend/src/rox_core/api/tasks/business.py",
+                    "lines": [
+                      298,
+                      298
+                    ]
+                  },
+                  {
+                    "path": "backend/src/rox_core/api/tasks/business.py",
+                    "lines": [
+                      635,
+                      635
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "each TaskType names its queue type",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/types.py",
+                    "lines": [
+                      1627,
+                      1627
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "task_run",
+            "label": "task_run (Postgres)",
+            "group": "producer",
+            "source": {
+              "path": "backend/src/rox_core/models/task.py",
+              "lines": [
+                52,
+                52
+              ]
+            },
+            "kind": "store",
+            "details": []
+          },
+          {
+            "id": "sqs",
+            "label": "SQS queue per queue type",
+            "group": "transport",
+            "source": {
+              "path": "backend/src/tasks/queue_registry.py",
+              "lines": [
+                165,
+                165
+              ]
+            },
+            "kind": "queue",
+            "details": [
+              {
+                "text": "QueueSpec: queue URL env var + listener limits",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/queue_registry.py",
+                    "lines": [
+                      165,
+                      165
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "listener",
+            "label": "SQS listener (listeners/base.py)",
+            "group": "worker",
+            "source": {
+              "path": "backend/src/tasks/listeners/base.py",
+              "lines": [
+                788,
+                788
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "DEPLOY_TARGET picks queue types to poll",
+                "sources": [
+                  {
+                    "path": "backend/src/util/listener_utils.py",
+                    "lines": [
+                      14,
+                      14
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "drops message if task_run already COMPLETED/STOPPED/SKIPPED",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/listeners/base.py",
+                    "lines": [
+                      929,
+                      931
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "handler",
+            "label": "TaskHandler",
+            "group": "run",
+            "source": {
+              "path": "backend/src/tasks/task_handler.py",
+              "lines": [
+                32,
+                32
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "resolves executor",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/task_handler.py",
+                    "lines": [
+                      174,
+                      174
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "updates task_run state when done",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/task_handler.py",
+                    "lines": [
+                      226,
+                      226
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "registry",
+            "label": "Executor registry",
+            "group": "run",
+            "source": {
+              "path": "backend/src/tasks/executor_registry.py",
+              "lines": [
+                760,
+                760
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "TASK_EXECUTORS[task_type](task)",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executor_registry.py",
+                    "lines": [
+                      770,
+                      770
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "executor",
+            "label": "TaskExecutor.execute()",
+            "group": "run",
+            "source": {
+              "path": "backend/src/tasks/task_handler.py",
+              "lines": [
+                116,
+                116
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "GoogleWorkspaceAdminCreateTaskExecutor",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executors/google_workspace_admin_integration.py",
+                    "lines": [
+                      45,
+                      45
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "EmailIntegrationTaskExecutor",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executors/email.py",
+                    "lines": [
+                      686,
+                      686
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "CalendarExtractionCoordinatorTaskExecutor",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+                    "lines": [
+                      103,
+                      103
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "DataExtractionCoordinatorExecutor",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executors/data_extraction_coordinator_executor.py",
+                    "lines": [
+                      34,
+                      34
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pg",
+            "label": "Postgres",
+            "group": "deps",
+            "source": {
+              "path": "backend/docker-compose-infra.yaml",
+              "lines": [
+                10,
+                11
+              ]
+            },
+            "kind": "store",
+            "details": []
+          },
+          {
+            "id": "ext",
+            "label": "External APIs",
+            "group": "deps",
+            "source": {
+              "path": "ascii_architecture.md",
+              "lines": [
+                135,
+                164
+              ]
+            },
+            "kind": "external",
+            "details": []
+          }
+        ],
+        "edges": [
+          {
+            "src": "caller",
+            "dst": "task_run",
+            "label": "insert QUEUED",
+            "source": {
+              "path": "backend/src/rox_core/api/tasks/business.py",
+              "lines": [
+                298,
+                298
+              ]
+            }
+          },
+          {
+            "src": "caller",
+            "dst": "sqs",
+            "label": "send task JSON",
+            "source": {
+              "path": "backend/src/rox_core/api/tasks/business.py",
+              "lines": [
+                635,
+                635
+              ]
+            }
+          },
+          {
+            "src": "sqs",
+            "dst": "listener",
+            "label": "long-poll",
+            "source": {
+              "path": "backend/src/tasks/listeners/base.py",
+              "lines": [
+                868,
+                868
+              ]
+            }
+          },
+          {
+            "src": "listener",
+            "dst": "task_run",
+            "label": "check state",
+            "source": {
+              "path": "backend/src/tasks/listeners/base.py",
+              "lines": [
+                919,
+                960
+              ]
+            }
+          },
+          {
+            "src": "listener",
+            "dst": "handler",
+            "label": "execute_task",
+            "source": {
+              "path": "backend/src/tasks/listeners/base.py",
+              "lines": [
+                913,
+                913
+              ]
+            }
+          },
+          {
+            "src": "handler",
+            "dst": "registry",
+            "label": "get_executor",
+            "source": {
+              "path": "backend/src/tasks/task_handler.py",
+              "lines": [
+                174,
+                174
+              ]
+            }
+          },
+          {
+            "src": "registry",
+            "dst": "executor",
+            "label": "construct",
+            "source": {
+              "path": "backend/src/tasks/executor_registry.py",
+              "lines": [
+                770,
+                770
+              ]
+            }
+          },
+          {
+            "src": "executor",
+            "dst": "pg",
+            "label": "business logic",
+            "source": {
+              "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+              "lines": [
+                480,
+                480
+              ]
+            }
+          },
+          {
+            "src": "executor",
+            "dst": "ext",
+            "label": "provider calls",
+            "source": {
+              "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+              "lines": [
+                633,
+                633
+              ]
+            }
+          },
+          {
+            "src": "handler",
+            "dst": "task_run",
+            "label": "final state",
+            "source": {
+              "path": "backend/src/tasks/task_handler.py",
+              "lines": [
+                226,
+                226
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "integration-layer",
+      "title": "Integration layer",
+      "notes": [
+        {
+          "text": "Based on ascii_architecture.md §5 (Integration Layer Architecture), corrected",
+          "sources": [
+            {
+              "path": "ascii_architecture.md",
+              "lines": [
+                135,
+                164
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Doc lists 4 shims; the current shim packages are shown",
+          "sources": [
+            {
+              "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+              "lines": [
+                155,
+                155
+              ]
+            },
+            {
+              "path": "backend/src/shim_layer/kv/kv_store.py",
+              "lines": [
+                17,
+                17
+              ]
+            },
+            {
+              "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+              "lines": [
+                7,
+                7
+              ]
+            }
+          ]
+        }
+      ],
+      "block": {
+        "groups": [
+          {
+            "id": "app",
+            "label": "Business logic",
+            "source": {
+              "path": "backend/src/rox_core/api/register_namespaces.py",
+              "lines": [
+                156,
+                415
+              ]
+            }
+          },
+          {
+            "id": "ext_int",
+            "label": "ext_integrations/",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            }
+          },
+          {
+            "id": "shims",
+            "label": "shim_layer/",
+            "source": {
+              "path": "backend/src/shim_layer/kv/kv_store.py",
+              "lines": [
+                17,
+                17
+              ]
+            }
+          },
+          {
+            "id": "providers",
+            "label": "Third-party APIs",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            }
+          },
+          {
+            "id": "aws",
+            "label": "AWS + infra",
+            "source": {
+              "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+              "lines": [
+                36,
+                36
+              ]
+            }
+          }
+        ],
+        "nodes": [
+          {
+            "id": "app",
+            "label": "rox_core/api, chat, tasks",
+            "group": "app",
+            "source": {
+              "path": "backend/src/rox_core/api/register_namespaces.py",
+              "lines": [
+                156,
+                415
+              ]
+            },
+            "kind": "component",
+            "details": []
+          },
+          {
+            "id": "calendar_email",
+            "label": "Calendar & email",
+            "group": "ext_int",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Google Calendar client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+                    "lines": [
+                      38,
+                      38
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Gmail Google API client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/email_integration/gmail_service.py",
+                    "lines": [
+                      10,
+                      10
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Outlook service",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/email_integration/outlook_service.py",
+                    "lines": [
+                      25,
+                      25
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "messaging",
+            "label": "Messaging",
+            "group": "ext_int",
+            "source": {
+              "path": "backend/src/ext_integrations/slack_integration/common.py",
+              "lines": [
+                11,
+                11
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Slack WebClient SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/slack_integration/common.py",
+                    "lines": [
+                      11,
+                      11
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Microsoft Teams MSAL client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+                    "lines": [
+                      3,
+                      3
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Unipile integration",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/unipile/unipile_shim.py",
+                    "lines": [
+                      103,
+                      103
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "crm",
+            "label": "CRM",
+            "group": "ext_int",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/crm/hubspot/parser.py",
+              "lines": [
+                30,
+                30
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "HubSpot field parser",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/crm/hubspot/parser.py",
+                    "lines": [
+                      30,
+                      30
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "HubSpot SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/hubspot/hubspot_shim.py",
+                    "lines": [
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Salesforce SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+                    "lines": [
+                      16,
+                      16
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "telephony",
+            "label": "Telephony & recorders",
+            "group": "ext_int",
+            "source": {
+              "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+              "lines": [
+                20,
+                20
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Twilio REST client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+                    "lines": [
+                      20,
+                      20
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Orum service",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/orum/orum_service.py",
+                    "lines": [
+                      339,
+                      339
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Call recorder event service",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
+                    "lines": [
+                      101,
+                      101
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "data_providers",
+            "label": "Data providers",
+            "group": "ext_int",
+            "source": {
+              "path": "backend/src/ext_integrations/data_providers/apollo/apollo_shim.py",
+              "lines": [
+                28,
+                28
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Apollo API base URL",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/data_providers/apollo/apollo_shim.py",
+                    "lines": [
+                      28,
+                      28
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Cognism client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/data_providers/cognism/cognism_shim.py",
+                    "lines": [
+                      22,
+                      22
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "auth_secrets",
+            "label": "Auth & secrets",
+            "group": "shims",
+            "source": {
+              "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+              "lines": [
+                155,
+                155
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Auth0 shim",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+                    "lines": [
+                      155,
+                      155
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "AWS KMS shim",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/kms_shim/aws_kms_shim.py",
+                    "lines": [
+                      40,
+                      40
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Secrets Manager client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+                    "lines": [
+                      48,
+                      48
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "store_shims",
+            "label": "Stores",
+            "group": "shims",
+            "source": {
+              "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+              "lines": [
+                36,
+                36
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "DynamoDB client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+                    "lines": [
+                      36,
+                      36
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "S3 client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+                    "lines": [
+                      159,
+                      160
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Redis client SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/redis_shim/redis.py",
+                    "lines": [
+                      9,
+                      9
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "KV store interface",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/kv/kv_store.py",
+                    "lines": [
+                      17,
+                      17
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "queue_shims",
+            "label": "Queues",
+            "group": "shims",
+            "source": {
+              "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+              "lines": [
+                7,
+                7
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Queue abstraction",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+                    "lines": [
+                      7,
+                      7
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "SQS queue shim",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/sqs_shim/sqs_shim.py",
+                    "lines": [
+                      184,
+                      184
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "billing",
+            "label": "Billing",
+            "group": "shims",
+            "source": {
+              "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+              "lines": [
+                9,
+                9
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Stripe SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+                    "lines": [
+                      9,
+                      9
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Rillet API endpoint",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/rillet_shim/rillet_shim.py",
+                    "lines": [
+                      16,
+                      16
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "obs",
+            "label": "Observability & push",
+            "group": "shims",
+            "source": {
+              "path": "backend/src/shim_layer/observability/__init__.py",
+              "lines": [
+                1,
+                1
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "Unified observability layer",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/observability/__init__.py",
+                    "lines": [
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "SNS push shim",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/push_notifications_shim/sns_push_shim.py",
+                    "lines": [
+                      153,
+                      153
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "google_microsoft",
+            "label": "Google / Microsoft",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Google Calendar API",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+                    "lines": [
+                      38,
+                      38
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Gmail API client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/email_integration/gmail_service.py",
+                    "lines": [
+                      10,
+                      10
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Outlook service",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/email_integration/outlook_service.py",
+                    "lines": [
+                      25,
+                      25
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "slack_api",
+            "label": "Slack",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/ext_integrations/slack_integration/common.py",
+              "lines": [
+                11,
+                11
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Slack WebClient SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/slack_integration/common.py",
+                    "lines": [
+                      11,
+                      11
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "crm_apis",
+            "label": "Salesforce / HubSpot",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+              "lines": [
+                16,
+                16
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Salesforce SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+                    "lines": [
+                      16,
+                      16
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "HubSpot SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/hubspot/hubspot_shim.py",
+                    "lines": [
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "twilio_api",
+            "label": "Twilio",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+              "lines": [
+                20,
+                20
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Twilio REST client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+                    "lines": [
+                      20,
+                      20
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "stripe_api",
+            "label": "Stripe",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+              "lines": [
+                9,
+                9
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Stripe SDK",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+                    "lines": [
+                      9,
+                      9
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "auth0_api",
+            "label": "Auth0",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+              "lines": [
+                179,
+                181
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Auth0 Management API",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+                    "lines": [
+                      179,
+                      181
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "data_vendors",
+            "label": "Data vendors",
+            "group": "providers",
+            "source": {
+              "path": "backend/src/ext_integrations/data_providers/apollo/apollo_shim.py",
+              "lines": [
+                28,
+                28
+              ]
+            },
+            "kind": "external",
+            "details": [
+              {
+                "text": "Apollo API",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/data_providers/apollo/apollo_shim.py",
+                    "lines": [
+                      28,
+                      28
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Cognism client",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/data_providers/cognism/cognism_shim.py",
+                    "lines": [
+                      22,
+                      22
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "dynamodb",
+            "label": "DynamoDB",
+            "group": "aws",
+            "source": {
+              "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+              "lines": [
+                36,
+                36
+              ]
+            },
+            "kind": "store",
+            "details": [
+              {
+                "text": "boto3 DynamoDB client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+                    "lines": [
+                      36,
+                      36
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s3",
+            "label": "S3",
+            "group": "aws",
+            "source": {
+              "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+              "lines": [
+                159,
+                160
+              ]
+            },
+            "kind": "store",
+            "details": [
+              {
+                "text": "boto3 S3 client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+                    "lines": [
+                      159,
+                      160
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "sqs_aws",
+            "label": "SQS",
+            "group": "aws",
+            "source": {
+              "path": "backend/src/shim_layer/sqs_shim/sqs_shim.py",
+              "lines": [
+                206,
+                207
+              ]
+            },
+            "kind": "queue",
+            "details": [
+              {
+                "text": "boto3 SQS client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/sqs_shim/sqs_shim.py",
+                    "lines": [
+                      206,
+                      207
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "redis",
+            "label": "Redis",
+            "group": "aws",
+            "source": {
+              "path": "backend/src/shim_layer/redis_shim/redis.py",
+              "lines": [
+                9,
+                9
+              ]
+            },
+            "kind": "store",
+            "details": [
+              {
+                "text": "redis-py client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/redis_shim/redis.py",
+                    "lines": [
+                      9,
+                      9
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kms_secrets",
+            "label": "KMS / Secrets Manager",
+            "group": "aws",
+            "source": {
+              "path": "backend/src/shim_layer/kms_shim/aws_kms_shim.py",
+              "lines": [
+                60,
+                61
+              ]
+            },
+            "kind": "store",
+            "details": [
+              {
+                "text": "boto3 KMS client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/kms_shim/aws_kms_shim.py",
+                    "lines": [
+                      60,
+                      61
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Secrets Manager client",
+                "sources": [
+                  {
+                    "path": "backend/src/shim_layer/secrets_manager_shim/secrets_manager_shim.py",
+                    "lines": [
+                      51,
+                      52
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "src": "app",
+            "dst": "calendar_email",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/account/service.py",
+              "lines": [
+                11,
+                11
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "messaging",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/business.py",
+              "lines": [
+                104,
+                104
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "crm",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/crm_field/sync.py",
+              "lines": [
+                9,
+                9
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "telephony",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+              "lines": [
+                42,
+                42
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "data_providers",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/business.py",
+              "lines": [
+                47,
+                47
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "auth_secrets",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/organizations/business.py",
+              "lines": [
+                118,
+                118
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "store_shims",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/account/service.py",
+              "lines": [
+                70,
+                70
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "queue_shims",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/azure_marketplace/endpoints.py",
+              "lines": [
+                32,
+                32
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "billing",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/billing/business.py",
+              "lines": [
+                118,
+                118
+              ]
+            }
+          },
+          {
+            "src": "app",
+            "dst": "obs",
+            "label": "calls",
+            "source": {
+              "path": "backend/src/rox_core/api/account/business.py",
+              "lines": [
+                66,
+                66
+              ]
+            }
+          },
+          {
+            "src": "calendar_email",
+            "dst": "google_microsoft",
+            "label": "Google Calendar API",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            }
+          },
+          {
+            "src": "messaging",
+            "dst": "google_microsoft",
+            "label": "Microsoft Teams API",
+            "source": {
+              "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+              "lines": [
+                3,
+                3
+              ]
+            }
+          },
+          {
+            "src": "messaging",
+            "dst": "slack_api",
+            "label": "Slack SDK",
+            "source": {
+              "path": "backend/src/ext_integrations/slack_integration/common.py",
+              "lines": [
+                11,
+                11
+              ]
+            }
+          },
+          {
+            "src": "crm",
+            "dst": "crm_apis",
+            "label": "Salesforce API",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+              "lines": [
+                16,
+                16
+              ]
+            }
+          },
+          {
+            "src": "telephony",
+            "dst": "twilio_api",
+            "label": "Twilio client",
+            "source": {
+              "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+              "lines": [
+                20,
+                20
+              ]
+            }
+          },
+          {
+            "src": "data_providers",
+            "dst": "data_vendors",
+            "label": "Apollo API",
+            "source": {
+              "path": "backend/src/ext_integrations/data_providers/apollo/apollo_shim.py",
+              "lines": [
+                28,
+                28
+              ]
+            }
+          },
+          {
+            "src": "auth_secrets",
+            "dst": "auth0_api",
+            "label": "Auth0 Management API",
+            "source": {
+              "path": "backend/src/shim_layer/auth0_shim/auth0_shim.py",
+              "lines": [
+                179,
+                181
+              ]
+            }
+          },
+          {
+            "src": "auth_secrets",
+            "dst": "kms_secrets",
+            "label": "AWS KMS client",
+            "source": {
+              "path": "backend/src/shim_layer/kms_shim/aws_kms_shim.py",
+              "lines": [
+                60,
+                61
+              ]
+            }
+          },
+          {
+            "src": "store_shims",
+            "dst": "dynamodb",
+            "label": "DynamoDB client",
+            "source": {
+              "path": "backend/src/shim_layer/dynamo_shim/dynamo_shim.py",
+              "lines": [
+                36,
+                36
+              ]
+            }
+          },
+          {
+            "src": "store_shims",
+            "dst": "s3",
+            "label": "S3 client",
+            "source": {
+              "path": "backend/src/shim_layer/s3_shim/s3_shim.py",
+              "lines": [
+                159,
+                160
+              ]
+            }
+          },
+          {
+            "src": "store_shims",
+            "dst": "redis",
+            "label": "Redis client",
+            "source": {
+              "path": "backend/src/shim_layer/redis_shim/redis.py",
+              "lines": [
+                9,
+                9
+              ]
+            }
+          },
+          {
+            "src": "queue_shims",
+            "dst": "sqs_aws",
+            "label": "SQS client",
+            "source": {
+              "path": "backend/src/shim_layer/sqs_shim/sqs_shim.py",
+              "lines": [
+                206,
+                207
+              ]
+            }
+          },
+          {
+            "src": "billing",
+            "dst": "stripe_api",
+            "label": "Stripe client",
+            "source": {
+              "path": "backend/src/shim_layer/stripe_shim/stripe_shim.py",
+              "lines": [
+                9,
+                9
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "connect-google-workspace",
+      "title": "Connecting an integration (Google Workspace admin)",
+      "notes": [
+        {
+          "text": "Based on ascii_architecture.md §7 (Calendar Integration), corrected",
+          "sources": [
+            {
+              "path": "ascii_architecture.md",
+              "lines": [
+                198,
+                198
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Runs on the INTEGRATION queue/worker, not AGENT/EXTRACTIONAGENT",
+          "sources": [
+            {
+              "path": "backend/src/tasks/types.py",
+              "lines": [
+                1651,
+                1651
+              ]
+            }
+          ]
+        },
+        {
+          "text": "/integrations/gcal is only the OAuth callback",
+          "sources": [
+            {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                295,
+                295
+              ]
+            }
+          ]
+        },
+        {
+          "text": "The periodic CalendarExtractionCoordinator is a separate scheduled refresh",
+          "sources": [
+            {
+              "path": "backend/src/rox_core/api/tasks/services.py",
+              "lines": [
+                276,
+                276
+              ]
+            }
+          ]
+        }
+      ],
+      "block": {
+        "groups": [
+          {
+            "id": "client",
+            "label": "Client",
+            "source": {
+              "path": "web/AGENTS.md",
+              "lines": [
+                3,
+                3
+              ]
+            }
+          },
+          {
+            "id": "http",
+            "label": "INTERACTION",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/endpoints.py",
+              "lines": [
+                190,
+                190
+              ]
+            }
+          },
+          {
+            "id": "q",
+            "label": "Queue",
+            "source": {
+              "path": "backend/src/tasks/types.py",
+              "lines": [
+                1651,
+                1651
+              ]
+            }
+          },
+          {
+            "id": "iw",
+            "label": "INTEGRATION worker",
+            "source": {
+              "path": "backend/src/tasks/executors/google_workspace_admin_integration.py",
+              "lines": [
+                45,
+                45
+              ]
+            }
+          },
+          {
+            "id": "out",
+            "label": "Downstream",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                241,
+                241
+              ]
+            }
+          }
+        ],
+        "nodes": [
+          {
+            "id": "web",
+            "label": "web app",
+            "group": "client",
+            "source": {
+              "path": "web/AGENTS.md",
+              "lines": [
+                3,
+                3
+              ]
+            },
+            "kind": "component",
+            "details": []
+          },
+          {
+            "id": "post",
+            "label": "POST /integrations",
+            "group": "http",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/endpoints.py",
+              "lines": [
+                190,
+                190
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "create_integration(request)",
+                "sources": [
+                  {
+                    "path": "backend/src/rox_core/api/integrations/endpoints.py",
+                    "lines": [
+                      249,
+                      249
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "create",
+            "label": "_create_integration()",
+            "group": "http",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/business.py",
+              "lines": [
+                802,
+                802
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "caches org workspace-admin flag",
+                "sources": [
+                  {
+                    "path": "backend/src/rox_core/api/integrations/business.py",
+                    "lines": [
+                      1913,
+                      1913
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "queue_task(GoogleWorkspaceAdminCreateTask)",
+                "sources": [
+                  {
+                    "path": "backend/src/rox_core/api/integrations/business.py",
+                    "lines": [
+                      1940,
+                      1940
+                    ]
+                  },
+                  {
+                    "path": "backend/src/rox_core/api/integrations/business.py",
+                    "lines": [
+                      1940,
+                      1949
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "integration_tbl",
+            "label": "integration (Postgres)",
+            "group": "http",
+            "source": {
+              "path": "backend/src/rox_core/models/integration.py",
+              "lines": [
+                120,
+                120
+              ]
+            },
+            "kind": "store",
+            "details": []
+          },
+          {
+            "id": "iq",
+            "label": "INTEGRATION queue",
+            "group": "q",
+            "source": {
+              "path": "backend/src/tasks/types.py",
+              "lines": [
+                1651,
+                1651
+              ]
+            },
+            "kind": "queue",
+            "details": []
+          },
+          {
+            "id": "gwa",
+            "label": "GoogleWorkspaceAdminCreateTaskExecutor",
+            "group": "iw",
+            "source": {
+              "path": "backend/src/tasks/executors/google_workspace_admin_integration.py",
+              "lines": [
+                45,
+                45
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "loads integration, checks type",
+                "sources": [
+                  {
+                    "path": "backend/src/tasks/executors/google_workspace_admin_integration.py",
+                    "lines": [
+                      92,
+                      92
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "creates per-user CAL + EMAIL integrations",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/workspace_integration/google_workspace_fanout.py",
+                    "lines": [
+                      330,
+                      330
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "fanout",
+            "label": "fan_out_tasks_for_integrations()",
+            "group": "out",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                241,
+                241
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "initialize calendar integrations",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                    "lines": [
+                      286,
+                      286
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "org-wide calendar: Temporal workflow, else SQS tasks",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                    "lines": [
+                      296,
+                      296
+                    ]
+                  },
+                  {
+                    "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                    "lines": [
+                      165,
+                      165
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "org-wide email: Temporal workflow, else SQS tasks",
+                "sources": [
+                  {
+                    "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                    "lines": [
+                      320,
+                      320
+                    ]
+                  },
+                  {
+                    "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                    "lines": [
+                      165,
+                      165
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "temporal",
+            "label": "Temporal (org-wide calendar/email workflows)",
+            "group": "out",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                503,
+                503
+              ]
+            },
+            "kind": "queue",
+            "details": []
+          },
+          {
+            "id": "sqs_tasks",
+            "label": "SQS extraction tasks",
+            "group": "out",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                165,
+                165
+              ]
+            },
+            "kind": "queue",
+            "details": []
+          },
+          {
+            "id": "google",
+            "label": "Google Calendar / Gmail APIs",
+            "group": "out",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            },
+            "kind": "external",
+            "details": []
+          }
+        ],
+        "edges": [
+          {
+            "src": "web",
+            "dst": "post",
+            "label": "connect",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/endpoints.py",
+              "lines": [
+                190,
+                190
+              ]
+            }
+          },
+          {
+            "src": "post",
+            "dst": "create",
+            "label": "create_integration",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/endpoints.py",
+              "lines": [
+                249,
+                249
+              ]
+            }
+          },
+          {
+            "src": "create",
+            "dst": "integration_tbl",
+            "label": "save row",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/business.py",
+              "lines": [
+                1675,
+                1675
+              ]
+            }
+          },
+          {
+            "src": "create",
+            "dst": "iq",
+            "label": "queue_task",
+            "source": {
+              "path": "backend/src/rox_core/api/integrations/business.py",
+              "lines": [
+                1940,
+                1949
+              ]
+            }
+          },
+          {
+            "src": "iq",
+            "dst": "gwa",
+            "label": "INTEGRATION worker",
+            "source": {
+              "path": "backend/src/tasks/types.py",
+              "lines": [
+                1651,
+                1651
+              ]
+            }
+          },
+          {
+            "src": "gwa",
+            "dst": "integration_tbl",
+            "label": "per-user rows",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/workspace_integration/google_workspace_fanout.py",
+              "lines": [
+                330,
+                330
+              ]
+            }
+          },
+          {
+            "src": "gwa",
+            "dst": "fanout",
+            "label": "fan_out_tasks_for_new_integrations",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/workspace_integration/google_workspace_fanout.py",
+              "lines": [
+                1015,
+                1015
+              ]
+            }
+          },
+          {
+            "src": "fanout",
+            "dst": "temporal",
+            "label": "start workflow",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                296,
+                296
+              ]
+            }
+          },
+          {
+            "src": "fanout",
+            "dst": "sqs_tasks",
+            "label": "fallback / direct",
+            "source": {
+              "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+              "lines": [
+                165,
+                165
+              ]
+            }
+          },
+          {
+            "src": "temporal",
+            "dst": "google",
+            "label": "fetch events / mail",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            }
+          },
+          {
+            "src": "sqs_tasks",
+            "dst": "google",
+            "label": "fetch events / mail",
+            "source": {
+              "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+              "lines": [
+                38,
+                38
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "chat-turn",
+      "title": "A chat turn (resumable stream)",
+      "notes": [
+        {
+          "text": "Condensed from chat/background_execution/README.md; full flow on the chat page",
+          "sources": [
+            {
+              "path": "backend/src/chat/background_execution/README.md",
+              "lines": [
+                23,
+                23
+              ]
+            }
+          ]
+        },
+        {
+          "text": "README checked against stream_runner.py at this commit",
+          "sources": [
+            {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                83,
+                83
+              ]
+            }
+          ]
+        }
+      ],
+      "block": {
+        "groups": [
+          {
+            "id": "client",
+            "label": "Browser",
+            "source": {
+              "path": "web/AGENTS.md",
+              "lines": [
+                3,
+                3
+              ]
+            }
+          },
+          {
+            "id": "chat",
+            "label": "CHAT service (FastAPI)",
+            "source": {
+              "path": "backend/src/chat/routes/conversation/router.py",
+              "lines": [
+                281,
+                281
+              ]
+            }
+          },
+          {
+            "id": "bg",
+            "label": "Background asyncio task",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                138,
+                138
+              ]
+            }
+          },
+          {
+            "id": "stores",
+            "label": "Stores",
+            "source": {
+              "path": "backend/src/rox_core/models/conversation/conversation.py",
+              "lines": [
+                32,
+                32
+              ]
+            }
+          }
+        ],
+        "nodes": [
+          {
+            "id": "web",
+            "label": "web app",
+            "group": "client",
+            "source": {
+              "path": "web/AGENTS.md",
+              "lines": [
+                3,
+                3
+              ]
+            },
+            "kind": "component",
+            "details": []
+          },
+          {
+            "id": "post_msg",
+            "label": "POST /message/{conversation_id}",
+            "group": "chat",
+            "source": {
+              "path": "backend/src/chat/routes/conversation/router.py",
+              "lines": [
+                281,
+                281
+              ]
+            },
+            "kind": "component",
+            "details": []
+          },
+          {
+            "id": "start_turn",
+            "label": "start_turn()",
+            "group": "chat",
+            "source": {
+              "path": "backend/src/chat/background_execution/service.py",
+              "lines": [
+                70,
+                70
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "initialize Redis stream (new UUID)",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/stream_runner.py",
+                    "lines": [
+                      101,
+                      101
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "reserve stream_id on conversation (fail_if_active)",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/stream_runner.py",
+                    "lines": [
+                      106,
+                      106
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "pre_spawn_hook: persist user message",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/service.py",
+                    "lines": [
+                      206,
+                      206
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "spawn producer task",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/stream_runner.py",
+                    "lines": [
+                      132,
+                      132
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "producer",
+            "label": "ConversationStreamRunner.run()",
+            "group": "bg",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                138,
+                138
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "heartbeats to Redis",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/stream_runner.py",
+                    "lines": [
+                      37,
+                      37
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "append each event",
+                "sources": [
+                  {
+                    "path": "backend/src/chat/background_execution/stream_runner.py",
+                    "lines": [
+                      231,
+                      231
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "agent",
+            "label": "agent_event_generator → RoxRunner turn loop",
+            "group": "bg",
+            "source": {
+              "path": "backend/src/chat/background_execution/business.py",
+              "lines": [
+                195,
+                195
+              ]
+            },
+            "kind": "component",
+            "details": [
+              {
+                "text": "LLM call + tools per turn",
+                "sources": [
+                  {
+                    "path": "backend/src/agent_framework/runner/rox_runner.py",
+                    "lines": [
+                      1718,
+                      1718
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "get_stream",
+            "label": "GET /message/stream/{conversation_id}",
+            "group": "chat",
+            "source": {
+              "path": "backend/src/chat/routes/conversation/router.py",
+              "lines": [
+                322,
+                322
+              ]
+            },
+            "kind": "component",
+            "details": []
+          },
+          {
+            "id": "conv",
+            "label": "conversation (Postgres)",
+            "group": "stores",
+            "source": {
+              "path": "backend/src/rox_core/models/conversation/conversation.py",
+              "lines": [
+                32,
+                32
+              ]
+            },
+            "kind": "store",
+            "details": []
+          },
+          {
+            "id": "redis",
+            "label": "Redis stream",
+            "group": "stores",
+            "source": {
+              "path": "backend/docker-compose-infra.yaml",
+              "lines": [
+                46,
+                47
+              ]
+            },
+            "kind": "store",
+            "details": []
+          }
+        ],
+        "edges": [
+          {
+            "src": "web",
+            "dst": "post_msg",
+            "label": "send",
+            "source": {
+              "path": "backend/src/chat/routes/conversation/router.py",
+              "lines": [
+                281,
+                281
+              ]
+            }
+          },
+          {
+            "src": "post_msg",
+            "dst": "start_turn",
+            "label": "start_turn",
+            "source": {
+              "path": "backend/src/chat/background_execution/service.py",
+              "lines": [
+                70,
+                70
+              ]
+            }
+          },
+          {
+            "src": "start_turn",
+            "dst": "redis",
+            "label": "init stream",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                101,
+                101
+              ]
+            }
+          },
+          {
+            "src": "start_turn",
+            "dst": "conv",
+            "label": "reserve stream_id",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                106,
+                106
+              ]
+            }
+          },
+          {
+            "src": "start_turn",
+            "dst": "producer",
+            "label": "asyncio.create_task",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                132,
+                132
+              ]
+            }
+          },
+          {
+            "src": "producer",
+            "dst": "agent",
+            "label": "iterate events",
+            "source": {
+              "path": "backend/src/chat/background_execution/business.py",
+              "lines": [
+                195,
+                195
+              ]
+            }
+          },
+          {
+            "src": "producer",
+            "dst": "redis",
+            "label": "append / heartbeat",
+            "source": {
+              "path": "backend/src/chat/background_execution/stream_runner.py",
+              "lines": [
+                217,
+                231
+              ]
+            }
+          },
+          {
+            "src": "web",
+            "dst": "get_stream",
+            "label": "SSE",
+            "source": {
+              "path": "backend/src/chat/routes/conversation/router.py",
+              "lines": [
+                417,
+                417
+              ]
+            }
+          },
+          {
+            "src": "get_stream",
+            "dst": "redis",
+            "label": "read (resumable)",
+            "source": {
+              "path": "backend/src/chat/background_execution/business.py",
+              "lines": [
+                345,
+                353
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
   "data": {
     "sql_tables": [],
     "nosql": [

@@ -74,11 +74,15 @@ def _page(data: dict[str, object]) -> Page:
     return Page.model_validate(copy.deepcopy(data))
 
 
+def _block_svg(page: Page) -> str:
+    return block_svg(page.block, page=page, repo_url=REPO_URL)
+
+
 def test_block_elements_show_labels_and_link_to_their_sources(
     page_data: dict[str, object],
 ) -> None:
     page = _page(_grouped_page_data(page_data))
-    svg = block_svg(page, repo_url=REPO_URL)
+    svg = _block_svg(page)
     links = _anchors(svg)
     expected = [
         ("BACKEND", page.block.groups[0].source),
@@ -114,7 +118,7 @@ def test_node_links_use_relative_page_href(page_data: dict[str, object]) -> None
 
     assert any(
         href == page_href(page.id, "rox-core/pkg") and "API" in text
-        for href, text in _anchors(block_svg(page, repo_url=REPO_URL))
+        for href, text in _anchors(_block_svg(page))
     )
 
 
@@ -122,7 +126,7 @@ def test_nested_groups_render_as_sections_inside_their_parent_column(
     page_data: dict[str, object],
 ) -> None:
     page = _page(_grouped_page_data(page_data))
-    root = ElementTree.fromstring(block_svg(page, repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(page))
     section = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}rect")
@@ -147,9 +151,7 @@ def test_nested_groups_render_as_sections_inside_their_parent_column(
 def test_group_boundaries_use_transparent_dashed_uml_style(
     page_data: dict[str, object],
 ) -> None:
-    root = ElementTree.fromstring(
-        block_svg(_page(_grouped_page_data(page_data)), repo_url=REPO_URL)
-    )
+    root = ElementTree.fromstring(_block_svg(_page(_grouped_page_data(page_data))))
     boundary = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}rect")
@@ -174,7 +176,7 @@ def test_top_level_columns_use_unnumbered_uppercase_captions(
     ]
     payload["block"]["nodes"][0]["group"] = "first"
     payload["block"]["nodes"][1]["group"] = "second"
-    svg = block_svg(_page(payload), repo_url=REPO_URL)
+    svg = _block_svg(_page(payload))
 
     assert "FIRST" in svg
     assert "SECOND" in svg
@@ -185,7 +187,7 @@ def test_top_level_columns_use_unnumbered_uppercase_captions(
 def test_block_svg_has_explicit_dimensions_and_is_not_width_constrained(
     page_data: dict[str, object],
 ) -> None:
-    svg = block_svg(_page(page_data), repo_url=REPO_URL)
+    svg = _block_svg(_page(page_data))
     root = ElementTree.fromstring(svg)
 
     assert int(root.attrib["width"]) > 0
@@ -236,7 +238,7 @@ def test_skipped_column_edges_use_dashed_channel_styling(
             "source": source,
         },
     ]
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     edge_paths = [
         element
         for element in root.iter(f"{SVG_NAMESPACE}path")
@@ -254,7 +256,7 @@ def test_component_uses_a_white_uml_class_box(page_data: dict[str, object]) -> N
     payload = copy.deepcopy(page_data)
     nodes = payload["block"]["nodes"]
     nodes[0].update({"label": 'API "primary"\nroute', "kind": "component"})
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     shape = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}rect")
@@ -292,7 +294,7 @@ def test_long_component_text_wraps_within_card_bounds(
             ],
         }
     )
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     node_group = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}g")
@@ -320,12 +322,63 @@ def test_long_component_text_wraps_within_card_bounds(
             assert card_top < float(text.attrib["y"]) < card_bottom
 
 
+def test_long_identifiers_wrap_at_semantic_boundaries(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    node = payload["block"]["nodes"][0]
+    node.update(
+        {
+            "label": "GET /message/stream/{conversation_id}",
+            "kind": "component",
+            "details": [
+                {
+                    "text": "GoogleWorkspaceAdminCreateTaskExecutor",
+                    "sources": [node["source"]],
+                }
+            ],
+        }
+    )
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
+    node_group = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "block-node block-kind-component"
+    )
+    title_group = next(
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "card-title"
+    )
+    detail_group = next(
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "card-detail"
+    )
+    title_lines = [
+        element.text or "" for element in title_group.iter(f"{SVG_NAMESPACE}text")
+    ]
+    detail_lines = [
+        element.text or "" for element in detail_group.iter(f"{SVG_NAMESPACE}text")
+    ]
+    detail_text = detail_lines[0].removeprefix("•  ").strip() + "".join(
+        line.strip() for line in detail_lines[1:]
+    )
+
+    assert title_lines == ["GET", "/message/stream", "/{conversation_id}"]
+    assert detail_lines == [
+        "•  GoogleWorkspaceAdminCreateTask",
+        "    Executor",
+    ]
+    assert detail_text == "GoogleWorkspaceAdminCreateTaskExecutor"
+
+
 def test_store_renders_as_a_vertical_cylinder_without_kind_tag(
     page_data: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(page_data)
     payload["block"]["nodes"][0].update({"label": "Cache", "kind": "store"})
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     node_group = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}g")
@@ -350,7 +403,7 @@ def test_store_renders_as_a_vertical_cylinder_without_kind_tag(
 def test_queue_renders_as_a_horizontal_cylinder(page_data: dict[str, object]) -> None:
     payload = copy.deepcopy(page_data)
     payload["block"]["nodes"][0].update({"label": "Queue", "kind": "queue"})
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     shape = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}path")
@@ -375,7 +428,7 @@ def test_external_uses_a_dashed_stereotype_box(
 ) -> None:
     payload = copy.deepcopy(page_data)
     payload["block"]["nodes"][0].update({"label": "External", "kind": "external"})
-    root = ElementTree.fromstring(block_svg(_page(payload), repo_url=REPO_URL))
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
     shape = next(
         element
         for element in root.iter(f"{SVG_NAMESPACE}rect")

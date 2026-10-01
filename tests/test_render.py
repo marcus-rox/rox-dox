@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import html
 import re
 from pathlib import Path
 
@@ -375,6 +376,126 @@ def test_page_text_is_html_escaped(
     assert "<script>" not in document
     assert "&lt;script&gt;" in document
     assert "Claim &lt;img src=x&gt;" in document
+
+
+def test_focused_block_figure_renders_notes_and_its_own_sources(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    note_source = {"path": "pkg/a.py", "lines": [1, 2]}
+    group_source = {"path": "pkg/a.py", "lines": [2, 3]}
+    node_source = {"path": "pkg/a.py", "lines": [3, 4]}
+    detail_source = {"path": "pkg/a.py", "lines": [4, 5]}
+    edge_source = {"path": "pkg/a.py", "lines": [5, 6]}
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "notes": [
+                {
+                    "text": "Based on the task pattern, corrected.",
+                    "sources": [note_source],
+                }
+            ],
+            "block": {
+                "groups": [
+                    {
+                        "id": "worker",
+                        "label": "Worker",
+                        "source": group_source,
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": "listener",
+                        "label": "Listener",
+                        "source": node_source,
+                        "group": "worker",
+                        "details": [
+                            {"text": "Polls the queue.", "sources": [detail_source]}
+                        ],
+                    },
+                    {"id": "handler", "label": "Handler", "source": node_source},
+                ],
+                "edges": [
+                    {
+                        "src": "listener",
+                        "dst": "handler",
+                        "label": "execute",
+                        "source": edge_source,
+                    }
+                ],
+            },
+        }
+    ]
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+
+    note_url = source_url(
+        page.block_figures[0].notes[0].sources[0],
+        repo_url=REPO_URL,
+        commit=commit,
+    )
+    figure_sources = {
+        "block figure task-pipeline note 1": note_url,
+        "block figure task-pipeline group worker": source_url(
+            page.block_figures[0].block.groups[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline node listener": source_url(
+            page.block_figures[0].block.nodes[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline node listener detail 1": source_url(
+            page.block_figures[0].block.nodes[0].details[0].sources[0],
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline edge listener->handler": source_url(
+            page.block_figures[0].block.edges[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+    }
+
+    assert (
+        '<article class="diagram-card zoom-figure" id="block-figure-task-pipeline">'
+        in document
+    )
+    assert "<h3>Figure 2. Background task pipeline</h3>" in document
+    assert "Based on the task pattern, corrected." in document
+    assert f'<a href="{note_url}">[1]</a>' in document
+    for label, url in figure_sources.items():
+        assert f'<th scope="row">{html.escape(label)}</th>' in document
+        assert f'<a href="{url}">Source</a>' in document
+    for url, text in (
+        (figure_sources["block figure task-pipeline node listener"], "Listener"),
+        (
+            figure_sources["block figure task-pipeline node listener detail 1"],
+            "Polls the queue.",
+        ),
+        (
+            figure_sources["block figure task-pipeline edge listener->handler"],
+            "execute",
+        ),
+    ):
+        assert re.search(
+            rf'<a href="{re.escape(url)}" target="_top">'
+            rf"(?:(?!</a>).)*{re.escape(text)}(?:(?!</a>).)*</a>",
+            document,
+            re.DOTALL,
+        )
 
 
 def test_same_title_diagrams_only_list_their_own_sources(

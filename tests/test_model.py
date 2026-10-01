@@ -157,7 +157,7 @@ def test_group_ids_must_be_unique(page_data: dict[str, object]) -> None:
         Page.model_validate(page_data)
 
 
-def test_group_and_node_ids_must_be_unique(
+def test_group_and_node_ids_can_match(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -169,9 +169,60 @@ def test_group_and_node_ids_must_be_unique(
             "source": {"path": "pkg/a.py", "lines": [1, 3]},
         }
     ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "api"
 
-    with pytest.raises(ValidationError, match="duplicate group/node id 'api'"):
-        Page.model_validate(page_data)
+    Page.model_validate(page_data)
+
+
+def test_block_figure_ids_must_be_unique(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    source = payload["block"]["nodes"][0]["source"]
+    figure = {
+        "id": "task-pipeline",
+        "title": "Background task pipeline",
+        "block": {
+            "nodes": [{"id": "caller", "label": "Caller", "source": source}],
+            "edges": [],
+        },
+    }
+    payload["block_figures"] = [figure, copy.deepcopy(figure)]
+
+    with pytest.raises(ValidationError, match="duplicate block figure id"):
+        Page.model_validate(payload)
+
+
+def test_block_figure_edges_must_reference_figure_nodes(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = payload["block"]["nodes"][0]["source"]
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "block": {
+                "nodes": [{"id": "caller", "label": "Caller", "source": source}],
+                "edges": [
+                    {
+                        "src": "caller",
+                        "dst": "missing",
+                        "label": "unknown",
+                        "source": source,
+                    }
+                ],
+            },
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="block edge caller->missing: unknown node 'missing'",
+    ):
+        Page.model_validate(payload)
 
 
 def test_node_details_are_limited_to_six(
@@ -290,6 +341,55 @@ def test_page_sources_include_group_and_node_detail_citations(
         "block node api detail 1",
         page.block.nodes[0].details[0].sources[0],
     ) in sources
+
+
+def test_page_sources_include_focused_block_figure_elements(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "notes": [{"text": "Based on the task pattern.", "sources": [source]}],
+            "block": {
+                "groups": [
+                    {"id": "worker", "label": "Worker", "source": source},
+                ],
+                "nodes": [
+                    {
+                        "id": "listener",
+                        "label": "Listener",
+                        "source": source,
+                        "group": "worker",
+                        "details": [{"text": "Polls SQS.", "sources": [source]}],
+                    },
+                    {"id": "handler", "label": "Handler", "source": source},
+                ],
+                "edges": [
+                    {
+                        "src": "listener",
+                        "dst": "handler",
+                        "label": "execute",
+                        "source": source,
+                    }
+                ],
+            },
+        }
+    ]
+    page = Page.model_validate(payload)
+
+    sources = page_sources(page)
+    labels = {label for label, _ in sources}
+
+    assert {
+        "block figure task-pipeline note 1",
+        "block figure task-pipeline group worker",
+        "block figure task-pipeline node listener",
+        "block figure task-pipeline node listener detail 1",
+        "block figure task-pipeline edge listener->handler",
+    } <= labels
 
 
 def test_schema_domains_require_key_tables_to_be_members(

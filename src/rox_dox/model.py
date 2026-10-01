@@ -130,13 +130,6 @@ class BlockDiagram(Model):
             raise ValueError(f"block diagram: duplicate node id '{duplicate_id}'")
 
         declared_groups = set(group_ids)
-        shared_id = next(
-            (group_id for group_id in group_ids if group_id in declared_nodes),
-            None,
-        )
-        if shared_id is not None:
-            raise ValueError(f"block diagram: duplicate group/node id '{shared_id}'")
-
         groups_by_id = {group.id: group for group in self.groups}
         for group in self.groups:
             if group.parent is not None and group.parent not in declared_groups:
@@ -186,6 +179,13 @@ class BlockDiagram(Model):
                     f"block edge {edge.src}->{edge.dst}: unknown node '{edge.dst}'"
                 )
         return self
+
+
+class BlockFigure(Model):
+    id: str = Field(pattern=r"^[a-z0-9-]+$")
+    title: str
+    notes: list[Claim] = Field(default_factory=list)
+    block: BlockDiagram
 
 
 class Participant(Model):
@@ -413,6 +413,7 @@ class Page(Model):
     paths: list[str] = Field(min_length=1)
     tldr: Tldr
     block: BlockDiagram
+    block_figures: list[BlockFigure] = Field(default_factory=list)
     data: DataModel
     sequences: list[Sequence]
     states: list[StateMachine]
@@ -432,6 +433,14 @@ class Page(Model):
             ):
                 raise ValueError(f"path '{path}' is not repo-relative")
         return paths
+
+    @model_validator(mode="after")
+    def validate_block_figures(self) -> Page:
+        figure_ids = [figure.id for figure in self.block_figures]
+        duplicate_id = _first_duplicate(figure_ids)
+        if duplicate_id is not None:
+            raise ValueError(f"duplicate block figure id '{duplicate_id}'")
+        return self
 
 
 def _claim_sources(claims: list[Claim], section: str) -> list[tuple[str, Source]]:
@@ -467,6 +476,45 @@ def page_sources(
     sources.extend(
         (f"block edge {edge.src}->{edge.dst}", edge.source) for edge in page.block.edges
     )
+    for figure in page.block_figures:
+        sources.extend(
+            (
+                f"block figure {figure.id} note {note_number}",
+                source,
+            )
+            for note_number, note in enumerate(figure.notes, start=1)
+            for source in note.sources
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} group {group.id}",
+                group.source,
+            )
+            for group in figure.block.groups
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} node {node.id}",
+                node.source,
+            )
+            for node in figure.block.nodes
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} node {node.id} detail {detail_number}",
+                source,
+            )
+            for node in figure.block.nodes
+            for detail_number, detail in enumerate(node.details, start=1)
+            for source in detail.sources
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} edge {edge.src}->{edge.dst}",
+                edge.source,
+            )
+            for edge in figure.block.edges
+        )
 
     for sequence in page.sequences:
         sources.extend(
