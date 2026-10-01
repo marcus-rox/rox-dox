@@ -22,6 +22,7 @@ class Column(SchemaModel):
 
 class Table(SchemaModel):
     name: str
+    class_name: str
     columns: list[Column]
     source: CodeSource
     duplicate_paths: list[str] = []
@@ -143,6 +144,7 @@ def _tables_in_file(source: str, path: str) -> list[Table]:
         tables.append(
             Table(
                 name=name,
+                class_name=class_node.name,
                 columns=[
                     column
                     for statement in class_node.body

@@ -10,11 +10,21 @@ from pydantic import ValidationError
 
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
+from rox_dox.relations import RelationCandidate, find_relation_candidates
 from rox_dox.render import render_page
 from rox_dox.repo_tree import list_entries
 from rox_dox.schema import Table, extract_tables
 from rox_dox.sources import page_problems
 from rox_dox.tree import build_tree, tree_problems
+
+
+def _parse_tables(value: str) -> tuple[str, ...]:
+    tables = tuple(table.strip() for table in value.split(","))
+    if not tables or any(not table for table in tables):
+        raise argparse.ArgumentTypeError(
+            "tables must be a comma-separated list of table names"
+        )
+    return tables
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -34,6 +44,11 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("tools/plantuml.jar"),
     )
+
+    relations = commands.add_parser("relations")
+    relations.add_argument("--repo", type=Path, required=True)
+    relations.add_argument("--commit", required=True)
+    relations.add_argument("--tables", type=_parse_tables, required=True)
     return parser
 
 
@@ -199,8 +214,29 @@ def _build_pages(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_relation_candidates(
+    repo: Path,
+    commit: str,
+    tables: Sequence[str],
+) -> int:
+    try:
+        candidates: list[RelationCandidate] = find_relation_candidates(
+            repo,
+            commit,
+            tables,
+        )
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
+        return 1
+    for candidate in candidates:
+        print(candidate.to_tsv())
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "relations":
+        return _print_relation_candidates(args.repo, args.commit, args.tables)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")

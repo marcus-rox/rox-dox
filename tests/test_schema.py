@@ -41,6 +41,7 @@ def test_extracts_sqlalchemy_tables_and_column_metadata(
 
     assert set(tables) == {"users", "sessions"}
     users = tables["users"]
+    assert users.class_name == "User"
     assert [
         (column.name, column.type, column.primary_key) for column in users.columns
     ] == [
@@ -48,6 +49,7 @@ def test_extracts_sqlalchemy_tables_and_column_metadata(
         ("email", "String", False),
     ]
     sessions = tables["sessions"]
+    assert sessions.class_name == "Session"
     assert [(column.name, column.type) for column in sessions.columns] == [
         ("id", "Integer"),
         ("user_id", "Integer"),

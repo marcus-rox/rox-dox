@@ -1144,6 +1144,75 @@ data = {
             "source": s_sort_key,
         },
     ],
+    "relations": [
+        {
+            "src": "user_task_run.run_id",
+            "dst": "task_run.run_id",
+            "label": "ORM primaryjoin",
+            "source": S(
+                "backend/src/rox_core/models/task.py",
+                "user_task_run = relationship(",
+                span=2,
+            ),
+        },
+        {
+            "src": "task_run_log.run_id",
+            "dst": "task_run.run_id",
+            "label": "written at queue time",
+            "source": S(
+                "backend/src/rox_core/api/tasks/business.py",
+                "task_run_log = TaskRunLog(",
+                span=2,
+            ),
+        },
+        {
+            "src": "task_run.parent_task_run_id",
+            "dst": "task_run.run_id",
+            "label": "parent in a task chain",
+            "source": S(
+                "backend/src/rox_core/models/task.py",
+                "parent_task_run_id: Mapped[str | None] = mapped_column(",
+                span=6,
+            ),
+        },
+        {
+            "src": "task_run.root_task_run_id",
+            "dst": "task_run.run_id",
+            "label": "root of a task chain",
+            "source": S(
+                "backend/src/rox_core/api/tasks/business.py",
+                "root_task_run_id = task_run_id",
+                end_needle="root_task_run_id = parent_task_run.root_task_run_id",
+            ),
+        },
+        {
+            "src": "conversation messages::conversation_id",
+            "dst": "conversation.public_id",
+            "label": "lookup by public_id",
+            "source": S(
+                "backend/src/chat/routes/conversation/service.py",
+                "conversation = Conversation.find_by_public_id(",
+                span=1,
+                after="def get_tag_mapping(",
+            ),
+        },
+        {
+            "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
+            "dst": "conversation.public_id",
+            "label": "key embeds conversation id",
+            "source": S(
+                "backend/src/chat/background_execution/stream_runner.py",
+                "def _get_stream_key(conversation_id: str, stream_id: str) -> str:",
+                span=1,
+            ),
+        },
+        {
+            "src": "chat:conversation:{conversation_id}:stream:{stream_id}",
+            "dst": "conversation.redis_stream_id",
+            "label": "stream id reserved on conversation",
+            "source": s_reserve,
+        },
+    ],
 }
 
 related = [
