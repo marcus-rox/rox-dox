@@ -11,7 +11,7 @@ from typing import TypeVar
 
 CACHE_ROOT = Path(__file__).resolve().parents[2] / ".cache" / "rox-dox"
 # Bump this whenever a source extractor changes.
-CACHE_VERSION = 2
+CACHE_VERSION = 4
 T = TypeVar("T")
 
 

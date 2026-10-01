@@ -246,9 +246,7 @@ def test_skipped_column_edges_use_dashed_channel_styling(
         },
     ]
     page = _page(payload)
-    assert block_layout_problems(page.block) == [
-        "first_node -> third_node (columns 0 -> 2; expected 0 -> 1)"
-    ]
+    assert block_layout_problems(page.block) == []
     root = ElementTree.fromstring(_block_svg(page))
     edge_paths = [
         element
@@ -261,6 +259,49 @@ def test_skipped_column_edges_use_dashed_channel_styling(
     assert edge_paths[1].attrib["stroke-dasharray"] == "4 3"
     assert all(path.attrib["stroke-width"] == "1.5" for path in edge_paths)
     assert [path.attrib["d"].count("L") for path in edge_paths] == [3, 5]
+
+
+def test_backward_and_same_column_edges_are_layout_problems(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id.title(), "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["nodes"] = [
+        {"id": node_id, "label": node_id, "source": source, "group": group_id}
+        for node_id, group_id in (
+            ("first_node", "first"),
+            ("second_node", "second"),
+            ("second_peer", "second"),
+            ("third_node", "third"),
+        )
+    ]
+    payload["block"]["edges"] = [
+        {
+            "src": "third_node",
+            "dst": "second_node",
+            "label": "backward",
+            "source": source,
+        },
+        {
+            "src": "second_node",
+            "dst": "second_peer",
+            "label": "same column",
+            "source": source,
+        },
+    ]
+
+    page = _page(payload)
+
+    assert block_layout_problems(page.block) == [
+        "third_node -> second_node (columns 2 -> 1; target column must be greater "
+        "than source column)",
+        "second_node -> second_peer (columns 1 -> 1; target column must be greater "
+        "than source column)",
+    ]
 
 
 def test_component_uses_a_white_uml_class_box(page_data: dict[str, object]) -> None:

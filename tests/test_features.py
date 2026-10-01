@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import ast
 import json
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from rox_dox import features as feature_module
 from rox_dox.features import (
@@ -434,18 +437,18 @@ def test_id_column_links_do_not_change_clustering_and_include_external_domains(
         frozenset({"beta"}),
         frozenset({"gamma", "delta"}),
     }
-    assert [
-        (link.a, link.b, link.signal) for link in feature_map.cross_links
-    ] == [("alpha", "beta", "id_column")]
+    assert [(link.a, link.b, link.signal) for link in feature_map.cross_links] == [
+        ("alpha", "beta", "id_column")
+    ]
     grouped_tables = next(
         feature
         for feature in feature_map.features
         if set(feature.tables) == {"gamma", "delta"}
     )
     assert any(link.signal == "id_column" for link in grouped_tables.table_links)
-    assert [
-        (link.a, link.b, link.signal) for link in feature_map.external_links
-    ] == [("alpha", "person", "id_column")]
+    assert [(link.a, link.b, link.signal) for link in feature_map.external_links] == [
+        ("alpha", "person", "id_column")
+    ]
 
 
 def test_evidence_check_reports_partnerless_file(tmp_path: Path) -> None:
@@ -625,3 +628,49 @@ def test_build_feature_maps_reuses_shared_graph_and_scope(
         domain_tables,
         "seq",
     )
+
+
+@pytest.mark.parametrize(
+    ("expression", "expected"),
+    [
+        ("User()", (1, None)),
+        ("insert(User)", (1, None)),
+        ("update(User)", (1, None)),
+        ("delete(User)", (1, None)),
+        ("bulk_insert_mappings(User, rows)", (1, None)),
+        ("bulk_update_mappings(User, rows)", (1, None)),
+        ("session.query(User).update({})", (1, None)),
+        ("session.select(User).delete()", (1, None)),
+        ("query(User)", (None, 1)),
+        ("select(User)", (None, 1)),
+        ("User.query", (None, 1)),
+        ("User.find_by_email(email)", (None, 1)),
+        ("User.get_by_id(identifier)", (None, 1)),
+        ("User.list_active()", (None, 1)),
+        ("User.fetch_latest()", (None, 1)),
+        ("User.load_related()", (None, 1)),
+    ],
+)
+def test_table_access_classifier_recognizes_read_and_write_patterns(
+    expression: str,
+    expected: tuple[int | None, int | None],
+) -> None:
+    accesses = feature_module._table_accesses(
+        ast.parse(f"{expression}\n"),
+        {"User": ["users"]},
+        {},
+        {},
+    )
+
+    assert accesses == {"users": expected}
+
+
+def test_unclassified_model_method_remains_uses_evidence() -> None:
+    accesses = feature_module._table_accesses(
+        ast.parse("User.save()\n"),
+        {"User": ["users"]},
+        {},
+        {},
+    )
+
+    assert accesses == {}

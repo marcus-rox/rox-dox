@@ -642,11 +642,11 @@ def block_layout_problems(diagram: BlockDiagram) -> list[str]:
     for edge in diagram.edges:
         source_column = endpoint_column[edge.src]
         target_column = endpoint_column[edge.dst]
-        if target_column != source_column + 1:
+        if target_column <= source_column:
             problems.append(
                 f"{edge.src} -> {edge.dst} (columns {source_column} -> "
-                f"{target_column}; expected {source_column} -> "
-                f"{source_column + 1})"
+                f"{target_column}; target column must be greater than "
+                f"source column)"
             )
     return problems
 

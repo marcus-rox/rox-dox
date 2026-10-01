@@ -19,11 +19,20 @@ description: Author and verify source-cited block diagrams for rox-core. Use whe
 
 ## Layout and visual language
 
-Columns read left to right. Aim for every arrow to go to the next column; a few non-adjacent arrows are acceptable when they stay traceable. `rox-dox build` warns on each one and fails when a figure has more than 5 layout problems. Above that, reorder columns, nest groups, use group endpoints, or split the figure.
+Columns read left to right. Every arrow must point to a column strictly to its right; forward skips are allowed. `rox-dox build` warns on backward and same-column edges and fails when a figure has more than 5 layout problems. Above that, reorder columns, nest groups, use group endpoints, or split the figure.
 
 When one box talks to every box in a group, draw one arrow to the group, not one per box.
 
-Every queue or stream has at least one producer arrow in and one consumer arrow out. Arrows follow the data (producer → queue → consumer), even when the consumer polls.
+Queues and streams show producer → queue → consumer whenever both sides are in scope. A domain-scoped flow may include a queue with only one in-domain side. Arrows follow the data even when the consumer polls.
+
+## Generated domain and feature pages
+- Feature columns are Web app → Entry points → Task queues → Queue workers → Data & services; empty columns are omitted.
+- Entry points group HTTP APIs, non-queue background workers, and task-producing library code not reached by another entry.
+- Reach follows in-feature call evidence and stops before files owned by another entry.
+- Caller and queue-worker reach starts only at imported member files, never at the caller's other code.
+- Queue edges follow producers → queue → consumers, with queue details cited at task-type definitions.
+- Entry and worker store edges use the extracted reads, writes, reads & writes, or uses evidence.
+- Domain flows show in-domain producer and consumer features around queues, including queues with one in-domain side.
 
 A box that stands for many runtime instances (one per queue type, per user, per executor class) is drawn stacked (`many: true`), and its citation must show the plurality.
 

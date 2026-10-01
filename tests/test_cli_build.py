@@ -165,7 +165,7 @@ def test_build_only_still_validates_unselected_pages(
     assert not output_dir.exists()
 
 
-def test_build_warns_for_nonadjacent_block_edges(
+def test_build_allows_forward_skip_block_edges(
     tmp_path: Path,
     git_repo: tuple[Path, str],
     page_data: dict[str, object],
@@ -198,9 +198,7 @@ def test_build_warns_for_nonadjacent_block_edges(
     exit_code = cli.main(_build_args(pages_dir, git_repo[0], output_dir, plantuml_jar))
 
     assert exit_code == 0
-    assert "warning: rox-core overview: api -> store (columns 0 -> 2;" in (
-        capsys.readouterr().out
-    )
+    assert "warning:" not in capsys.readouterr().out
 
 
 def test_build_fails_when_figure_exceeds_layout_problem_limit(
@@ -230,7 +228,9 @@ def test_build_fails_when_figure_exceeds_layout_problem_limit(
             "group": "second",
         }
     )
-    edge = payload["block"]["edges"][0]
+    edge = payload["block"]["edges"][0].copy()
+    edge["src"] = "store"
+    edge["dst"] = "api"
     payload["block"]["edges"] = [edge.copy() for _ in range(6)]
     _write_page(pages_dir, "root.json", payload)
     render_mock = Mock(return_value="<html></html>")
@@ -240,7 +240,7 @@ def test_build_fails_when_figure_exceeds_layout_problem_limit(
 
     output = capsys.readouterr().out
     assert exit_code == 1
-    assert output.count("warning: rox-core overview: api -> store") == 6
+    assert output.count("warning: rox-core overview: store -> api") == 6
     assert "error: rox-core overview: 6 layout problems (max 5)" in output
     render_mock.assert_not_called()
     assert not output_dir.exists()

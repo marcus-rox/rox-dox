@@ -4,10 +4,12 @@ import ast
 import hashlib
 import json
 from collections import defaultdict
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from functools import lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Literal
+
+from pydantic import Field
 
 from rox_dox.cache import get_or_compute
 from rox_dox.features import _git_blobs, _git_tree
@@ -33,12 +35,78 @@ class ExternalCall(Model):
     line: int
 
 
+class TaskType(Model):
+    name: str
+    queue_type: str
+    path: str
+    line: int
+
+
+class TaskConsumer(Model):
+    task_type: str
+    executor: str
+    path: str
+    line: int
+
+
+class TaskProducer(Model):
+    task_type: str
+    path: str
+    line: int
+
+
+class TaskFacts(Model):
+    task_types: list[TaskType]
+    consumers: list[TaskConsumer]
+    producers: list[TaskProducer]
+
+
 class FileFacts(Model):
     path: str
     api_group: str | None
     endpoints: list[Endpoint]
     workers: list[Worker]
     externals: list[ExternalCall]
+    task_types: list[TaskType] = Field(default_factory=list)
+    task_consumers: list[TaskConsumer] = Field(default_factory=list)
+    task_producers: list[TaskProducer] = Field(default_factory=list)
+
+
+def collect_task_facts(file_facts: Mapping[str, FileFacts]) -> TaskFacts:
+    task_types = {
+        (fact.name, fact.queue_type, fact.path, fact.line): fact
+        for file_fact in file_facts.values()
+        for fact in file_fact.task_types
+    }
+    consumers = {
+        (fact.task_type, fact.executor, fact.path, fact.line): fact
+        for file_fact in file_facts.values()
+        for fact in file_fact.task_consumers
+    }
+    producers = {
+        (fact.task_type, fact.path, fact.line): fact
+        for file_fact in file_facts.values()
+        for fact in file_fact.task_producers
+    }
+    return TaskFacts(
+        task_types=sorted(
+            task_types.values(),
+            key=lambda fact: (fact.name, fact.queue_type, fact.path, fact.line),
+        ),
+        consumers=sorted(
+            consumers.values(),
+            key=lambda fact: (
+                fact.task_type,
+                fact.executor,
+                fact.path,
+                fact.line,
+            ),
+        ),
+        producers=sorted(
+            producers.values(),
+            key=lambda fact: (fact.task_type, fact.path, fact.line),
+        ),
+    )
 
 
 EXTERNAL_SERVICES = {
@@ -59,6 +127,10 @@ EXTERNAL_SERVICES = {
     "msal": "Microsoft identity",
 }
 HTTP_METHODS = frozenset({"get", "post", "put", "patch", "delete"})
+TASK_TYPE_CLASS = "TaskType"
+TASK_TYPE_INFO_CALL = "TaskTypeInfo"
+TASK_TYPE_KEYWORD = "task_type"
+QUEUE_TYPE_KEYWORD = "queue_type"
 
 
 def _expression_parts(expression: ast.expr) -> list[str] | None:
@@ -104,9 +176,9 @@ def _assignment_names(target: ast.expr) -> list[str]:
     return []
 
 
-def _module_assignments(tree: ast.Module) -> list[tuple[str, ast.expr]]:
+def _assignments(body: list[ast.stmt]) -> list[tuple[str, ast.expr]]:
     assignments = []
-    for statement in tree.body:
+    for statement in body:
         if isinstance(statement, ast.Assign):
             targets = statement.targets
             value = statement.value
@@ -121,6 +193,10 @@ def _module_assignments(tree: ast.Module) -> list[tuple[str, ast.expr]]:
             (name, value) for target in targets for name in _assignment_names(target)
         )
     return assignments
+
+
+def _module_assignments(tree: ast.Module) -> list[tuple[str, ast.expr]]:
+    return _assignments(tree.body)
 
 
 def _namespace_names(tree: ast.Module) -> dict[str, str]:
@@ -350,6 +426,111 @@ def _worker_facts(tree: ast.Module) -> list[Worker]:
     return workers
 
 
+def _task_type_names(expression: ast.expr) -> list[str]:
+    names = set()
+    for node in ast.walk(expression):
+        if not isinstance(node, ast.Attribute):
+            continue
+        parts = _expression_parts(node)
+        if parts is not None and len(parts) >= 2 and parts[-2] == TASK_TYPE_CLASS:
+            names.add(parts[-1])
+    return sorted(names)
+
+
+def _task_type_facts(tree: ast.Module, path: str) -> list[TaskType]:
+    facts = []
+    for node in tree.body:
+        if not isinstance(node, ast.ClassDef) or node.name != TASK_TYPE_CLASS:
+            continue
+        if not any(_call_name(base) == "Enum" for base in node.bases):
+            continue
+        for statement in node.body:
+            if isinstance(statement, ast.Assign):
+                targets, value = statement.targets, statement.value
+            elif isinstance(statement, ast.AnnAssign):
+                targets, value = [statement.target], statement.value
+            else:
+                continue
+            if (
+                not isinstance(value, ast.Call)
+                or _call_name(value.func) != TASK_TYPE_INFO_CALL
+            ):
+                continue
+            queue_type = next(
+                (
+                    ast.unparse(keyword.value)
+                    for keyword in value.keywords
+                    if keyword.arg == QUEUE_TYPE_KEYWORD
+                ),
+                None,
+            )
+            if queue_type is None:
+                continue
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    facts.append(
+                        TaskType(
+                            name=target.id,
+                            queue_type=queue_type,
+                            path=path,
+                            line=statement.lineno,
+                        )
+                    )
+    return sorted(facts, key=lambda fact: (fact.name, fact.path, fact.line))
+
+
+def _task_consumer_facts(tree: ast.Module, path: str) -> list[TaskConsumer]:
+    consumers = []
+    for _, value in _module_assignments(tree):
+        if not isinstance(value, ast.Dict):
+            continue
+        for key, executor in zip(value.keys, value.values, strict=True):
+            if not isinstance(key, ast.Attribute) or not isinstance(executor, ast.Name):
+                continue
+            parts = _expression_parts(key)
+            if parts is None or len(parts) != 2 or parts[0] != TASK_TYPE_CLASS:
+                continue
+            consumers.append(
+                TaskConsumer(
+                    task_type=parts[1],
+                    executor=executor.id,
+                    path=path,
+                    line=key.lineno,
+                )
+            )
+    return sorted(
+        consumers,
+        key=lambda consumer: (
+            consumer.task_type,
+            consumer.executor,
+            consumer.path,
+            consumer.line,
+        ),
+    )
+
+
+def _task_producer_facts(tree: ast.Module, path: str) -> list[TaskProducer]:
+    producers = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != TASK_TYPE_KEYWORD:
+                continue
+            producers.extend(
+                TaskProducer(task_type=task_type, path=path, line=node.lineno)
+                for task_type in _task_type_names(keyword.value)
+            )
+    unique = {
+        (producer.task_type, producer.path, producer.line): producer
+        for producer in producers
+    }
+    return sorted(
+        unique.values(),
+        key=lambda producer: (producer.task_type, producer.path, producer.line),
+    )
+
+
 def _external_facts(tree: ast.Module) -> list[ExternalCall]:
     calls = []
     service_keys = sorted(EXTERNAL_SERVICES, key=lambda key: (-len(key), key))
@@ -405,6 +586,9 @@ def _file_facts(
         endpoints.extend(_fastapi_endpoints(tree, path))
         workers = _worker_facts(tree)
         externals = _external_facts(tree)
+        task_types = _task_type_facts(tree, path)
+        task_consumers = _task_consumer_facts(tree, path)
+        task_producers = _task_producer_facts(tree, path)
     else:
         return FileFacts(
             path=path,
@@ -433,6 +617,9 @@ def _file_facts(
             key=lambda worker: (worker.kind, worker.name, worker.line),
         ),
         externals=externals,
+        task_types=task_types,
+        task_consumers=task_consumers,
+        task_producers=task_producers,
     )
 
 

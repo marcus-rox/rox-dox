@@ -4,7 +4,15 @@ from pathlib import Path
 import pytest
 
 from rox_dox.block_svg import block_layout_problems
-from rox_dox.components import Endpoint, ExternalCall, FileFacts, Worker
+from rox_dox.components import (
+    Endpoint,
+    ExternalCall,
+    FileFacts,
+    TaskConsumer,
+    TaskProducer,
+    TaskType,
+    Worker,
+)
 from rox_dox.feature_pages import (
     _domain_block,
     _domain_data,
@@ -308,6 +316,7 @@ def _feature_page_from_runtime_fixture(
     worker_name: str = "SyncWorker",
     component_imports: dict[str, dict[str, int]] | None = None,
     primary_features: dict[str, tuple[str, str]] | None = None,
+    table_accesses: dict[str, dict[str, tuple[int | None, int | None]]] | None = None,
 ) -> Page:
     feature_map, tables, facts = _runtime_feature_fixture(
         api_table_count,
@@ -326,6 +335,7 @@ def _feature_page_from_runtime_fixture(
         tables=tables,
         component_facts=facts,
         component_imports=component_imports,
+        table_accesses=table_accesses,
         primary_features=primary_features,
     )
     return next(page for page in pages if page.kind == "feature")
@@ -547,10 +557,38 @@ def test_worker_labels_use_specific_directories_or_generic_fallback(
     assert table_row[0] == expected
 
 
-def test_library_nodes_appear_only_without_entry_nodes() -> None:
-    without_entries = _feature_page_from_runtime_fixture(
+def test_library_nodes_require_unreached_task_producers() -> None:
+    feature_map, tables, facts = _runtime_feature_fixture(
         endpoint_count=0,
         worker_count=0,
+    )
+    library_path = "backend/src/services/library.py"
+    task_types_path = "backend/src/tasks/types.py"
+    facts[library_path].task_producers = [
+        TaskProducer(task_type="TASK_A", path=library_path, line=7)
+    ]
+    facts[task_types_path] = FileFacts(
+        path=task_types_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_types=[
+            TaskType(
+                name="TASK_A",
+                queue_type="NotificationQueueType.SYNC",
+                path=task_types_path,
+                line=12,
+            )
+        ],
+    )
+    without_entries = _feature_page_from_runtime_fixture_with_facts(
+        feature_map,
+        tables,
+        facts,
+        component_imports={},
+        primary_features={},
+        table_accesses={},
     )
     with_entries = _feature_page_from_runtime_fixture()
 
@@ -662,7 +700,7 @@ def test_feature_entry_reach_does_not_enter_another_entry_files() -> None:
 def test_domain_block_flows_features_to_stores_without_feature_edges() -> None:
     feature_map, tables, facts = _runtime_feature_fixture()
 
-    block, figures = _domain_block(feature_map, {}, tables, facts)
+    block, figures = _domain_block(feature_map, {}, tables, facts, {})
 
     assert block_layout_problems(block) == []
     assert figures == []
@@ -670,7 +708,7 @@ def test_domain_block_flows_features_to_stores_without_feature_edges() -> None:
     assert not any(
         edge.src in feature_ids and edge.dst in feature_ids for edge in block.edges
     )
-    assert any(edge.label == "owns" for edge in block.edges)
+    assert any(edge.label == "uses" for edge in block.edges)
     assert all(
         edge.src in feature_ids
         or edge.dst.startswith("external-service-")
@@ -688,6 +726,259 @@ def test_domain_block_flows_features_to_stores_without_feature_edges() -> None:
         if node.id in feature_ids
         for detail in node.details
     )
+
+
+def test_domain_queue_figure_shows_producer_queue_consumer_flow() -> None:
+    feature_map, tables, facts = _runtime_feature_fixture()
+    api_path = "backend/src/api/integrations/endpoints.py"
+    task_types_path = "backend/src/tasks/types.py"
+    registry_path = "backend/src/tasks/executor_registry.py"
+    facts[api_path].task_producers = [
+        TaskProducer(task_type="TASK_A", path=api_path, line=30)
+    ]
+    facts[task_types_path] = FileFacts(
+        path=task_types_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_types=[
+            TaskType(
+                name="TASK_A",
+                queue_type="NotificationQueueType.SYNC",
+                path=task_types_path,
+                line=12,
+            )
+        ],
+    )
+    facts[registry_path] = FileFacts(
+        path=registry_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_consumers=[
+            TaskConsumer(
+                task_type="TASK_A",
+                executor="SyncWorker",
+                path=registry_path,
+                line=20,
+            )
+        ],
+    )
+
+    _domain_diagram, figures = _domain_block(feature_map, {}, tables, facts, {})
+
+    assert [figure.title for figure in figures] == ["Work handed between features"]
+    flow = figures[0].block
+    assert block_layout_problems(flow) == []
+    queue = next(node for node in flow.nodes if node.kind == "queue")
+    producer = next(node for node in flow.nodes if node.group == "group-flow-producers")
+    consumer = next(node for node in flow.nodes if node.group == "group-flow-consumers")
+    assert producer.label == consumer.label
+    assert producer.link == consumer.link
+    assert [(edge.src, edge.dst) for edge in flow.edges] == [
+        (producer.id, queue.id),
+        (queue.id, consumer.id),
+    ]
+    assert [edge.label for edge in flow.edges] == [
+        "enqueues TASK_A",
+        "consumed by",
+    ]
+
+
+def test_feature_task_queue_reaches_external_consumer_only_through_member_imports() -> (
+    None
+):
+    feature_map, tables, facts = _runtime_feature_fixture(
+        worker_path="backend/src/notifications/workers/member.py"
+    )
+    api_path = "backend/src/api/integrations/endpoints.py"
+    task_types_path = "backend/src/tasks/types.py"
+    registry_path = "backend/src/tasks/executor_registry.py"
+    caller_path = "backend/src/notifications/workers/consumer.py"
+    outside_path = "backend/src/notifications/helpers.py"
+    facts[api_path].task_producers = [
+        TaskProducer(task_type="TASK_A", path=api_path, line=30)
+    ]
+    facts[task_types_path] = FileFacts(
+        path=task_types_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_types=[
+            TaskType(
+                name="TASK_A",
+                queue_type="NotificationQueueType.SYNC",
+                path=task_types_path,
+                line=12,
+            )
+        ],
+    )
+    facts[registry_path] = FileFacts(
+        path=registry_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_consumers=[
+            TaskConsumer(
+                task_type="TASK_A",
+                executor="SyncWorker",
+                path=registry_path,
+                line=20,
+            ),
+            TaskConsumer(
+                task_type="TASK_A",
+                executor="NotificationTaskExecutor",
+                path=registry_path,
+                line=21,
+            ),
+        ],
+    )
+    facts[caller_path] = FileFacts(
+        path=caller_path,
+        api_group=None,
+        endpoints=[],
+        workers=[
+            Worker(
+                name="NotificationTaskExecutor",
+                kind="task_executor",
+                line=8,
+            )
+        ],
+        externals=[
+            ExternalCall(service="Salesforce", module="simple_salesforce", line=9)
+        ],
+    )
+    facts[outside_path] = FileFacts(
+        path=outside_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[ExternalCall(service="AWS", module="boto3", line=4)],
+    )
+
+    page = _feature_page_from_runtime_fixture_with_facts(
+        feature_map,
+        tables,
+        facts,
+        component_imports={
+            caller_path: {
+                api_path: 7,
+                outside_path: 6,
+            }
+        },
+        primary_features={
+            caller_path: ("Notifications", "feature-activity-notifications")
+        },
+        table_accesses={api_path: {"api_table_00": (31, 29)}},
+    )
+    nodes = {node.id: node for node in page.block.nodes}
+    api_node = next(node for node in nodes.values() if node.label == "Integrations API")
+    queue = next(node for node in nodes.values() if node.kind == "queue")
+    external_worker = next(
+        node for node in nodes.values() if node.link == "feature-activity-notifications"
+    )
+    store = next(node for node in nodes.values() if node.label == "api_table_00")
+
+    assert block_layout_problems(page.block) == []
+    assert [group.label for group in page.block.groups if group.parent is None] == [
+        "Web app",
+        "Entry points",
+        "Task queues",
+        "Queue workers",
+        "Data & services",
+    ]
+    assert any(
+        edge.src == api_node.id
+        and edge.dst == queue.id
+        and edge.label == "enqueues TASK_A"
+        for edge in page.block.edges
+    )
+    assert any(
+        edge.src == queue.id
+        and edge.dst == external_worker.id
+        and edge.label == "consumed by"
+        for edge in page.block.edges
+    )
+    read_edge = next(
+        edge
+        for edge in page.block.edges
+        if edge.src == external_worker.id and edge.dst == store.id
+    )
+    assert read_edge.label == "reads & writes"
+    assert read_edge.source.path == api_path
+    assert read_edge.source.lines == (31, 31)
+    assert external_worker.details[-1].text == (
+        "Calls into this feature from Notifications"
+    )
+    assert all(node.label not in {"Salesforce", "AWS"} for node in page.block.nodes)
+
+
+def _feature_page_from_runtime_fixture_with_facts(
+    feature_map: FeatureMap,
+    tables: dict[str, Table],
+    facts: dict[str, FileFacts],
+    *,
+    component_imports: dict[str, dict[str, int]],
+    primary_features: dict[str, tuple[str, str]],
+    table_accesses: dict[str, dict[str, tuple[int | None, int | None]]],
+) -> Page:
+    pages = feature_pages(
+        feature_map,
+        root_id="rox-core",
+        domain_title="Activity",
+        names={"integration": "Integration connections & sync"},
+        tables=tables,
+        component_facts=facts,
+        component_imports=component_imports,
+        table_accesses=table_accesses,
+        primary_features=primary_features,
+    )
+    return next(page for page in pages if page.kind == "feature")
+
+
+def test_feature_table_edges_use_access_modes_and_source_priority() -> None:
+    api_path = "backend/src/api/integrations/endpoints.py"
+    helper_path = "backend/src/services/api_helper.py"
+    page = _feature_page_from_runtime_fixture(
+        table_accesses={
+            api_path: {
+                "api_table_00": (31, 29),
+                "api_table_01": (None, 30),
+            }
+        }
+    )
+    api_node = next(
+        node for node in page.block.nodes if node.label == "Integrations API"
+    )
+    edges_by_table = {
+        next(node.label for node in page.block.nodes if node.id == edge.dst): edge
+        for edge in page.block.edges
+        if edge.src == api_node.id
+        and any(
+            node.id == edge.dst and node.kind == "store" for node in page.block.nodes
+        )
+    }
+
+    assert edges_by_table["api_table_00"].label == "reads & writes"
+    assert edges_by_table["api_table_00"].source.path == api_path
+    assert edges_by_table["api_table_00"].source.lines == (31, 31)
+    assert edges_by_table["api_table_01"].label == "reads"
+    assert edges_by_table["api_table_01"].source.lines == (30, 30)
+    uses_edge = next(
+        edge
+        for edge in page.block.edges
+        if edge.src == api_node.id
+        and edge.dst
+        == next(
+            node.id for node in page.block.nodes if node.label == "api_helper_table"
+        )
+    )
+    assert uses_edge.label == "uses"
+    assert uses_edge.source.path == helper_path
 
 
 def test_empty_feature_and_domain_use_key_table_definition_path() -> None:

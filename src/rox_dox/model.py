@@ -202,11 +202,13 @@ class BlockDiagram(Model):
         incoming_nodes = {edge.dst for edge in self.edges}
         outgoing_nodes = {edge.src for edge in self.edges}
         for node in self.nodes:
-            if node.kind == "queue" and (
-                node.id not in incoming_nodes or node.id not in outgoing_nodes
+            if (
+                node.kind == "queue"
+                and node.id not in incoming_nodes
+                and node.id not in outgoing_nodes
             ):
                 raise ValueError(
-                    f"block diagram: queue '{node.id}' needs a producer and a "
+                    f"block diagram: queue '{node.id}' needs a producer or a "
                     "consumer edge"
                 )
         return self

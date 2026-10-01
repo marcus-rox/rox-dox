@@ -49,6 +49,7 @@ def main() -> None:
     tables_by_commit = {}
     components_by_commit = {}
     imports_by_commit = {}
+    table_accesses_by_commit = {}
     generated = []
     for feature_map in selected_maps:
         if feature_map.commit not in tables_by_commit:
@@ -74,6 +75,10 @@ def main() -> None:
                     imported: graph_file.import_lines[imported]
                     for imported in graph_file.imports
                 }
+                for path, graph_file in sorted(graph.items())
+            }
+            table_accesses_by_commit[feature_map.commit] = {
+                path: graph_file.table_accesses
                 for path, graph_file in sorted(graph.items())
             }
 
@@ -109,6 +114,7 @@ def main() -> None:
                 tables=tables_by_commit[feature_map.commit],
                 component_facts=components_by_commit[feature_map.commit],
                 component_imports=imports_by_commit[feature_map.commit],
+                table_accesses=table_accesses_by_commit[feature_map.commit],
                 primary_features=primary_features,
                 domain_titles=domain_titles,
                 table_domains=table_domains,

@@ -8,7 +8,17 @@ from pathlib import PurePosixPath
 from typing import Literal
 
 from rox_dox.block_svg import block_layout_problems
-from rox_dox.components import Endpoint, ExternalCall, FileFacts, Worker
+from rox_dox.components import (
+    Endpoint,
+    ExternalCall,
+    FileFacts,
+    TaskConsumer,
+    TaskFacts,
+    TaskProducer,
+    TaskType,
+    Worker,
+    collect_task_facts,
+)
 from rox_dox.features import (
     Feature,
     FeatureEvidence,
@@ -242,13 +252,9 @@ def _worker_label(
 ) -> str:
     label_family = "workers" if family == "task_executor" else "workflows"
     for segment in reversed(PurePosixPath(directory).parts):
-        parts = [
-            part
-            for part in segment.lower().replace("-", "_").split("_")
-            if part and part not in GENERIC_SEGMENTS
-        ]
-        if parts:
-            return f"{_humanize('_'.join(parts))} {label_family}"
+        normalized = segment.lower().replace("-", "_")
+        if normalized not in GENERIC_SEGMENTS:
+            return f"{_humanize(normalized)} {label_family}"
     first_name = min(records, key=lambda item: (item[1].name, item[0], item[1].line))[
         1
     ].name
@@ -270,6 +276,45 @@ def _caller_detail(callers: list[_Caller]) -> Claim:
         text=_bounded_detail_text(text),
         sources=sources,
     )
+
+
+def _task_workers_by_type(
+    task_facts: TaskFacts,
+    component_facts: Mapping[str, FileFacts],
+) -> dict[str, list[tuple[str, Worker, TaskConsumer]]]:
+    workers_by_name: defaultdict[str, list[tuple[str, Worker]]] = defaultdict(list)
+    for path, facts in component_facts.items():
+        for worker in facts.workers:
+            if worker.kind == "task_executor":
+                workers_by_name[worker.name].append((path, worker))
+    consumers: defaultdict[str, list[tuple[str, Worker, TaskConsumer]]] = defaultdict(
+        list
+    )
+    for consumer in task_facts.consumers:
+        for path, worker in workers_by_name[consumer.executor]:
+            consumers[consumer.task_type].append((path, worker, consumer))
+    return {
+        task_type: sorted(
+            {
+                (
+                    path,
+                    worker.name,
+                    worker.line,
+                    consumer.path,
+                    consumer.line,
+                ): (path, worker, consumer)
+                for path, worker, consumer in records
+            }.values(),
+            key=lambda item: (
+                item[1].name,
+                item[0],
+                item[1].line,
+                item[2].path,
+                item[2].line,
+            ),
+        )
+        for task_type, records in consumers.items()
+    }
 
 
 def _caller_records(
@@ -353,6 +398,28 @@ def _web_directory_detail(directory: str, file_count: int) -> str:
 
 def _source(path: str, line: int) -> CodeSource:
     return CodeSource(path=path, lines=(line, line))
+
+
+def _access_label(
+    write_sources: Collection[CodeSource],
+    read_sources: Collection[CodeSource],
+) -> str:
+    if write_sources and read_sources:
+        return "reads & writes"
+    if write_sources:
+        return "writes"
+    if read_sources:
+        return "reads"
+    return "uses"
+
+
+def _access_source(
+    write_sources: Collection[CodeSource],
+    read_sources: Collection[CodeSource],
+    evidence_sources: Collection[CodeSource],
+) -> CodeSource:
+    candidates = write_sources or read_sources or evidence_sources
+    return min(candidates, key=lambda source: (source.path, source.lines[0]))
 
 
 def _unique_sources(sources: list[CodeSource]) -> list[CodeSource]:
@@ -586,6 +653,8 @@ def _feature_tldr(
         "group-http-api": "HTTP API",
         "group-background-workers": "Background workers / workflows",
         "group-library-code": "Library code",
+        "column-task-queues": "Task queue",
+        "column-queue-workers": "Queue worker",
         "group-database": "Database",
         "group-external-services": "External service",
     }
@@ -661,6 +730,7 @@ def _feature_block(
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
     component_imports: Mapping[str, Mapping[str, int]],
+    table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
     primary_features: Mapping[str, tuple[str, str]],
 ) -> _FeatureBlock:
     fallback = tables[feature.id].source
@@ -672,7 +742,19 @@ def _feature_block(
         component_imports,
         primary_features,
     )
+    task_facts = collect_task_facts(component_facts)
+    task_type_by_name: dict[str, TaskType] = {}
+    for task_type in task_facts.task_types:
+        task_type_by_name.setdefault(task_type.name, task_type)
+    queue_workers_by_task = _task_workers_by_type(task_facts, component_facts)
+    queue_worker_keys = {
+        (path, worker.name)
+        for task_name, records in queue_workers_by_task.items()
+        if task_name in task_type_by_name
+        for path, worker, _ in records
+    }
     nodes = []
+    edges = []
     component_files: dict[str, set[str]] = {}
     component_roles: dict[str, str] = {}
     entry_files: dict[str, set[str]] = {}
@@ -802,6 +884,11 @@ def _feature_block(
     for path, file_facts in facts.items():
         directory = PurePosixPath(path).parent.as_posix()
         for worker in file_facts.workers:
+            if (
+                worker.kind == "task_executor"
+                and (path, worker.name) in queue_worker_keys
+            ):
+                continue
             family = "task_executor" if worker.kind == "task_executor" else "temporal"
             worker_records[(directory, family)].append((path, worker))
             worker_member_paths[(directory, family)].add(path)
@@ -809,6 +896,15 @@ def _feature_block(
         caller_facts = component_facts[caller.path]
         directory = PurePosixPath(caller.path).parent.as_posix()
         for worker in caller_facts.workers:
+            if (
+                worker.kind == "task_executor"
+                and (
+                    caller.path,
+                    worker.name,
+                )
+                in queue_worker_keys
+            ):
+                continue
             family = "task_executor" if worker.kind == "task_executor" else "temporal"
             key = (directory, family)
             worker_records[key].append((caller.path, worker))
@@ -913,12 +1009,20 @@ def _feature_block(
             for path in sorted(paths)
             for external in facts[path].externals
         ]
-        if not table_evidence and not external_records:
+        producer_records = [
+            producer for producer in task_facts.producers if producer.path in paths
+        ]
+        if not table_evidence and not external_records and not producer_records:
             continue
         sources = [_source(evidence.path, evidence.line) for evidence in table_evidence]
         sources.extend(
             _source(path, external.line) for path, external in external_records
         )
+        sources.extend(
+            _source(producer.path, producer.line) for producer in producer_records
+        )
+        if not sources:
+            continue
         source = min(sources, key=lambda item: (item.path, item.lines[0]))
         library_row = _LibraryRow(
             label=f"{_humanize(PurePosixPath(directory).name)} (library)",
@@ -937,31 +1041,247 @@ def _feature_block(
             ),
             sources=tuple(_unique_sources(sources)),
         )
-        if entry_files:
-            library_rows.append(library_row)
+        library_rows.append(library_row)
+        if not producer_records:
             continue
         component_id = node_id("library", directory)
+        task_records = [
+            (
+                producer.task_type,
+                _source(producer.path, producer.line),
+            )
+            for producer in producer_records
+        ]
         nodes.append(
             Node(
                 id=component_id,
                 label=library_row.label,
                 source=source,
                 group="group-library-code",
+                details=_bounded_details(task_records, "task types"),
             )
         )
         component_files[component_id] = paths
         component_roles[component_id] = "library"
+        entry_files[component_id] = paths
+        entry_starts[component_id] = paths
+        reached_by_entry[component_id] = set(paths)
+        for path in paths:
+            entry_ids_by_path[path].add(component_id)
+
+    producer_records_by_node: defaultdict[str, list[TaskProducer]] = defaultdict(list)
+    for component_id, reached in reached_by_entry.items():
+        producer_records_by_node[component_id].extend(
+            producer
+            for producer in task_facts.producers
+            if producer.path in reached and producer.task_type in task_type_by_name
+        )
+
+    member_paths = set(feature_file_by_path)
+    caller_by_path = {caller.path: caller for caller in callers}
+    local_consumer_tasks = {
+        task_type
+        for task_type, records in queue_workers_by_task.items()
+        if task_type in task_type_by_name
+        if any(path in member_paths or path in caller_by_path for path, _, _ in records)
+    }
+    relevant_task_names = {
+        producer.task_type
+        for records in producer_records_by_node.values()
+        for producer in records
+    } | local_consumer_tasks
+    relevant_queue_types = {
+        task_type_by_name[name].queue_type
+        for name in relevant_task_names
+        if name in task_type_by_name
+    }
+    queue_tasks: defaultdict[str, list[TaskType]] = defaultdict(list)
+    for task_type in task_facts.task_types:
+        if task_type.name in relevant_task_names:
+            queue_tasks[task_type.queue_type].append(task_type)
+    for queue_type in queue_tasks:
+        queue_tasks[queue_type] = sorted(
+            {
+                (task.name, task.path, task.line): task
+                for task in queue_tasks[queue_type]
+            }.values(),
+            key=lambda task: (task.name, task.path, task.line),
+        )
+
+    queue_ids = {}
+    for queue_type in sorted(relevant_queue_types):
+        records = queue_tasks[queue_type]
+        if not records:
+            continue
+        queue_id = node_id("queue", queue_type)
+        queue_ids[queue_type] = queue_id
+        nodes.append(
+            Node(
+                id=queue_id,
+                label=f"{_humanize(queue_type.rsplit('.', 1)[-1])} queue",
+                source=_source(records[0].path, records[0].line),
+                kind="queue",
+                group="column-task-queues",
+                many=len(records) > 1,
+                details=_bounded_details(
+                    [
+                        (record.name, _source(record.path, record.line))
+                        for record in records
+                    ],
+                    "task types",
+                ),
+            )
+        )
+
+    queue_worker_groups: defaultdict[
+        tuple[str, str | None, bool], list[tuple[str, Worker]]
+    ] = defaultdict(list)
+    for task_name in sorted(relevant_task_names):
+        task_type = task_type_by_name.get(task_name)
+        if task_type is None or task_type.queue_type not in queue_ids:
+            continue
+        for path, worker, _ in queue_workers_by_task.get(task_name, []):
+            is_member = path in member_paths
+            owner_page = primary_features.get(path, (None, None))[1]
+            key = (PurePosixPath(path).parent.as_posix(), owner_page, is_member)
+            queue_worker_groups[key].append((path, worker))
+    queue_worker_nodes: dict[tuple[str, str], str] = {}
+    for (directory, owner_page, is_member), records in sorted(
+        queue_worker_groups.items(),
+        key=lambda item: (
+            item[0][0],
+            item[0][1] or "",
+            item[0][2],
+        ),
+    ):
+        unique_records = {
+            (path, worker.name, worker.line): (path, worker) for path, worker in records
+        }
+        records = sorted(
+            unique_records.values(),
+            key=lambda item: (item[1].name, item[0], item[1].line),
+        )
+        component_id = node_id(
+            "queue-worker",
+            f"{directory}-{owner_page or ('member' if is_member else 'outside')}",
+        )
+        details = _bounded_details(
+            [(worker.name, _source(path, worker.line)) for path, worker in records],
+            "workers",
+        )
+        group_callers = [
+            caller_by_path[path] for path, _ in records if path in caller_by_path
+        ]
+        if group_callers:
+            details.append(_caller_detail(group_callers))
+        nodes.append(
+            Node(
+                id=component_id,
+                label=_worker_label(directory, records, "task_executor"),
+                source=details[0].sources[0],
+                link=owner_page if not is_member else None,
+                group="column-queue-workers",
+                details=details,
+            )
+        )
+        worker_paths = {path for path, _ in records if path in member_paths}
+        caller_targets = {
+            target
+            for path, _ in records
+            if (caller := caller_by_path.get(path)) is not None
+            for target in caller.targets
+        }
+        component_files[component_id] = worker_paths
+        component_roles[component_id] = "queue_worker"
+        entry_files[component_id] = worker_paths
+        entry_starts[component_id] = worker_paths | caller_targets
+        for path in entry_files[component_id]:
+            entry_ids_by_path[path].add(component_id)
+        queue_worker_nodes.update(
+            {(path, worker.name): component_id for path, worker in records}
+        )
+        reached = set(entry_starts[component_id])
+        pending = sorted(reached)
+        cursor = 0
+        while cursor < len(pending):
+            current = pending[cursor]
+            cursor += 1
+            owners = entry_ids_by_path.get(current, set())
+            if owners and component_id not in owners:
+                continue
+            for target in sorted(call_edges[current]):
+                owners = entry_ids_by_path.get(target, set())
+                if owners and component_id not in owners:
+                    continue
+                if target not in reached:
+                    reached.add(target)
+                    pending.append(target)
+        reached_by_entry[component_id] = reached
+
+    for component_id, producers in sorted(producer_records_by_node.items()):
+        by_queue: defaultdict[str, list[TaskProducer]] = defaultdict(list)
+        for producer in producers:
+            task_type = task_type_by_name.get(producer.task_type)
+            if task_type is not None and task_type.queue_type in queue_ids:
+                by_queue[task_type.queue_type].append(producer)
+        for queue_type, queue_producers in sorted(by_queue.items()):
+            task_names = sorted({producer.task_type for producer in queue_producers})
+            label = (
+                f"enqueues {task_names[0]}"
+                if len(task_names) == 1
+                else f"enqueues {len(task_names)} task types"
+            )
+            edges.append(
+                Edge(
+                    src=component_id,
+                    dst=queue_ids[queue_type],
+                    label=label,
+                    source=min(
+                        (_source(item.path, item.line) for item in queue_producers),
+                        key=lambda source: (source.path, source.lines[0]),
+                    ),
+                )
+            )
+
+    for queue_type, queue_id in sorted(queue_ids.items()):
+        task_names = {task.name for task in queue_tasks[queue_type]}
+        consumers_by_node: defaultdict[str, list[tuple[str, Worker, TaskConsumer]]] = (
+            defaultdict(list)
+        )
+        for task_name in task_names & relevant_task_names:
+            for path, worker, consumer in queue_workers_by_task.get(task_name, []):
+                component_id = queue_worker_nodes.get((path, worker.name))
+                if component_id is not None:
+                    consumers_by_node[component_id].append((path, worker, consumer))
+        for component_id, consumers in sorted(consumers_by_node.items()):
+            edges.append(
+                Edge(
+                    src=queue_id,
+                    dst=component_id,
+                    label="consumed by",
+                    source=min(
+                        (
+                            _source(consumer.path, consumer.line)
+                            for _, _, consumer in consumers
+                        ),
+                        key=lambda source: (source.path, source.lines[0]),
+                    ),
+                )
+            )
 
     data_component_files = {
         component_id: (
             reached_by_entry[component_id]
-            if component_roles[component_id] == "entry"
+            if component_roles[component_id] in {"entry", "library", "queue_worker"}
             else component_files[component_id]
         )
         for component_id in component_files
-        if component_roles[component_id] in {"entry", "library"}
+        if component_roles[component_id] in {"entry", "library", "queue_worker"}
     }
     table_sources_by_component: defaultdict[tuple[str, str], list[CodeSource]] = (
+        defaultdict(list)
+    )
+    table_access_sources: defaultdict[tuple[str, str, str], list[CodeSource]] = (
         defaultdict(list)
     )
     service_sources_by_component: defaultdict[tuple[str, str], list[CodeSource]] = (
@@ -969,16 +1289,47 @@ def _feature_block(
     )
     for component_id, paths in data_component_files.items():
         for path in sorted(paths):
-            file = feature_file_by_path[path]
-            for evidence in file.evidence:
-                if (
-                    evidence.kind == "table"
-                    and evidence.table in feature.tables
-                    and evidence.table is not None
-                ):
-                    table_sources_by_component[(component_id, evidence.table)].append(
-                        _source(evidence.path, evidence.line)
+            file = feature_file_by_path.get(path)
+            evidence_by_table: defaultdict[str, list[CodeSource]] = defaultdict(list)
+            if file is not None:
+                for evidence in file.evidence:
+                    if evidence.kind == "table" and evidence.table in feature.tables:
+                        evidence_by_table[evidence.table].append(
+                            _source(evidence.path, evidence.line)
+                        )
+            for table_name in sorted(
+                set(evidence_by_table) | set(table_accesses.get(path, {}))
+            ):
+                if table_name not in feature.tables:
+                    continue
+                write_line, read_line = table_accesses.get(path, {}).get(
+                    table_name,
+                    (None, None),
+                )
+                table_evidence_sources = evidence_by_table[table_name]
+                if write_line is not None:
+                    table_access_sources[(component_id, table_name, "writes")].append(
+                        _source(path, write_line)
                     )
+                if read_line is not None:
+                    table_access_sources[(component_id, table_name, "reads")].append(
+                        _source(path, read_line)
+                    )
+                if write_line is None and read_line is None:
+                    table_access_sources[(component_id, table_name, "uses")].extend(
+                        table_evidence_sources
+                    )
+                table_sources_by_component[(component_id, table_name)].extend(
+                    [
+                        *(
+                            [_source(path, write_line)]
+                            if write_line is not None
+                            else []
+                        ),
+                        *([_source(path, read_line)] if read_line is not None else []),
+                        *table_evidence_sources,
+                    ]
+                )
             for external in facts[path].externals:
                 service_sources_by_component[(component_id, external.service)].append(
                     _source(path, external.line)
@@ -1038,7 +1389,6 @@ def _feature_block(
             )
         )
 
-    edges = []
     if web_files:
         route_pairs: defaultdict[str, dict[str, list[FeatureEvidence]]] = defaultdict(
             lambda: {"web": [], "backend": []}
@@ -1082,13 +1432,30 @@ def _feature_block(
         for (component_id, table_name), sources in sorted(
             table_sources_by_component.items()
         ):
+            modes = {
+                mode
+                for mode in ("writes", "reads")
+                if table_access_sources[(component_id, table_name, mode)]
+            }
+            label = "reads & writes" if len(modes) == 2 else next(iter(modes), "uses")
+            preferred_mode = (
+                "writes"
+                if "writes" in modes
+                else "reads"
+                if "reads" in modes
+                else "uses"
+            )
+            preferred_sources = table_access_sources[
+                (component_id, table_name, preferred_mode)
+            ]
             edges.append(
                 Edge(
                     src=component_id,
                     dst=table_store_ids[table_name],
-                    label="reads/writes",
+                    label=label,
                     source=min(
-                        sources, key=lambda source: (source.path, source.lines[0])
+                        preferred_sources or sources,
+                        key=lambda source: (source.path, source.lines[0]),
                     ),
                 )
             )
@@ -1102,13 +1469,32 @@ def _feature_block(
                 for table_name in used_tables
                 for source in table_sources_by_component[(component_id, table_name)]
             ]
+            writes = [
+                source
+                for table_name in used_tables
+                for source in table_access_sources[(component_id, table_name, "writes")]
+            ]
+            reads = [
+                source
+                for table_name in used_tables
+                for source in table_access_sources[(component_id, table_name, "reads")]
+            ]
             edges.append(
                 Edge(
                     src=component_id,
                     dst="database",
-                    label="reads/writes",
+                    label=(
+                        "reads & writes"
+                        if writes and reads
+                        else "writes"
+                        if writes
+                        else "reads"
+                        if reads
+                        else "uses"
+                    ),
                     source=min(
-                        sources, key=lambda source: (source.path, source.lines[0])
+                        writes or reads or sources,
+                        key=lambda source: (source.path, source.lines[0]),
                     ),
                 )
             )
@@ -1194,6 +1580,26 @@ def _feature_block(
                         parent="column-entry-points",
                     )
                 )
+    task_queue_nodes = [node for node in nodes if node.group == "column-task-queues"]
+    if task_queue_nodes:
+        groups.append(
+            Group(
+                id="column-task-queues",
+                label="Task queues",
+                source=task_queue_nodes[0].source,
+            )
+        )
+    queue_worker_nodes = [
+        node for node in nodes if node.group == "column-queue-workers"
+    ]
+    if queue_worker_nodes:
+        groups.append(
+            Group(
+                id="column-queue-workers",
+                label="Queue workers",
+                source=queue_worker_nodes[0].source,
+            )
+        )
     data_group_specs = (
         ("group-database", "Database"),
         ("group-external-services", "External services"),
@@ -1406,6 +1812,7 @@ def _feature_page(
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
     component_imports: Mapping[str, Mapping[str, int]],
+    table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
     primary_features: Mapping[str, tuple[str, str]],
 ) -> Page:
     title = _feature_name(feature, names)
@@ -1450,6 +1857,7 @@ def _feature_page(
         tables,
         component_facts,
         component_imports,
+        table_accesses,
         primary_features,
     )
     return Page(
@@ -1509,11 +1917,193 @@ def _domain_calls(
     return sorted(calls, key=lambda item: (item[3], item[2], item[4]))
 
 
+def _domain_queue_figure(
+    feature_map: FeatureMap,
+    names: Mapping[str, str],
+    tables: Mapping[str, Table],
+    component_facts: Mapping[str, FileFacts],
+) -> BlockFigure | None:
+    task_facts = collect_task_facts(component_facts)
+    task_type_by_name = {}
+    queue_task_types: defaultdict[str, list[TaskType]] = defaultdict(list)
+    for task_type in task_facts.task_types:
+        task_type_by_name.setdefault(task_type.name, task_type)
+        queue_task_types[task_type.queue_type].append(task_type)
+    workers_by_task = _task_workers_by_type(task_facts, component_facts)
+    owner_by_path = {}
+    for feature in feature_map.features:
+        for file in feature.files:
+            if file.primary or file.path not in owner_by_path:
+                owner_by_path[file.path] = feature.id
+    producers_by_queue: defaultdict[str, list[tuple[str, TaskProducer]]] = defaultdict(
+        list
+    )
+    consumers_by_queue: defaultdict[
+        str, list[tuple[str, str, Worker, TaskConsumer]]
+    ] = defaultdict(list)
+    for producer in task_facts.producers:
+        task_type = task_type_by_name.get(producer.task_type)
+        feature_id = owner_by_path.get(producer.path)
+        if task_type is not None and feature_id is not None:
+            producers_by_queue[task_type.queue_type].append((feature_id, producer))
+    for task_name, workers in workers_by_task.items():
+        task_type = task_type_by_name.get(task_name)
+        if task_type is None:
+            continue
+        for path, worker, consumer in workers:
+            feature_id = owner_by_path.get(path)
+            if feature_id is not None:
+                consumers_by_queue[task_type.queue_type].append(
+                    (feature_id, path, worker, consumer)
+                )
+    queue_types = sorted(set(producers_by_queue) | set(consumers_by_queue))
+    if not queue_types:
+        return None
+
+    nodes = []
+    edges = []
+    producer_node_ids = {}
+    consumer_node_ids = {}
+    producer_nodes_by_feature = {}
+    consumer_nodes_by_feature = {}
+    feature_by_id = {feature.id: feature for feature in feature_map.features}
+    for queue_type in queue_types:
+        producer_features = sorted(
+            {feature_id for feature_id, _ in producers_by_queue[queue_type]}
+        )
+        consumer_features = sorted(
+            {feature_id for feature_id, _, _, _ in consumers_by_queue[queue_type]}
+        )
+        if not producer_features and not consumer_features:
+            continue
+        records = sorted(
+            {
+                (task.name, task.path, task.line): task
+                for task in queue_task_types[queue_type]
+            }.values(),
+            key=lambda task: (task.name, task.path, task.line),
+        )
+        queue_id = f"queue-{_component_slug(queue_type)}"
+        nodes.append(
+            Node(
+                id=queue_id,
+                label=f"{_humanize(queue_type.rsplit('.', 1)[-1])} queue",
+                source=_source(records[0].path, records[0].line),
+                kind="queue",
+                group="group-flow-queues",
+                many=len(records) > 1,
+                details=_bounded_details(
+                    [
+                        (record.name, _source(record.path, record.line))
+                        for record in records
+                    ],
+                    "task types",
+                ),
+            )
+        )
+        for feature_id in producer_features:
+            node_id = producer_nodes_by_feature.get(feature_id)
+            if node_id is None:
+                node_id = f"producer-feature-{_component_slug(feature_id)}"
+                producer_nodes_by_feature[feature_id] = node_id
+                feature = feature_by_id[feature_id]
+                nodes.append(
+                    Node(
+                        id=node_id,
+                        label=_feature_name(feature, names),
+                        source=tables[feature.id].source,
+                        link=f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}",
+                        group="group-flow-producers",
+                    )
+                )
+            producer_node_ids[(queue_type, feature_id)] = node_id
+        for feature_id in consumer_features:
+            node_id = consumer_nodes_by_feature.get(feature_id)
+            if node_id is None:
+                node_id = f"consumer-feature-{_component_slug(feature_id)}"
+                consumer_nodes_by_feature[feature_id] = node_id
+                feature = feature_by_id[feature_id]
+                nodes.append(
+                    Node(
+                        id=node_id,
+                        label=_feature_name(feature, names),
+                        source=tables[feature.id].source,
+                        link=f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}",
+                        group="group-flow-consumers",
+                    )
+                )
+            consumer_node_ids[(queue_type, feature_id)] = node_id
+        for feature_id in producer_features:
+            records_for_feature = [
+                producer
+                for owner, producer in producers_by_queue[queue_type]
+                if owner == feature_id
+            ]
+            task_names = sorted({record.task_type for record in records_for_feature})
+            edges.append(
+                Edge(
+                    src=producer_node_ids[(queue_type, feature_id)],
+                    dst=queue_id,
+                    label=(
+                        f"enqueues {task_names[0]}"
+                        if len(task_names) == 1
+                        else f"enqueues {len(task_names)} task types"
+                    ),
+                    source=min(
+                        (
+                            _source(record.path, record.line)
+                            for record in records_for_feature
+                        ),
+                        key=lambda source: (source.path, source.lines[0]),
+                    ),
+                )
+            )
+        for feature_id in consumer_features:
+            edges.append(
+                Edge(
+                    src=queue_id,
+                    dst=consumer_node_ids[(queue_type, feature_id)],
+                    label="consumed by",
+                    source=min(
+                        [
+                            _source(consumer.path, consumer.line)
+                            for owner, _, _, consumer in consumers_by_queue[queue_type]
+                            if owner == feature_id
+                        ],
+                        key=lambda source: (source.path, source.lines[0]),
+                    ),
+                )
+            )
+
+    groups = []
+    group_specs = (
+        ("group-flow-producers", "Producer features"),
+        ("group-flow-queues", "Task queues"),
+        ("group-flow-consumers", "Consumer features"),
+    )
+    for group_id, label in group_specs:
+        members = [node for node in nodes if node.group == group_id]
+        if members:
+            groups.append(Group(id=group_id, label=label, source=members[0].source))
+    diagram = BlockDiagram(groups=groups, nodes=nodes, edges=edges)
+    problems = block_layout_problems(diagram)
+    if problems:
+        raise ValueError(
+            f"domain '{feature_map.domain}' queue-flow layout problems: {problems}"
+        )
+    return BlockFigure(
+        id="work-handed-between-features",
+        title="Work handed between features",
+        block=diagram,
+    )
+
+
 def _domain_block(
     feature_map: FeatureMap,
     names: Mapping[str, str],
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
+    table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
 ) -> tuple[BlockDiagram, list[BlockFigure]]:
     nodes = []
     edges = []
@@ -1623,12 +2213,36 @@ def _domain_block(
                 details=_bounded_details(table_records, "tables"),
             )
         )
+        write_sources = []
+        read_sources = []
+        evidence_sources = []
+        for path in sorted(facts):
+            file = next(item for item in feature.files if item.path == path)
+            if file is not None:
+                evidence_sources.extend(
+                    _source(evidence.path, evidence.line)
+                    for evidence in file.evidence
+                    if evidence.kind == "table" and evidence.table in feature.tables
+                )
+            for table_name, (write_line, read_line) in table_accesses.get(
+                path, {}
+            ).items():
+                if table_name not in feature.tables:
+                    continue
+                if write_line is not None:
+                    write_sources.append(_source(path, write_line))
+                if read_line is not None:
+                    read_sources.append(_source(path, read_line))
         edges.append(
             Edge(
                 src=feature_node_id,
                 dst=store_id,
-                label="owns",
-                source=tables[feature.tables[0]].source,
+                label=_access_label(write_sources, read_sources),
+                source=_access_source(
+                    write_sources,
+                    read_sources,
+                    evidence_sources or [tables[feature.tables[0]].source],
+                ),
             )
         )
 
@@ -1720,7 +2334,13 @@ def _domain_block(
         raise ValueError(
             f"domain '{feature_map.domain}' block layout problems: {problems}"
         )
-    return block, []
+    queue_figure = _domain_queue_figure(
+        feature_map,
+        names,
+        tables,
+        component_facts,
+    )
+    return block, [queue_figure] if queue_figure is not None else []
 
 
 def _domain_tldr(
@@ -1934,9 +2554,7 @@ def _domain_tldr(
         ):
             continue
         own_table, other_table = (
-            (link.a, link.b)
-            if a_domain == feature_map.domain
-            else (link.b, link.a)
+            (link.a, link.b) if a_domain == feature_map.domain else (link.b, link.a)
         )
         other_domain = b_domain if a_domain == feature_map.domain else a_domain
         external_rows.append(
@@ -2041,6 +2659,7 @@ def _domain_page(
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts],
     component_imports: Mapping[str, Mapping[str, int]],
+    table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
     primary_features: Mapping[str, tuple[str, str]],
     domain_titles: Mapping[str, str],
     table_domains: Mapping[str, str],
@@ -2056,7 +2675,13 @@ def _domain_page(
     )
     if not primary_paths:
         primary_paths = [tables[feature_map.features[0].id].source.path]
-    block, figures = _domain_block(feature_map, names, tables, component_facts)
+    block, figures = _domain_block(
+        feature_map,
+        names,
+        tables,
+        component_facts,
+        table_accesses,
+    )
     table_sources = _unique_sources(
         [tables[name].source for name in feature_map.tables]
     )
@@ -2102,12 +2727,15 @@ def feature_pages(
     tables: Mapping[str, Table],
     component_facts: Mapping[str, FileFacts] | None = None,
     component_imports: Mapping[str, Mapping[str, int]] | None = None,
+    table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]]
+    | None = None,
     primary_features: Mapping[str, tuple[str, str]] | None = None,
     domain_titles: Mapping[str, str] | None = None,
     table_domains: Mapping[str, str] | None = None,
 ) -> list[Page]:
     runtime_facts = component_facts or {}
     runtime_imports = component_imports or {}
+    runtime_table_accesses = table_accesses or {}
     primary_feature_owners = primary_features or {}
     pages = [
         _domain_page(
@@ -2118,6 +2746,7 @@ def feature_pages(
             tables=tables,
             component_facts=runtime_facts,
             component_imports=runtime_imports,
+            table_accesses=runtime_table_accesses,
             primary_features=primary_feature_owners,
             domain_titles=domain_titles or {},
             table_domains=table_domains or {},
@@ -2132,6 +2761,7 @@ def feature_pages(
             tables=tables,
             component_facts=runtime_facts,
             component_imports=runtime_imports,
+            table_accesses=runtime_table_accesses,
             primary_features=primary_feature_owners,
         )
         for feature in feature_map.features

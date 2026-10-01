@@ -114,6 +114,9 @@ class _GraphFile:
     import_lines: dict[str, int] = field(default_factory=dict)
     tables: set[str] = field(default_factory=set)
     table_lines: dict[str, int] = field(default_factory=dict)
+    table_accesses: dict[str, tuple[int | None, int | None]] = field(
+        default_factory=dict
+    )
     defines: set[str] = field(default_factory=set)
     reexport_only: bool = False
     domains: list[str] = field(default_factory=list)
@@ -322,6 +325,149 @@ def _relative_module(
     return ".".join([*base, *([node.module] if node.module else [])])
 
 
+_WRITE_CALLS = frozenset({"insert", "update", "delete"})
+_BULK_WRITE_CALLS = frozenset({"bulk_insert_mappings", "bulk_update_mappings"})
+_CHAINED_WRITE_CALLS = frozenset({"update", "delete"})
+_READ_CALLS = frozenset({"query", "select"})
+_READ_METHOD_PREFIXES = ("find", "get", "list", "fetch", "load")
+
+
+def _table_references(
+    expression: ast.expr,
+    class_tables: Mapping[str, list[str]],
+    class_aliases: Mapping[str, list[str]],
+    module_aliases: Mapping[str, str],
+) -> set[str]:
+    tables = set()
+    for node in ast.walk(expression):
+        if isinstance(node, ast.Name):
+            tables.update(class_aliases.get(node.id, ()))
+            tables.update(class_tables.get(node.id, ()))
+        if not isinstance(node, ast.Attribute):
+            continue
+        parts = _attribute_parts(node)
+        if not parts:
+            continue
+        tables.update(class_aliases.get(parts[0], ()))
+        tables.update(class_tables.get(parts[0], ()))
+        if len(parts) > 1 and parts[0] in module_aliases:
+            tables.update(class_tables.get(parts[-1], ()))
+    return tables
+
+
+def _model_constructor(
+    expression: ast.expr,
+    class_tables: Mapping[str, list[str]],
+    class_aliases: Mapping[str, list[str]],
+    module_aliases: Mapping[str, str],
+) -> bool:
+    if isinstance(expression, ast.Name):
+        return expression.id in class_tables or expression.id in class_aliases
+    if not isinstance(expression, ast.Attribute):
+        return False
+    parts = _attribute_parts(expression)
+    if not parts:
+        return False
+    class_name = parts[-1] if parts[0] in module_aliases else expression.attr
+    return class_name in class_tables or class_name in class_aliases
+
+
+def _table_accesses(
+    tree: ast.Module,
+    class_tables: Mapping[str, list[str]],
+    class_aliases: Mapping[str, list[str]],
+    module_aliases: Mapping[str, str],
+) -> dict[str, tuple[int | None, int | None]]:
+    writes: defaultdict[str, list[int]] = defaultdict(list)
+    reads: defaultdict[str, list[int]] = defaultdict(list)
+    query_calls_used_for_writes = set()
+    calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
+    for call in calls:
+        if _call_name(call.func) not in _CHAINED_WRITE_CALLS or not isinstance(
+            call.func, ast.Attribute
+        ):
+            continue
+        receiver = call.func.value
+        for nested in ast.walk(receiver):
+            if isinstance(nested, ast.Call) and _call_name(nested.func) in _READ_CALLS:
+                query_calls_used_for_writes.add(id(nested))
+                expression = ast.Tuple(elts=nested.args, ctx=ast.Load())
+                writes_for_query = _table_references(
+                    expression,
+                    class_tables,
+                    class_aliases,
+                    module_aliases,
+                )
+                for table in writes_for_query:
+                    writes[table].append(call.lineno)
+
+    for call in calls:
+        name = _call_name(call.func)
+        if name in _BULK_WRITE_CALLS | _WRITE_CALLS:
+            if call.args:
+                for table in _table_references(
+                    call.args[0],
+                    class_tables,
+                    class_aliases,
+                    module_aliases,
+                ):
+                    writes[table].append(call.lineno)
+            continue
+        if name in _READ_CALLS:
+            if id(call) in query_calls_used_for_writes:
+                continue
+            expression = ast.Tuple(elts=call.args, ctx=ast.Load())
+            for table in _table_references(
+                expression,
+                class_tables,
+                class_aliases,
+                module_aliases,
+            ):
+                reads[table].append(call.lineno)
+            continue
+        if isinstance(call.func, ast.Attribute) and call.func.attr.startswith(
+            _READ_METHOD_PREFIXES
+        ):
+            for table in _table_references(
+                call.func.value,
+                class_tables,
+                class_aliases,
+                module_aliases,
+            ):
+                reads[table].append(call.lineno)
+            continue
+        if _model_constructor(
+            call.func,
+            class_tables,
+            class_aliases,
+            module_aliases,
+        ):
+            for table in _table_references(
+                call.func,
+                class_tables,
+                class_aliases,
+                module_aliases,
+            ):
+                writes[table].append(call.lineno)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr == "query":
+            for table in _table_references(
+                node.value,
+                class_tables,
+                class_aliases,
+                module_aliases,
+            ):
+                reads[table].append(node.lineno)
+    return {
+        table: (
+            min(writes[table]) if writes[table] else None,
+            min(reads[table]) if reads[table] else None,
+        )
+        for table in sorted(writes.keys() | reads.keys())
+    }
+
+
 def _reexport_only(tree: ast.Module) -> bool:
     return all(
         isinstance(node, (ast.Import, ast.ImportFrom, ast.Expr, ast.Assign))
@@ -374,6 +520,7 @@ def _parse_graph(
     for path in sorted(parsed):
         graph_file = parsed[path]
         aliases: dict[str, str] = {}
+        class_aliases: dict[str, list[str]] = {}
         imports: set[str] = set()
         touched: set[str] = set()
         for node in ast.walk(graph_file.tree):
@@ -387,6 +534,10 @@ def _parse_graph(
                     continue
                 for alias in node.names:
                     full = f"{module}.{alias.name}"
+                    if alias.name in class_tables:
+                        class_aliases[alias.asname or alias.name] = class_tables[
+                            alias.name
+                        ]
                     if full in module_to_path:
                         imports.add(full)
                         aliases[alias.asname or alias.name] = full
@@ -435,6 +586,12 @@ def _parse_graph(
             graph_file.table_lines[table_name] = _table_line(
                 path, table_name, tables, graph_file.tree
             )
+        graph_file.table_accesses = _table_accesses(
+            graph_file.tree,
+            class_tables,
+            class_aliases,
+            aliases,
+        )
     return parsed, unparseable
 
 
@@ -461,8 +618,6 @@ def _cached_parse_graph(
         f"parse-graph-{graph_key}",
         lambda: _parse_graph(snapshot, tables, domain_table_names),
     )
-
-
 
 
 def _first_import_line(
@@ -711,10 +866,10 @@ def _external_table_links(
                 continue
             target_table = column.foreign_key.split(".", 1)[0]
             target_domain = table_domains.get(target_table)
-            if (
-                source_domain == target_domain
-                or domain not in {source_domain, target_domain}
-            ):
+            if source_domain == target_domain or domain not in {
+                source_domain,
+                target_domain,
+            }:
                 continue
             raw_links.append(
                 _normalise_link(

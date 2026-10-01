@@ -82,7 +82,7 @@ def test_group_can_be_an_edge_endpoint(page_data: dict[str, object]) -> None:
     assert page.block.edges[0].src == "backend"
 
 
-def test_queue_needs_a_producer_and_consumer_edge(
+def test_queue_with_one_flow_side_is_valid(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -91,9 +91,24 @@ def test_queue_needs_a_producer_and_consumer_edge(
     assert isinstance(nodes, list)
     nodes[1]["kind"] = "queue"
 
+    page = Page.model_validate(page_data)
+
+    assert page.block.nodes[1].kind == "queue"
+
+
+def test_queue_without_any_flow_side_is_invalid(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    nodes[1]["kind"] = "queue"
+    block["edges"] = []
+
     with pytest.raises(
         ValidationError,
-        match="block diagram: queue 'store' needs a producer and a consumer edge",
+        match="block diagram: queue 'store' needs a producer or a consumer edge",
     ):
         Page.model_validate(page_data)
 

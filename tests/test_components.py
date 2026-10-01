@@ -245,3 +245,76 @@ def test_extraction_is_deterministic_across_hash_seeds(tmp_path: Path) -> None:
 
     assert outputs[0] == outputs[1]
     assert json.loads(outputs[0])
+
+
+def test_task_types_consumers_and_producers_are_extracted(tmp_path: Path) -> None:
+    sources = {
+        "backend/src/tasks/types.py": (
+            "from enum import Enum\n"
+            "\n"
+            "class TaskTypeInfo:\n"
+            "    pass\n"
+            "\n"
+            "class TaskType(Enum):\n"
+            "    NOTIFICATION_SENDER = TaskTypeInfo(\n"
+            "        queue_type=RealtimeAgentQueueType.NOTIFICATION_SENDER\n"
+            "    )\n"
+        ),
+        "backend/src/tasks/executor_registry.py": (
+            "from .types import TaskType\n"
+            "\n"
+            "TASK_EXECUTORS = {\n"
+            "    TaskType.NOTIFICATION_SENDER: NotificationSenderTaskExecutor,\n"
+            "}\n"
+        ),
+        "backend/src/tasks/notification_sender.py": (
+            "class TaskExecutor:\n"
+            "    pass\n"
+            "\n"
+            "class NotificationSenderTaskExecutor(TaskExecutor):\n"
+            "    pass\n"
+        ),
+        "backend/src/tasks/producer.py": (
+            "def enqueue(payload):\n"
+            "    submit(payload, task_type=TaskType.NOTIFICATION_SENDER.value.name)\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    facts = extract_file_facts(repo, commit, sorted(sources))
+
+    assert [
+        (task.name, task.queue_type, task.path, task.line)
+        for task in facts["backend/src/tasks/types.py"].task_types
+    ] == [
+        (
+            "NOTIFICATION_SENDER",
+            "RealtimeAgentQueueType.NOTIFICATION_SENDER",
+            "backend/src/tasks/types.py",
+            7,
+        )
+    ]
+    assert [
+        (consumer.task_type, consumer.executor, consumer.path, consumer.line)
+        for consumer in facts["backend/src/tasks/executor_registry.py"].task_consumers
+    ] == [
+        (
+            "NOTIFICATION_SENDER",
+            "NotificationSenderTaskExecutor",
+            "backend/src/tasks/executor_registry.py",
+            4,
+        )
+    ]
+    assert [
+        (producer.task_type, producer.path, producer.line)
+        for producer in facts["backend/src/tasks/producer.py"].task_producers
+    ] == [
+        (
+            "NOTIFICATION_SENDER",
+            "backend/src/tasks/producer.py",
+            2,
+        )
+    ]
+    assert [
+        (worker.name, worker.line)
+        for worker in facts["backend/src/tasks/notification_sender.py"].workers
+    ] == [("NotificationSenderTaskExecutor", 4)]
