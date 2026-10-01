@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import html
 import re
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from rox_dox.links import source_url
 from rox_dox.model import Page
 from rox_dox.repo_tree import RepoEntry
 from rox_dox.render import page_href, render_page
+from rox_dox.schema import extract_tables
 from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
@@ -62,6 +64,214 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     assert re.search(r"<h3>Summary</h3>.*?<h3>Key Points</h3>", document, re.DOTALL)
     assert "<h3>Table</h3>" in document
     assert "<h3>Interesting Notes</h3>" in document
+
+
+def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    page = _empty_page(page_data)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    expected_diagrams = len(page.sequences) + len(page.states)
+    assert document.count('<div class="diagram block-scroll">') == expected_diagrams
+    assert ".block-scroll svg {\n  max-width: none;\n}" in document
+    assert (
+        ".diagram svg {\n"
+        "  display: block;\n"
+        "  max-width: 100%;\n"
+        "  height: auto;\n"
+        "  margin: 0 auto;\n}"
+    ) in document
+
+
+def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["sequences"].append(copy.deepcopy(payload["sequences"][0]))
+    payload["states"].append(copy.deepcopy(payload["states"][0]))
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+
+    diagram_ids = re.findall(
+        r'<article class="diagram-card zoom-figure" id="([^"]+)">',
+        document,
+    )
+    expand_targets = re.findall(
+        r'<a class="expand" href="#([^"]+)">Expand full screen</a>',
+        document,
+    )
+    close_targets = re.findall(
+        r'<a class="collapse" href="#([^"]+)">Close</a>',
+        document,
+    )
+    assert diagram_ids == [
+        "block-figure",
+        "fig-schema",
+        "fig-sequences-1",
+        "fig-sequences-2",
+        "fig-states-1",
+        "fig-states-2",
+    ]
+    assert expand_targets == diagram_ids
+    assert close_targets == [
+        "block",
+        "schema",
+        "sequences",
+        "sequences",
+        "states",
+        "states",
+    ]
+    assert document.count('<div class="diagram block-scroll">') == (
+        2 + len(page.sequences) + len(page.states)
+    )
+
+    left_toggle = '<input class="panel-toggle" id="toggle-left" type="checkbox">'
+    right_toggle = '<input class="panel-toggle" id="toggle-right" type="checkbox">'
+    page_shell = '<div class="page-shell">'
+    assert left_toggle in document and right_toggle in document
+    assert document.index(left_toggle) < document.index(page_shell)
+    assert document.index(right_toggle) < document.index(page_shell)
+    assert '<main class="page-main"><div class="panel-controls">' in document
+    assert 'for="toggle-left"><span class="expanded">◀ Panel</span>' in document
+    assert 'for="toggle-right"><span class="expanded">Panel ▶</span>' in document
+    assert '<span class="collapsed">▶ Panel</span>' in document
+    assert '<span class="collapsed">Panel ◀</span>' in document
+    assert (
+        ".page-shell {\n"
+        "  display: grid;\n"
+        "  grid-template-columns: 280px minmax(0, 1fr) 320px;"
+    ) in document
+    assert (
+        "#toggle-left:checked ~ .page-shell {\n"
+        "  grid-template-columns: 0 minmax(0, 1fr) 320px;\n}"
+    ) in document
+    assert (
+        "#toggle-right:checked ~ .page-shell {\n"
+        "  grid-template-columns: 280px minmax(0, 1fr) 0;\n}"
+    ) in document
+    assert (
+        "#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
+        "  grid-template-columns: 0 minmax(0, 1fr) 0;\n}"
+    ) in document
+    assert "@media (max-width: 1100px)" in document
+    assert (
+        "  #toggle-left:checked ~ .page-shell,\n"
+        "  #toggle-right:checked ~ .page-shell,\n"
+        "  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
+        "    grid-template-columns: minmax(0, 1fr);\n  }"
+    ) in document
+    assert "<script" not in document
+
+
+def test_schema_sources_include_authored_relations(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions.user_id",
+            "dst": "users.id",
+            "label": "implicit foreign key",
+            "source": {"path": "pkg/a.py", "lines": [4, 5]},
+        }
+    ]
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+    schema = re.search(r'<section id="schema">(.*?)</section>', document, re.DOTALL)
+    assert schema is not None
+
+    relation_url = source_url(
+        page.data.relations[0].source,
+        repo_url=REPO_URL,
+        commit=page.commit,
+    )
+    assert "relation sessions.user_id -&gt; users.id" in schema.group(1)
+    assert relation_url in schema.group(1)
+
+
+def test_domain_schema_renders_legend_table_guide_and_key_table_sources(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["sql_tables"] = []
+    payload["data"]["columns"] = [["identity", "cache"]]
+    payload["data"]["domains"] = [
+        {
+            "id": "identity",
+            "title": "Identity",
+            "tables": ["users", "sessions"],
+            "key_tables": ["users"],
+            "notes": [
+                {
+                    "text": "Tenant keys are summarized.",
+                    "sources": [{"path": "pkg/a.py", "lines": [1, 2]}],
+                }
+            ],
+        }
+    ]
+    page = Page.model_validate(payload)
+    tables = extract_tables(repo, commit)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=tables,
+        jar=plantuml_jar,
+    )
+
+    schema = re.search(r'<section id="schema">(.*?)</section>', document, re.DOTALL)
+    assert schema is not None
+    guide = schema.group(1)
+    assert "Each card is a domain" in guide
+    assert "orange = primary / referenced key" in guide
+    assert "blue = referencing (FK-like) column" in guide
+    assert "solid blue = DB-enforced FK" in guide
+    assert "dashed grey = symbolic reference (no constraint)" in guide
+    assert "dotted amber = blob pointer" in guide
+    assert "keys the arrows use are listed on the right" in guide
+    assert "width: 34px" in document
+    assert "border-top-style: dashed" in document
+    assert "border-top-style: dotted" in document
+    assert "<h3>Table guide</h3>" in guide
+    assert (
+        '<details id="schema-guide-identity"><summary>Identity — 2 tables</summary>'
+        in guide
+    )
+    assert (
+        f'<a href="{source_url(tables["sessions"].source, repo_url=REPO_URL, commit=page.commit)}">'
+        "<code>sessions</code></a>" in guide
+    )
+    assert "schema domain identity key table users" in guide
+    assert "schema domain identity note 1" in guide
 
 
 def test_related_page_links_are_relative_and_external_targets_link_out(
@@ -168,6 +378,126 @@ def test_page_text_is_html_escaped(
     assert "Claim &lt;img src=x&gt;" in document
 
 
+def test_focused_block_figure_renders_notes_and_its_own_sources(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    note_source = {"path": "pkg/a.py", "lines": [1, 2]}
+    group_source = {"path": "pkg/a.py", "lines": [2, 3]}
+    node_source = {"path": "pkg/a.py", "lines": [3, 4]}
+    detail_source = {"path": "pkg/a.py", "lines": [4, 5]}
+    edge_source = {"path": "pkg/a.py", "lines": [5, 6]}
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "notes": [
+                {
+                    "text": "Based on the task pattern, corrected.",
+                    "sources": [note_source],
+                }
+            ],
+            "block": {
+                "groups": [
+                    {
+                        "id": "worker",
+                        "label": "Worker",
+                        "source": group_source,
+                    }
+                ],
+                "nodes": [
+                    {
+                        "id": "listener",
+                        "label": "Listener",
+                        "source": node_source,
+                        "group": "worker",
+                        "details": [
+                            {"text": "Polls the queue.", "sources": [detail_source]}
+                        ],
+                    },
+                    {"id": "handler", "label": "Handler", "source": node_source},
+                ],
+                "edges": [
+                    {
+                        "src": "listener",
+                        "dst": "handler",
+                        "label": "execute",
+                        "source": edge_source,
+                    }
+                ],
+            },
+        }
+    ]
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+
+    note_url = source_url(
+        page.block_figures[0].notes[0].sources[0],
+        repo_url=REPO_URL,
+        commit=commit,
+    )
+    figure_sources = {
+        "block figure task-pipeline note 1": note_url,
+        "block figure task-pipeline group worker": source_url(
+            page.block_figures[0].block.groups[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline node listener": source_url(
+            page.block_figures[0].block.nodes[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline node listener detail 1": source_url(
+            page.block_figures[0].block.nodes[0].details[0].sources[0],
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+        "block figure task-pipeline edge listener->handler": source_url(
+            page.block_figures[0].block.edges[0].source,
+            repo_url=REPO_URL,
+            commit=commit,
+        ),
+    }
+
+    assert (
+        '<article class="diagram-card zoom-figure" id="block-figure-task-pipeline">'
+        in document
+    )
+    assert "<h3>Figure 2. Background task pipeline</h3>" in document
+    assert "Based on the task pattern, corrected." in document
+    assert f'<a href="{note_url}">[1]</a>' in document
+    for label, url in figure_sources.items():
+        assert f'<th scope="row">{html.escape(label)}</th>' in document
+        assert f'<a href="{url}">Source</a>' in document
+    for url, text in (
+        (figure_sources["block figure task-pipeline node listener"], "Listener"),
+        (
+            figure_sources["block figure task-pipeline node listener detail 1"],
+            "Polls the queue.",
+        ),
+        (
+            figure_sources["block figure task-pipeline edge listener->handler"],
+            "execute",
+        ),
+    ):
+        assert re.search(
+            rf'<a href="{re.escape(url)}" target="_top">'
+            rf"(?:(?!</a>).)*{re.escape(text)}(?:(?!</a>).)*</a>",
+            document,
+            re.DOTALL,
+        )
+
+
 def test_same_title_diagrams_only_list_their_own_sources(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
@@ -200,12 +530,12 @@ def test_same_title_diagrams_only_list_their_own_sources(
     )
 
     sequence_cards = re.findall(
-        r'<article class="diagram-card">(.*?)</article>',
+        r'<article class="diagram-card zoom-figure" id="[^"]+">(.*?)</article>',
         re.search(r'<section id="sequences">.*?</section>', document, re.DOTALL)[0],
         re.DOTALL,
     )
     state_cards = re.findall(
-        r'<article class="diagram-card">(.*?)</article>',
+        r'<article class="diagram-card zoom-figure" id="[^"]+">(.*?)</article>',
         re.search(r'<section id="states">.*?</section>', document, re.DOTALL)[0],
         re.DOTALL,
     )

@@ -11,12 +11,12 @@ from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 SECTION_IDS = [
+    "related",
     "tldr",
     "block",
     "schema",
     "sequences",
     "states",
-    "related",
 ]
 DIAGRAM_SECTION_IDS = ("block", "schema", "sequences", "states")
 EMPTY_MESSAGE = "Nothing to show for this module."
@@ -54,9 +54,15 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
     )
 
     assert re.findall(r'<section id="([^"]+)">', document) == SECTION_IDS
+    assert '</header><section id="related">' in document
     assert f"verified at <code>{page.commit[:10]}</code>" in document
     assert "https&#58;//content.example.test/docs" in document
     assert "https&#58;//api.example.test" in document
+    related = _section_fragment(document, "related")
+    assert re.search(
+        r"<details open><summary><h2>Related</h2></summary>",
+        related,
+    )
     for section_id in DIAGRAM_SECTION_IDS:
         section = _section_fragment(document, section_id)
         assert "<svg" in section
@@ -90,12 +96,12 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
     )
     assert toc is not None
     assert re.findall(r'href="#([^"]+)"', toc.group(1)) == [
+        "related",
         "tldr",
         "block",
         "schema",
         "sequences",
         "states",
-        "related",
     ]
 
     lowered = document.lower()

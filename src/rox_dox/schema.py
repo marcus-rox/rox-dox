@@ -22,6 +22,7 @@ class Column(SchemaModel):
 
 class Table(SchemaModel):
     name: str
+    class_name: str
     columns: list[Column]
     source: CodeSource
     duplicate_paths: list[str] = []
@@ -129,12 +130,52 @@ def _column(class_statement: ast.stmt) -> Column | None:
     )
 
 
+def _table_columns(
+    class_node: ast.ClassDef,
+    classes_by_name: dict[str, ast.ClassDef],
+    cache: dict[str, list[Column]],
+    visiting: set[str],
+) -> list[Column]:
+    if class_node.name in cache:
+        return cache[class_node.name]
+    if class_node.name in visiting:
+        return []
+
+    visiting.add(class_node.name)
+    columns_by_name: dict[str, Column] = {}
+    for base in reversed(class_node.bases):
+        base_name = _call_name(base)
+        base_node = classes_by_name.get(base_name or "")
+        if base_node is not None:
+            columns_by_name.update(
+                (
+                    column.name,
+                    column,
+                )
+                for column in _table_columns(
+                    base_node,
+                    classes_by_name,
+                    cache,
+                    visiting,
+                )
+            )
+    for statement in class_node.body:
+        column = _column(statement)
+        if column is not None:
+            columns_by_name[column.name] = column
+    visiting.remove(class_node.name)
+    cache[class_node.name] = list(columns_by_name.values())
+    return cache[class_node.name]
+
+
 def _tables_in_file(source: str, path: str) -> list[Table]:
     module = ast.parse(source, filename=path)
     classes = sorted(
         (node for node in ast.walk(module) if isinstance(node, ast.ClassDef)),
         key=lambda node: node.lineno,
     )
+    classes_by_name = {class_node.name: class_node for class_node in classes}
+    column_cache: dict[str, list[Column]] = {}
     tables = []
     for class_node in classes:
         name = _table_name(class_node)
@@ -143,11 +184,10 @@ def _tables_in_file(source: str, path: str) -> list[Table]:
         tables.append(
             Table(
                 name=name,
-                columns=[
-                    column
-                    for statement in class_node.body
-                    if (column := _column(statement)) is not None
-                ],
+                class_name=class_node.name,
+                columns=_table_columns(
+                    class_node, classes_by_name, column_cache, set()
+                ),
                 source=CodeSource(
                     path=path,
                     lines=(

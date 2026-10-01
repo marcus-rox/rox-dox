@@ -1,0 +1,503 @@
+---
+name: sprint-tasks
+description: "Decompose a plan document (a PLAN.md, PRD, design doc, or any written statement of a goal) into individual, numbered sprint tasks, each in a fixed ticket shape — user story, context, scope, requirements, acceptance criteria, Definition of Done, dependencies, references, delivery fields, and a Proof of value — preceded by a manifest and a parallel execution plan showing which tasks can be worked simultaneously (e.g. by separate Claude instances acting as parallel developers). Use when the user says \"break this plan into tasks\", \"turn this into tickets\", \"decompose this into sprint tasks\", hands over a plan/PRD and asks what the tickets look like, asks for a backlog from a goal, or wants to know what can be run in parallel. Requires a `SPEC.md`: every task names the requirements it discharges, and a sprint is measured by which requirements it turns green, so if no spec exists this skill stops and drafts one with the user first. This skill only reads the plan, it never writes or owns it. Each task's Proof of value section follows the dedicated value-proof procedure, not written inline from scratch."
+---
+
+# sprint-tasks
+
+A plan says what the project is for and what happens next. It does not say what a person
+picks up on Monday, reviews in one pull request, and closes by Friday. This skill is the
+bridge: one plan goes in, a set of independently workable tickets comes out, each in the
+same fixed shape so a reader never has to guess where the acceptance bar or the owner is
+written down. And each of them points at the same target — a requirement in `SPEC.md` that
+is not true yet.
+
+**This skill decomposes; it does not decide.** Every task's scope, requirement and
+dependency must trace back to something the plan already says. If the plan is silent or
+contradictory on a boundary a task needs, that is a gap in the plan, not a judgment call
+for this skill to make quietly — see [Out of scope](#out-of-scope).
+
+---
+
+## The spec is the precondition
+
+**A sprint exists to move requirements from ❌ or `unbound` to ✅.** That is the unit of
+progress. The plan supplies the *route* — which requirements to attack, in what order, and
+what would falsify the approach — and the tickets supply the *work*, but the thing being
+delivered is always a requirement in `SPEC.md` becoming true.
+
+**This skill does not run without a spec.** If the repo has no `SPEC.md`, stop before
+writing any ticket and say so: the sprint has no definition of done that outlives the
+sprint, and the tickets would be a list of activities rather than a list of obligations
+discharged. Draft one with the user first — [`spec-doc`](../spec-doc/SKILL.md) owns its
+shape — and wait for them to accept it. Requirements are theirs; drafting is not accepting.
+
+Three consequences, each of which invalidates a batch that breaks it:
+
+- **Every task discharges at least one requirement**, named by ID. A task that discharges
+  nothing is either work the user never asked for, or a requirement nobody wrote down. Both
+  are answered by going back to the user, not by shipping the ticket.
+- **A task never restates, reinterprets or narrows a requirement.** Acceptance criteria may
+  make a requirement *checkable in this ticket's context*; they may not make it smaller. If
+  a requirement is too large for one ticket, split the ticket, never the obligation.
+- **A requirement is never edited to fit the decomposition.** Discovering during
+  decomposition that a requirement is wrong, ambiguous or unachievable is a valuable result
+  — raise it as a spec change request and let the user decide. It is not a licence to
+  reword.
+
+---
+
+## The format
+
+Every task uses this shape, unchanged in section order and headings:
+
+```markdown
+# Task [N] — [Outcome-focused title]
+
+**Satisfies:** R-n, R-m — the requirements this task makes true.
+
+## User story
+
+As a [type of user], I want [capability], so that [benefit].
+
+## Context
+
+[Why this is needed and what problem it solves.]
+
+## Scope
+
+In scope:
+- [...]
+
+Out of scope:
+- [...]
+
+## Requirements
+
+- [...]
+- [...]
+- [...]
+
+## Acceptance criteria
+
+- Given [context], when [action], then [observable result].
+- Given [context], when [action], then [observable result].
+- Errors and edge cases: [...]
+
+## Definition of Done
+
+- All acceptance criteria pass.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean).
+- Code is reviewed and merged.
+- Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is deployed to [environment].
+- No unresolved critical defects remain.
+
+## Dependencies and constraints
+
+- [...]
+
+## Proof of value
+
+[Produced by following proof-of-value's shape in full — Discharges, Claim, Premises,
+Argument, Attempted counterexample, Falsifier, Verdict. Never a paragraph substituted in its
+place.]
+
+## References
+
+- Design:
+- Technical specification:
+- Related issues:
+
+## Delivery
+
+- Owner:
+- Priority:
+- Estimate:
+- Sprint:
+- Parent epic:
+```
+
+**The `Satisfies` field names requirements by ID; Acceptance criteria make those requirements
+checkable in this ticket's context** — never by restating them in the ticket's own words. A
+restated requirement is a second copy that drifts; an ID is a pointer that cannot. The
+requirement itself is the user's, and neither this skill nor the developer may reword it. See
+[`spec-doc`](../spec-doc/SKILL.md).
+
+The two fields are not the same thing: **`Satisfies` names requirements** in `SPEC.md`, while
+*Proof of value*'s own **Discharges names the plan element** the ticket serves. One is the
+obligation; the other is the route to it.
+
+**Every heading appears in every task, in this order, even when a section is short.** A
+missing *Out of scope* reads as "nothing was excluded" when it usually means nobody thought
+about the boundary. *Proof of value* is never abbreviated to a sentence — see
+[`proof-of-value`](../proof-of-value/SKILL.md) for its own fixed shape.
+
+---
+
+## Before the tickets: a manifest
+
+**Every task gets a number, assigned once, for the whole batch — sequential, starting at 1,
+never reused or renumbered within it.** The number is what the title carries (`# Task
+[N] — ...`), what `Depends on` references, and what a person hands to a developer or a
+parallel Claude instance as the whole instruction: "take Task 3."
+
+Produce a manifest table before the individual tasks, so the batch can be scanned before
+anyone reads eleven tickets end to end. `Depends on` references task numbers, not titles —
+numbers don't need renaming when a title is later reworded, and a number makes the parallel
+plan below mechanically derivable instead of read by eye:
+
+```markdown
+| # | Task | Satisfies | Parent plan step | Depends on | Priority |
+|---|---|---|---|---|---|
+| 1 | Public API requests are rate-limited per API key | R-4 | Next step 1 | — | High |
+| 2 | Emit rate-limit metrics to the dashboard | R-5 | Next step 1 | 1 | Medium |
+| 3 | Add configurable per-tenant quotas | R-4, R-9 | Next step 3 | — | Medium |
+```
+
+The manifest is what makes the dependency graph visible at a glance and catches three
+failure modes early: a task with no parent step (scope invented, not decomposed), two tasks
+silently claiming the same in-scope item, and an empty `Satisfies` cell (work with no
+mandate behind it).
+
+### And the coverage table, read the other way
+
+The manifest is read task-first. Read it requirement-first and it answers the question the
+user actually has — *what does this sprint make true?*
+
+```markdown
+| Req | Status now | Tasks | Status if the sprint lands |
+|---|---|---|---|
+| R-4 | ❌ | 1, 3 | ✅ |
+| R-5 | unbound | 2 | ✅ |
+| R-9 | ❌ | 3 | ❌ — partial, needs a follow-up sprint |
+```
+
+**A requirement the sprint targets but does not finish must say so in that last column.**
+A sprint that closes every ticket and leaves R-9 red is not a failed sprint; a sprint that
+closes every ticket while implying R-9 went green is a false report, and it is the one this
+table exists to prevent.
+
+## Before the tickets: a parallel execution plan
+
+Group the manifest's tasks into waves — the tasks in one wave share no dependency on each
+other and can be handed to separate developers, or separate Claude instances, to work at the
+same time:
+
+```markdown
+| Wave | Tasks | Blocked by |
+|---|---|---|
+| 1 | 1, 3 | — |
+| 2 | 2 | Wave 1 |
+```
+
+**The rule that generates this table, mechanically, from the manifest's `Depends on`
+column:**
+
+> Wave(task) = 1 if `Depends on` is empty; otherwise 1 + max(Wave(d)) over every d it depends
+> on.
+
+Tasks land in the same wave only because the formula says so, never because they "feel"
+independent — read `Depends on`, don't guess. A task in wave *k* cannot start until every
+task it depends on (necessarily in an earlier wave) is done; two tasks in the same wave have
+no ordering constraint between them at all.
+
+**The largest wave's size is the maximum useful parallelism this backlog supports.** Assign
+that many developers or agents at once; assigning more doesn't shorten the critical path,
+because there is nothing left in that wave for the extra hands to pick up. In the example
+above, at most 2 things can happen at once — a third developer would sit idle in Wave 1 and
+still be waiting when Wave 2 opens.
+
+**If computing a task's wave requires walking through the task itself, the dependency graph
+has a cycle.** That's a modeling error, not a valid schedule — two tasks that each need the
+other to finish first cannot both be independently shippable, which the
+[splitting rule](#splitting-a-plan-step-into-tasks) already requires. Fix the split; don't
+force a wave number onto a cycle.
+
+A backlog that resolves to one task per wave, in one long chain, is a signal worth noticing
+too — it means the split produced a strictly serial pipeline with no parallelism available at
+all, which is often a sign the tasks were sliced by technical layer rather than as vertical
+slices. Revisit the split before accepting that shape as final.
+
+---
+
+## Where each section's content comes from
+
+Read the plan; do not invent what it does not say.
+
+| Plan content | Feeds into |
+|---|---|
+| **`SPEC.md` requirements** (not plan content — the bar the plan is a route to) | **Satisfies, and the Acceptance criteria that make each cited requirement checkable here** |
+| The objective / problem statement | Context, and the benefit clause of User story |
+| Constraints | Dependencies and constraints, and any Requirement they force |
+| Next steps (or equivalent deliverables list) | The set of tasks — one step commonly becomes 1–4 tasks |
+| Decided | Requirements and Context — settled reasoning is restated, never re-argued |
+| The plan's own out-of-scope items | Inherited into each task's Out of scope, never contradicted |
+| Open questions | Dependencies and constraints, flagged as blocking until resolved — never silently resolved here |
+| This task's own Requirements and Acceptance criteria, plus the specific plan element they target | Proof of value — see [`proof-of-value`](../proof-of-value/SKILL.md) |
+
+If the input isn't in this repo's [`plan-doc`](../plan-doc/SKILL.md) shape — a PRD, a design
+doc, a paragraph of goals in a message — the same mapping still applies: find the
+problem statement, the constraints, and the list of deliverables, and decompose from those.
+
+---
+
+## Splitting a plan step into tasks
+
+A plan step is strategy; a task is a unit of execution. They are not required to be 1:1.
+
+- **A task must be independently shippable and reviewable** — one pull request, one review,
+  one deploy (or safely behind a flag). If a step already reads like that, it becomes one
+  task; padding it into several to look thorough is not the goal.
+- **Prefer a vertical slice over a horizontal layer.** A thin end-to-end capability (e.g.
+  "an authenticated user can reset their password by email") ships and demonstrates value on
+  its own; "build the backend endpoint" and "build the frontend form" as two tasks usually
+  cannot ship independently of each other, so avoid that split unless the plan itself already
+  separates them for a reason it states.
+- **When a dependency between tasks is unavoidable, name it** — in that task's Dependencies
+  and constraints, and in the manifest's Depends on column. Do not leave it implicit in
+  ordering alone.
+- **No fixed cap on the count.** [`plan-doc`](../plan-doc/SKILL.md) caps next steps at three
+  or four because that is strategy, written under uncertainty. A task list is downstream
+  execution detail once a direction is settled, so it follows the work. If one plan step
+  produces more than about eight tasks, say so — it is usually a sign the step is really an
+  epic and should be named as this batch's Parent epic rather than split further.
+
+---
+
+## Rules that keep a task from being vague
+
+Each of these mirrors a rule elsewhere in this skill set — specificity over vagueness, in
+every field that invites a placeholder:
+
+- **A task with an empty `Satisfies` is not a task.** Before writing the ticket, name the
+  requirement it makes true. If none exists, the honest output is a question to the user —
+  "this work has no requirement behind it; should there be one?" — not a ticket.
+- **A user story names a real actor, not "a user."** If the plan's actor is a system (a CI
+  pipeline, a cron job, an on-call engineer), name that system. A generic actor means the
+  plan was not read closely enough to find the real one.
+- **Every Out of scope line names something a reader would otherwise assume is included.**
+  "Out of scope: mobile" is only useful if a reader would otherwise expect mobile.
+- **Every requirement has a matching acceptance criterion, and vice versa.** An orphan
+  requirement is untested; an orphan acceptance criterion is testing something nobody asked
+  for.
+- **"Errors and edge cases" names a real one**, surfaced from the plan's constraints or from
+  the task's own failure modes — never left as the literal placeholder text, and never
+  "handle errors gracefully."
+- **`[environment]` in the Definition of Done is filled in**, from the plan or by asking —
+  never left as a literal bracket.
+- **Estimate and Sprint are sourced from the plan or written `TBD`, never invented.** A
+  guessed estimate is worse than an absent one, because it reads as a commitment nobody made.
+- **Priority may be inferred from the plan step's position** (earlier next-steps are
+  higher-priority), but say so is inferred if there's no explicit priority in the plan —
+  don't present a guess as a fact from the source.
+- **Parent epic matches the plan's step name or number.** This is the one field that closes
+  the loop back to the plan — per [`plan-doc`](../plan-doc/SKILL.md), only the plan numbers
+  steps, so a task refers to that number rather than inventing a competing one.
+- **References → Related issues lists sibling tasks from the same batch**, so the set is
+  traceable to itself, not just to the plan — cite them by number ("Task 2"), the same way
+  the manifest's `Depends on` column does.
+- **Proof of value is not optional and not decorative.** Run
+  [`proof-of-value`](../proof-of-value/SKILL.md) against this task's own Acceptance criteria
+  before calling the task finished. An Open verdict means the Acceptance criteria are
+  missing something — add it and re-run, rather than writing a Proof of value section that
+  glosses over the gap. A Conditional verdict's assumption must also appear in this task's
+  own Dependencies and constraints.
+
+When a scope boundary is genuinely ambiguous in the plan — not merely unwritten, but
+unresolvable without a decision only the user can make — stop and ask, per
+[`escalate`](../escalate/SKILL.md), rather than guessing which side of the line the task
+falls on.
+
+---
+
+## Example
+
+Plan excerpt (from a `plan-doc`-shaped `PLAN.md`):
+
+```markdown
+## Next steps
+1. Rate-limit the public API per key, 429 with Retry-After, so far-below-quota tenants
+   never notice. Falsifier: p99 latency for compliant callers regresses more than 5ms.
+3. Let large customers set their own per-tenant quota above the default.
+```
+
+Manifest and parallel execution plan for this batch (see the two sections above — Task 2
+and Task 3 aren't written out in full here, only Task 1 is):
+
+```markdown
+| # | Task | Satisfies | Parent plan step | Depends on | Priority |
+|---|---|---|---|---|---|
+| 1 | Public API requests are rate-limited per API key | R-4 | Next step 1 | — | High |
+| 2 | Emit rate-limit metrics to the dashboard | R-5 | Next step 1 | 1 | Medium |
+| 3 | Add configurable per-tenant quotas | R-4, R-9 | Next step 3 | — | Medium |
+
+| Req | Status now | Tasks | Status if the sprint lands |
+|---|---|---|---|
+| R-4 | ❌ | 1, 3 | ✅ |
+| R-5 | unbound | 2 | ✅ |
+| R-9 | ❌ | 3 | ❌ — partial, needs a follow-up sprint |
+
+| Wave | Tasks | Blocked by |
+|---|---|---|
+| 1 | 1, 3 | — |
+| 2 | 2 | Wave 1 |
+```
+
+Tasks 1 and 3 share no dependency — hand them to two developers (or two Claude instances) at
+once. Task 2 needs Task 1's counting mechanism to emit metrics from, so it waits for Wave 1.
+
+Resulting task:
+
+```markdown
+# Task 1 — Public API requests are rate-limited per API key
+
+**Satisfies:** R-4.
+
+## User story
+
+As a third-party integrator calling the public API, I want my requests capped and clearly
+signaled when I exceed my quota, so that a runaway client of mine can't take down the
+service for every other tenant.
+
+## Context
+
+The API has no per-key limit today; one misbehaving integration has twice degraded
+p99 latency for all tenants (see Next step 1 in PLAN.md). This task adds the limit and the
+signal a well-behaved client needs to back off.
+
+## Scope
+
+In scope:
+- Per-API-key request counting on the public API gateway.
+- A 429 response with a `Retry-After` header when a key exceeds its quota.
+
+Out of scope:
+- Configurable per-tenant quotas (single global quota for this task; see Next step 3).
+- Rate-limit metrics on the dashboard (separate task, see manifest).
+
+## Requirements
+
+- Requests are counted per API key over a rolling 60-second window.
+- A key over quota receives HTTP 429 with a `Retry-After` header in seconds.
+- Compliant callers (under quota) see no added latency beyond the counting overhead, and
+  that overhead adds no more than 5ms to p99 latency.
+
+## Acceptance criteria
+
+- Given a key under its quota, when it makes a request, then the request succeeds with no
+  added latency beyond counting overhead.
+- Given a key under its quota, when p99 latency is measured under load, then the added
+  overhead is no more than 5ms.
+- Given a key over its quota, when it makes a request, then it receives 429 with a
+  `Retry-After` header.
+- Errors and edge cases: a key with no requests in the last 60s resets to full quota; the
+  counting store being unavailable fails open (requests are allowed, not blocked).
+
+## Definition of Done
+
+- All acceptance criteria pass.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean).
+- Code is reviewed and merged.
+- Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is deployed to production, behind a flag defaulting off.
+- No unresolved critical defects remain.
+
+## Dependencies and constraints
+
+- Falsifier from the plan: p99 latency for compliant callers must not regress more than
+  5ms — measure before merging the flag on.
+- Depends on: none (Wave 1). Unblocks Task 2.
+
+## Proof of value
+
+**Discharges:** Plan → Next step 1 — "p99 latency for compliant callers must not regress
+more than 5ms"
+
+**Claim:** If every acceptance criterion of this task holds, then p99 latency for compliant
+callers regresses by at most 5ms.
+
+**Premises:**
+1. A compliant caller's request succeeds with no added latency beyond counting overhead —
+   source: this task's Acceptance criteria.
+2. That counting overhead adds no more than 5ms to p99 latency — source: this task's
+   Acceptance criteria.
+
+**Argument:**
+1. From Premise 1, a compliant caller's added latency equals the counting overhead exactly.
+2. From Premise 2, that overhead is bounded at 5ms p99.
+3. Therefore p99 added latency for compliant callers is at most 5ms — the claim holds.
+
+**Attempted counterexample:** A counting-store implementation with p99 lookup latency above
+5ms would violate Premise 2 directly, so it cannot satisfy this task's own acceptance
+criteria — no scenario satisfies the criteria while breaching the target.
+
+**Falsifier:** A production measurement showing p99 overhead above 5ms while Premise 2's
+acceptance criterion is reported as passing — would mean the test measuring Premise 2 is
+wrong, not that the plan's bar changed.
+
+**Verdict:** Proved — every premise sources to this task's own Acceptance criteria, and no
+counterexample was found.
+
+## References
+
+- Design:
+- Technical specification:
+- Related issues: Task 2 — Emit rate-limit metrics to the dashboard; Task 3 — Add
+  configurable per-tenant quotas
+
+## Delivery
+
+- Owner:
+- Priority: High
+- Estimate: TBD
+- Sprint: TBD
+- Parent epic: Next step 1 — Rate-limit the public API
+```
+
+---
+
+## Out of scope
+
+**Whether the plan's objective itself is the right objective.** Proof of value proves that a
+task's acceptance criteria discharge a specific plan element, not that the element belongs
+in the plan — that judgment is settled in the plan's own Objective and Decided sections, per
+[`plan-doc`](../plan-doc/SKILL.md), and this skill's job is only to reference it, not to
+re-argue it.
+
+**Creating the tickets in a tracker** (Linear, Jira, GitHub Issues) is a separate step from
+producing their content. Produce the tasks in this format first; create them in a connected
+tracker only when asked.
+
+**Re-deciding the plan's scope.** If decomposing a step reveals it's actually two unrelated
+efforts, or the plan is missing a constraint a task needs, that's a finding about the plan —
+fix the plan first, per [`plan-doc`](../plan-doc/SKILL.md), rather than silently patching it
+at the ticket level.
+
+**Estimating with any real rigor.** This skill writes `TBD` for anything not sourced from
+the plan; it does not simulate a planning-poker session.
+
+---
+
+## Done when
+
+A manifest table precedes the batch, naming every task by number, its parent plan step, its
+dependencies (by number) and its priority; a parallel execution plan table follows it, with
+every task's wave computed from `Depends on` by the stated formula rather than eyeballed,
+and the largest wave named as the batch's maximum useful parallelism; every task's title
+carries its number; every task has all ten headings in order; every requirement has a
+matching acceptance criterion and vice versa; Out of scope names things a reader would
+otherwise assume are in; Errors and edge cases names a real one; `[environment]` is filled
+in; Estimate and Sprint are sourced or `TBD`; Parent epic matches the plan's own step
+numbering; References → Related issues lists sibling tasks from the batch by number; every
+task's Proof of value follows [`proof-of-value`](../proof-of-value/SKILL.md) in full,
+reached Proved or Conditional (with its assumption echoed into Dependencies and constraints)
+before the task is called finished, and any Open verdict was resolved by adding the missing
+acceptance criterion rather than left standing; and nothing in any task asserts a boundary,
+priority, or justification the plan doesn't support.

@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from rox_dox.cli import main
 from rox_dox.model import NotionDoc, Page, page_sources
+from rox_dox.schema import extract_tables
 
 
 def test_valid_page_passes_check_command(
@@ -25,7 +26,7 @@ def test_valid_page_passes_check_command(
     assert "1 pages OK" in capsys.readouterr().out
 
 
-def test_edge_endpoint_must_name_declared_node(
+def test_edge_endpoint_must_name_declared_node_or_group(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -36,7 +37,48 @@ def test_edge_endpoint_must_name_declared_node(
     assert isinstance(edge, dict)
     edge["dst"] = "cache"
 
-    with pytest.raises(ValidationError, match="block edge api->cache"):
+    with pytest.raises(
+        ValidationError, match="block edge api->cache.*unknown endpoint"
+    ):
+        Page.model_validate(page_data)
+
+
+def test_group_can_be_an_edge_endpoint(page_data: dict[str, object]) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    block["groups"] = [
+        {"id": "backend", "label": "Backend", "source": source},
+    ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "backend"
+    edges = block["edges"]
+    assert isinstance(edges, list)
+    edge = edges[0]
+    assert isinstance(edge, dict)
+    edge["src"] = "backend"
+
+    page = Page.model_validate(page_data)
+
+    assert page.block.edges[0].src == "backend"
+
+
+def test_queue_needs_a_producer_and_consumer_edge(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    nodes[1]["kind"] = "queue"
+
+    with pytest.raises(
+        ValidationError,
+        match="block diagram: queue 'store' needs a producer and a consumer edge",
+    ):
         Page.model_validate(page_data)
 
 
@@ -173,6 +215,53 @@ def test_group_and_node_ids_must_be_unique(
         Page.model_validate(page_data)
 
 
+def test_block_figure_ids_must_be_unique(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    source = payload["block"]["nodes"][0]["source"]
+    figure = {
+        "id": "task-pipeline",
+        "title": "Background task pipeline",
+        "block": {
+            "nodes": [{"id": "caller", "label": "Caller", "source": source}],
+            "edges": [],
+        },
+    }
+    payload["block_figures"] = [figure, copy.deepcopy(figure)]
+
+    with pytest.raises(ValidationError, match="duplicate block figure id"):
+        Page.model_validate(payload)
+
+
+def test_block_figure_edges_must_reference_declared_node_or_group(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = payload["block"]["nodes"][0]["source"]
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "block": {
+                "nodes": [{"id": "caller", "label": "Caller", "source": source}],
+                "edges": [
+                    {
+                        "src": "caller",
+                        "dst": "missing",
+                        "label": "unknown",
+                        "source": source,
+                    }
+                ],
+            },
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="block edge caller->missing: unknown endpoint 'missing'",
+    ):
+        Page.model_validate(payload)
+
+
 def test_node_details_are_limited_to_six(
     page_data: dict[str, object],
 ) -> None:
@@ -291,6 +380,220 @@ def test_page_sources_include_group_and_node_detail_citations(
     ) in sources
 
 
+def test_page_sources_include_focused_block_figure_elements(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    payload["block_figures"] = [
+        {
+            "id": "task-pipeline",
+            "title": "Background task pipeline",
+            "notes": [{"text": "Based on the task pattern.", "sources": [source]}],
+            "block": {
+                "groups": [
+                    {"id": "worker", "label": "Worker", "source": source},
+                ],
+                "nodes": [
+                    {
+                        "id": "listener",
+                        "label": "Listener",
+                        "source": source,
+                        "group": "worker",
+                        "details": [{"text": "Polls SQS.", "sources": [source]}],
+                    },
+                    {"id": "handler", "label": "Handler", "source": source},
+                ],
+                "edges": [
+                    {
+                        "src": "listener",
+                        "dst": "worker",
+                        "label": "execute",
+                        "source": source,
+                    }
+                ],
+            },
+        }
+    ]
+    page = Page.model_validate(payload)
+
+    sources = page_sources(page)
+    labels = {label for label, _ in sources}
+
+    assert {
+        "block figure task-pipeline note 1",
+        "block figure task-pipeline group worker",
+        "block figure task-pipeline node listener",
+        "block figure task-pipeline node listener detail 1",
+        "block figure task-pipeline edge listener->worker",
+    } <= labels
+
+
+def test_schema_domains_require_key_tables_to_be_members(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["sessions"],
+        }
+    ]
+
+    with pytest.raises(ValidationError, match="schema domain 'people'.*key tables"):
+        Page.model_validate(page_data)
+
+
+def test_schema_domain_key_tables_must_not_repeat(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users", "users"],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="schema domain 'people': duplicate key table 'users'",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_schema_domain_ids_must_be_unique(page_data: dict[str, object]) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+        {
+            "id": "people",
+            "title": "Other people",
+            "tables": ["sessions"],
+            "key_tables": ["sessions"],
+        },
+    ]
+
+    with pytest.raises(ValidationError, match="schema: duplicate domain id 'people'"):
+        Page.model_validate(page_data)
+
+
+def test_schema_table_can_belong_to_only_one_domain(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+        {
+            "id": "sessions",
+            "title": "Sessions",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+    ]
+
+    with pytest.raises(ValidationError, match="table 'users' belongs to both domain"):
+        Page.model_validate(page_data)
+
+
+def test_schema_domains_and_table_view_are_mutually_exclusive(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError, match="domains and sql_tables are mutually exclusive"
+    ):
+        Page.model_validate(page_data)
+
+
+@pytest.mark.parametrize(
+    ("columns", "message"),
+    [
+        ([["unknown"]], "unknown columns item 'unknown'"),
+        ([["users"], ["users"]], "duplicate columns item 'users'"),
+    ],
+)
+def test_schema_columns_must_be_declared_and_unique(
+    page_data: dict[str, object],
+    columns: list[list[str]],
+    message: str,
+) -> None:
+    page_data["data"]["columns"] = columns
+
+    with pytest.raises(ValidationError, match=message):
+        Page.model_validate(page_data)
+
+
+def test_page_sources_include_domain_note_citations(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+            "notes": [
+                {
+                    "text": "The domain has shared tenancy fields.",
+                    "sources": [{"path": "pkg/a.py", "lines": [1, 2]}],
+                }
+            ],
+        }
+    ]
+    page = Page.model_validate(page_data)
+
+    assert (
+        "schema domain people note 1",
+        page.data.domains[0].notes[0].sources[0],
+    ) in page_sources(page)
+
+
+def test_page_sources_include_key_table_model_citations(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        }
+    ]
+    page = Page.model_validate(page_data)
+    tables = extract_tables(*git_repo)
+
+    assert (
+        "schema domain people key table users",
+        tables["users"].source,
+    ) in page_sources(page, tables=tables)
+
+
 def test_summary_table_rows_must_match_column_count(
     page_data: dict[str, object],
 ) -> None:
@@ -378,3 +681,23 @@ def test_notion_doc_excerpt_accepts_600_characters() -> None:
     )
 
     assert len(document.excerpt) == 600
+
+
+def test_relation_source_is_enumerated_for_citation_checks(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions.user_id",
+            "dst": "users.id",
+            "label": "implicit foreign key",
+            "source": {"path": "pkg/a.py", "lines": [4, 5]},
+        }
+    ]
+    page = Page.model_validate(payload)
+
+    assert (
+        "relation sessions.user_id -> users.id",
+        page.data.relations[0].source,
+    ) in page_sources(page)

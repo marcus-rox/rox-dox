@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Mapping
 from datetime import date
 from pathlib import PurePosixPath
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+if TYPE_CHECKING:
+    from rox_dox.schema import Table
+
+
+RelationKind = Literal["enforced", "symbolic", "blob"]
 
 
 class Model(BaseModel):
@@ -52,6 +59,7 @@ class Node(Model):
     link: str | None = None
     kind: Literal["component", "store", "external", "queue"] = "component"
     group: str | None = None
+    many: bool = False
     details: list[Claim] = Field(default_factory=list, max_length=_MAX_NODE_DETAILS)
 
     @model_validator(mode="before")
@@ -169,16 +177,35 @@ class BlockDiagram(Model):
                     f"block diagram: group '{group.id}' has no nodes or child groups"
                 )
 
+        declared_endpoints = declared_nodes | declared_groups
         for edge in self.edges:
-            if edge.src not in declared_nodes:
+            if edge.src not in declared_endpoints:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.src}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown endpoint '{edge.src}'"
                 )
-            if edge.dst not in declared_nodes:
+            if edge.dst not in declared_endpoints:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.dst}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown endpoint '{edge.dst}'"
+                )
+
+        incoming_nodes = {edge.dst for edge in self.edges}
+        outgoing_nodes = {edge.src for edge in self.edges}
+        for node in self.nodes:
+            if node.kind == "queue" and (
+                node.id not in incoming_nodes or node.id not in outgoing_nodes
+            ):
+                raise ValueError(
+                    f"block diagram: queue '{node.id}' needs a producer and a "
+                    "consumer edge"
                 )
         return self
+
+
+class BlockFigure(Model):
+    id: str = Field(pattern=r"^[a-z0-9-]+$")
+    title: str
+    notes: list[Claim] = Field(default_factory=list)
+    block: BlockDiagram
 
 
 class Participant(Model):
@@ -277,9 +304,82 @@ class NoSqlStore(Model):
     source: Source
 
 
+class Relation(Model):
+    src: str
+    dst: str
+    label: str
+    source: Source
+    kind: RelationKind = "symbolic"
+
+
+class SchemaDomain(Model):
+    id: str
+    title: str
+    tables: list[str] = Field(min_length=1)
+    key_tables: list[str] = Field(min_length=1)
+    notes: list[Claim] = Field(default_factory=list)
+    page: str | None = None
+
+    @model_validator(mode="after")
+    def validate_tables(self) -> SchemaDomain:
+        duplicate = _first_duplicate(self.key_tables)
+        if duplicate is not None:
+            raise ValueError(
+                f"schema domain '{self.id}': duplicate key table '{duplicate}'"
+            )
+        missing = sorted(set(self.key_tables) - set(self.tables))
+        if missing:
+            raise ValueError(
+                f"schema domain '{self.id}': key tables not in domain: {missing}"
+            )
+        return self
+
+
 class DataModel(Model):
     sql_tables: list[str] = Field(default_factory=list)
     nosql: list[NoSqlStore] = Field(default_factory=list)
+    relations: list[Relation] = Field(default_factory=list)
+    domains: list[SchemaDomain] = Field(default_factory=list)
+    columns: list[list[str]] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_schema_layout(self) -> DataModel:
+        domain_ids = [domain.id for domain in self.domains]
+        duplicate_domain = _first_duplicate(domain_ids)
+        if duplicate_domain is not None:
+            raise ValueError(f"schema: duplicate domain id '{duplicate_domain}'")
+
+        table_domains: dict[str, str] = {}
+        for domain in self.domains:
+            for table in domain.tables:
+                previous_domain = table_domains.get(table)
+                if previous_domain is not None:
+                    raise ValueError(
+                        f"schema: table '{table}' belongs to both domain "
+                        f"'{previous_domain}' and domain '{domain.id}'"
+                    )
+                table_domains[table] = domain.id
+
+        if self.domains and self.sql_tables:
+            raise ValueError("schema: domains and sql_tables are mutually exclusive")
+
+        layout_items = [item for column in self.columns for item in column]
+        duplicate_item = _first_duplicate(layout_items)
+        if duplicate_item is not None:
+            raise ValueError(f"schema: duplicate columns item '{duplicate_item}'")
+
+        declared_items = (
+            set(domain_ids)
+            | set(self.sql_tables)
+            | {store.name for store in self.nosql}
+        )
+        unknown_item = next(
+            (item for item in layout_items if item not in declared_items),
+            None,
+        )
+        if unknown_item is not None:
+            raise ValueError(f"schema: unknown columns item '{unknown_item}'")
+        return self
 
 
 class SummaryTable(Model):
@@ -333,6 +433,7 @@ class Page(Model):
     paths: list[str] = Field(min_length=1)
     tldr: Tldr
     block: BlockDiagram
+    block_figures: list[BlockFigure] = Field(default_factory=list)
     data: DataModel
     sequences: list[Sequence]
     states: list[StateMachine]
@@ -353,6 +454,14 @@ class Page(Model):
                 raise ValueError(f"path '{path}' is not repo-relative")
         return paths
 
+    @model_validator(mode="after")
+    def validate_block_figures(self) -> Page:
+        figure_ids = [figure.id for figure in self.block_figures]
+        duplicate_id = _first_duplicate(figure_ids)
+        if duplicate_id is not None:
+            raise ValueError(f"duplicate block figure id '{duplicate_id}'")
+        return self
+
 
 def _claim_sources(claims: list[Claim], section: str) -> list[tuple[str, Source]]:
     return [
@@ -362,7 +471,10 @@ def _claim_sources(claims: list[Claim], section: str) -> list[tuple[str, Source]
     ]
 
 
-def page_sources(page: Page) -> list[tuple[str, Source]]:
+def page_sources(
+    page: Page,
+    tables: Mapping[str, Table] | None = None,
+) -> list[tuple[str, Source]]:
     sources: list[tuple[str, Source]] = []
     sources.extend(_claim_sources(page.tldr.summary, "summary"))
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
@@ -384,6 +496,45 @@ def page_sources(page: Page) -> list[tuple[str, Source]]:
     sources.extend(
         (f"block edge {edge.src}->{edge.dst}", edge.source) for edge in page.block.edges
     )
+    for figure in page.block_figures:
+        sources.extend(
+            (
+                f"block figure {figure.id} note {note_number}",
+                source,
+            )
+            for note_number, note in enumerate(figure.notes, start=1)
+            for source in note.sources
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} group {group.id}",
+                group.source,
+            )
+            for group in figure.block.groups
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} node {node.id}",
+                node.source,
+            )
+            for node in figure.block.nodes
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} node {node.id} detail {detail_number}",
+                source,
+            )
+            for node in figure.block.nodes
+            for detail_number, detail in enumerate(node.details, start=1)
+            for source in detail.sources
+        )
+        sources.extend(
+            (
+                f"block figure {figure.id} edge {edge.src}->{edge.dst}",
+                edge.source,
+            )
+            for edge in figure.block.edges
+        )
 
     for sequence in page.sequences:
         sources.extend(
@@ -421,6 +572,31 @@ def page_sources(page: Page) -> list[tuple[str, Source]]:
 
     sources.extend(
         (f"NoSQL store {store.name}", store.source) for store in page.data.nosql
+    )
+    sources.extend(
+        (f"schema domain {domain.id} note {note_number}", source)
+        for domain in page.data.domains
+        for note_number, note in enumerate(domain.notes, start=1)
+        for source in note.sources
+    )
+    if tables is not None:
+        sources.extend(
+            (f"SQL table {table_name}", tables[table_name].source)
+            for table_name in page.data.sql_tables
+            if table_name in tables
+        )
+        sources.extend(
+            (
+                f"schema domain {domain.id} key table {table_name}",
+                tables[table_name].source,
+            )
+            for domain in page.data.domains
+            for table_name in domain.key_tables
+            if table_name in tables
+        )
+    sources.extend(
+        (f"relation {relation.src} -> {relation.dst}", relation.source)
+        for relation in page.data.relations
     )
     sources.extend(
         (f"related '{related.label}'", related.source) for related in page.related

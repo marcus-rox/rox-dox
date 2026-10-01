@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Mapping
 from urllib.parse import quote
 
 from rox_dox.links import source_url
 from rox_dox.model import Page, Sequence, Source, StateMachine
-from rox_dox.plantuml import DiagramError
-from rox_dox.schema import Table
 
 
 MAX_DIAGRAM_ELEMENTS = 12
@@ -57,7 +54,13 @@ def _plantuml_url(url: str) -> str:
 
 
 def _linked_label(url: str, label: str) -> str:
-    escaped_label = _escape_label(label).replace("[", "~[").replace("]", "~]")
+    escaped_label = (
+        _escape_label(label)
+        .replace("[", "~[")
+        .replace("]", "~]")
+        .replace("{", "&#123;")
+        .replace("}", "&#125;")
+    )
     return f"[[{_plantuml_url(url)}{{{LINK_TOOLTIP}}} {escaped_label}]]"
 
 
@@ -75,71 +78,6 @@ def _element_url(page: Page, repo_url: str, source: Source) -> str:
 
 def _aliases(ids: list[str], prefix: str) -> dict[str, str]:
     return {element_id: f"{prefix}_{index}" for index, element_id in enumerate(ids)}
-
-
-def schema_plantuml(
-    page: Page,
-    *,
-    repo_url: str,
-    tables: Mapping[str, Table],
-) -> str:
-    sql_aliases = _aliases(page.data.sql_tables, "sql")
-    for table_name in page.data.sql_tables:
-        if table_name not in tables:
-            raise DiagramError(
-                f"SQL table '{table_name}' is missing for page '{page.id}'"
-            )
-
-    nosql_aliases = _aliases(
-        [store.name for store in page.data.nosql],
-        "nosql",
-    )
-    lines = _diagram_header(smetana=True)
-    lines.extend(["hide circle", "hide empty methods"])
-    for table_name in page.data.sql_tables:
-        table = tables[table_name]
-        alias = sql_aliases[table_name]
-        lines.append(f"class {_quoted_label(table.name)} as {alias} {{")
-        for column in table.columns:
-            markers = []
-            if column.primary_key:
-                markers.append("<<PK>>")
-            if column.foreign_key is not None:
-                markers.append("<<FK>>")
-            suffix = f" {' '.join(markers)}" if markers else ""
-            lines.append(
-                f"  {_escape_label(column.name)}: {_escape_label(column.type)}{suffix}"
-            )
-        lines.append("}")
-        url = _element_url(page, repo_url, table.source)
-        lines.append(f"url of {alias} is [[{_plantuml_url(url)}]]")
-
-    for store in page.data.nosql:
-        alias = nosql_aliases[store.name]
-        kind = _escape_label(store.kind).replace(">", "\\>")
-        lines.append(f"class {_quoted_label(store.name)} as {alias} <<{kind}>> {{")
-        lines.extend(f"  {_escape_label(field)}" for field in store.fields)
-        lines.append("}")
-        url = _element_url(page, repo_url, store.source)
-        lines.append(f"url of {alias} is [[{_plantuml_url(url)}]]")
-
-    for table_name in page.data.sql_tables:
-        table = tables[table_name]
-        for column in table.columns:
-            if column.foreign_key is None:
-                continue
-            referenced_name = column.foreign_key.rsplit(".", 1)[0]
-            if referenced_name not in sql_aliases:
-                referenced_name = referenced_name.rsplit(".", 1)[-1]
-            if referenced_name not in sql_aliases:
-                continue
-            url = _element_url(page, repo_url, table.source)
-            lines.append(
-                f"{sql_aliases[table_name]} --> {sql_aliases[referenced_name]} : "
-                f"{_linked_label(url, column.name)}"
-            )
-    lines.append("@enduml")
-    return "\n".join(lines)
 
 
 def sequence_plantuml(
