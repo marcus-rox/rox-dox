@@ -69,6 +69,7 @@ def _check_pages(pages_dir: Path, repo: Path) -> int:
     pages = _load_pages(pages_dir)
     problems_found = False
     valid_pages = []
+    table_cache: dict[tuple[Path, str], dict[str, Table]] = {}
     for page_file, page, load_error in pages:
         if load_error is not None:
             print(f"{page_file}: {load_error}")
@@ -78,7 +79,29 @@ def _check_pages(pages_dir: Path, repo: Path) -> int:
             continue
         valid_pages.append(page)
 
-        for problem in page_problems(page, repo):
+        tables: dict[str, Table] = {}
+        if page.data.sql_tables or page.data.domains:
+            cache_key = (repo, page.commit)
+            if cache_key not in table_cache:
+                try:
+                    table_cache[cache_key] = extract_tables(repo, page.commit)
+                except RuntimeError as error:
+                    print(f"{page_file}: {error}")
+                    problems_found = True
+            tables = table_cache.get(cache_key, {})
+            requested_tables = [
+                *page.data.sql_tables,
+                *(table for domain in page.data.domains for table in domain.tables),
+            ]
+            for table_name in dict.fromkeys(requested_tables):
+                if table_name not in tables:
+                    print(
+                        f"{page_file}: SQL table '{table_name}' not found at "
+                        f"commit {page.commit[:10]}"
+                    )
+                    problems_found = True
+
+        for problem in page_problems(page, repo, tables=tables):
             print(f"{page_file}: {problem}")
             problems_found = True
 
@@ -116,12 +139,9 @@ def _build_pages(args: argparse.Namespace) -> int:
             continue
         valid_pages.append(page)
 
-        citation_problems = page_problems(page, args.repo)
-        problems.extend((page_file, problem) for problem in citation_problems)
-        commit_missing = f"commit '{page.commit}' not found in repository"
         tables: dict[str, Table] = {}
         cache_key = (args.repo, page.commit)
-        if page.data.sql_tables and commit_missing not in citation_problems:
+        if page.data.sql_tables or page.data.domains:
             if cache_key not in table_cache and cache_key not in table_errors:
                 try:
                     table_cache[cache_key] = extract_tables(args.repo, page.commit)
@@ -131,16 +151,28 @@ def _build_pages(args: argparse.Namespace) -> int:
                 problems.append((page_file, table_errors[cache_key]))
             else:
                 tables = table_cache[cache_key]
-                for table_name in dict.fromkeys(page.data.sql_tables):
+                requested_tables = [
+                    *page.data.sql_tables,
+                    *(table for domain in page.data.domains for table in domain.tables),
+                ]
+                for table_name in dict.fromkeys(requested_tables):
                     if table_name not in tables:
+                        table_kind = "SQL table"
+                        if any(
+                            table_name in domain.tables for domain in page.data.domains
+                        ):
+                            table_kind = "schema domain table"
                         problems.append(
                             (
                                 page_file,
-                                f"SQL table '{table_name}' not found at "
+                                f"{table_kind} '{table_name}' not found at "
                                 f"commit {page.commit[:10]}",
                             )
                         )
-                    elif tables[table_name].duplicate_paths:
+                    elif (
+                        table_name in page.data.sql_tables
+                        and tables[table_name].duplicate_paths
+                    ):
                         duplicate_paths = ", ".join(tables[table_name].duplicate_paths)
                         print(
                             f"warning: {page_file}: SQL table '{table_name}' also "
@@ -149,6 +181,8 @@ def _build_pages(args: argparse.Namespace) -> int:
                             file=sys.stderr,
                         )
 
+        citation_problems = page_problems(page, args.repo, tables=tables)
+        problems.extend((page_file, problem) for problem in citation_problems)
         output_path = _page_output_path(args.out, page)
         if output_path is None:
             problems.append(

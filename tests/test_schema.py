@@ -71,6 +71,54 @@ def test_schema_table_source_covers_class_lines(
     assert tables["sessions"].source.lines == (9, 13)
 
 
+def test_table_inherits_mapped_columns_transitively_and_overrides_base_columns(
+    git_repo: tuple[Path, str],
+) -> None:
+    repo, _ = git_repo
+    source = (
+        "from sqlalchemy import Integer, String\n"
+        "from sqlalchemy.orm import Mapped, mapped_column\n"
+        "\n"
+        "class RootBase:\n"
+        "    inherited: Mapped[str] = mapped_column(String(20))\n"
+        "\n"
+        "class AccountBase(RootBase):\n"
+        "    account_name: Mapped[str] = mapped_column(String(40))\n"
+        "\n"
+        "class Account(AccountBase):\n"
+        '    __tablename__ = "entity_company"\n'
+        "    inherited: Mapped[int] = mapped_column(Integer, primary_key=True)\n"
+        "    own: Mapped[str] = mapped_column(String(12))\n"
+    )
+    path = repo / "models" / "account.py"
+    path.write_text(source, encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "models/account.py"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "Add inherited account model"],
+        check=True,
+        capture_output=True,
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    columns = extract_tables(repo, commit)["entity_company"].columns
+
+    assert [(column.name, column.type) for column in columns] == [
+        ("inherited", "Integer"),
+        ("account_name", "String(40)"),
+        ("own", "String(12)"),
+    ]
+    assert columns[0].primary_key is True
+
+
 def test_duplicate_table_paths_are_collected_without_warning(
     git_repo: tuple[Path, str],
     capsys: pytest.CaptureFixture[str],

@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from rox_dox.cli import main
 from rox_dox.model import NotionDoc, Page, page_sources
+from rox_dox.schema import extract_tables
 
 
 def test_valid_page_passes_check_command(
@@ -289,6 +290,171 @@ def test_page_sources_include_group_and_node_detail_citations(
         "block node api detail 1",
         page.block.nodes[0].details[0].sources[0],
     ) in sources
+
+
+def test_schema_domains_require_key_tables_to_be_members(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["sessions"],
+        }
+    ]
+
+    with pytest.raises(ValidationError, match="schema domain 'people'.*key tables"):
+        Page.model_validate(page_data)
+
+
+def test_schema_domain_key_tables_must_not_repeat(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users", "users"],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError,
+        match="schema domain 'people': duplicate key table 'users'",
+    ):
+        Page.model_validate(page_data)
+
+
+def test_schema_domain_ids_must_be_unique(page_data: dict[str, object]) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+        {
+            "id": "people",
+            "title": "Other people",
+            "tables": ["sessions"],
+            "key_tables": ["sessions"],
+        },
+    ]
+
+    with pytest.raises(ValidationError, match="schema: duplicate domain id 'people'"):
+        Page.model_validate(page_data)
+
+
+def test_schema_table_can_belong_to_only_one_domain(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+        {
+            "id": "sessions",
+            "title": "Sessions",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        },
+    ]
+
+    with pytest.raises(ValidationError, match="table 'users' belongs to both domain"):
+        Page.model_validate(page_data)
+
+
+def test_schema_domains_and_table_view_are_mutually_exclusive(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        }
+    ]
+
+    with pytest.raises(
+        ValidationError, match="domains and sql_tables are mutually exclusive"
+    ):
+        Page.model_validate(page_data)
+
+
+@pytest.mark.parametrize(
+    ("columns", "message"),
+    [
+        ([["unknown"]], "unknown columns item 'unknown'"),
+        ([["users"], ["users"]], "duplicate columns item 'users'"),
+    ],
+)
+def test_schema_columns_must_be_declared_and_unique(
+    page_data: dict[str, object],
+    columns: list[list[str]],
+    message: str,
+) -> None:
+    page_data["data"]["columns"] = columns
+
+    with pytest.raises(ValidationError, match=message):
+        Page.model_validate(page_data)
+
+
+def test_page_sources_include_domain_note_citations(
+    page_data: dict[str, object],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+            "notes": [
+                {
+                    "text": "The domain has shared tenancy fields.",
+                    "sources": [{"path": "pkg/a.py", "lines": [1, 2]}],
+                }
+            ],
+        }
+    ]
+    page = Page.model_validate(page_data)
+
+    assert (
+        "schema domain people note 1",
+        page.data.domains[0].notes[0].sources[0],
+    ) in page_sources(page)
+
+
+def test_page_sources_include_key_table_model_citations(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+) -> None:
+    page_data["data"]["sql_tables"] = []
+    page_data["data"]["domains"] = [
+        {
+            "id": "people",
+            "title": "People",
+            "tables": ["users"],
+            "key_tables": ["users"],
+        }
+    ]
+    page = Page.model_validate(page_data)
+    tables = extract_tables(*git_repo)
+
+    assert (
+        "schema domain people key table users",
+        tables["users"].source,
+    ) in page_sources(page, tables=tables)
 
 
 def test_summary_table_rows_must_match_column_count(
