@@ -2722,6 +2722,7 @@ block_figures = [
 page = {
     "id": "rox-core",
     "title": "rox-core",
+    "kind": "root",
     "commit": COMMIT,
     "parent": None,
     "paths": ["."],

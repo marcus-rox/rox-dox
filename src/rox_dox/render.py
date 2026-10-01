@@ -108,7 +108,7 @@ body {
   flex-direction: column;
   gap: 0.75rem;
 }
-#toc, #site-nav {
+#toc, #feature-tree, #site-nav {
   padding: 1rem;
   border: 1px solid #e2e7ee;
   border-radius: 14px;
@@ -117,12 +117,12 @@ body {
 #toc {
   flex: 0 0 auto;
 }
-#site-nav {
+#feature-tree, #site-nav {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
-#toc > h2, #site-nav > h2 {
+#toc > h2, #feature-tree > h2, #site-nav > h2 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
 }
@@ -227,7 +227,7 @@ h1, h2, h3 {
   color: #667085;
   overflow-wrap: anywhere;
 }
-.submodules {
+.page-children {
   margin: 0.5rem 0 0;
 }
 section {
@@ -1007,46 +1007,66 @@ def _sort_key(item: tuple[bool, str, str]) -> tuple[int, str]:
     return (0 if is_dir else 1, label.lower())
 
 
-def _tree_item(
+def _page_tree_item(
     tree: SiteTree,
     current: Page,
     page_id: str,
     *,
     expanded_ids: set[str],
-    entries: Mapping[str, Sequence[RepoEntry]],
-    repo_url: str,
 ) -> str:
     page = tree.pages[page_id]
     css_class = "page current" if page_id == current.id else "page"
+    child_ids = tree.children_of(page_id)
+    chevron = CHEVRON_ICON if child_ids else SPACER_ICON
     row = _explorer_row(
-        CHEVRON_ICON + FOLDER_ICON,
+        chevron + FOLDER_ICON,
         page.title,
         page_href(current.id, page_id),
         css_class,
     )
-    child_ids = tree.children_of(page_id)
-    documented_paths = {
-        path for child_id in child_ids for path in tree.pages[child_id].paths
-    }
-    items: list[tuple[bool, str, str]] = [
-        (
-            True,
-            tree.pages[child_id].title,
-            _tree_item(
-                tree,
-                current,
-                child_id,
-                expanded_ids=expanded_ids,
-                entries=entries,
-                repo_url=repo_url,
-            ),
+    if not child_ids:
+        return f"<li>{row}</li>"
+    open_attribute = " open" if page_id in expanded_ids else ""
+    children = "".join(
+        _page_tree_item(
+            tree,
+            current,
+            child_id,
+            expanded_ids=expanded_ids,
         )
         for child_id in child_ids
-    ]
-    for entry in entries.get(page_id, []):
-        if entry.path in documented_paths:
-            continue
-        href = _entry_href(entry, page=current, repo_url=repo_url)
+    )
+    return (
+        f"<li><details{open_attribute}><summary>{row}</summary>"
+        f"<ul>{children}</ul></details></li>"
+    )
+
+
+def _feature_tree_html(tree: SiteTree, page: Page) -> str:
+    expanded_ids = {tree.root, page.id, *tree.ancestors(page.id)}
+    root_item = _page_tree_item(
+        tree,
+        page,
+        tree.root,
+        expanded_ids=expanded_ids,
+    )
+    return (
+        '<nav id="feature-tree" aria-label="Feature tree">'
+        "<h2>Features</h2>"
+        f'<ul class="page-tree">{root_item}</ul></nav>'
+    )
+
+
+def _file_explorer_html(
+    tree: SiteTree,
+    *,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+) -> str:
+    root_page = tree.pages[tree.root]
+    items = []
+    for entry in entries.get(tree.root, []):
+        href = _entry_href(entry, page=root_page, repo_url=repo_url)
         if entry.is_dir:
             markup = _explorer_row(
                 SPACER_ICON + FOLDER_ICON,
@@ -1058,38 +1078,13 @@ def _tree_item(
         else:
             markup = _explorer_row(SPACER_ICON + FILE_ICON, entry.name, href, "file")
         items.append((entry.is_dir, entry.name, f"<li>{markup}</li>"))
-    if not items:
-        return f"<li>{row}</li>"
-    open_attribute = " open" if page_id in expanded_ids else ""
-    children = "".join(
+    root_entries = "".join(
         markup for _is_dir, _label, markup in sorted(items, key=_sort_key)
-    )
-    return (
-        f"<li><details{open_attribute}><summary>{row}</summary>"
-        f"<ul>{children}</ul></details></li>"
-    )
-
-
-def _site_nav_html(
-    tree: SiteTree,
-    page: Page,
-    *,
-    entries: Mapping[str, Sequence[RepoEntry]],
-    repo_url: str,
-) -> str:
-    expanded_ids = {tree.root, page.id, *tree.ancestors(page.id)}
-    root_item = _tree_item(
-        tree,
-        page,
-        tree.root,
-        expanded_ids=expanded_ids,
-        entries=entries,
-        repo_url=repo_url,
     )
     return (
         '<nav id="site-nav" aria-label="Site navigation">'
         "<h2>Explorer</h2>"
-        f'<ul class="page-tree">{root_item}</ul></nav>'
+        f'<ul class="page-tree">{root_entries}</ul></nav>'
     )
 
 
@@ -1101,12 +1096,13 @@ def _breadcrumbs_html(tree: SiteTree, page: Page) -> str:
     return f'<nav class="breadcrumbs" aria-label="Breadcrumbs">{trail}</nav>'
 
 
-def _submodules_html(tree: SiteTree, page: Page) -> str:
+def _children_html(tree: SiteTree, page: Page) -> str:
     child_ids = tree.children_of(page.id)
     if not child_ids:
         return ""
     links = ", ".join(_page_link(tree, page.id, child_id) for child_id in child_ids)
-    return f'<p class="submodules"><strong>Submodules:</strong> {links}</p>'
+    label = "Domains" if page.kind == "root" else "Features"
+    return f'<p class="page-children"><strong>{label}:</strong> {links}</p>'
 
 
 def _page_header_html(tree: SiteTree, page: Page) -> str:
@@ -1117,7 +1113,7 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
         f'<p class="page-meta">Page ID: <code>{_escape(page.id)}</code>'
         f" · verified at <code>{_escape(page.commit[:10])}</code></p>"
         f'<p class="page-meta">Covers: {covers}</p>'
-        f"{_submodules_html(tree, page)}"
+        f"{_children_html(tree, page)}"
         "</header>"
     )
 
@@ -1152,7 +1148,8 @@ def render_page(
         f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
         f'<div class="page-shell"><div id="sidebar">'
         f"{_table_of_contents()}"
-        f"{_site_nav_html(tree, page, entries=entries, repo_url=repo_url)}</div>"
+        f"{_feature_tree_html(tree, page)}"
+        f"{_file_explorer_html(tree, entries=entries, repo_url=repo_url)}</div>"
         f'<main class="page-main"><div class="panel-controls">'
         '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
         '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'

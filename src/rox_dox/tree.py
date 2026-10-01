@@ -78,32 +78,30 @@ def tree_problems(pages: list[Page]) -> list[str]:
         if page.parent is None:
             if page.paths != ["."]:
                 problems.append(f"root page '{page.id}' paths must be exactly ['.']")
-            continue
-        parent = pages_by_id.get(page.parent)
-        if parent is None:
-            continue
-        for path in page.paths:
-            if not any(
-                parent_path == "."
-                or path == parent_path
-                or path.startswith(f"{parent_path}/")
-                for parent_path in parent.paths
-            ):
+            if page.kind != "root":
                 problems.append(
-                    f"page '{page.id}' path '{path}' is outside parent "
-                    f"'{page.parent}' paths"
+                    f"page '{page.id}' has kind '{page.kind}' with parent kind "
+                    "'none'; root pages must have kind 'root'"
                 )
+            continue
 
-    paths_by_owner: dict[str, list[Page]] = {}
-    for page in pages:
-        for path in page.paths:
-            owners = paths_by_owner.setdefault(path, [])
-            if owners and all(owner is not page for owner in owners):
-                problems.append(
-                    f"path '{path}' is claimed by both page "
-                    f"'{owners[0].id}' and page '{page.id}'"
-                )
-            owners.append(page)
+        parent = pages_by_id.get(page.parent)
+        parent_kind = parent.kind if parent is not None else "missing"
+        if page.kind == "root":
+            problems.append(
+                f"page '{page.id}' has kind 'root' but parent '{page.parent}' "
+                f"has kind '{parent_kind}'"
+            )
+        elif page.kind == "domain" and parent_kind != "root":
+            problems.append(
+                f"page '{page.id}' has kind 'domain' but parent '{page.parent}' "
+                f"has kind '{parent_kind}'; domains require a root parent"
+            )
+        elif page.kind == "feature" and parent_kind not in {"domain", "feature"}:
+            problems.append(
+                f"page '{page.id}' has kind 'feature' but parent '{page.parent}' "
+                f"has kind '{parent_kind}'; features require a domain or feature parent"
+            )
 
     return problems
 

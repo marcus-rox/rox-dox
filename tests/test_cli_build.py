@@ -167,6 +167,7 @@ def test_build_renders_all_pages_before_writing_any(
     first_page["states"] = []
     second_page = copy.deepcopy(page_data)
     second_page["id"] = "second"
+    second_page["kind"] = "domain"
     second_page["parent"] = "first"
     second_page["paths"] = ["pkg"]
     _write_page(pages_dir, "a-first.json", first_page)
@@ -200,6 +201,7 @@ def test_build_extracts_schema_once_per_commit(
     first_page["id"] = "first"
     second_page = copy.deepcopy(page_data)
     second_page["id"] = "second"
+    second_page["kind"] = "domain"
     second_page["parent"] = "first"
     second_page["paths"] = ["pkg"]
     _write_page(pages_dir, "first.json", first_page)

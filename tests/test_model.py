@@ -625,6 +625,14 @@ def test_related_item_requires_exactly_one_target(
         Page.model_validate(page_data)
 
 
+def test_page_kind_is_required(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    del payload["kind"]
+
+    with pytest.raises(ValidationError, match="kind"):
+        Page.model_validate(payload)
+
+
 @pytest.mark.parametrize(
     "paths",
     [[], [""], ["/absolute"], ["pkg/../private"], ["pkg/"]],
