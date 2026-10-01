@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping
-from datetime import date
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -34,6 +33,18 @@ class NotionSource(Model):
 
 
 Source = CodeSource | NotionSource
+
+
+class MembershipRow(Model):
+    path: str
+    primary: bool
+    evidence: str
+    sources: list[Source] = Field(min_length=1)
+
+
+class MembershipGroup(Model):
+    layer: str
+    rows: list[MembershipRow]
 
 
 _MAX_NODE_DETAILS = 6
@@ -435,20 +446,14 @@ class Related(Model):
         return self
 
 
-class NotionDoc(Model):
-    title: str = Field(min_length=1)
-    url: str
-    last_edited: date
-    excerpt: str = Field(min_length=1, max_length=600)
-
-
 class Page(Model):
     id: str
     title: str
-    kind: Literal["root", "domain", "feature"] | None = None
+    kind: Literal["root", "domain", "feature"]
     commit: str
     parent: str | None
-    paths: list[str]
+    paths: list[str] = Field(min_length=1)
+    membership: list[MembershipGroup] = Field(default_factory=list)
     tldr: Tldr
     block: BlockDiagram
     block_figures: list[BlockFigure] = Field(default_factory=list)
@@ -456,7 +461,6 @@ class Page(Model):
     sequences: list[Sequence]
     states: list[StateMachine]
     related: list[Related]
-    notion: list[NotionDoc]
 
     @field_validator("paths")
     @classmethod
@@ -471,12 +475,6 @@ class Page(Model):
             ):
                 raise ValueError(f"path '{path}' is not repo-relative")
         return paths
-
-    @model_validator(mode="after")
-    def validate_paths_nonempty(self) -> Page:
-        if not self.paths and self.kind != "domain":
-            raise ValueError("page paths must not be empty")
-        return self
 
     @model_validator(mode="after")
     def validate_block_figures(self) -> Page:
@@ -624,5 +622,11 @@ def page_sources(
     )
     sources.extend(
         (f"related '{related.label}'", related.source) for related in page.related
+    )
+    sources.extend(
+        (f"membership {group.layer} file {row.path}", source)
+        for group in page.membership
+        for row in group.rows
+        for source in row.sources
     )
     return sources

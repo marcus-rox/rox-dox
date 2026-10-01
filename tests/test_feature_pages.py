@@ -149,3 +149,66 @@ def test_feature_block_drops_low_volume_edges_with_a_cited_note() -> None:
         drop_note.sources[0].path,
         drop_note.sources[0].lines,
     ) == (paths["routes"], (50, 50))
+    assert page.tldr.table.columns == [
+        "Layer",
+        "Primary",
+        "Shared",
+        "Top directories",
+    ]
+    assert [row[0] for row in page.tldr.table.rows] == [
+        "HTTP routes",
+        "Background workers",
+        "Business logic",
+        "Models",
+    ]
+    assert [group.layer for group in page.membership] == [
+        "HTTP routes",
+        "Background workers",
+        "Business logic",
+        "Models",
+    ]
+    assert {row.path for group in page.membership for row in group.rows} == set(
+        paths.values()
+    )
+    assert all(row.sources for group in page.membership for row in group.rows)
+
+
+def test_empty_feature_and_domain_use_key_table_definition_path() -> None:
+    source = CodeSource(path="backend/src/models/user.py", lines=(12, 12))
+    table = Table(
+        name="users",
+        class_name="User",
+        columns=[Column(name="id", type="Integer", primary_key=True)],
+        source=source,
+    )
+    feature_map = FeatureMap(
+        commit="a" * 40,
+        domain="test",
+        threshold=0.25,
+        tables=["users"],
+        features=[Feature(id="users", tables=["users"], files=[], table_links=[])],
+        uncovered=[],
+        unmapped_tags=[],
+        counts=FeatureCounts(
+            domain_files=0,
+            primary_placed=0,
+            shared=0,
+            uncovered=0,
+            web=0,
+            deployment=0,
+            skills=0,
+            unparseable=0,
+        ),
+    )
+
+    pages = feature_pages(
+        feature_map,
+        root_id="rox-core",
+        domain_title="Test",
+        names={},
+        tables={"users": table},
+    )
+
+    assert pages[0].paths == [source.path]
+    assert pages[1].paths == [source.path]
+    assert pages[1].tldr.summary[1].text == "No in-scope code uses its tables."

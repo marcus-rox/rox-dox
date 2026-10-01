@@ -256,7 +256,6 @@ def _build_folder_pages(
         document = render_folder_page(
             folder_path=folder,
             tree=tree,
-            root_page=root_page,
             entries=entries,
             repo_url=args.repo_url,
             feature_rows=sorted(feature_rows),
@@ -272,7 +271,6 @@ def _build_folder_pages(
     uncovered = {path: per_map_reasons.get(path, []) for path in globally_uncovered}
     uncovered_document = render_uncovered_page(
         tree=tree,
-        root_page=root_page,
         entries=entries,
         repo_url=args.repo_url,
         uncovered=uncovered,

@@ -17,7 +17,6 @@ from rox_dox.diagrams import (
 from rox_dox.links import page_href, source_url
 from rox_dox.model import (
     Claim,
-    NotionDoc,
     Page,
     Related,
     Sequence as SequenceDiagram,
@@ -60,8 +59,8 @@ body {
 }
 .page-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 320px;
-  grid-template-areas: "nav main aside";
+  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-areas: "nav main";
   align-items: start;
   gap: 1rem;
   max-width: 1600px;
@@ -69,16 +68,9 @@ body {
   padding: 2rem 1.5rem 4rem;
 }
 #toggle-left:checked ~ .page-shell {
-  grid-template-columns: 0 minmax(0, 1fr) 320px;
+  grid-template-columns: 0 minmax(0, 1fr);
 }
-#toggle-right:checked ~ .page-shell {
-  grid-template-columns: 280px minmax(0, 1fr) 0;
-}
-#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
-  grid-template-columns: 0 minmax(0, 1fr) 0;
-}
-#toggle-left:checked ~ .page-shell #sidebar,
-#toggle-right:checked ~ .page-shell #context {
+#toggle-left:checked ~ .page-shell #sidebar {
   display: none;
 }
 .panel-controls {
@@ -101,15 +93,10 @@ body {
   display: none;
 }
 #toggle-left:checked ~ .page-shell .panel-toggle-left .expanded,
-#toggle-right:checked ~ .page-shell .panel-toggle-right .expanded {
-  display: none;
-}
-#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed,
-#toggle-right:checked ~ .page-shell .panel-toggle-right .collapsed {
+#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed {
   display: inline;
 }
-#toggle-left:focus-visible ~ .page-shell .panel-toggle-left,
-#toggle-right:focus-visible ~ .page-shell .panel-toggle-right {
+#toggle-left:focus-visible ~ .page-shell .panel-toggle-left {
   outline: 2px solid #3b6fd8;
   outline-offset: 2px;
 }
@@ -122,7 +109,7 @@ body {
   flex-direction: column;
   gap: 0.75rem;
 }
-#toc, #site-nav, #explorer, #context {
+#toc, #feature-tree, #site-nav {
   padding: 1rem;
   border: 1px solid #e2e7ee;
   border-radius: 14px;
@@ -131,58 +118,20 @@ body {
 #toc {
   flex: 0 0 auto;
 }
-#site-nav {
-  flex: 0 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-#explorer {
+#feature-tree, #site-nav {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
-#context {
-  grid-area: aside;
-  position: sticky;
-  top: 0;
-  max-height: 100vh;
-  overflow-y: auto;
-}
-#toc > h2, #site-nav > h2, #explorer > h2, #context > h2 {
+#toc > h2, #feature-tree > h2, #site-nav > h2 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
-}
-#context > h2:not(:first-child) {
-  margin-top: 1.25rem;
-}
-.notion-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.notion-doc {
-  padding: 0.45rem 0;
-  border-top: 1px solid #eef1f5;
-  font-size: 0.92rem;
-  line-height: 1.35;
-}
-.notion-doc:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.notion-doc a {
-  color: #182230;
-  text-decoration: none;
-}
-.notion-doc a:hover {
-  color: #145bc4;
-  text-decoration: underline;
 }
 .page-main {
   grid-area: main;
   min-width: 0;
 }
-#site-nav > h2 {
+#site-nav > h2, #explorer > h2 {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -244,11 +193,19 @@ body {
 .page-tree details[open] > summary .chevron {
   transform: rotate(90deg);
 }
-.page-tree .icon {
+.page-tree .icon, .repo-tree .icon {
   flex: 0 0 15px;
   width: 15px;
   height: 15px;
   color: #8a94a6;
+}
+.repo-tree .row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  color: #26323f;
+  text-decoration: none;
 }
 .page-tree .row.page .icon {
   color: #145bc4;
@@ -279,7 +236,7 @@ h1, h2, h3 {
   color: #667085;
   overflow-wrap: anywhere;
 }
-.submodules {
+.page-children {
   margin: 0.5rem 0 0;
 }
 .repo-tree {
@@ -304,6 +261,9 @@ h3 {
 }
 p {
   margin: 0.65rem 0;
+}
+p, li, th, td, summary, code {
+  overflow-wrap: anywhere;
 }
 a {
   color: #2458a6;
@@ -331,6 +291,9 @@ a:hover {
   margin-left: 0.2rem;
   white-space: nowrap;
 }
+.membership-table .citations {
+  white-space: normal;
+}
 .citations sup {
   margin-right: 0.2rem;
 }
@@ -340,6 +303,7 @@ a:hover {
 }
 table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   margin: 0.6rem 0;
 }
@@ -506,16 +470,13 @@ blockquote {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "nav"
-      "main"
-      "aside";
+      "main";
     padding: 1rem 0.75rem 2rem;
   }
-  #toggle-left:checked ~ .page-shell,
-  #toggle-right:checked ~ .page-shell,
-  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
+  #toggle-left:checked ~ .page-shell {
     grid-template-columns: minmax(0, 1fr);
   }
-  #sidebar, #context {
+  #sidebar {
     position: static;
     max-height: none;
   }
@@ -642,6 +603,39 @@ def _tldr_html(page: Page, *, repo_url: str) -> str:
     )
 
 
+def _membership_section(page: Page, *, repo_url: str) -> str:
+    if not page.membership:
+        return ""
+
+    groups = []
+    for group in page.membership:
+        if not group.rows:
+            continue
+        rows = "".join(
+            "<tr>"
+            f"<td><code>{_escape(row.path)}</code></td>"
+            f"<td>{'Primary' if row.primary else 'Shared'}</td>"
+            f"<td>{_escape(row.evidence)}"
+            f"{_citation_links(row.sources, page=page, repo_url=repo_url)}</td>"
+            "</tr>"
+            for row in group.rows
+        )
+        shared_count = sum(not row.primary for row in group.rows)
+        table = (
+            '<div class="table-scroll membership-table">'
+            "<table><thead><tr>"
+            '<th scope="col">File</th><th scope="col">Primary/shared</th>'
+            '<th scope="col">Evidence</th>'
+            f"</tr></thead><tbody>{rows}</tbody></table></div>"
+        )
+        groups.append(
+            "<details>"
+            f"<summary>{_escape(group.layer)} — {len(group.rows)} files "
+            f"({shared_count} shared)</summary>{table}</details>"
+        )
+    return _section("membership", "Why these files are one feature", "".join(groups))
+
+
 def _section(section_id: str, title: str, content: str) -> str:
     return (
         f'<section id="{_escape(section_id)}">'
@@ -649,10 +643,12 @@ def _section(section_id: str, title: str, content: str) -> str:
     )
 
 
-def _table_of_contents() -> str:
+def _table_of_contents(
+    sections: Sequence[tuple[str, str]] = SECTION_LINKS,
+) -> str:
     links = "".join(
         f'<li><a href="#{section_id}">{_escape(title)}</a></li>'
-        for section_id, title in SECTION_LINKS
+        for section_id, title in sections
     )
     return (
         '<nav id="toc" aria-label="On this page">'
@@ -1090,7 +1086,7 @@ def _folder_target(folder_path: str) -> str:
     return "folders/index.html" if folder_path == "." else f"folders/{folder_path}.html"
 
 
-def _tree_item(
+def _page_tree_item(
     tree: SiteTree,
     page_id: str,
     *,
@@ -1101,36 +1097,25 @@ def _tree_item(
     page = tree.pages[page_id]
     css_class = "page current" if page_id == current_page_id else "page"
     child_ids = tree.children_of(page_id)
-    icon = CHEVRON_ICON + FOLDER_ICON if child_ids else SPACER_ICON + FOLDER_ICON
+    chevron = CHEVRON_ICON if child_ids else SPACER_ICON
     row = _explorer_row(
-        icon,
+        chevron + FOLDER_ICON,
         page.title,
         _relative_href(current_path, f"{page_id}.html"),
         css_class,
     )
-    items: list[tuple[bool, str, str]] = [
-        (
-            True,
-            tree.pages[child_id].title,
-            _tree_item(
-                tree,
-                child_id,
-                current_page_id=current_page_id,
-                current_path=current_path,
-                expanded_ids=expanded_ids,
-            ),
-        )
-        for child_id in child_ids
-    ]
-    if not items:
-        open_attribute = " open" if page_id in expanded_ids else ""
-        return (
-            f"<li><details{open_attribute}><summary>{row}</summary>"
-            "<ul></ul></details></li>"
-        )
+    if not child_ids:
+        return f"<li>{row}</li>"
     open_attribute = " open" if page_id in expanded_ids else ""
     children = "".join(
-        markup for _is_dir, _label, markup in sorted(items, key=_sort_key)
+        _page_tree_item(
+            tree,
+            child_id,
+            current_page_id=current_page_id,
+            current_path=current_path,
+            expanded_ids=expanded_ids,
+        )
+        for child_id in child_ids
     )
     return (
         f"<li><details{open_attribute}><summary>{row}</summary>"
@@ -1138,7 +1123,7 @@ def _tree_item(
     )
 
 
-def _site_nav_html(
+def _feature_tree_html(
     tree: SiteTree,
     *,
     current_path: str,
@@ -1147,7 +1132,7 @@ def _site_nav_html(
     expanded_ids = {tree.root}
     if current_page_id is not None:
         expanded_ids.update({current_page_id, *tree.ancestors(current_page_id)})
-    root_item = _tree_item(
+    root_item = _page_tree_item(
         tree,
         tree.root,
         current_page_id=current_page_id,
@@ -1155,10 +1140,33 @@ def _site_nav_html(
         expanded_ids=expanded_ids,
     )
     return (
-        '<nav id="site-nav" aria-label="Site navigation">'
+        '<nav id="feature-tree" aria-label="Feature tree">'
         "<h2>Features</h2>"
         f'<ul class="page-tree">{root_item}</ul></nav>'
     )
+
+
+def _file_explorer_html(
+    tree: SiteTree,
+    *,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+    current_path: str,
+    folders_only: bool = False,
+    folder_path: str | None = None,
+    child_folders: Sequence[tuple[str, str]] = (),
+) -> str:
+    root_page = tree.pages[tree.root]
+    explorer = _explorer_html(
+        root_page,
+        entries=entries,
+        current_path=current_path,
+        repo_url=repo_url,
+        folders_only=folders_only,
+        folder_path=folder_path,
+        child_folders=child_folders,
+    )
+    return f'<nav id="site-nav" aria-label="Site navigation">{explorer}</nav>'
 
 
 def _explorer_html(
@@ -1248,41 +1256,34 @@ def _breadcrumbs_html(tree: SiteTree, page: Page) -> str:
     return f'<nav class="breadcrumbs" aria-label="Breadcrumbs">{trail}</nav>'
 
 
-def _submodules_html(tree: SiteTree, page: Page) -> str:
+def _children_html(tree: SiteTree, page: Page) -> str:
     child_ids = tree.children_of(page.id)
     if not child_ids:
         return ""
     links = ", ".join(_page_link(tree, page.id, child_id) for child_id in child_ids)
-    return f'<p class="submodules"><strong>Submodules:</strong> {links}</p>'
+    label = "Domains" if page.kind == "root" else "Features"
+    return f'<p class="page-children"><strong>{label}:</strong> {links}</p>'
 
 
 def _page_header_html(tree: SiteTree, page: Page) -> str:
-    covers = ", ".join(f"<code>{_escape(path)}</code>" for path in page.paths)
+    if page.kind == "root":
+        covers = ", ".join(f"<code>{_escape(path)}</code>" for path in page.paths)
+        covers_html = f'<p class="page-meta">Covers: {covers}</p>'
+    else:
+        paths = "".join(f"<li><code>{_escape(path)}</code></li>" for path in page.paths)
+        covers_html = (
+            '<details class="page-covers">'
+            f"<summary>Covers {len(page.paths)} files</summary><ul>{paths}</ul>"
+            "</details>"
+        )
     return (
         '<header class="page-header">'
         f"<h1>{_escape(page.title)}</h1>"
         f'<p class="page-meta">Page ID: <code>{_escape(page.id)}</code>'
         f" · verified at <code>{_escape(page.commit[:10])}</code></p>"
-        f'<p class="page-meta">Covers: {covers}</p>'
-        f"{_submodules_html(tree, page)}"
+        f"{covers_html}"
+        f"{_children_html(tree, page)}"
         "</header>"
-    )
-
-
-def _notion_doc_html(document: NotionDoc) -> str:
-    return f'<li class="notion-doc">{_anchor(document.url, document.title)}</li>'
-
-
-def _context_panel_html(page: Page) -> str:
-    notion_content = "".join(_notion_doc_html(document) for document in page.notion)
-    if notion_content:
-        notion_content = f'<ul class="notion-list">{notion_content}</ul>'
-    else:
-        notion_content = '<p class="empty">No related Notion pages.</p>'
-    return (
-        '<aside id="context" aria-label="Context">'
-        f"<h2>Notion</h2>{notion_content}"
-        '<h2>Slack</h2><p class="empty">Not yet available.</p></aside>'
     )
 
 
@@ -1291,8 +1292,6 @@ def _panel_controls_html() -> str:
         '<div class="panel-controls">'
         '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
         '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
-        '<label class="panel-toggle-button panel-toggle-right" for="toggle-right">'
-        '<span class="expanded">Panel ▶</span><span class="collapsed">Panel ◀</span></label>'
         "</div>"
     )
 
@@ -1302,25 +1301,24 @@ def _document_shell(
     main_content: str,
     *,
     tree: SiteTree,
-    root_page: Page,
-    context_page: Page,
     current_path: str,
     current_page_id: str | None,
     entries: Mapping[str, Sequence[RepoEntry]],
     repo_url: str,
+    toc_sections: Sequence[tuple[str, str]] = SECTION_LINKS,
     folders_only: bool = False,
     folder_path: str | None = None,
     child_folders: Sequence[tuple[str, str]] = (),
 ) -> str:
     sidebar = (
-        _table_of_contents()
-        + _site_nav_html(
+        _table_of_contents(toc_sections)
+        + _feature_tree_html(
             tree,
             current_path=current_path,
             current_page_id=current_page_id,
         )
-        + _explorer_html(
-            root_page,
+        + _file_explorer_html(
+            tree,
             entries=entries,
             current_path=current_path,
             repo_url=repo_url,
@@ -1336,10 +1334,9 @@ def _document_shell(
         f"<title>{_escape(title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
         f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
-        f'<input class="panel-toggle" id="toggle-right" type="checkbox">'
         f'<div class="page-shell"><div id="sidebar">{sidebar}</div>'
         f'<main class="page-main">{_panel_controls_html()}{main_content}</main>'
-        f"{_context_panel_html(context_page)}</div></body></html>"
+        "</div></body></html>"
     )
     return _offline_html(document)
 
@@ -1354,12 +1351,16 @@ def render_page(
     entries: Mapping[str, Sequence[RepoEntry]] = NO_ENTRIES,
 ) -> str:
     emit_diagram_warnings(page)
-    root_page = tree.pages[tree.root]
     page_header = _page_header_html(tree, page)
+    toc_sections = list(SECTION_LINKS[:2])
+    if page.membership:
+        toc_sections.append(("membership", "Why these files are one feature"))
+    toc_sections.extend(SECTION_LINKS[2:])
     sections = "".join(
         [
             _related_section(page, repo_url=repo_url),
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
+            _membership_section(page, repo_url=repo_url),
             _block_section(page, repo_url=repo_url),
             _schema_section(page, repo_url=repo_url, tables=tables),
             _sequence_section(page, repo_url=repo_url, jar=jar),
@@ -1371,12 +1372,11 @@ def render_page(
         page.title,
         main_content,
         tree=tree,
-        root_page=root_page,
-        context_page=page,
         current_path=f"{page.id}.html",
         current_page_id=page.id,
         entries=entries,
         repo_url=repo_url,
+        toc_sections=toc_sections,
     )
 
 
@@ -1384,7 +1384,6 @@ def render_folder_page(
     *,
     folder_path: str,
     tree: SiteTree,
-    root_page: Page,
     entries: Mapping[str, Sequence[RepoEntry]],
     repo_url: str,
     feature_rows: Sequence[tuple[str, str, str, str, int, int, int]],
@@ -1422,7 +1421,7 @@ def render_folder_page(
         for name, path in child_folders
     )
     child_section = (
-        f"<section><h2>Subfolders</h2><ul>{child_links}</ul></section>"
+        f'<section id="subfolders"><h2>Subfolders</h2><ul>{child_links}</ul></section>'
         if child_links
         else ""
     )
@@ -1434,22 +1433,26 @@ def render_folder_page(
     main_content = (
         '<header class="page-header"><h1>Repository folder</h1>'
         f"<p><code>{_escape(folder_label)}</code></p></header>"
-        f"<section><h2>Feature coverage</h2>{feature_table}</section>"
-        f"<section><h2>Uncovered files</h2><p>{uncovered_count} in-scope files "
+        f'<section><h2>Feature coverage</h2><div id="feature-coverage">{feature_table}</div></section>'
+        f'<section id="uncovered-files"><h2>Uncovered files</h2><p>{uncovered_count} in-scope files '
         f"{_anchor(_relative_href(current_path, 'uncovered.html'), 'listed in the uncovered inventory')}.</p>"
         f"{test_note}</section>{child_section}"
     )
-    folder_context = root_page.model_copy(update={"notion": []})
+    toc_sections = [
+        ("feature-coverage", "Feature coverage"),
+        ("uncovered-files", "Uncovered files"),
+    ]
+    if child_links:
+        toc_sections.append(("subfolders", "Subfolders"))
     return _document_shell(
         f"Folder: {folder_label}",
         main_content,
         tree=tree,
-        root_page=root_page,
-        context_page=folder_context,
         current_path=current_path,
         current_page_id=None,
         entries=entries,
         repo_url=repo_url,
+        toc_sections=toc_sections,
         folders_only=True,
         folder_path=folder_path,
         child_folders=child_folders,
@@ -1459,7 +1462,6 @@ def render_folder_page(
 def render_uncovered_page(
     *,
     tree: SiteTree,
-    root_page: Page,
     entries: Mapping[str, Sequence[RepoEntry]],
     repo_url: str,
     uncovered: Mapping[str, Sequence[tuple[str, str]]],
@@ -1509,19 +1511,20 @@ def render_uncovered_page(
     main_content = (
         '<header class="page-header"><h1>Uncovered files</h1>'
         f"<p>{len(uncovered)} unique in-scope files are not placed on any feature page.</p></header>"
-        f"<section><h2>Global inventory</h2>{global_items}</section>"
-        f"<section><h2>Per-map reasons</h2>{''.join(map_details)}</section>"
+        f'<section id="global-inventory"><h2>Global inventory</h2>{global_items}</section>'
+        f'<section id="per-map-reasons"><h2>Per-map reasons</h2>{"".join(map_details)}</section>'
     )
-    inventory_context = root_page.model_copy(update={"notion": []})
     return _document_shell(
         "Uncovered files",
         main_content,
         tree=tree,
-        root_page=root_page,
-        context_page=inventory_context,
         current_path=current_path,
         current_page_id=None,
         entries=entries,
         repo_url=repo_url,
+        toc_sections=[
+            ("global-inventory", "Global inventory"),
+            ("per-map-reasons", "Per-map reasons"),
+        ],
         folders_only=True,
     )

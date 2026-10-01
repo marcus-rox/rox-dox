@@ -22,6 +22,8 @@ from rox_dox.model import (
     DataModel,
     Edge,
     Group,
+    MembershipGroup,
+    MembershipRow,
     Node,
     Page,
     Related,
@@ -184,27 +186,23 @@ def _feature_tldr(
 ) -> Tldr:
     table_sources = _table_sources(feature, tables)
     files = feature.files
+    summary = [
+        Claim(
+            text="Stores: " + ", ".join(feature.tables) + ".",
+            sources=table_sources,
+        )
+    ]
+    key_points = []
+    rows = []
+    row_sources = list(table_sources)
     if not files:
-        summary = [
-            Claim(
-                text="Stores: " + ", ".join(feature.tables) + ".",
-                sources=table_sources,
-            ),
+        summary.append(
             Claim(
                 text="No in-scope code uses its tables.",
                 sources=table_sources,
-            ),
-        ]
-        key_points: list[Claim] = []
-        rows: list[list[str]] = []
-        row_sources = table_sources
-    else:
-        summary = [
-            Claim(
-                text="Stores: " + ", ".join(feature.tables) + ".",
-                sources=table_sources,
             )
-        ]
+        )
+    else:
         counts = _layer_counts(files)
         count_text = ", ".join(
             f"{LAYER_LABELS[layer]}: {counts[layer]}"
@@ -228,11 +226,11 @@ def _feature_tldr(
                 sources=_unique_sources(count_sources),
             )
         )
-        key_points = []
         for layer in LAYER_ORDER:
-            directories = _top_directories(files, layer)
-            if not directories:
+            layer_files = [file for file in files if layer_of(file.path) == layer]
+            if not layer_files:
                 continue
+            directories = _top_directories(files, layer)
             directory_list = ", ".join(
                 f"{directory} ({len(directory_files)})"
                 for directory, directory_files in directories
@@ -248,45 +246,27 @@ def _feature_tldr(
                     ),
                 )
             )
-        ordered_files = sorted(
-            files,
-            key=lambda file: (not file.primary, file.path),
-        )
-        rows = []
-        table_row_sources = []
-        for file in ordered_files:
-            evidence = sorted(
-                file.evidence,
-                key=lambda item: (
-                    item.kind,
-                    item.path,
-                    item.line,
-                    item.to or "",
-                    item.table or "",
-                ),
-            )
-            evidence_text = "; ".join(
-                dict.fromkeys(_evidence_text(item) for item in evidence)
-            )
-            if not evidence_text:
-                evidence_text = "feature-map placement"
             rows.append(
                 [
-                    file.path,
-                    LAYER_LABELS[layer_of(file.path)],
-                    "Primary" if file.primary else "Shared",
-                    evidence_text,
+                    LAYER_LABELS[layer],
+                    str(sum(file.primary for file in layer_files)),
+                    str(sum(not file.primary for file in layer_files)),
+                    directory_list,
                 ]
             )
-            table_row_sources.extend(_file_sources(file, table_sources[0]))
-        row_sources = _unique_sources(table_row_sources) or table_sources
+            row_sources.append(
+                _file_evidence_source(
+                    min(layer_files, key=lambda file: file.path),
+                    table_sources[0],
+                )
+            )
     return Tldr(
         summary=summary,
         key_points=key_points,
         table=SummaryTable(
-            columns=["File", "Layer", "Primary/shared", "Evidence"],
+            columns=["Layer", "Primary", "Shared", "Top directories"],
             rows=rows,
-            sources=row_sources,
+            sources=_unique_sources(row_sources),
         ),
         notes=[],
     )
@@ -620,6 +600,48 @@ def _feature_tldr_for_map(
     return result
 
 
+def _feature_membership(
+    feature: Feature,
+    tables: Mapping[str, Table],
+) -> list[MembershipGroup]:
+    fallback = tables[feature.id].source
+    groups = []
+    for layer in LAYER_ORDER:
+        files = sorted(
+            (file for file in feature.files if layer_of(file.path) == layer),
+            key=lambda file: (not file.primary, file.path),
+        )
+        if not files:
+            continue
+        rows = []
+        for file in files:
+            evidence = sorted(
+                file.evidence,
+                key=lambda item: (
+                    item.kind,
+                    item.path,
+                    item.line,
+                    item.to or "",
+                    item.table or "",
+                    item.tag or "",
+                    item.target or "",
+                ),
+            )
+            evidence_text = "; ".join(
+                dict.fromkeys(_evidence_text(item) for item in evidence)
+            )
+            rows.append(
+                MembershipRow(
+                    path=file.path,
+                    primary=file.primary,
+                    evidence=evidence_text or "feature-map placement",
+                    sources=_file_sources(file, fallback),
+                )
+            )
+        groups.append(MembershipGroup(layer=LAYER_LABELS[layer], rows=rows))
+    return groups
+
+
 def _feature_page(
     feature: Feature,
     feature_map: FeatureMap,
@@ -673,6 +695,7 @@ def _feature_page(
         commit=feature_map.commit,
         parent=domain_id,
         paths=paths,
+        membership=_feature_membership(feature, tables),
         tldr=_feature_tldr_for_map(
             feature,
             feature_map,
@@ -688,7 +711,6 @@ def _feature_page(
         sequences=[],
         states=[],
         related=related,
-        notion=[],
     )
 
 
@@ -956,6 +978,8 @@ def _domain_page(
             if file.primary
         }
     )
+    if not primary_paths:
+        primary_paths = [tables[feature_map.features[0].id].source.path]
     block, figures = _domain_block(feature_map, names, tables)
     table_sources = _unique_sources(
         [tables[name].source for name in feature_map.tables]
@@ -981,7 +1005,6 @@ def _domain_page(
                 source=root_source,
             )
         ],
-        notion=[],
     )
 
 
