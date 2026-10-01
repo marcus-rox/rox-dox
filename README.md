@@ -27,3 +27,21 @@ xdg-open site/rox-core.html
 
 Use `--open-pr` only after a successful rebuild to publish changed `pages/` and
 `features/` JSON artifacts as a pull request.
+
+## View the site locally
+
+From the repository root, ensure `tools/plantuml.jar` exists; fetch it with
+`./scripts/fetch_plantuml.sh` if needed. Then build the offline site:
+
+```sh
+uv run rox-dox build pages \
+  --repo /path/to/rox-core \
+  --repo-url https://github.com/Rox-AI/rox-core \
+  --out site
+```
+
+The root page is `site/rox-core.html` (there is no top-level `site/index.html`):
+
+```sh
+xdg-open site/rox-core.html
+```
