@@ -265,41 +265,9 @@ s_app_calendar = S(
     "backend/src/rox_core/api/account/service.py",
     "from ext_integrations.calendar_integration.calendar_data_store_v2 import (",
 )
-s_app_messaging = S(
-    "backend/src/rox_core/api/integrations/business.py",
-    "from ext_integrations.slack_integration.channel_autojoin_service import (",
-)
-s_app_crm = S(
-    "backend/src/rox_core/api/crm_field/sync.py",
-    "from ext_integrations.integration.crm.hubspot.parser import parse_hubspot_field",
-)
-s_app_telephony = S(
-    "backend/src/rox_core/api/agents/outreach/dialer/business.py",
-    "from ext_integrations.twilio_integration.twilio_schemas import (",
-)
-s_app_data_providers = S(
-    "backend/src/rox_core/api/integrations/business.py",
-    "from ext_integrations.data_providers.apollo.apollo_shim import ApolloShim",
-)
-s_app_auth = S(
-    "backend/src/rox_core/api/organizations/business.py",
-    "from shim_layer.auth0_shim.auth0_shim import Auth0OrganizationFetcher, Auth0Shim",
-)
 s_app_stores = S(
     "backend/src/rox_core/api/account/service.py",
     "from shim_layer.redis_shim.redis import RedisClient",
-)
-s_app_queues = S(
-    "backend/src/rox_core/api/azure_marketplace/endpoints.py",
-    "from shim_layer.queue_shim import get_queue_shim",
-)
-s_app_billing = S(
-    "backend/src/rox_core/api/billing/business.py",
-    "from shim_layer.stripe_shim.stripe_shim import (",
-)
-s_app_observability = S(
-    "backend/src/rox_core/api/account/business.py",
-    "from shim_layer.observability import logger, statsd",
 )
 s_google_calendar = S(
     "backend/src/ext_integrations/calendar_integration/google_calendar.py",
@@ -544,6 +512,10 @@ s_listener_queue_configs = S(
     "backend/src/util/listener_utils.py",
     "QUEUE_CONFIGS = {",
 )
+s_listener_receive = S(
+    "backend/src/tasks/listeners/base.py",
+    "messages = get_queue_shim().receive_messages(",
+)
 s_listener_drop_states = S(
     "backend/src/tasks/listeners/base.py",
     "TaskState.COMPLETED.value,",
@@ -670,6 +642,7 @@ def N(
     source: dict[str, object],
     details: list[dict[str, object]],
     kind: str = "component",
+    many: bool = False,
 ) -> dict[str, object]:
     return {
         "id": id,
@@ -677,6 +650,7 @@ def N(
         "group": group,
         "source": source,
         "kind": kind,
+        "many": many,
         "details": details,
     }
 
@@ -717,6 +691,7 @@ nodes = [
             D("Keep-alive 200s outlasts the ALB 180s idle timeout", s_keepalive),
             D("Also consumes InteractionQueueType SQS queues", s_qc),
         ],
+        many=True,
     ),
     N(
         "chat",
@@ -750,6 +725,7 @@ nodes = [
             D("/circleback, /slack_agent, /sequences_tracking", s_rn_webhook),
             D("Gunicorn 2 × 50 threads, no worker timeout", s_webhook_gunicorn),
         ],
+        many=True,
     ),
     N(
         "mcp",
@@ -775,6 +751,7 @@ nodes = [
                 s_async_exec,
             ),
         ],
+        many=True,
     ),
     N(
         "data_workers",
@@ -786,6 +763,7 @@ nodes = [
             D("BATCH: batch task routes", s_rn_batch),
             D("Each target polls its own QueueType enum", s_qc),
         ],
+        many=True,
     ),
     N(
         "outreach_sched",
@@ -796,6 +774,7 @@ nodes = [
             D("OutreachQueueType / WorkflowSchedulerQueueType", s_qc_outreach),
             D("WORKFLOWSCHEDULER runs leader election", s_leader),
         ],
+        many=True,
     ),
     N(
         "temporal_workers",
@@ -811,6 +790,7 @@ nodes = [
             ),
             D("Task queues: rox-flow, enrichment, outbound-prospecting…", s_tq),
         ],
+        many=True,
     ),
     N(
         "cell",
@@ -866,6 +846,7 @@ nodes = [
             D("Local stand-in: LocalStack", s_localstack),
         ],
         kind="queue",
+        many=True,
     ),
     N(
         "kv",
@@ -1935,6 +1916,7 @@ block_figures = [
                         )
                     ],
                     kind="queue",
+                    many=True,
                 ),
                 N(
                     "listener",
@@ -1994,6 +1976,7 @@ block_figures = [
                             s_data_extraction_executor,
                         ),
                     ],
+                    many=True,
                 ),
                 N(
                     "pg",
@@ -2059,29 +2042,52 @@ block_figures = [
                 s_kv_store,
                 s_queue_shim,
             ),
+            C(
+                "SQS is consumed by the task listeners; the doc showed no consumer",
+                s_listener_receive,
+            ),
         ],
         "block": {
             "groups": [
                 {"id": "business", "label": "Business logic", "source": s_rn},
                 {
+                    "id": "libs",
+                    "label": "rox-core libraries",
+                    "source": s_app_calendar,
+                },
+                {
                     "id": "ext_int",
                     "label": "ext_integrations/",
                     "source": s_google_calendar,
+                    "parent": "libs",
                 },
                 {
                     "id": "shims",
                     "label": "shim_layer/",
                     "source": s_kv_store,
+                    "parent": "libs",
+                },
+                {
+                    "id": "outside",
+                    "label": "Outside services",
+                    "source": s_sqs_client,
                 },
                 {
                     "id": "providers",
                     "label": "Third-party APIs",
                     "source": s_google_calendar,
+                    "parent": "outside",
                 },
                 {
                     "id": "aws",
                     "label": "AWS + infra",
                     "source": s_dynamo_client,
+                    "parent": "outside",
+                },
+                {
+                    "id": "workers",
+                    "label": "Task workers",
+                    "source": s_listener_receive,
                 },
             ],
             "nodes": [
@@ -2091,6 +2097,20 @@ block_figures = [
                     "business",
                     s_rn,
                     [],
+                ),
+                N(
+                    "listener",
+                    "SQS listeners",
+                    "workers",
+                    s_listener_receive,
+                    [
+                        D("polls its queue", s_listener_receive),
+                        D(
+                            "hands each task to TaskHandler (Figure 2)",
+                            s_task_handler_class,
+                        ),
+                    ],
+                    many=True,
                 ),
                 N(
                     "calendar_email",
@@ -2286,8 +2306,12 @@ block_figures = [
                     "SQS",
                     "aws",
                     s_sqs_client,
-                    [D("boto3 SQS client", s_sqs_client)],
+                    [
+                        D("boto3 SQS client", s_sqs_client),
+                        D("one queue per queue type", s_listener_queue_configs),
+                    ],
                     kind="queue",
+                    many=True,
                 ),
                 N(
                     "redis",
@@ -2310,16 +2334,8 @@ block_figures = [
                 ),
             ],
             "edges": [
-                E("app", "calendar_email", "calls", s_app_calendar),
-                E("app", "messaging", "calls", s_app_messaging),
-                E("app", "crm", "calls", s_app_crm),
-                E("app", "telephony", "calls", s_app_telephony),
-                E("app", "data_providers", "calls", s_app_data_providers),
-                E("app", "auth_secrets", "calls", s_app_auth),
-                E("app", "store_shims", "calls", s_app_stores),
-                E("app", "queue_shims", "calls", s_app_queues),
-                E("app", "billing", "calls", s_app_billing),
-                E("app", "obs", "calls", s_app_observability),
+                E("app", "ext_int", "calls", s_app_calendar),
+                E("app", "shims", "calls", s_app_stores),
                 E(
                     "calendar_email",
                     "google_microsoft",
@@ -2348,6 +2364,7 @@ block_figures = [
                 E("store_shims", "redis", "Redis client", s_redis_sdk),
                 E("queue_shims", "sqs_aws", "SQS client", s_sqs_client),
                 E("billing", "stripe_api", "Stripe client", s_stripe_sdk),
+                E("sqs_aws", "listener", "polled by", s_listener_receive),
             ],
         },
     },
@@ -2477,6 +2494,7 @@ block_figures = [
                             s_sqs_calendar_tasks,
                         ),
                     ],
+                    many=True,
                 ),
                 N(
                     "temporal",

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from rox_dox.block_svg import block_layout_problems
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
@@ -209,6 +210,15 @@ def _build_pages(args: argparse.Namespace) -> int:
         for page_file, problem in problems:
             print(f"{page_file}: {problem}")
         return 1
+
+    for page in valid_pages:
+        diagrams = [
+            ("overview", page.block),
+            *((figure.id, figure.block) for figure in page.block_figures),
+        ]
+        for figure_id, diagram in diagrams:
+            for problem in block_layout_problems(diagram):
+                print(f"warning: {page.id} {figure_id}: {problem}")
 
     tree = build_tree(valid_pages)
     entries = {

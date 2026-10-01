@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 import copy
+import json
 import re
 from pathlib import Path
 
 import pytest
 
+from rox_dox.block_svg import block_layout_problems
 from rox_dox.diagrams import (
     emit_diagram_warnings,
     sequence_plantuml,
     state_plantuml,
 )
 from rox_dox.links import source_url
-from rox_dox.model import Page
+from rox_dox.model import BlockDiagram, Page
 from rox_dox.plantuml import DiagramError, render_svg
 from rox_dox.schema import extract_tables
 from rox_dox.schema_svg import schema_svg
@@ -36,6 +38,50 @@ def test_node_kind_defaults_to_component(page_data: dict[str, object]) -> None:
     page = _page(page_data)
 
     assert page.block.nodes[0].kind == "component"
+    assert page.block.nodes[0].many is False
+
+
+def test_authored_integration_layer_has_adjacent_column_edges() -> None:
+    pages_path = Path(__file__).resolve().parents[1] / "pages/rox-core.json"
+    payload = json.loads(pages_path.read_text(encoding="utf-8"))
+    figure_data = next(
+        figure
+        for figure in payload["block_figures"]
+        if figure["id"] == "integration-layer"
+    )
+    diagram = BlockDiagram.model_validate(figure_data["block"])
+
+    assert block_layout_problems(diagram) == []
+
+
+def test_authored_many_flags_match_plural_runtime_nodes() -> None:
+    pages_path = Path(__file__).resolve().parents[1] / "pages/rox-core.json"
+    payload = json.loads(pages_path.read_text(encoding="utf-8"))
+    figures = {
+        figure["id"]: figure["block"]["nodes"] for figure in payload["block_figures"]
+    }
+
+    assert {node["id"] for node in payload["block"]["nodes"] if node["many"]} == {
+        "interaction",
+        "webhook",
+        "agent_workers",
+        "data_workers",
+        "outreach_sched",
+        "temporal_workers",
+        "sqs",
+    }
+    assert {node["id"] for node in figures["task-pipeline"] if node["many"]} == {
+        "sqs",
+        "executor",
+    }
+    assert {node["id"] for node in figures["integration-layer"] if node["many"]} == {
+        "listener",
+        "sqs_aws",
+    }
+    assert {
+        node["id"] for node in figures["connect-google-workspace"] if node["many"]
+    } == {"fanout"}
+    assert not any(node["many"] for node in figures["chat-turn"])
 
 
 def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(

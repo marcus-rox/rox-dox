@@ -59,6 +59,7 @@ class Node(Model):
     link: str | None = None
     kind: Literal["component", "store", "external", "queue"] = "component"
     group: str | None = None
+    many: bool = False
     details: list[Claim] = Field(default_factory=list, max_length=_MAX_NODE_DETAILS)
 
     @model_validator(mode="before")
@@ -176,14 +177,26 @@ class BlockDiagram(Model):
                     f"block diagram: group '{group.id}' has no nodes or child groups"
                 )
 
+        declared_endpoints = declared_nodes | declared_groups
         for edge in self.edges:
-            if edge.src not in declared_nodes:
+            if edge.src not in declared_endpoints:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.src}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown endpoint '{edge.src}'"
                 )
-            if edge.dst not in declared_nodes:
+            if edge.dst not in declared_endpoints:
                 raise ValueError(
-                    f"block edge {edge.src}->{edge.dst}: unknown node '{edge.dst}'"
+                    f"block edge {edge.src}->{edge.dst}: unknown endpoint '{edge.dst}'"
+                )
+
+        incoming_nodes = {edge.dst for edge in self.edges}
+        outgoing_nodes = {edge.src for edge in self.edges}
+        for node in self.nodes:
+            if node.kind == "queue" and (
+                node.id not in incoming_nodes or node.id not in outgoing_nodes
+            ):
+                raise ValueError(
+                    f"block diagram: queue '{node.id}' needs a producer and a "
+                    "consumer edge"
                 )
         return self
 

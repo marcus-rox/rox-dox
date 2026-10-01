@@ -4,7 +4,14 @@ import copy
 import re
 from xml.etree import ElementTree
 
-from rox_dox.block_svg import ARROW_COLOR, block_svg
+from rox_dox.block_svg import (
+    ARROW_COLOR,
+    QUEUE_FILL,
+    QUEUE_NOTCH,
+    QUEUE_STROKE,
+    block_layout_problems,
+    block_svg,
+)
 from rox_dox.links import page_href, source_url
 from rox_dox.model import Page
 from rox_dox.render import PAGE_CSS
@@ -238,7 +245,11 @@ def test_skipped_column_edges_use_dashed_channel_styling(
             "source": source,
         },
     ]
-    root = ElementTree.fromstring(_block_svg(_page(payload)))
+    page = _page(payload)
+    assert block_layout_problems(page.block) == [
+        "first_node -> third_node (columns 0 -> 2; expected 0 -> 1)"
+    ]
+    root = ElementTree.fromstring(_block_svg(page))
     edge_paths = [
         element
         for element in root.iter(f"{SVG_NAMESPACE}path")
@@ -400,27 +411,158 @@ def test_store_renders_as_a_vertical_cylinder_without_kind_tag(
     assert "STORE" not in "".join(node_group.itertext())
 
 
-def test_queue_renders_as_a_horizontal_cylinder(page_data: dict[str, object]) -> None:
+def test_queue_renders_as_a_chevron(page_data: dict[str, object]) -> None:
     payload = copy.deepcopy(page_data)
-    payload["block"]["nodes"][0].update({"label": "Queue", "kind": "queue"})
+    source = payload["block"]["nodes"][0]["source"]
+    payload["block"]["groups"] = [
+        {"id": "producer", "label": "Producer", "source": source},
+        {"id": "queue-group", "label": "Queue", "source": source},
+        {"id": "consumer", "label": "Consumer", "source": source},
+    ]
+    payload["block"]["nodes"][0]["group"] = "producer"
+    payload["block"]["nodes"][1].update({"label": "Queue", "kind": "queue"})
+    payload["block"]["nodes"][1]["group"] = "queue-group"
+    payload["block"]["nodes"].append(
+        {"id": "sink", "label": "Sink", "source": source, "group": "consumer"}
+    )
+    payload["block"]["edges"].append(
+        {"src": "store", "dst": "sink", "label": "writes", "source": source}
+    )
     root = ElementTree.fromstring(_block_svg(_page(payload)))
     shape = next(
         element
-        for element in root.iter(f"{SVG_NAMESPACE}path")
+        for element in root.iter(f"{SVG_NAMESPACE}polygon")
         if element.attrib.get("class") == "queue-shape"
     )
+    points = [
+        tuple(float(coordinate) for coordinate in point.split(","))
+        for point in shape.attrib["points"].split()
+    ]
+    edges = [
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}path")
+        if element.attrib.get("class") == "block-edge"
+    ]
+    edge_points = [
+        [
+            (float(x), float(y))
+            for x, y in re.findall(r"[ML]([0-9.]+)\s+([0-9.]+)", edge.attrib["d"])
+        ]
+        for edge in edges
+    ]
 
-    assert "A" in shape.attrib["d"]
-    assert shape.attrib["fill"] == "#f0fdf4"
-    assert shape.attrib["stroke"] == "#166534"
-    assert any(
-        element.attrib.get("class") == "queue-cap-left" and element.attrib["rx"] == "10"
+    assert len(points) == 6
+    assert shape.attrib["fill"] == QUEUE_FILL
+    assert shape.attrib["stroke"] == QUEUE_STROKE
+    assert edge_points[0][-1][0] == points[0][0] + QUEUE_NOTCH
+    assert edge_points[0][-1][1] == points[-1][1]
+    assert edge_points[1][0] == (points[2][0], points[2][1])
+    assert not any(
+        (element.attrib.get("class") or "").startswith("queue-cap-")
         for element in root.iter(f"{SVG_NAMESPACE}ellipse")
     )
-    assert any(
-        element.attrib.get("class") == "queue-cap-right"
-        for element in root.iter(f"{SVG_NAMESPACE}ellipse")
+
+
+def test_many_nodes_render_three_shapes_and_normal_nodes_one(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["nodes"][0]["many"] = True
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
+    node_group = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "block-node block-kind-component"
     )
+    component_shapes = [
+        element
+        for element in node_group.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "component-shape"
+    ]
+
+    assert len(component_shapes) == 3
+    assert [float(element.attrib["width"]) for element in component_shapes] == [
+        300,
+        294,
+        288,
+    ]
+    front_shape = component_shapes[-1]
+    edge = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}path")
+        if element.attrib.get("class") == "block-edge"
+    )
+    edge_start = re.search(r"M([0-9.]+)\s+([0-9.]+)", edge.attrib["d"])
+    assert edge_start is not None
+    assert (
+        float(edge_start.group(2))
+        == float(front_shape.attrib["y"]) + float(front_shape.attrib["height"]) / 2
+    )
+
+    normal_root = ElementTree.fromstring(_block_svg(_page(page_data)))
+    normal_node_group = next(
+        element
+        for element in normal_root.iter(f"{SVG_NAMESPACE}g")
+        if element.attrib.get("class") == "block-node block-kind-component"
+    )
+    normal_shapes = [
+        element
+        for element in normal_node_group.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "component-shape"
+    ]
+    assert len(normal_shapes) == 1
+
+
+def test_group_edges_anchor_to_column_and_section_boundaries(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    payload["block"]["groups"] = [
+        {"id": "producer", "label": "Producer", "source": source},
+        {"id": "consumer", "label": "Consumer", "source": source},
+        {
+            "id": "reader",
+            "label": "Reader",
+            "source": source,
+            "parent": "consumer",
+        },
+    ]
+    payload["block"]["nodes"][0]["group"] = "producer"
+    payload["block"]["nodes"][1]["group"] = "reader"
+    payload["block"]["edges"] = [
+        {
+            "src": "producer",
+            "dst": "reader",
+            "label": "calls",
+            "source": source,
+        }
+    ]
+    root = ElementTree.fromstring(_block_svg(_page(payload)))
+    source_shape = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "component-shape"
+    )
+    section = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}rect")
+        if element.attrib.get("class") == "group-boundary"
+    )
+    edge = next(
+        element
+        for element in root.iter(f"{SVG_NAMESPACE}path")
+        if element.attrib.get("class") == "block-edge"
+    )
+    points = [
+        (float(x), float(y))
+        for x, y in re.findall(r"[ML]([0-9.]+)\s+([0-9.]+)", edge.attrib["d"])
+    ]
+
+    assert points[0][0] == float(source_shape.attrib["x"]) + float(
+        source_shape.attrib["width"]
+    )
+    assert points[-1][0] == float(section.attrib["x"])
 
 
 def test_external_uses_a_dashed_stereotype_box(

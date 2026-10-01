@@ -4,6 +4,7 @@ import copy
 import json
 import re
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -62,6 +63,44 @@ def test_build_writes_complete_page_under_page_id_path(
     document = output_file.read_text(encoding="utf-8")
     assert re.search(r'<section id="tldr">', document)
     assert "<svg" in document
+
+
+def test_build_warns_for_nonadjacent_block_edges(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pages_dir = tmp_path / "pages"
+    pages_dir.mkdir()
+    output_dir = tmp_path / "site"
+    payload = copy.deepcopy(page_data)
+    source = payload["block"]["nodes"][0]["source"]
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id, "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["nodes"][0]["group"] = "first"
+    payload["block"]["nodes"][1]["group"] = "third"
+    payload["block"]["nodes"].append(
+        {
+            "id": "middle",
+            "label": "Middle",
+            "source": source,
+            "group": "second",
+        }
+    )
+    _write_page(pages_dir, "root.json", payload)
+    monkeypatch.setattr(cli, "render_page", Mock(return_value="<html></html>"))
+
+    exit_code = cli.main(_build_args(pages_dir, git_repo[0], output_dir, plantuml_jar))
+
+    assert exit_code == 0
+    assert "warning: rox-core overview: api -> store (columns 0 -> 2;" in (
+        capsys.readouterr().out
+    )
 
 
 def test_build_renders_all_pages_before_writing_any(

@@ -26,7 +26,7 @@ def test_valid_page_passes_check_command(
     assert "1 pages OK" in capsys.readouterr().out
 
 
-def test_edge_endpoint_must_name_declared_node(
+def test_edge_endpoint_must_name_declared_node_or_group(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -37,7 +37,48 @@ def test_edge_endpoint_must_name_declared_node(
     assert isinstance(edge, dict)
     edge["dst"] = "cache"
 
-    with pytest.raises(ValidationError, match="block edge api->cache"):
+    with pytest.raises(
+        ValidationError, match="block edge api->cache.*unknown endpoint"
+    ):
+        Page.model_validate(page_data)
+
+
+def test_group_can_be_an_edge_endpoint(page_data: dict[str, object]) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    source = {"path": "pkg/a.py", "lines": [1, 3]}
+    block["groups"] = [
+        {"id": "backend", "label": "Backend", "source": source},
+    ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "backend"
+    edges = block["edges"]
+    assert isinstance(edges, list)
+    edge = edges[0]
+    assert isinstance(edge, dict)
+    edge["src"] = "backend"
+
+    page = Page.model_validate(page_data)
+
+    assert page.block.edges[0].src == "backend"
+
+
+def test_queue_needs_a_producer_and_consumer_edge(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    nodes[1]["kind"] = "queue"
+
+    with pytest.raises(
+        ValidationError,
+        match="block diagram: queue 'store' needs a producer and a consumer edge",
+    ):
         Page.model_validate(page_data)
 
 
@@ -191,7 +232,7 @@ def test_block_figure_ids_must_be_unique(page_data: dict[str, object]) -> None:
         Page.model_validate(payload)
 
 
-def test_block_figure_edges_must_reference_figure_nodes(
+def test_block_figure_edges_must_reference_declared_node_or_group(
     page_data: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(page_data)
@@ -216,7 +257,7 @@ def test_block_figure_edges_must_reference_figure_nodes(
 
     with pytest.raises(
         ValidationError,
-        match="block edge caller->missing: unknown node 'missing'",
+        match="block edge caller->missing: unknown endpoint 'missing'",
     ):
         Page.model_validate(payload)
 
@@ -366,7 +407,7 @@ def test_page_sources_include_focused_block_figure_elements(
                 "edges": [
                     {
                         "src": "listener",
-                        "dst": "handler",
+                        "dst": "worker",
                         "label": "execute",
                         "source": source,
                     }
@@ -384,7 +425,7 @@ def test_page_sources_include_focused_block_figure_elements(
         "block figure task-pipeline group worker",
         "block figure task-pipeline node listener",
         "block figure task-pipeline node listener detail 1",
-        "block figure task-pipeline edge listener->handler",
+        "block figure task-pipeline edge listener->worker",
     } <= labels
 
 

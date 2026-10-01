@@ -35,6 +35,8 @@ UNGROUPED_COLUMN_LABEL = "Other"
 
 CARD_WIDTH = 300
 CARD_PADDING = 14
+MANY_OFFSET = 12
+MANY_STEP = 6
 TITLE_LINE_HEIGHT = 20
 DETAIL_LINE_HEIGHT = 17
 TITLE_FONT_SIZE = 13.5
@@ -49,7 +51,7 @@ COMPONENT_DIVIDER_OFFSET = 1
 COMPONENT_DIVIDER_GAP = 5
 EXTERNAL_HEADER_HEIGHT = 14
 STORE_ELLIPSE_RY = 10
-QUEUE_CAP_RX = 10
+QUEUE_NOTCH = 18
 CARD_GAP = 16
 SECTION_INSET = 12
 SECTION_HEADER_HEIGHT = 28
@@ -69,6 +71,9 @@ LEGEND_HEIGHT = 56
 LEGEND_SHAPE_WIDTH = 20
 LEGEND_SHAPE_GAP = 7
 LEGEND_ITEM_GAP = 20
+LEGEND_QUEUE_WIDTH = 18
+LEGEND_QUEUE_HEIGHT = 12
+LEGEND_QUEUE_NOTCH = 4
 
 
 @dataclass
@@ -107,6 +112,27 @@ def _escape(value: str) -> str:
 
 def _text_width(value: str, font_size: float) -> float:
     return len(value) * font_size * TEXT_WIDTH_EM
+
+
+def _chevron_points(
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    notch: float,
+) -> str:
+    midpoint = y + height / 2
+    return " ".join(
+        f"{point_x:.1f},{point_y:.1f}"
+        for point_x, point_y in (
+            (x, y),
+            (x + width - notch, y),
+            (x + width, midpoint),
+            (x + width - notch, y + height),
+            (x, y + height),
+            (x + notch, midpoint),
+        )
+    )
 
 
 def _wrap_long_word(word: str, max_width: float, font_size: float) -> list[str]:
@@ -193,9 +219,9 @@ def _wrap(
 
 def _title_lines(node: Node) -> list[str]:
     suffix = "  ›" if node.link is not None else ""
-    max_width = CARD_WIDTH - 2 * CARD_PADDING
+    max_width = CARD_WIDTH - (MANY_OFFSET if node.many else 0) - 2 * CARD_PADDING
     if node.kind == "queue":
-        max_width -= 2 * QUEUE_CAP_RX
+        max_width -= 2 * QUEUE_NOTCH
     return _wrap(
         node.label + suffix,
         max_width=max_width,
@@ -204,9 +230,9 @@ def _title_lines(node: Node) -> list[str]:
 
 
 def _detail_lines(node: Node, detail_text: str) -> list[str]:
-    max_width = CARD_WIDTH - 2 * CARD_PADDING
+    max_width = CARD_WIDTH - (MANY_OFFSET if node.many else 0) - 2 * CARD_PADDING
     if node.kind == "queue":
-        max_width -= 2 * QUEUE_CAP_RX
+        max_width -= 2 * QUEUE_NOTCH
     return _wrap(
         detail_text,
         max_width=max_width,
@@ -230,6 +256,8 @@ def _card_height(node: Node) -> float:
         height += EXTERNAL_HEADER_HEIGHT
     elif node.kind == "store":
         height += 2 * STORE_ELLIPSE_RY
+    if node.many:
+        height += MANY_OFFSET
     return height
 
 
@@ -336,7 +364,67 @@ class _Route:
 
 
 def _port_y(card: _Card, index: int, count: int) -> float:
-    return card.y + card.height * (index + 1) / (count + 1)
+    offset = MANY_OFFSET if card.node.many else 0
+    content_height = card.height - offset
+    return card.y + offset + content_height * (index + 1) / (count + 1)
+
+
+def _front_geometry(card: _Card) -> tuple[float, float, float, float]:
+    offset = MANY_OFFSET if card.node.many else 0
+    return (
+        card.x + offset,
+        card.y + offset,
+        CARD_WIDTH - offset,
+        card.height - offset,
+    )
+
+
+def _endpoint_mid_y(
+    endpoint_id: str,
+    cards: dict[str, _Card],
+    group_bounds: dict[str, tuple[float, float, float, float]],
+) -> float:
+    if endpoint_id in cards:
+        card = cards[endpoint_id]
+        _, y, _, height = _front_geometry(card)
+        return y + height / 2
+    _, y, _, height = group_bounds[endpoint_id]
+    return y + height / 2
+
+
+def _node_shape_svg(
+    node: Node,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+) -> str:
+    if node.kind == "store":
+        rx = width / 2
+        ry = STORE_ELLIPSE_RY
+        return (
+            f'<path class="store-shape" d="M{x:.1f} {y + ry:.1f} '
+            f"A{rx:.1f} {ry} 0 0 1 {x + width:.1f} {y + ry:.1f} "
+            f"L{x + width:.1f} {y + height - ry:.1f} "
+            f'A{rx:.1f} {ry} 0 0 1 {x:.1f} {y + height - ry:.1f} Z" '
+            f'fill="{STORE_FILL}" stroke="{STORE_STROKE}" stroke-width="1.5"/>'
+            f'<path class="store-lid-front" d="M{x:.1f} {y + ry:.1f} '
+            f'A{rx:.1f} {ry} 0 0 0 {x + width:.1f} {y + ry:.1f}" '
+            f'fill="none" stroke="{STORE_STROKE}" stroke-width="1.5"/>'
+        )
+    if node.kind == "queue":
+        return (
+            f'<polygon class="queue-shape" '
+            f'points="{_chevron_points(x, y, width, height, QUEUE_NOTCH)}" '
+            f'fill="{QUEUE_FILL}" stroke="{QUEUE_STROKE}" stroke-width="1.5"/>'
+        )
+    stroke = EXTERNAL_STROKE if node.kind == "external" else COMPONENT_STROKE
+    dash = ' stroke-dasharray="6 4"' if node.kind == "external" else ""
+    return (
+        f'<rect class="{node.kind}-shape" x="{x:.1f}" y="{y:.1f}" '
+        f'width="{width:.1f}" height="{height:.1f}" rx="4" fill="#ffffff" '
+        f'stroke="{stroke}" stroke-width="1.5"{dash}/>'
+    )
 
 
 def _layout(
@@ -349,18 +437,31 @@ def _layout(
         for index, column in enumerate(columns)
         for card in column.cards
     }
+    groups_by_id = {group.id: group for group in diagram.groups}
+    top_level_groups = [group for group in diagram.groups if group.parent is None]
+    top_level_column = {group.id: index for index, group in enumerate(top_level_groups)}
+    group_column_of = {}
+    for group in diagram.groups:
+        current = group
+        while current.parent is not None:
+            current = groups_by_id[current.parent]
+        group_column_of[group.id] = top_level_column[current.id]
+    endpoint_column = {**column_of, **group_column_of}
+
     edges = diagram.edges
     for edge in edges:
-        cards[edge.src].outgoing.append(edge)
-        cards[edge.dst].incoming.append(edge)
+        if edge.src in cards:
+            cards[edge.src].outgoing.append(edge)
+        if edge.dst in cards:
+            cards[edge.dst].incoming.append(edge)
 
     gutter_count = len(columns) + 1
     lanes: list[list[Edge]] = [[] for _ in range(gutter_count)]
     entry_labels: list[float] = [0.0] * gutter_count
     channel_edges = []
     for edge in edges:
-        exit_gutter = column_of[edge.src] + 1
-        entry_gutter = column_of[edge.dst]
+        exit_gutter = endpoint_column[edge.src] + 1
+        entry_gutter = endpoint_column[edge.dst]
         lanes[exit_gutter].append(edge)
         if exit_gutter != entry_gutter:
             lanes[entry_gutter].append(edge)
@@ -393,20 +494,78 @@ def _layout(
         default=0,
     )
     channel_top = columns_bottom + CHANNEL_OFFSET
+    group_bounds = {
+        group.id: (
+            columns[index].x,
+            TOP_MARGIN + COLUMN_CAPTION_HEIGHT,
+            columns[index].width,
+            columns[index].height,
+        )
+        for index, group in enumerate(top_level_groups)
+    }
+    group_bounds.update(
+        {
+            section.group.id: (
+                section.x,
+                section.y,
+                section.width,
+                section.height,
+            )
+            for column in columns
+            for section in column.sections
+        }
+    )
 
     exit_y: dict[int, float] = {}
     entry_y: dict[int, float] = {}
     for card in cards.values():
-        outgoing = sorted(card.outgoing, key=lambda edge: cards[edge.dst].y)
+        outgoing = sorted(
+            card.outgoing,
+            key=lambda edge: _endpoint_mid_y(edge.dst, cards, group_bounds),
+        )
         for index, edge in enumerate(outgoing):
             exit_y[id(edge)] = _port_y(card, index, len(outgoing))
-        incoming = sorted(card.incoming, key=lambda edge: cards[edge.src].y)
+        incoming = sorted(
+            card.incoming,
+            key=lambda edge: _endpoint_mid_y(edge.src, cards, group_bounds),
+        )
         for index, edge in enumerate(incoming):
             entry_y[id(edge)] = _port_y(card, index, len(incoming))
 
+    starts: dict[int, tuple[float, float]] = {}
+    ends: dict[int, tuple[float, float]] = {}
+    for edge in edges:
+        if edge.src in cards:
+            source_card = cards[edge.src]
+            source_x, source_y, source_width, source_height = _front_geometry(
+                source_card
+            )
+            starts[id(edge)] = (
+                source_x + source_width,
+                source_y + source_height / 2
+                if source_card.node.kind == "queue"
+                else exit_y[id(edge)],
+            )
+        else:
+            x, y, width, height = group_bounds[edge.src]
+            starts[id(edge)] = (x + width, y + height / 2)
+
+        if edge.dst in cards:
+            target_card = cards[edge.dst]
+            target_x, target_y, _, target_height = _front_geometry(target_card)
+            ends[id(edge)] = (
+                target_x + (QUEUE_NOTCH if target_card.node.kind == "queue" else 0),
+                target_y + target_height / 2
+                if target_card.node.kind == "queue"
+                else entry_y[id(edge)],
+            )
+        else:
+            x, y, _, height = group_bounds[edge.dst]
+            ends[id(edge)] = (x, y + height / 2)
+
     lane_x: dict[tuple[int, int], float] = {}
     for gutter, gutter_edges in enumerate(lanes):
-        ordered = sorted(gutter_edges, key=lambda edge: exit_y[id(edge)])
+        ordered = sorted(gutter_edges, key=lambda edge: starts[id(edge)][1])
         for index, edge in enumerate(ordered):
             lane_x[(gutter, id(edge))] = (
                 gutter_lefts[gutter] + LANE_MARGIN + index * LANE_STEP
@@ -419,12 +578,10 @@ def _layout(
 
     routes = []
     for edge in edges:
-        source_card = cards[edge.src]
-        target_card = cards[edge.dst]
-        exit_gutter = column_of[edge.src] + 1
-        entry_gutter = column_of[edge.dst]
-        start = (source_card.x + CARD_WIDTH, exit_y[id(edge)])
-        end = (target_card.x, entry_y[id(edge)])
+        exit_gutter = endpoint_column[edge.src] + 1
+        entry_gutter = endpoint_column[edge.dst]
+        start = starts[id(edge)]
+        end = ends[id(edge)]
         first_lane = lane_x[(exit_gutter, id(edge))]
         if exit_gutter == entry_gutter:
             points = [start, (first_lane, start[1]), (first_lane, end[1]), end]
@@ -458,6 +615,39 @@ def _layout(
     return columns, cards, routes, width, height
 
 
+def block_layout_problems(diagram: BlockDiagram) -> list[str]:
+    top_level_groups = [group for group in diagram.groups if group.parent is None]
+    groups_by_id = {group.id: group for group in diagram.groups}
+    top_level_column = {group.id: index for index, group in enumerate(top_level_groups)}
+    group_column = {}
+    for group in diagram.groups:
+        current = group
+        while current.parent is not None:
+            current = groups_by_id[current.parent]
+        group_column[group.id] = top_level_column[current.id]
+
+    node_column = {
+        node.id: (
+            group_column[node.group]
+            if node.group is not None
+            else len(top_level_groups)
+        )
+        for node in diagram.nodes
+    }
+    endpoint_column = {**node_column, **group_column}
+    problems = []
+    for edge in diagram.edges:
+        source_column = endpoint_column[edge.src]
+        target_column = endpoint_column[edge.dst]
+        if target_column != source_column + 1:
+            problems.append(
+                f"{edge.src} -> {edge.dst} (columns {source_column} -> "
+                f"{target_column}; expected {source_column} -> "
+                f"{source_column + 1})"
+            )
+    return problems
+
+
 def _link(href: str, content: str) -> str:
     return f'<a href="{_escape(href)}" target="_top">{content}</a>'
 
@@ -482,50 +672,20 @@ def _text(
 
 def _card_svg(card: _Card, *, page: Page, repo_url: str) -> str:
     node = card.node
-    x = card.x
-    y = card.y
-    width = CARD_WIDTH
-    height = card.height
-    if node.kind == "store":
-        rx = width / 2
-        ry = STORE_ELLIPSE_RY
-        shape = (
-            f'<path class="store-shape" d="M{x:.1f} {y + ry:.1f} '
-            f"A{rx:.1f} {ry} 0 0 1 {x + width:.1f} {y + ry:.1f} "
-            f"L{x + width:.1f} {y + height - ry:.1f} "
-            f'A{rx:.1f} {ry} 0 0 1 {x:.1f} {y + height - ry:.1f} Z" '
-            f'fill="{STORE_FILL}" '
-            f'stroke="{STORE_STROKE}" stroke-width="1.5"/>'
-            f'<path class="store-lid-front" d="M{x:.1f} {y + ry:.1f} '
-            f'A{rx:.1f} {ry} 0 0 0 {x + width:.1f} {y + ry:.1f}" '
-            f'fill="none" stroke="{STORE_STROKE}" stroke-width="1.5"/>'
-        )
-    elif node.kind == "queue":
-        rx = QUEUE_CAP_RX
-        ry = height / 2
-        shape = (
-            f'<path class="queue-shape" d="M{x + rx:.1f} {y:.1f} '
-            f"H{x + width - rx:.1f} "
-            f"A{rx} {ry:.1f} 0 0 1 {x + width - rx:.1f} {y + height:.1f} "
-            f"H{x + rx:.1f} "
-            f'A{rx} {ry:.1f} 0 0 1 {x + rx:.1f} {y:.1f} Z" '
-            f'fill="{QUEUE_FILL}" stroke="{QUEUE_STROKE}" stroke-width="1.5"/>'
-            f'<ellipse class="queue-cap-left" cx="{x + rx:.1f}" '
-            f'cy="{y + ry:.1f}" rx="{rx}" ry="{ry:.1f}" fill="none" '
-            f'stroke="{QUEUE_STROKE}" stroke-width="1.5"/>'
-            f'<ellipse class="queue-cap-right" cx="{x + width - rx:.1f}" '
-            f'cy="{y + ry:.1f}" rx="{rx}" ry="{ry:.1f}" fill="none" '
-            f'stroke="{QUEUE_STROKE}" stroke-width="1.5"/>'
-        )
-    else:
-        stroke = EXTERNAL_STROKE if node.kind == "external" else COMPONENT_STROKE
-        dash = ' stroke-dasharray="6 4"' if node.kind == "external" else ""
-        shape = (
-            f'<rect class="{node.kind}-shape" x="{x:.1f}" y="{y:.1f}" '
-            f'width="{width}" height="{height:.1f}" rx="4" fill="#ffffff" '
-            f'stroke="{stroke}" stroke-width="1.5"{dash}/>'
-        )
-    parts = [shape]
+    x, y, width, height = _front_geometry(card)
+    parts = []
+    if node.many:
+        for offset in (0, MANY_STEP):
+            parts.append(
+                _node_shape_svg(
+                    node,
+                    card.x + offset,
+                    card.y + offset,
+                    CARD_WIDTH - offset,
+                    height,
+                )
+            )
+    parts.append(_node_shape_svg(node, x, y, width, height))
     if node.link is not None:
         title_href = page_href(page.id, node.link)
     else:
@@ -575,7 +735,7 @@ def _card_svg(card: _Card, *, page: Page, repo_url: str) -> str:
     details_start_y += DETAIL_FONT_SIZE
     if node.kind != "component":
         details_start_y += DETAIL_TOP_GAP
-    left = x + CARD_PADDING + (QUEUE_CAP_RX if node.kind == "queue" else 0)
+    left = x + CARD_PADDING + (QUEUE_NOTCH if node.kind == "queue" else 0)
     detail_y = details_start_y
     for detail in node.details:
         lines = _detail_lines(node, detail.text)
@@ -667,6 +827,7 @@ def _legend_entries() -> list[tuple[str, str]]:
         ("queue", "queue/stream"),
         ("external", "external system"),
         ("group", "group"),
+        ("many", "many instances"),
     ]
 
 
@@ -693,10 +854,16 @@ def _legend_shape_svg(kind: str, x: float, y: float) -> str:
             f'fill="{STORE_FILL}" stroke="{STORE_STROKE}" stroke-width="1.2"/>'
         )
     if kind == "queue":
+        points = _chevron_points(
+            x,
+            y - LEGEND_QUEUE_HEIGHT / 2,
+            LEGEND_QUEUE_WIDTH,
+            LEGEND_QUEUE_HEIGHT,
+            LEGEND_QUEUE_NOTCH,
+        )
         return (
-            f'<path d="M{x + 4:.1f} {y - 6:.1f} H{x + 16:.1f} '
-            f"A4 6 0 0 1 {x + 16:.1f} {y + 6:.1f} H{x + 4:.1f} "
-            f'A4 6 0 0 1 {x + 4:.1f} {y - 6:.1f} Z" '
+            f'<polygon class="queue-legend-shape" '
+            f'points="{points}" '
             f'fill="{QUEUE_FILL}" stroke="{QUEUE_STROKE}" stroke-width="1.2"/>'
         )
     if kind == "external":
@@ -704,6 +871,13 @@ def _legend_shape_svg(kind: str, x: float, y: float) -> str:
             f'<rect x="{x:.1f}" y="{y - 7:.1f}" width="18" height="14" rx="2" '
             f'fill="#ffffff" stroke="{EXTERNAL_STROKE}" stroke-width="1.2" '
             'stroke-dasharray="4 3"/>'
+        )
+    if kind == "many":
+        return "".join(
+            f'<rect x="{x + offset:.1f}" y="{y - 6 + offset:.1f}" '
+            'width="12" height="10" rx="2" fill="#ffffff" '
+            f'stroke="{COMPONENT_STROKE}" stroke-width="1.2"/>'
+            for offset in (0, 3, 6)
         )
     return (
         f'<rect x="{x:.1f}" y="{y - 7:.1f}" width="18" height="14" rx="4" '
