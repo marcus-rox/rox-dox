@@ -420,6 +420,7 @@ class Related(Model):
 class Page(Model):
     id: str
     title: str
+    kind: Literal["root", "domain", "feature"]
     commit: str
     parent: str | None
     paths: list[str] = Field(min_length=1)

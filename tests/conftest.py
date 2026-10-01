@@ -29,6 +29,9 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
     (repo / "pkg").mkdir()
     (repo / "pkg" / "sub").mkdir()
     (repo / "README.md").write_text("Repository fixture\n", encoding="utf-8")
+    other_path = repo / "other" / "thing"
+    other_path.mkdir(parents=True)
+    (other_path / "c.py").write_text("distant feature source\n", encoding="utf-8")
     source_file = repo / "pkg" / "a.py"
     source_file.write_text(
         "\n".join(f"line {line_number}" for line_number in range(1, 11)) + "\n",
@@ -63,6 +66,7 @@ def git_repo(tmp_path: Path) -> tuple[Path, str]:
             "add",
             "pkg/a.py",
             "pkg/sub/b.py",
+            "other/thing/c.py",
             "models/user.py",
             "README.md",
         ],
@@ -91,6 +95,7 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
     return {
         "id": "rox-core",
         "title": "Rox Core",
+        "kind": "root",
         "commit": commit,
         "parent": None,
         "paths": ["."],
@@ -176,6 +181,7 @@ def site_pages(page_data: dict[str, object]) -> list[dict[str, object]]:
     child = copy.deepcopy(page_data)
     child["id"] = "rox-core/pkg"
     child["title"] = "pkg"
+    child["kind"] = "domain"
     child["parent"] = "rox-core"
     child["paths"] = ["pkg"]
     child["block"]["nodes"][0]["link"] = "rox-core/pkg/sub"
@@ -183,7 +189,8 @@ def site_pages(page_data: dict[str, object]) -> list[dict[str, object]]:
     leaf = copy.deepcopy(page_data)
     leaf["id"] = "rox-core/pkg/sub"
     leaf["title"] = "sub"
+    leaf["kind"] = "feature"
     leaf["parent"] = "rox-core/pkg"
-    leaf["paths"] = ["pkg/sub"]
+    leaf["paths"] = ["other/thing"]
 
     return [root, child, leaf]
