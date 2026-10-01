@@ -17,6 +17,9 @@ from rox_dox.relations import find_relation_candidates
 from rox_dox.schema import Table, extract_tables
 
 
+DomainReason = Literal["tables", "calls", "called_by"]
+
+
 class FeatureEvidence(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -455,7 +458,7 @@ def _table_line(
 def _domain_scope(
     graph: Mapping[str, _GraphFile],
     domain_tables: Mapping[str, Collection[str]],
-) -> tuple[dict[str, list[str]], dict[str, str]]:
+) -> tuple[dict[str, list[str]], dict[str, DomainReason]]:
     table_domain = {
         table: domain_id
         for domain_id, tables in domain_tables.items()
@@ -471,7 +474,7 @@ def _domain_scope(
         if count
     }
     domains: dict[str, list[str]] = {}
-    reasons: dict[str, str] = {}
+    reasons: dict[str, DomainReason] = {}
     for path in sorted(graph):
         graph_file = graph[path]
         if not graph_file.tables or (
@@ -1026,7 +1029,7 @@ def build_feature_map(
             _Placement(
                 feature=feature,
                 primary=True,
-                reason=reason,  # type: ignore[arg-type]
+                reason=reason,
                 evidence=_backend_evidence(
                     path,
                     feature,
@@ -1080,7 +1083,7 @@ def build_feature_map(
                         _Placement(
                             feature=other_feature,
                             primary=False,
-                            reason=reason,  # type: ignore[arg-type]
+                            reason=reason,
                             evidence=evidence,
                         )
                     )
@@ -1142,43 +1145,44 @@ def build_feature_map(
         ]
 
     for _ in range(2):
+        placed_snapshot = web_placements.copy()
+        new: dict[str, list[_Placement]] = {}
         for path in web_paths:
-            if path in web_placements or _route_tags(path, snapshot.files[path]):
+            if path in placed_snapshot or _route_tags(path, snapshot.files[path]):
                 continue
-            imported_paths = sorted(
-                resolved
-                for imported, _ in _web_imports(path, snapshot.files[path])
+            resolved_imports = [
+                (resolved, line)
+                for imported, line in _web_imports(path, snapshot.files[path])
                 if (resolved := _resolve_web_import(path, imported, web_files))
-                and resolved in web_placements
-            )
+            ]
+            placed_imports = [
+                (imported_path, line)
+                for imported_path, line in resolved_imports
+                if imported_path in placed_snapshot
+            ]
             imported_features = [
                 placement.feature
-                for imported_path in imported_paths
-                for placement in web_placements[imported_path]
+                for imported_path, _ in placed_imports
+                for placement in placed_snapshot[imported_path]
                 if placement.primary
             ]
-            if not imported_features:
+            if not imported_features or not resolved_imports:
                 continue
             counts = Counter(imported_features)
             feature = _most_common_lowest(counts)
             count = counts[feature]
-            if count / len(imported_paths) <= 0.5:
+            if count / len(resolved_imports) <= 0.5:
                 continue
             evidence = [
                 FeatureEvidence(
                     kind="call",
                     to=imported_path,
                     path=path,
-                    line=next(
-                        line
-                        for imported, line in _web_imports(path, snapshot.files[path])
-                        if _resolve_web_import(path, imported, web_files)
-                        == imported_path
-                    ),
+                    line=line,
                 )
-                for imported_path in imported_paths
+                for imported_path, line in placed_imports
             ]
-            web_placements[path] = [
+            new[path] = [
                 _Placement(
                     feature=feature,
                     primary=True,
@@ -1186,6 +1190,7 @@ def build_feature_map(
                     evidence=_bounded_evidence(evidence),
                 )
             ]
+        web_placements.update(new)
 
     deployment_paths = {
         path

@@ -344,6 +344,61 @@ def test_web_routes_and_unmapped_tags(tmp_path: Path) -> None:
     assert feature_map.counts.web == 1
 
 
+def test_web_calls_use_all_imports_and_two_snapshot_passes(tmp_path: Path) -> None:
+    sources = {
+        **_base_sources(),
+        "web/apps/web/src/route-one.tsx": (
+            'import "#/app/hooks/react-query/generated/sequences/sequences";\n'
+        ),
+        "web/apps/web/src/route-two.tsx": (
+            'import "#/app/hooks/react-query/generated/sequences/sequences";\n'
+        ),
+        "web/apps/web/src/unplaced-one.ts": "export const one = 1;\n",
+        "web/apps/web/src/unplaced-two.ts": "export const two = 2;\n",
+        "web/apps/web/src/unplaced-three.ts": "export const three = 3;\n",
+        "web/apps/web/src/below-threshold.tsx": (
+            'import routeOne from "./route-one";\n'
+            'import one from "./unplaced-one";\n'
+            'import two from "./unplaced-two";\n'
+        ),
+        "web/apps/web/src/above-threshold.tsx": (
+            'import routeOne from "./route-one";\n'
+            'import routeTwo from "./route-two";\n'
+            'import three from "./unplaced-three";\n'
+        ),
+        "web/apps/web/src/chain-a.tsx": 'import chainB from "./chain-b";\n',
+        "web/apps/web/src/chain-b.tsx": 'import chainC from "./chain-c";\n',
+        "web/apps/web/src/chain-c.tsx": (
+            'import "#/app/hooks/react-query/generated/sequences/sequences";\n'
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    feature_map = build_feature_map(
+        repo,
+        commit,
+        {"seq": ["campaign", "sequence"]},
+        "seq",
+    )
+    sequence = _feature_by_table(feature_map, "sequence")
+    sequence_files = {file.path: file for file in sequence.files}
+    placed_paths = {
+        file.path for feature in feature_map.features for file in feature.files
+    }
+
+    assert "web/apps/web/src/below-threshold.tsx" not in placed_paths
+    assert sequence_files["web/apps/web/src/above-threshold.tsx"].reason == "calls"
+    assert sequence_files["web/apps/web/src/chain-b.tsx"].reason == "calls"
+    assert sequence_files["web/apps/web/src/chain-a.tsx"].reason == "calls"
+    assert {
+        evidence.to
+        for evidence in sequence_files["web/apps/web/src/above-threshold.tsx"].evidence
+        if evidence.kind == "call"
+    } == {
+        "web/apps/web/src/route-one.tsx",
+        "web/apps/web/src/route-two.tsx",
+    }
+
+
 def test_deployment_and_skill_references_join_their_feature(
     tmp_path: Path,
 ) -> None:
