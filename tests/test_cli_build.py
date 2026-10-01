@@ -40,6 +40,17 @@ def _write_page(pages_dir: Path, filename: str, page: dict[str, object]) -> None
     (pages_dir / filename).write_text(json.dumps(page), encoding="utf-8")
 
 
+def test_page_loader_ignores_component_catalog(tmp_path: Path) -> None:
+    pages_dir = tmp_path / "pages"
+    pages_dir.mkdir()
+    (pages_dir / "components.json").write_text(
+        json.dumps([{"id": "web", "label": "web"}]),
+        encoding="utf-8",
+    )
+
+    assert cli._load_pages(pages_dir) == []
+
+
 def test_build_writes_complete_page_under_page_id_path(
     tmp_path: Path,
     git_repo: tuple[Path, str],

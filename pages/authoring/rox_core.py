@@ -147,6 +147,11 @@ s_rn_batch = S(
 s_rn_agent = S(RN, 'elif deploy_target == "AGENT":', 'elif deploy_target == "BACKFILL"')
 s_rn_fastapi = S(RN, '    deploy_target == "CHAT"', "# Uses FastAPI")
 s_rn_webhook = S(RN, 'elif deploy_target == "WEBHOOK":', "sequences_tracking_ns, path=")
+s_init_webhook = S(
+    INIT,
+    'if deploy_target_for_blueprints == "WEBHOOK":',
+    "app.register_blueprint(twilio_webhook_v2_bp)",
+)
 s_rn_unknown = S(RN, 'raise ValueError(f"DEPLOY_TARGET', span=0)
 s_rn_sf = S(RN, "salesforce_enrichment_ns, path=", "hubspot_enrichment_ns, path=")
 s_rn_dialer = S(
@@ -2742,6 +2747,169 @@ page = {
     "related": related,
 }
 
+root_nodes_by_id = {node["id"]: node for node in nodes}
+component_catalog = [
+    {
+        "id": "web",
+        "root_id": "web",
+        "kind": "client",
+        "column": "Callers",
+        "match": {"web_files": True},
+    },
+    {
+        "id": "provider_push",
+        "label": "Provider push",
+        "kind": "external",
+        "shape": "external",
+        "many": False,
+        "column": "Callers",
+        "match": {"implied_by": "WEBHOOK endpoint"},
+        "source": s_init_webhook,
+    },
+    {
+        "id": "interaction",
+        "root_id": "interaction",
+        "kind": "service",
+        "column": "HTTP services",
+        "match": {
+            "deploy_targets": ["INTERACTION"],
+            "queue_type_classes": ["InteractionQueueType"],
+        },
+    },
+    {
+        "id": "webhook",
+        "root_id": "interaction",
+        "label": "WEBHOOK (Flask)",
+        "kind": "service",
+        "column": "HTTP services",
+        "match": {"deploy_targets": ["WEBHOOK"]},
+        "extra_sources": [s_rn_webhook, s_init_webhook],
+    },
+    {
+        "id": "chat",
+        "root_id": "chat",
+        "kind": "service",
+        "column": "HTTP services",
+        "match": {"path_prefixes": ["backend/src/chat/"]},
+    },
+    {
+        "id": "public_api",
+        "root_id": "public_api",
+        "kind": "service",
+        "column": "HTTP services",
+        "match": {"path_prefixes": ["backend/src/public_api/"]},
+    },
+    {
+        "id": "mcp",
+        "root_id": "mcp",
+        "kind": "service",
+        "column": "HTTP services",
+        "match": {"path_prefixes": ["backend/src/external_mcp/"]},
+    },
+    {
+        "id": "temporal",
+        "root_id": "temporal_workers",
+        "label": "Temporal workflows",
+        "kind": "queue",
+        "column": "Workflows",
+        "match": {
+            "worker_kinds": ["temporal_workflow", "temporal_activity"],
+            "workflow_start_callers": True,
+        },
+    },
+    {
+        "id": "sqs",
+        "root_id": "sqs",
+        "label": "SQS queues",
+        "kind": "queue",
+        "column": "Queues",
+        "match": {"task_producers_or_consumers": True},
+    },
+    {
+        "id": "agent_workers",
+        "root_id": "agent_workers",
+        "kind": "service(many)",
+        "column": "Background workers",
+        "match": {
+            "deploy_targets": [
+                "AGENT",
+                "REALTIMEAGENT",
+                "EXTRACTIONAGENT",
+                "ASYNC_AGENT",
+            ]
+        },
+    },
+    {
+        "id": "data_workers",
+        "root_id": "data_workers",
+        "kind": "service(many)",
+        "column": "Background workers",
+        "match": {
+            "deploy_targets": ["SOR", "BATCH", "BACKFILL", "INTEGRATION"]
+        },
+    },
+    {
+        "id": "outreach_sched",
+        "root_id": "outreach_sched",
+        "kind": "service(many)",
+        "column": "Background workers",
+        "match": {"deploy_targets": ["OUTREACH", "WORKFLOWSCHEDULER"]},
+    },
+    {
+        "id": "postgres",
+        "root_id": "postgres",
+        "label": "PostgreSQL",
+        "kind": "store",
+        "column": "Stores",
+        "match": {"table_access": True},
+    },
+    {
+        "id": "llm",
+        "root_id": "llm",
+        "kind": "external",
+        "column": "Provider APIs",
+        "match": {"external_services": ["OpenAI", "Anthropic", "LiteLLM"]},
+    },
+    {
+        "id": "crm",
+        "root_id": "crm",
+        "kind": "external",
+        "column": "Provider APIs",
+        "match": {
+            "external_services": [
+                "Salesforce",
+                "HubSpot",
+                "Google APIs",
+                "Slack",
+                "Microsoft identity",
+            ]
+        },
+    },
+    {
+        "id": "twilio",
+        "root_id": "twilio",
+        "kind": "external",
+        "column": "Provider APIs",
+        "match": {"external_services": ["Twilio"]},
+    },
+]
+for catalog_entry in component_catalog:
+    root_id = catalog_entry.pop("root_id", None)
+    root_node = root_nodes_by_id.get(root_id)
+    if root_node is not None:
+        catalog_entry.setdefault("label", root_node["label"])
+        catalog_entry["shape"] = root_node["kind"]
+        catalog_entry["many"] = root_node["many"]
+        catalog_entry["source"] = root_node["source"]
+    extra_sources = catalog_entry.pop("extra_sources", [])
+    if extra_sources:
+        catalog_entry["sources"] = [catalog_entry["source"], *extra_sources]
+
 out = Path(__file__).resolve().parents[1] / "rox-core.json"
 out.write_text(json.dumps(page, indent=2, ensure_ascii=False) + "\n")
 print("wrote", out, len(nodes), "nodes", len(edges), "edges")
+component_catalog_out = out.parent / "components.json"
+component_catalog_out.write_text(
+    json.dumps(component_catalog, indent=2, ensure_ascii=False) + "\n"
+)
+print("wrote", component_catalog_out, len(component_catalog), "components")

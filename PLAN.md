@@ -1,6 +1,6 @@
 # rox-dox — a feature tree of cited design docs for rox-core, regenerated on a schedule
 
-**Status · 2026-10-01 · planned.** Root page shipped (PRs 8–11); the folder-tree plan is closed in PLAN_deprecated.md. Next: step 1.
+**Status · 2026-10-01 · implementing cited runtime projections.** The approved c43 Activity diagrams define the visual style; `/home/ubuntu/scratch/projection_spec.md` defines the catalog and projection.
 
 ## The objective
 
@@ -25,6 +25,7 @@ from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
 4. **A block figure with more than five layout problems fails the build.** Arrows routed through
    the bottom bundle were unreadable.
 5. **Pages are self-contained HTML** that open offline from a local clone.
+6. **Queue mapping never guesses.** Only `ClassName.MEMBER` values mapped by `QUEUE_CONFIGS` get a deploy target; unknown values remain unmapped.
 
 ## Previous steps
 
@@ -35,21 +36,15 @@ from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
 | Whole repo as a folder tree (old step 2) | ❌ | Removed unrun — folders split features across layers |
 | Overlap between sibling folders in `chat` and `chat/routes` | ✅ | Siblings barely overlap; one feature spans distant folders · this session |
 | Prior work and brainstorm on parent → child generation | ✅ | Adopted an explicit page tree and full rebuilds; rejected writing parents from children · this session |
+| Feature maps, runtime facts, and cached generation | ✅ | Pinned-source feature and runtime extraction support generated pages · Tasks 82–112 |
+| Hand-authored Activity figures and forward-skip corridors | ✅ | Approved left-to-right reference style and readable routing · `c43ca202` |
+| Generated-page merge checkpoint | ✅ | Retained c43 diagram behavior and the compatible feature-tree work · `ce903d8` |
 
 ## Next steps
 
-1. **Feature map for one domain, Sequences & outreach.** Assign every backend and web file that
-   uses the domain's tables, or is called by code that does, to a feature by overlap (shared
-   tables plus calls). Output: a reviewable list of features → files → tables, plus the files
-   that fit nowhere. *Falsifier:* Marcus judges the groups are not features, or much of the
-   domain's code can't be placed. *Cost:* about half a session.
-2. **Pages for that domain.** The domain page and each feature page, written with the existing
-   page and diagram skills, linked through the left panel. *Falsifier:* Marcus can't tell from a
-   feature page what it stores and how it runs, or a spot check contradicts the code. *Cost:*
-   about 1 session.
-3. **Every domain plus the scheduled run.** One command regenerates the tree and every page
-   at the latest `main`; a schedule runs it daily at 00:00 UTC. *Falsifier:* an unattended run fails, or
-   spot-checked pages are wrong. *Cost:* 1–2 sessions, mostly agent time.
+1. **Reusable component catalog and source facts.** Generate the catalog from root citations, then extract deploy targets, routes, queue mappings, and workflow starts. *Falsifier:* a fact test disagrees with pinned source or an unknown queue expression is mapped. *Cost:* about half a session.
+2. **Feature and domain runtime projections.** Attribute in-scope files to catalog entries, produce cited edges and flow notes, and report unreachable files. *Falsifier:* synthetic projections violate the spec or any diagram element lacks source evidence. *Cost:* about one session.
+3. **Regenerate Activity and Seq, build, inspect, and deliver.** Regenerate only those domains, capture the requested figures, run the full checks, then checkpoint and push. *Falsifier:* generated figures fail validation or do not match the hand-authored style. *Cost:* about half a session.
 
 ## Decided
 
@@ -69,6 +64,10 @@ from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
 - **Accuracy and readability come before run cost.**
 - **No Notion on pages** (SPEC `R-3` retired).
 - **Superseded documents are renamed `*_deprecated.md`**, not deleted.
+- **Generated diagrams follow the c43 Activity style.** Catalog kinds stay semantic; rendering uses the existing component/store/external/queue shapes.
+- **Queue deploy targets come only from default `queue_type`.** Dynamic-routing fields are ignored; unknown expressions are reported, not inferred.
+- **Projection attribution starts at runtime entries and follows in-scope imports.** Unreached files are reported rather than assigned by guesswork.
+- **The diagram box budget is 15.** Merge provider boxes first and worker-pool boxes second only when needed.
 
 ## Out of scope
 
@@ -76,6 +75,8 @@ from the latest `main` (SPEC `R-2`, `R-4` to `R-9`; tasks in TASKS.md).
 - Running on every rox-core PR — there are too many; the schedule is enough.
 - Notion context and the right-hand panel — `R-3` retired by Marcus.
 - Pages per folder — folders only list the feature pages that cover them.
+- Regenerating domains other than Activity and Seq during this task.
+- Changes to `/home/ubuntu/rox-docs-t8` or `/home/ubuntu/rox-docs-main`.
 
 ## Open
 

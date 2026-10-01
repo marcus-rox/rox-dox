@@ -91,6 +91,8 @@ def _parser() -> argparse.ArgumentParser:
 def _load_pages(pages_dir: Path) -> list[tuple[Path, Page | None, str | None]]:
     pages = []
     for page_file in sorted(pages_dir.rglob("*.json")):
+        if page_file == pages_dir / "components.json":
+            continue
         try:
             page_data = json.loads(page_file.read_text(encoding="utf-8"))
             page = Page.model_validate(page_data)

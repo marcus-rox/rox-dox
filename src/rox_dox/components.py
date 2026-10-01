@@ -21,6 +21,7 @@ class Endpoint(Model):
     path: str
     handler: str
     line: int
+    deploy_target: str | None = None
 
 
 class Worker(Model):
@@ -38,6 +39,8 @@ class ExternalCall(Model):
 class TaskType(Model):
     name: str
     queue_type: str
+    queue_class: str | None = None
+    deploy_target: str | None = None
     path: str
     line: int
 
@@ -59,6 +62,8 @@ class TaskFacts(Model):
     task_types: list[TaskType]
     consumers: list[TaskConsumer]
     producers: list[TaskProducer]
+    unmapped_queue_type_count: int = 0
+    unmapped_queue_type_values: list[str] = Field(default_factory=list)
 
 
 class FileFacts(Model):
@@ -70,6 +75,7 @@ class FileFacts(Model):
     task_types: list[TaskType] = Field(default_factory=list)
     task_consumers: list[TaskConsumer] = Field(default_factory=list)
     task_producers: list[TaskProducer] = Field(default_factory=list)
+    workflow_starts: list[int] = Field(default_factory=list)
 
 
 def collect_task_facts(file_facts: Mapping[str, FileFacts]) -> TaskFacts:
@@ -88,11 +94,18 @@ def collect_task_facts(file_facts: Mapping[str, FileFacts]) -> TaskFacts:
         for file_fact in file_facts.values()
         for fact in file_fact.task_producers
     }
-    return TaskFacts(
-        task_types=sorted(
-            task_types.values(),
-            key=lambda fact: (fact.name, fact.queue_type, fact.path, fact.line),
+    ordered_task_types = sorted(
+        task_types.values(),
+        key=lambda fact: (
+            fact.name,
+            fact.queue_type or "",
+            fact.path,
+            fact.line,
         ),
+    )
+    unmapped = [fact for fact in ordered_task_types if fact.deploy_target is None]
+    return TaskFacts(
+        task_types=ordered_task_types,
         consumers=sorted(
             consumers.values(),
             key=lambda fact: (
@@ -105,6 +118,10 @@ def collect_task_facts(file_facts: Mapping[str, FileFacts]) -> TaskFacts:
         producers=sorted(
             producers.values(),
             key=lambda fact: (fact.task_type, fact.path, fact.line),
+        ),
+        unmapped_queue_type_count=len(unmapped),
+        unmapped_queue_type_values=sorted(
+            {fact.queue_type for fact in unmapped},
         ),
     )
 
@@ -257,6 +274,126 @@ def _cached_namespace_prefixes(repo: Path, commit: str) -> dict[str, frozenset[s
     return _namespace_prefixes(repo, commit)
 
 
+def _condition_values(expression: ast.expr, variable: str) -> set[str]:
+    if isinstance(expression, ast.BoolOp):
+        return set().union(
+            *(_condition_values(value, variable) for value in expression.values)
+        )
+    if not isinstance(expression, ast.Compare) or len(expression.ops) != 1:
+        return set()
+    if not isinstance(expression.ops[0], ast.Eq) or len(expression.comparators) != 1:
+        return set()
+    left = _expression_parts(expression.left)
+    right = _constant_string(expression.comparators[0])
+    if left == [variable] and right is not None:
+        return {right}
+    right_parts = _expression_parts(expression.comparators[0])
+    left_value = _constant_string(expression.left)
+    if right_parts == [variable] and left_value is not None:
+        return {left_value}
+    return set()
+
+
+def _namespace_registration_targets(
+    tree: ast.Module,
+) -> dict[str, frozenset[tuple[str, str]]]:
+    registrations: defaultdict[str, set[tuple[str, str]]] = defaultdict(set)
+
+    def visit(node: ast.AST, target: str | None) -> None:
+        if isinstance(node, ast.If):
+            targets = _condition_values(node.test, "deploy_target")
+            if targets:
+                for selected in sorted(targets):
+                    for statement in node.body:
+                        visit(statement, selected)
+                for statement in node.orelse:
+                    visit(statement, target)
+            else:
+                for statement in (*node.body, *node.orelse):
+                    visit(statement, target)
+            return
+        if isinstance(node, ast.Call) and _call_name(node.func) == "add_namespace":
+            if target is not None and node.args and isinstance(node.args[0], ast.Name):
+                prefix = _keyword_string(node, "path")
+                if prefix is not None:
+                    registrations[node.args[0].id].add((prefix, target))
+        for child in ast.iter_child_nodes(node):
+            visit(child, target)
+
+    visit(tree, None)
+    return {name: frozenset(values) for name, values in registrations.items()}
+
+
+def _webhook_blueprint_paths(tree: ast.Module) -> frozenset[str]:
+    imported_modules: dict[str, str] = {}
+    registered_names: set[str] = set()
+
+    def visit(node: ast.AST, webhook_branch: bool = False) -> None:
+        if isinstance(node, ast.If):
+            is_webhook = "WEBHOOK" in _condition_values(
+                node.test, "deploy_target_for_blueprints"
+            )
+            for statement in node.body:
+                visit(statement, webhook_branch or is_webhook)
+            for statement in node.orelse:
+                visit(statement, webhook_branch)
+            return
+        if webhook_branch and isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                imported_modules[alias.asname or alias.name] = node.module
+        if (
+            webhook_branch
+            and isinstance(node, ast.Call)
+            and _call_name(node.func) == "register_blueprint"
+            and node.args
+            and isinstance(node.args[0], ast.Name)
+        ):
+            registered_names.add(node.args[0].id)
+        for child in ast.iter_child_nodes(node):
+            visit(child, webhook_branch)
+
+    visit(tree)
+    return frozenset(
+        "backend/src/" + imported_modules[name].replace(".", "/") + ".py"
+        for name in registered_names
+        if name in imported_modules
+    )
+
+
+def _queue_deploy_targets(tree: ast.Module) -> dict[str, str]:
+    classes_by_target: defaultdict[str, set[str]] = defaultdict(set)
+    for node in tree.body:
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        if not any(
+            "QUEUE_CONFIGS" in _assignment_names(target) for target in targets
+        ):
+            continue
+        if not isinstance(node.value, ast.Dict):
+            continue
+        for deploy_target, config in zip(node.value.keys, node.value.values, strict=True):
+            target_name = _constant_string(deploy_target)
+            if (
+                target_name is None
+                or not isinstance(config, (ast.Tuple, ast.List))
+                or len(config.elts) < 2
+            ):
+                continue
+            queue_class = _constant_string(config.elts[1])
+            if queue_class is not None:
+                classes_by_target[target_name].add(queue_class)
+    targets_by_class: defaultdict[str, set[str]] = defaultdict(set)
+    for deploy_target, queue_classes in classes_by_target.items():
+        for queue_class in queue_classes:
+            targets_by_class[queue_class].add(deploy_target)
+    return {
+        queue_class: next(iter(targets))
+        for queue_class, targets in targets_by_class.items()
+        if len(targets) == 1
+    }
+
+
 def _join_path(prefix: str, path: str) -> str:
     parts = [value.strip("/") for value in (prefix, path) if value.strip("/")]
     return "/" + "/".join(parts) if parts else "/"
@@ -272,6 +409,7 @@ def _flask_endpoints(
     tree: ast.Module,
     path: str,
     prefixes: dict[str, frozenset[str]],
+    registrations: dict[str, frozenset[tuple[str, str]]],
 ) -> list[tuple[str, Endpoint]]:
     namespaces = _namespace_names(tree)
     endpoints = []
@@ -289,28 +427,104 @@ def _flask_endpoints(
             route_path = _constant_string(call.args[0]) if call.args else ""
             if route_path is None:
                 continue
-            registered = prefixes.get(namespace_variable, frozenset())
-            prefix = (
-                next(iter(registered))
-                if len(registered) == 1
-                else "/" + namespace.strip("/")
+            registered = registrations.get(namespace_variable, frozenset())
+            routed_targets = (
+                sorted(registered)
+                if registered
+                else [
+                    (
+                        next(iter(prefixes[namespace_variable]))
+                        if len(prefixes.get(namespace_variable, ())) == 1
+                        else "/" + namespace.strip("/"),
+                        "",
+                    )
+                ]
             )
             for method in node.body:
                 if (
                     isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
                     and method.name in HTTP_METHODS
                 ):
-                    endpoints.append(
-                        (
-                            namespace,
-                            Endpoint(
-                                method=method.name.upper(),
-                                path=_join_path(prefix, route_path),
-                                handler=node.name,
-                                line=decorator.lineno,
-                            ),
+                    for prefix, deploy_target in routed_targets:
+                        endpoints.append(
+                            (
+                                namespace,
+                                Endpoint(
+                                    method=method.name.upper(),
+                                    path=_join_path(prefix, route_path),
+                                    handler=node.name,
+                                    line=decorator.lineno,
+                                    deploy_target=deploy_target or None,
+                                ),
+                            )
                         )
+    return endpoints
+
+
+def _blueprint_endpoints(
+    tree: ast.Module,
+    path: str,
+    webhook_blueprint_paths: frozenset[str],
+) -> list[tuple[str, Endpoint]]:
+    if path not in webhook_blueprint_paths:
+        return []
+    blueprints = {}
+    for variable, value in _module_assignments(tree):
+        if not isinstance(value, ast.Call) or not (
+            (_expression_parts(value.func) or [])[-1:] == ["Blueprint"]
+        ):
+            continue
+        name = _constant_string(value.args[0]) if value.args else variable
+        prefix = _keyword_string(value, "url_prefix") or ""
+        blueprints[variable] = (name, prefix)
+    endpoints = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for decorator in node.decorator_list:
+            parts, call = _decorator_call(decorator)
+            if len(parts) < 2 or parts[-1] != "route" or call is None:
+                continue
+            blueprint = blueprints.get(parts[-2])
+            if blueprint is None:
+                continue
+            route_path = _constant_string(call.args[0]) if call.args else ""
+            if route_path is None:
+                continue
+            methods = next(
+                (
+                    keyword.value
+                    for keyword in call.keywords
+                    if keyword.arg == "methods"
+                ),
+                None,
+            )
+            method_names = (
+                [
+                    value
+                    for value in (
+                        _constant_string(item)
+                        for item in methods.elts
                     )
+                    if value is not None
+                ]
+                if isinstance(methods, (ast.List, ast.Tuple))
+                else ["GET"]
+            )
+            group, prefix = blueprint
+            for method in method_names:
+                endpoints.append(
+                    (
+                        group,
+                        Endpoint(
+                            method=method.upper(),
+                            path=_join_path(prefix, route_path),
+                            handler=node.name,
+                            line=decorator.lineno,
+                            deploy_target="WEBHOOK",
+                        ),
+                    )
+                )
     return endpoints
 
 
@@ -437,7 +651,16 @@ def _task_type_names(expression: ast.expr) -> list[str]:
     return sorted(names)
 
 
-def _task_type_facts(tree: ast.Module, path: str) -> list[TaskType]:
+def _queue_type_class(expression: ast.expr | None) -> str | None:
+    parts = _expression_parts(expression) if expression is not None else None
+    return parts[0] if parts is not None and len(parts) == 2 else None
+
+
+def _task_type_facts(
+    tree: ast.Module,
+    path: str,
+    queue_deploy_targets: Mapping[str, str],
+) -> list[TaskType]:
     facts = []
     for node in tree.body:
         if not isinstance(node, ast.ClassDef) or node.name != TASK_TYPE_CLASS:
@@ -456,27 +679,41 @@ def _task_type_facts(tree: ast.Module, path: str) -> list[TaskType]:
                 or _call_name(value.func) != TASK_TYPE_INFO_CALL
             ):
                 continue
-            queue_type = next(
+            queue_expression = next(
                 (
-                    ast.unparse(keyword.value)
+                    keyword.value
                     for keyword in value.keywords
                     if keyword.arg == QUEUE_TYPE_KEYWORD
                 ),
                 None,
             )
+            queue_type = (
+                ast.unparse(queue_expression) if queue_expression is not None else None
+            )
             if queue_type is None:
                 continue
+            queue_class = _queue_type_class(queue_expression)
             for target in targets:
                 if isinstance(target, ast.Name):
                     facts.append(
                         TaskType(
                             name=target.id,
                             queue_type=queue_type,
+                            queue_class=queue_class,
+                            deploy_target=queue_deploy_targets.get(queue_class),
                             path=path,
                             line=statement.lineno,
                         )
                     )
-    return sorted(facts, key=lambda fact: (fact.name, fact.path, fact.line))
+    return sorted(
+        facts,
+        key=lambda fact: (
+            fact.name,
+            fact.queue_type or "",
+            fact.path,
+            fact.line,
+        ),
+    )
 
 
 def _task_consumer_facts(tree: ast.Module, path: str) -> list[TaskConsumer]:
@@ -569,6 +806,9 @@ def _file_facts(
     path: str,
     source: str,
     prefixes: dict[str, frozenset[str]],
+    registrations: dict[str, frozenset[tuple[str, str]]],
+    webhook_blueprint_paths: frozenset[str],
+    queue_deploy_targets: Mapping[str, str],
 ) -> FileFacts:
     endpoints: list[tuple[str, Endpoint]] = []
     if path.endswith(".py"):
@@ -582,13 +822,23 @@ def _file_facts(
                 workers=[],
                 externals=[],
             )
-        endpoints.extend(_flask_endpoints(tree, path, prefixes))
+        endpoints.extend(_flask_endpoints(tree, path, prefixes, registrations))
+        endpoints.extend(_blueprint_endpoints(tree, path, webhook_blueprint_paths))
         endpoints.extend(_fastapi_endpoints(tree, path))
         workers = _worker_facts(tree)
         externals = _external_facts(tree)
-        task_types = _task_type_facts(tree, path)
+        task_types = _task_type_facts(tree, path, queue_deploy_targets)
         task_consumers = _task_consumer_facts(tree, path)
         task_producers = _task_producer_facts(tree, path)
+        workflow_starts = sorted(
+            {
+                node.lineno
+                for node in ast.walk(tree)
+                if isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"start_workflow", "execute_workflow"}
+            }
+        )
     else:
         return FileFacts(
             path=path,
@@ -620,6 +870,7 @@ def _file_facts(
         task_types=task_types,
         task_consumers=task_consumers,
         task_producers=task_producers,
+        workflow_starts=workflow_starts,
     )
 
 
@@ -632,11 +883,46 @@ def _extract_file_facts(
     missing = sorted(path for path in requested if path not in tree)
     if missing:
         raise ValueError(f"paths are missing at {commit}: {', '.join(missing)}")
-    python_paths = [path for path in requested if path.endswith(".py")]
+    config_paths = {
+        "backend/src/rox_core/api/register_namespaces.py",
+        "backend/src/rox_core/__init__.py",
+        "backend/src/util/listener_utils.py",
+    }
+    needed_paths = set(requested) | (config_paths & tree.keys())
+    python_paths = sorted(path for path in needed_paths if path.endswith(".py"))
     sources = _git_blobs(repo, [(path, tree[path]) for path in python_paths])
     prefixes = _cached_namespace_prefixes(repo.resolve(), commit)
+    namespace_path = "backend/src/rox_core/api/register_namespaces.py"
+    blueprint_path = "backend/src/rox_core/__init__.py"
+    queue_config_path = "backend/src/util/listener_utils.py"
+    namespace_tree = (
+        ast.parse(sources[namespace_path], filename=namespace_path)
+        if namespace_path in sources
+        else ast.Module(body=[], type_ignores=[])
+    )
+    blueprint_tree = (
+        ast.parse(sources[blueprint_path], filename=blueprint_path)
+        if blueprint_path in sources
+        else ast.Module(body=[], type_ignores=[])
+    )
+    queue_config_tree = (
+        ast.parse(sources[queue_config_path], filename=queue_config_path)
+        if queue_config_path in sources
+        else ast.Module(body=[], type_ignores=[])
+    )
+    registrations = _namespace_registration_targets(namespace_tree)
+    webhook_blueprint_paths = _webhook_blueprint_paths(blueprint_tree)
+    queue_deploy_targets = _queue_deploy_targets(queue_config_tree)
     return {
-        path: _file_facts(path, sources.get(path, ""), prefixes) for path in requested
+        path: _file_facts(
+            path,
+            sources.get(path, ""),
+            prefixes,
+            registrations,
+            webhook_blueprint_paths,
+            queue_deploy_targets,
+        )
+        for path in requested
     }
 
 

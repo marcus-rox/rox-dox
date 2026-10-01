@@ -40,6 +40,9 @@ def main() -> None:
     ]
 
     root_page = json.loads((pages_dir / "rox-core.json").read_text(encoding="utf-8"))
+    component_catalog = json.loads(
+        (pages_dir / "components.json").read_text(encoding="utf-8")
+    )
     names = json.loads(
         (project_root / "features" / "names.json").read_text(encoding="utf-8")
     )
@@ -118,6 +121,7 @@ def main() -> None:
                 primary_features=primary_features,
                 domain_titles=domain_titles,
                 table_domains=table_domains,
+                component_catalog=component_catalog,
             )
         )
 

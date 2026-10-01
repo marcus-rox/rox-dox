@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from rox_dox.components import extract_file_facts
+from rox_dox.components import collect_task_facts, extract_file_facts
 
 
 def _commit_sources(
@@ -318,3 +318,139 @@ def test_task_types_consumers_and_producers_are_extracted(tmp_path: Path) -> Non
         (worker.name, worker.line)
         for worker in facts["backend/src/tasks/notification_sender.py"].workers
     ] == [("NotificationSenderTaskExecutor", 4)]
+
+
+def test_namespace_registration_records_webhook_deploy_target(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/rox_core/api/register_namespaces.py": (
+            'if deploy_target == "WEBHOOK":\n'
+            '    api.add_namespace(webhook_ns, path="/webhooks")\n'
+            'elif deploy_target == "INTERACTION":\n'
+            '    api.add_namespace(other_ns, path="/api")\n'
+        ),
+        "backend/src/rox_core/api/webhook/endpoints.py": (
+            "from flask_restx import Namespace\n"
+            'webhook_ns = Namespace("webhook")\n'
+            '@webhook_ns.route("/events")\n'
+            "class Events:\n"
+            "    def post(self):\n"
+            '        return "ok"\n'
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    endpoints = extract_file_facts(
+        repo,
+        commit,
+        ["backend/src/rox_core/api/webhook/endpoints.py"],
+    )["backend/src/rox_core/api/webhook/endpoints.py"].endpoints
+
+    assert [
+        (endpoint.path, endpoint.deploy_target) for endpoint in endpoints
+    ] == [("/webhooks/events", "WEBHOOK")]
+
+
+def test_webhook_blueprint_routes_are_extracted_with_methods(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/rox_core/__init__.py": (
+            "def create_app():\n"
+            '    if deploy_target_for_blueprints == "WEBHOOK":\n'
+            "        from rox_core.api.webhook.routes import webhook_bp\n"
+            "        app.register_blueprint(webhook_bp)\n"
+            "    else:\n"
+            "        pass\n"
+        ),
+        "backend/src/rox_core/api/webhook/routes.py": (
+            "from flask import Blueprint\n"
+            'webhook_bp = Blueprint("provider", __name__, url_prefix="/provider")\n'
+            '@webhook_bp.route("/events", methods=["POST", "GET"])\n'
+            "def receive_event():\n"
+            "    return None\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    endpoints = extract_file_facts(
+        repo,
+        commit,
+        ["backend/src/rox_core/api/webhook/routes.py"],
+    )["backend/src/rox_core/api/webhook/routes.py"].endpoints
+
+    assert [
+        (endpoint.method, endpoint.path, endpoint.deploy_target)
+        for endpoint in endpoints
+    ] == [
+        ("GET", "/provider/events", "WEBHOOK"),
+        ("POST", "/provider/events", "WEBHOOK"),
+    ]
+
+
+def test_enum_member_queue_class_maps_to_configured_deploy_target(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/util/listener_utils.py": (
+            "QUEUE_CONFIGS = {\n"
+            '    "INTERACTION": ("interaction task", "InteractionQueueType"),\n'
+            "}\n"
+        ),
+        "backend/src/tasks/types.py": (
+            "from enum import Enum\n"
+            "class TaskTypeInfo:\n"
+            "    pass\n"
+            "class TaskType(Enum):\n"
+            "    MAPPED = TaskTypeInfo(\n"
+            "        queue_type=InteractionQueueType.MEMBER,\n"
+            "        supports_dynamic_routing=True,\n"
+            "        dynamic_routing_enum=UnknownQueueType,\n"
+            "    )\n"
+            "    UNKNOWN = TaskTypeInfo(queue_type=UnknownQueueType.MEMBER)\n"
+            "    MALFORMED = TaskTypeInfo(queue_type=make_queue())\n"
+            "    MISSING = TaskTypeInfo()\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    facts = extract_file_facts(repo, commit, ["backend/src/tasks/types.py"])
+    task_facts = facts["backend/src/tasks/types.py"].task_types
+    tasks_by_name = {task.name: task for task in task_facts}
+
+    assert (
+        tasks_by_name["MAPPED"].queue_type,
+        tasks_by_name["MAPPED"].queue_class,
+        tasks_by_name["MAPPED"].deploy_target,
+    ) == (
+        "InteractionQueueType.MEMBER",
+        "InteractionQueueType",
+        "INTERACTION",
+    )
+    assert tasks_by_name["UNKNOWN"].deploy_target is None
+    assert tasks_by_name["MALFORMED"].queue_class is None
+    assert "MISSING" not in tasks_by_name
+    summary = collect_task_facts(facts)
+    assert summary.unmapped_queue_type_count == 2
+    assert summary.unmapped_queue_type_values == [
+        "UnknownQueueType.MEMBER",
+        "make_queue()",
+    ]
+
+
+def test_temporal_workflow_start_calls_are_recorded(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/rox_core/workers/start_workflow.py": (
+            "async def start(client):\n"
+            "    await client.start_workflow(MyWorkflow.run, id='one')\n"
+            "    await client.execute_workflow(MyWorkflow.run, id='two')\n"
+        )
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    facts = extract_file_facts(
+        repo,
+        commit,
+        ["backend/src/rox_core/workers/start_workflow.py"],
+    )["backend/src/rox_core/workers/start_workflow.py"]
+
+    assert facts.workflow_starts == [2, 3]
