@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 
@@ -5,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from rox_dox.cli import main
-from rox_dox.model import Page, page_sources
+from rox_dox.model import NotionDoc, Page, page_sources
 
 
 def test_valid_page_passes_check_command(
@@ -319,3 +320,61 @@ def test_related_item_requires_exactly_one_target(
 
     with pytest.raises(ValidationError, match="exactly one of page or url"):
         Page.model_validate(page_data)
+
+
+@pytest.mark.parametrize(
+    "paths",
+    [[], [""], ["/absolute"], ["pkg/../private"], ["pkg/"]],
+)
+def test_page_paths_must_be_nonempty_and_repo_relative(
+    page_data: dict[str, object],
+    paths: list[str],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["paths"] = paths
+
+    with pytest.raises(ValidationError):
+        Page.model_validate(payload)
+
+
+def test_notion_doc_title_cannot_be_empty(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["notion"] = [
+        {
+            "title": "",
+            "url": "https://www.notion.so/rox/API-guide-123",
+            "last_edited": "2026-06-10",
+            "excerpt": "Reference material.",
+        }
+    ]
+
+    with pytest.raises(ValidationError, match="title"):
+        Page.model_validate(payload)
+
+
+@pytest.mark.parametrize("excerpt", ["", "x" * 601])
+def test_notion_doc_excerpt_must_be_between_one_and_600_characters(
+    excerpt: str,
+) -> None:
+    with pytest.raises(ValidationError, match="excerpt"):
+        NotionDoc.model_validate(
+            {
+                "title": "API guide",
+                "url": "https://www.notion.so/rox/API-guide-123",
+                "last_edited": "2026-06-10",
+                "excerpt": excerpt,
+            }
+        )
+
+
+def test_notion_doc_excerpt_accepts_600_characters() -> None:
+    document = NotionDoc.model_validate(
+        {
+            "title": "API guide",
+            "url": "https://www.notion.so/rox/API-guide-123",
+            "last_edited": "2026-06-10",
+            "excerpt": "x" * 600,
+        }
+    )
+
+    assert len(document.excerpt) == 600

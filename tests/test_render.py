@@ -7,6 +7,7 @@ from pathlib import Path
 from rox_dox.links import source_url
 from rox_dox.model import Page
 from rox_dox.render import page_href, render_page
+from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 
@@ -31,7 +32,13 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
         {"path": "pkg/a.py", "lines": [4, 5]}
     )
     page = _empty_page(payload)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     first_source_url = source_url(
         page.tldr.summary[0].sources[0],
@@ -81,7 +88,13 @@ def test_related_page_links_are_relative_and_external_targets_link_out(
         },
     ]
     page = _empty_page(payload)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert page_href("a/b", "a/c/d") == "c/d.html"
     assert '<a href="c/d.html">Nested sibling</a>' in document
@@ -98,7 +111,13 @@ def test_empty_key_points_show_module_placeholder(
     plantuml_jar: Path,
 ) -> None:
     page = _empty_page(page_data)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert (
         '<h3>Key Points</h3><p class="empty">Nothing to show for this module.</p>'
@@ -113,7 +132,13 @@ def test_empty_notes_show_module_placeholder(
     payload = copy.deepcopy(page_data)
     payload["tldr"]["notes"] = []
     page = _empty_page(payload)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert (
         '<h3>Interesting Notes</h3><p class="empty">Nothing to show for this module.</p>'
@@ -129,7 +154,13 @@ def test_page_text_is_html_escaped(
     payload["title"] = 'Page <script>alert("unsafe")</script>'
     payload["tldr"]["summary"][0]["text"] = "Claim <img src=x>"
     page = _empty_page(payload)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     assert "<script>" not in document
     assert "&lt;script&gt;" in document
@@ -159,7 +190,13 @@ def test_same_title_diagrams_only_list_their_own_sources(
     second_state_machine["transitions"][0]["source"]["lines"] = [5, 6]
     payload["states"].append(second_state_machine)
     page = Page.model_validate(payload)
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
 
     sequence_cards = re.findall(
         r'<article class="diagram-card">(.*?)</article>',
@@ -231,7 +268,13 @@ def test_block_sources_table_includes_group_and_detail_citations(
     payload["states"] = []
     page = Page.model_validate(payload)
 
-    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
     block_section = re.search(r'<section id="block">.*?</section>', document, re.DOTALL)
     assert block_section is not None
     block_html = block_section.group()

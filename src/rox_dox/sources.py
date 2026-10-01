@@ -127,7 +127,28 @@ def page_problems(page: Page, repo: Path) -> list[str]:
         )
 
     for notion_doc in page.notion:
-        problem = _notion_problem(f"Notion doc '{notion_doc.title}'", notion_doc.url)
+        problem = _notion_problem(f"notion '{notion_doc.title}'", notion_doc.url)
         if problem is not None:
             problems.append(problem)
+
+    if commit_exists:
+        for path in page.paths:
+            if path == ".":
+                continue
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(repo),
+                    "cat-file",
+                    "-t",
+                    "--end-of-options",
+                    f"{page.commit}:{path}",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode != 0 or result.stdout.strip() != "tree":
+                problems.append(f"path '{path}' is not a folder at {page.commit[:8]}")
     return problems

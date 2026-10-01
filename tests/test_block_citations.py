@@ -4,6 +4,8 @@ from pathlib import Path
 import pytest
 
 from rox_dox.cli import main
+from rox_dox.model import Page
+from rox_dox.tree import build_tree, tree_problems
 
 
 def test_stale_node_detail_source_fails_check_with_its_label(
@@ -66,3 +68,41 @@ def test_stale_group_source_fails_check_with_its_label(
     output = capsys.readouterr().out
     assert "block group backend" in output
     assert "pkg/a.py" in output
+
+
+def test_tree_supports_grouped_nodes_and_checks_their_page_links(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": {"path": "pkg/a.py", "lines": [1, 3]},
+        }
+    ]
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    node = nodes[0]
+    assert isinstance(node, dict)
+    node["group"] = "backend"
+    node["details"] = [
+        {
+            "text": "Handles requests",
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    ]
+
+    page = Page.model_validate(page_data)
+
+    assert tree_problems([page]) == []
+    tree = build_tree([page])
+    assert tree.root == page.id
+    assert tree.pages[page.id] is page
+
+    node["link"] = "missing-page"
+    page_with_missing_link = Page.model_validate(page_data)
+    assert tree_problems([page_with_missing_link]) == [
+        "block node api: link to missing page 'missing-page'"
+    ]
