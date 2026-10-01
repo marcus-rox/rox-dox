@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 from collections import defaultdict
 from collections.abc import Collection
 from functools import lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Literal
 
+from rox_dox.cache import get_or_compute
 from rox_dox.features import _git_blobs, _git_tree
 from rox_dox.model import Model
 
@@ -433,12 +436,11 @@ def _file_facts(
     )
 
 
-def extract_file_facts(
+def _extract_file_facts(
     repo: Path,
     commit: str,
-    paths: Collection[str],
+    requested: list[str],
 ) -> dict[str, FileFacts]:
-    requested = sorted(set(paths))
     tree = dict(_git_tree(repo, commit))
     missing = sorted(path for path in requested if path not in tree)
     if missing:
@@ -449,3 +451,19 @@ def extract_file_facts(
     return {
         path: _file_facts(path, sources.get(path, ""), prefixes) for path in requested
     }
+
+
+def extract_file_facts(
+    repo: Path,
+    commit: str,
+    paths: Collection[str],
+) -> dict[str, FileFacts]:
+    requested = sorted(set(paths))
+    paths_digest = hashlib.sha256(
+        json.dumps(requested, separators=(",", ":")).encode()
+    ).hexdigest()
+    return get_or_compute(
+        commit,
+        f"file-facts-{paths_digest}",
+        lambda: _extract_file_facts(repo, commit, requested),
+    )

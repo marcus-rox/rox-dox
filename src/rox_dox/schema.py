@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
+from rox_dox.cache import get_or_compute
 from rox_dox.model import CodeSource
 
 
@@ -200,7 +201,7 @@ def _tables_in_file(source: str, path: str) -> list[Table]:
     return tables
 
 
-def extract_tables(repo: Path, commit: str) -> dict[str, Table]:
+def _extract_tables(repo: Path, commit: str) -> dict[str, Table]:
     candidates = subprocess.run(
         [
             "git",
@@ -252,3 +253,7 @@ def extract_tables(repo: Path, commit: str) -> dict[str, Table]:
                 continue
             tables[table.name] = table
     return tables
+
+
+def extract_tables(repo: Path, commit: str) -> dict[str, Table]:
+    return get_or_compute(commit, "tables", lambda: _extract_tables(repo, commit))

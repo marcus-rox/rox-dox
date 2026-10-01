@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 import math
 import re
 import subprocess
@@ -13,6 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from tqdm import tqdm
 
+from rox_dox.cache import get_or_compute
 from rox_dox.relations import find_relation_candidates
 from rox_dox.schema import Table, extract_tables
 
@@ -261,7 +264,7 @@ def _git_blobs(repo: Path, objects: list[tuple[str, str]]) -> dict[str, str]:
     return contents
 
 
-def _snapshot(repo: Path, commit: str) -> _Snapshot:
+def _snapshot_from_git(repo: Path, commit: str) -> _Snapshot:
     tree = _git_tree(repo, commit)
     selected = []
     all_paths = {path for path, _ in tree}
@@ -269,6 +272,14 @@ def _snapshot(repo: Path, commit: str) -> _Snapshot:
         if is_feature_path(path):
             selected.append((path, object_id))
     return _Snapshot(_git_blobs(repo, selected), all_paths)
+
+
+def _snapshot(repo: Path, commit: str) -> _Snapshot:
+    return get_or_compute(
+        commit,
+        "snapshot",
+        lambda: _snapshot_from_git(repo, commit),
+    )
 
 
 def _module_name(path: str) -> str:
@@ -424,6 +435,33 @@ def _parse_graph(
                 path, table_name, tables, graph_file.tree
             )
     return parsed, unparseable
+
+
+def _cached_parse_graph(
+    repo: Path,
+    commit: str,
+    snapshot: _Snapshot,
+    tables: Mapping[str, Table],
+    domain_table_names: set[str],
+) -> tuple[dict[str, _GraphFile], int]:
+    signature = json.dumps(
+        {
+            "domain_tables": sorted(domain_table_names),
+            "tables": sorted(
+                (table.name, table.class_name, table.source.path)
+                for table in tables.values()
+            ),
+        },
+        separators=(",", ":"),
+    )
+    graph_key = hashlib.sha256(signature.encode()).hexdigest()
+    return get_or_compute(
+        commit,
+        f"parse-graph-{graph_key}",
+        lambda: _parse_graph(snapshot, tables, domain_table_names),
+    )
+
+
 
 
 def _first_import_line(
@@ -967,7 +1005,13 @@ def _prepare_feature_maps(
     snapshot = _snapshot(repo, commit)
     tables = extract_tables(repo, commit)
     all_domain_tables = {table for names in domain_tables.values() for table in names}
-    graph, parse_counts = _parse_graph(snapshot, tables, all_domain_tables)
+    graph, parse_counts = _cached_parse_graph(
+        repo,
+        commit,
+        snapshot,
+        tables,
+        all_domain_tables,
+    )
     domains, domain_reasons = _domain_scope(graph, domain_tables)
     return snapshot, tables, graph, parse_counts, domains, domain_reasons
 

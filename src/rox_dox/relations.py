@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 import re
 import subprocess
 from collections.abc import Sequence
@@ -8,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from pathlib import PurePosixPath
 
+from rox_dox.cache import get_or_compute
 from rox_dox.schema import extract_tables
 
 COMMENTED_FOREIGN_KEY = re.compile(r"""#\s*ForeignKey\s*\(\s*["']([^"']+)["']\s*\)""")
@@ -368,7 +371,7 @@ def _file_candidates(
     ]
 
 
-def find_relation_candidates(
+def _find_relation_candidates(
     repo: Path,
     commit: str,
     tables: Sequence[str],
@@ -414,4 +417,20 @@ def find_relation_candidates(
             candidate.path,
             candidate.line,
         ),
+    )
+
+
+def find_relation_candidates(
+    repo: Path,
+    commit: str,
+    tables: Sequence[str],
+) -> list[RelationCandidate]:
+    table_names = sorted(set(tables))
+    table_digest = hashlib.sha256(
+        json.dumps(table_names, separators=(",", ":")).encode()
+    ).hexdigest()
+    return get_or_compute(
+        commit,
+        f"relation-candidates-{table_digest}",
+        lambda: _find_relation_candidates(repo, commit, table_names),
     )

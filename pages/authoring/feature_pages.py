@@ -5,7 +5,7 @@ from pathlib import Path
 import rox_core_domains
 from rox_dox.components import extract_file_facts
 from rox_dox.feature_pages import feature_pages
-from rox_dox.features import FeatureMap, _parse_graph, _snapshot
+from rox_dox.features import FeatureMap, _cached_parse_graph, _snapshot
 from rox_dox.schema import extract_tables
 
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
@@ -46,7 +46,13 @@ def main() -> None:
                 repo, feature_map.commit
             )
             snapshot = _snapshot(repo, feature_map.commit)
-            graph, _ = _parse_graph(snapshot, {}, set())
+            graph, _ = _cached_parse_graph(
+                repo,
+                feature_map.commit,
+                snapshot,
+                tables_by_commit[feature_map.commit],
+                set(tables_by_commit[feature_map.commit]),
+            )
             source_paths = sorted(graph)
             components_by_commit[feature_map.commit] = extract_file_facts(
                 repo,
