@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import rox_dox.cli as cli
+from rox_dox.relations import find_relation_candidates
 
 
 def _commit_relation_fixture(repo: Path) -> str:
@@ -162,4 +163,109 @@ def test_relations_resolve_duplicate_class_names_from_imports_and_mark_ambiguity
         f"{src}.id\t{dst}.id\tcomparison:ambiguous\tbackend/src/ambiguous_query.py:1"
         for src in ("person", "entity_person")
         for dst in ("person", "entity_person")
+    }
+
+
+def test_id_column_candidates_use_longest_table_suffix_and_column_match(
+    git_repo: tuple[Path, str],
+) -> None:
+    repo, _ = git_repo
+    path = repo / "backend/src/id_models.py"
+    source = (
+        "from sqlalchemy import Column, String\n"
+        "\n"
+        "class User:\n"
+        '    __tablename__ = "user"\n'
+        "    rox_user_id = Column(String)\n"
+        "    user_id = Column(String)\n"
+        "    public_id = Column(String)\n"
+        "    rox_org_id = Column(String)\n"
+        "\n"
+        "class Integration:\n"
+        '    __tablename__ = "integration"\n'
+        "    public_id = Column(String)\n"
+        "\n"
+        "class CalendarEvent:\n"
+        '    __tablename__ = "calendar_event"\n'
+        "    id = Column(String)\n"
+        "\n"
+        "class Event:\n"
+        '    __tablename__ = "event"\n'
+        "    id = Column(String)\n"
+        "\n"
+        "class Public:\n"
+        '    __tablename__ = "public"\n'
+        "    id = Column(String)\n"
+        "\n"
+        "class RoxOrg:\n"
+        '    __tablename__ = "rox_org"\n'
+        "    id = Column(String)\n"
+        "\n"
+        "class EmailMessageRecipient:\n"
+        '    __tablename__ = "email_message_recipient"\n'
+        "    recipient_rox_user_id = Column(String)\n"
+        "    integration_public_id = Column(String)\n"
+        "    calendar_event_id = Column(String)\n"
+        "    missing_id = Column(String)\n"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(source, encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "backend/src/id_models.py"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "Add ID relation fixture"],
+        check=True,
+        capture_output=True,
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    table_names = [
+        "user",
+        "integration",
+        "calendar_event",
+        "event",
+        "public",
+        "rox_org",
+        "email_message_recipient",
+    ]
+    candidates = find_relation_candidates(repo, commit, table_names)
+    id_candidates = {
+        (candidate.src, candidate.dst, candidate.line)
+        for candidate in candidates
+        if candidate.signal == "id_column"
+    }
+    source_lines = source.splitlines()
+    line_numbers = {
+        definition: source_lines.index(definition) + 1
+        for definition in (
+            "    recipient_rox_user_id = Column(String)",
+            "    integration_public_id = Column(String)",
+            "    calendar_event_id = Column(String)",
+        )
+    }
+
+    assert id_candidates == {
+        (
+            "email_message_recipient.recipient_rox_user_id",
+            "user.rox_user_id",
+            line_numbers["    recipient_rox_user_id = Column(String)"],
+        ),
+        (
+            "email_message_recipient.integration_public_id",
+            "integration.public_id",
+            line_numbers["    integration_public_id = Column(String)"],
+        ),
+        (
+            "email_message_recipient.calendar_event_id",
+            "calendar_event.id",
+            line_numbers["    calendar_event_id = Column(String)"],
+        ),
     }

@@ -1,0 +1,684 @@
+{
+ "id": "feature-crm-crm-writeback-audit-log",
+ "title": "Crm Writeback Audit Log",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-crm",
+ "paths": [
+  "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+  "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+  "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+  "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+  "backend/src/tasks/executors/writeback/audit_log_cleanup.py"
+ ],
+ "membership": [
+  {
+   "layer": "Background workers",
+   "rows": [
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/models/public_crm_writeback_audit_log.py; uses crm_writeback_audit_log",
+     "sources": [
+      {
+       "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+       "lines": [
+        10,
+        10
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "Business logic",
+   "rows": [
+    {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+     "primary": true,
+     "evidence": "imports backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+     "sources": [
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+       "lines": [
+        8,
+        8
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+     "primary": true,
+     "evidence": "imports backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py; imports backend/src/rox_core/models/public_crm_writeback_audit_log.py; imports backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py; uses crm_writeback_audit_log; uses crm_writeback_entity_snapshot",
+     "sources": [
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+       "lines": [
+        8,
+        8
+       ]
+      },
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+       "lines": [
+        22,
+        22
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "Models",
+   "rows": [
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "primary": true,
+     "evidence": "imports backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py; imports backend/src/tasks/executors/writeback/audit_log_cleanup.py; uses crm_writeback_audit_log",
+     "sources": [
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+       "lines": [
+        17,
+        17
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+       "lines": [
+        10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+     "primary": true,
+     "evidence": "imports backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py; uses crm_writeback_entity_snapshot",
+     "sources": [
+      {
+       "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+       "lines": [
+        22,
+        22
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+       "lines": [
+        14,
+        14
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Runs 2 background workers and workflows: AuditLoggerCleanupCoordinatorTaskExecutor, AuditLoggerCleanupTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+      "lines": [
+       97,
+       97
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+      "lines": [
+       145,
+       145
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: crm_writeback_audit_log, crm_writeback_entity_snapshot.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+      "lines": [
+       17,
+       83
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+      "lines": [
+       14,
+       68
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Background workers: backend/src/tasks/executors/writeback (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/ext_integrations/integration/crm/audit_log (2).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (2).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+      "lines": [
+       17,
+       17
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
+   ],
+   "rows": [
+    [
+     "Writeback (library)",
+     "Library code",
+     "crm_writeback_audit_log",
+     "—"
+    ],
+    [
+     "Table Cleanup queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Writeback workers",
+     "Queue worker",
+     "crm_writeback_audit_log",
+     "—"
+    ],
+    [
+     "crm_writeback_audit_log",
+     "Database",
+     "crm_writeback_audit_log",
+     "—"
+    ],
+    [
+     "crm_writeback_entity_snapshot",
+     "Database",
+     "crm_writeback_entity_snapshot",
+     "—"
+    ],
+    [
+     "Audit Log (library)",
+     "Library code",
+     "crm_writeback_audit_log, crm_writeback_entity_snapshot",
+     "—"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "crm_writeback_audit_log, crm_writeback_entity_snapshot",
+     "—"
+    ],
+    [
+     "Writeback (library)",
+     "Library code",
+     "crm_writeback_audit_log",
+     "—"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      83
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+     "lines": [
+      14,
+      68
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      129,
+      129
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2257,
+      2257
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      600,
+      600
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      145,
+      145
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/crm_writeback_service.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+     "lines": [
+      14,
+      14
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares no files with other features.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+      "lines": [
+       17,
+       83
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    }
+   },
+   {
+    "id": "group-library-code",
+    "label": "Library code",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      97,
+      97
+     ]
+    }
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      83
+     ]
+    }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      83
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "library-backend-src-tasks-executors-writeback",
+    "label": "Writeback (library)",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    "kind": "component",
+    "group": "group-library-code",
+    "many": false,
+    "details": [
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         129,
+         129
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-batchqueuetypev2-table-cleanup",
+    "label": "Table Cleanup queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2251,
+      2251
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2251,
+         2251
+        ]
+       }
+      ]
+     },
+     {
+      "text": "AUDIT_LOGGER_CLEANUP_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2257,
+         2257
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
+    "label": "Writeback workers",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "AuditLoggerCleanupCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         97,
+         97
+        ]
+       }
+      ]
+     },
+     {
+      "text": "AuditLoggerCleanupTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+        "lines": [
+         145,
+         145
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-crm-writeback-audit-log",
+    "label": "crm_writeback_audit_log",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+     "lines": [
+      17,
+      83
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   },
+   {
+    "id": "store-crm-writeback-entity-snapshot",
+    "label": "crm_writeback_entity_snapshot",
+    "source": {
+     "path": "backend/src/rox_core/models/public_crm_writeback_entity_snapshot.py",
+     "lines": [
+      14,
+      68
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "library-backend-src-tasks-executors-writeback",
+    "dst": "queue-batchqueuetypev2-table-cleanup",
+    "label": "enqueues AUDIT_LOGGER_CLEANUP_TASK",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      129,
+      129
+     ]
+    }
+   },
+   {
+    "src": "queue-batchqueuetypev2-table-cleanup",
+    "dst": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      600,
+      600
+     ]
+    }
+   },
+   {
+    "src": "library-backend-src-tasks-executors-writeback",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-writeback-feature-crm-crm-writeback-audit-log",
+    "dst": "store-crm-writeback-audit-log",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/tasks/executors/writeback/audit_log_cleanup.py",
+     "lines": [
+      88,
+      88
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "crm_writeback_audit_log",
+   "crm_writeback_entity_snapshot"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "CRM mirror (entity_*, sfdc_*, graph)",
+   "page": "domain-crm",
+   "source": {
+    "path": "backend/src/rox_core/models/public_crm_writeback_audit_log.py",
+    "lines": [
+     17,
+     83
+    ]
+   }
+  }
+ ]
+}

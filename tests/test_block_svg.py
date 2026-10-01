@@ -351,6 +351,47 @@ def test_backward_edge_keeps_the_shared_channel(
     ]
 
 
+def test_backward_and_same_column_edges_are_layout_problems(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id.title(), "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["nodes"] = [
+        {"id": node_id, "label": node_id, "source": source, "group": group_id}
+        for node_id, group_id in (
+            ("first_node", "first"),
+            ("second_node", "second"),
+            ("second_peer", "second"),
+            ("third_node", "third"),
+        )
+    ]
+    payload["block"]["edges"] = [
+        {
+            "src": "third_node",
+            "dst": "second_node",
+            "label": "backward",
+            "source": source,
+        },
+        {
+            "src": "second_node",
+            "dst": "second_peer",
+            "label": "same column",
+            "source": source,
+        },
+    ]
+
+    page = _page(payload)
+
+    assert block_layout_problems(page.block) == [
+        "third_node -> second_node (columns 2 -> 1; expected 2 -> 3)",
+        "second_node -> second_peer (columns 1 -> 1; expected 1 -> 2)",
+    ]
+
+
 def test_component_uses_a_white_uml_class_box(page_data: dict[str, object]) -> None:
     payload = copy.deepcopy(page_data)
     nodes = payload["block"]["nodes"]

@@ -12,7 +12,7 @@ argument_parser = argparse.ArgumentParser(
 )
 argument_parser.add_argument("--repo", type=Path, default=DEFAULT_REPO)
 REPO = argument_parser.parse_args().repo.resolve()
-COMMIT = "315a00b5b4ecbd6970b537c3e20b1d827ae3b845"
+COMMIT = Path(__file__).with_name("COMMIT").read_text(encoding="utf-8").strip()
 _cache: dict[str, list[str]] = {}
 
 
@@ -74,6 +74,8 @@ SVC = "backend/src/chat/background_execution/service.py"
 RSS = "backend/src/shim_layer/redis_shim/redis_stream_shim.py"
 COMPOSE = "backend/docker-compose-infra.yaml"
 ASCII = "ascii_architecture.md"
+
+s_testpaths = S("backend/tests_agent/pytest.ini", "testpaths = .")
 
 s_targets_case = S(EP, 'case "$DEPLOY_TARGET" in', "esac")
 s_listener_mode = S(
@@ -1051,6 +1053,10 @@ tldr = {
             s_localstack,
             s_temporal_srv,
         ),
+        C(
+            "Tests and migrations are not documented on this site.",
+            s_testpaths,
+        ),
     ],
 }
 
@@ -1772,6 +1778,7 @@ for domain_id, title, _, key_tables in rox_core_domains.DOMAINS:
         "title": title,
         "tables": domain_tables[domain_id],
         "key_tables": key_tables,
+        "page": f"domain-{domain_id}",
     }
     if domain_id == "tenancy":
         domain["notes"] = [

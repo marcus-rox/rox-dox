@@ -154,6 +154,15 @@ def _endpoint(
     if value in store_names:
         return _Endpoint(raw=value, kind="nosql", name=value, field=None)
 
+    if value in sql_names:
+        if value not in tables:
+            raise _error(
+                page,
+                relation,
+                f"SQL table '{value}' is missing",
+            )
+        return _Endpoint(raw=value, kind="sql", name=value, field=None)
+
     store_name, separator, field = value.partition("::")
     if separator and store_name in store_names:
         return _Endpoint(raw=value, kind="nosql", name=store_name, field=field)
@@ -227,12 +236,23 @@ def _validate_relation(
             raise _error(
                 page,
                 relation,
-                "enforced relation must connect SQL table columns",
+                "enforced relation must connect SQL tables or table columns",
             )
-        source_column = next(
-            column for column in tables[src.name].columns if column.name == src.field
-        )
-        if source_column.foreign_key != relation.dst:
+        if (src.field is None) != (dst.field is None):
+            raise _error(
+                page,
+                relation,
+                "enforced relation must connect two SQL tables or two columns",
+            )
+        if src.field is not None and dst.field is not None:
+            source_column = next(
+                column
+                for column in tables[src.name].columns
+                if column.name == src.field
+            )
+        else:
+            source_column = None
+        if source_column is not None and source_column.foreign_key != relation.dst:
             raise _error(
                 page,
                 relation,
@@ -546,6 +566,8 @@ def _anchor(
             item.y + item.header_height + row_index * ROW_HEIGHT + ROW_HEIGHT / 2,
         )
     item = _item_by_name(items, item_name)
+    if endpoint.field is None:
+        return item, item.y + item.header_height / 2
     table = tables[item_name]
     row_index = next(
         index

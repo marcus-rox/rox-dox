@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 import re
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from pathlib import PurePosixPath
 
-from rox_dox.schema import extract_tables
+from rox_dox.cache import get_or_compute
+from rox_dox.schema import Table, extract_tables
 
 COMMENTED_FOREIGN_KEY = re.compile(r"""#\s*ForeignKey\s*\(\s*["']([^"']+)["']\s*\)""")
 
@@ -368,7 +371,68 @@ def _file_candidates(
     ]
 
 
-def find_relation_candidates(
+def _id_column_candidates(
+    tables: Mapping[str, Table],
+    selected_tables: set[str],
+) -> list[RelationCandidate]:
+    candidates = []
+    for table_name in sorted(selected_tables & tables.keys()):
+        table = tables[table_name]
+        for column in table.columns:
+            if column.name in {"id", "public_id", "rox_org_id"}:
+                continue
+            suffix = next(
+                (
+                    suffix
+                    for suffix in ("_public_id", "_id")
+                    if column.name.endswith(suffix)
+                ),
+                None,
+            )
+            if suffix is None:
+                continue
+            tokens = column.name[: -len(suffix)].split("_")
+            if not tokens:
+                continue
+            target_table = None
+            for index in range(len(tokens)):
+                candidate_table = "_".join(tokens[index:])
+                if candidate_table in tables:
+                    target_table = candidate_table
+                    break
+            if target_table is None or target_table == table_name:
+                continue
+            if target_table not in selected_tables:
+                continue
+            target_columns = {item.name for item in tables[target_table].columns}
+            possible_columns = [
+                column.name,
+                *(
+                    f"{'_'.join(tokens[index:])}{suffix}"
+                    for index in range(len(tokens))
+                ),
+                "public_id",
+                "id",
+            ]
+            target_column = next(
+                (name for name in possible_columns if name in target_columns),
+                None,
+            )
+            if target_column is None:
+                continue
+            candidates.append(
+                RelationCandidate(
+                    src=f"{table_name}.{column.name}",
+                    dst=f"{target_table}.{target_column}",
+                    signal="id_column",
+                    path=table.source.path,
+                    line=column.line,
+                )
+            )
+    return candidates
+
+
+def _find_relation_candidates(
     repo: Path,
     commit: str,
     tables: Sequence[str],
@@ -397,6 +461,7 @@ def find_relation_candidates(
                 selected_tables=selected_tables,
             )
         )
+    candidates.extend(_id_column_candidates(extracted_tables, selected_tables))
 
     candidates.sort(key=lambda candidate: (candidate.path, candidate.line))
     deduplicated: dict[tuple[str, str, str], RelationCandidate] = {}
@@ -414,4 +479,20 @@ def find_relation_candidates(
             candidate.path,
             candidate.line,
         ),
+    )
+
+
+def find_relation_candidates(
+    repo: Path,
+    commit: str,
+    tables: Sequence[str],
+) -> list[RelationCandidate]:
+    table_names = sorted(set(tables))
+    table_digest = hashlib.sha256(
+        json.dumps(table_names, separators=(",", ":")).encode()
+    ).hexdigest()
+    return get_or_compute(
+        commit,
+        f"relation-candidates-{table_digest}",
+        lambda: _find_relation_candidates(repo, commit, table_names),
     )

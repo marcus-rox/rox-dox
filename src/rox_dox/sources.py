@@ -151,6 +151,6 @@ def page_problems(
                 capture_output=True,
                 text=True,
             )
-            if result.returncode != 0 or result.stdout.strip() != "tree":
-                problems.append(f"path '{path}' is not a folder at {page.commit[:8]}")
+            if result.returncode != 0 or result.stdout.strip() not in {"blob", "tree"}:
+                problems.append(f"path '{path}' not found at {page.commit[:8]}")
     return problems

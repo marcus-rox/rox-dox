@@ -8,6 +8,7 @@ Always-on pointers to repository skills. Load a skill when its trigger fires.
 - A list of requirements or hypotheses too long to read? `minimal-cover`.
 - Finishing a task: `consistency` before declaring a change done, `tldr` for the handoff.
 - `call-tree`: `.agents/skills/call-tree/SKILL.md`
+- `daily-rebuild`: `.agents/skills/daily-rebuild/SKILL.md`
 - `outline`: `.agents/skills/outline/SKILL.md`
 - `block-diagram`: `.agents/skills/block-diagram/SKILL.md`
 - `sequence-diagram`: `.agents/skills/sequence-diagram/SKILL.md`

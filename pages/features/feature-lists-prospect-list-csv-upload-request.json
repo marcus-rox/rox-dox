@@ -1,0 +1,5182 @@
+{
+ "id": "feature-lists-prospect-list-csv-upload-request",
+ "title": "Prospect List Csv Upload Request",
+ "kind": "feature",
+ "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "parent": "domain-lists",
+ "paths": [
+  "backend/src/data_store/s3_csv_store.py",
+  "backend/src/enrichment/handlers/auto_update_handler.py",
+  "backend/src/rox_core/api/enrichment/business.py",
+  "backend/src/rox_core/api/enrichment/dependency_utils.py",
+  "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+  "backend/src/rox_core/api/prospect_lists/constants.py",
+  "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+  "backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
+  "backend/src/rox_core/api/prospect_lists/endpoints.py",
+  "backend/src/rox_core/api/prospect_lists/lead_list_add.py",
+  "backend/src/rox_core/api/prospect_lists/manual_column_value_write.py",
+  "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+  "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+  "backend/src/tasks/executors/prospect_list_csv_upload.py",
+  "backend/src/tasks/listeners/prospect_ingestion_helpers.py",
+  "backend/src/temporal/activities/enrichment/csv_import.py",
+  "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/boards/[list_id]/page.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddToListDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityCreateDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityListPageHeader.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityRemoveFromListDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActionsDataTable.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachSequencesView/outreachSequenceCells/sequenceContactSourceDisplay.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ContactListSelectionDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/PeopleSearchActions.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/ProspectListSelectionDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ProspectListActionsDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useDefaultProspectLists.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListDelete.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListsTableState.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddContactDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddLeadDialog.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadChooseListStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadMapColumnsStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/useProspectListCsvUpload.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/SalesforceIntegrationRow.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/index.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/steps/SalesforceImportMapColumnsStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/ConfigureWebhooksModal.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/index.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/page.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleListView.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CsvUploadBanner.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/EnrichmentDetailsContent.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ExportCsvModal.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ProspectListPageHeader.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/userProfileSettings/useProfileAssetSources.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/InitialRunCard.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/useOutboundWorkflowDelete.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/TabDeletion.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/useUserTabs.ts",
+  "web/apps/web/src/app/(standalone)/(oskitchen)/oskitchen/composite/roxfile-pointers/page.tsx",
+  "web/apps/web/src/app/hooks/react-query/generated/prospect-lists/prospect-lists.ts",
+  "web/apps/web/src/app/lib/streamReducers/roxFilePointerReducer.ts",
+  "web/apps/web/src/components/command/agentMessages/RoxFilePointerEntityList.tsx",
+  "web/apps/web/src/components/command/agentMessages/RoxFilePointerPersonList.tsx",
+  "web/apps/web/src/components/command/panel/EntityListPanel/EntityListPanel.tsx",
+  "web/apps/web/src/components/command/panel/chatEntityListPanel.registration.tsx",
+  "web/apps/web/src/components/insights/insightsFilter/insightsFilterAccounts/ViewPickerContent.tsx",
+  "web/apps/web/src/components/sequenceBuilder/campaignEditor/PeopleCleverColumnsEditor.tsx",
+  "web/apps/web/src/components/settings/user-metadata/endUserViews/EndUserViewsSettings.tsx",
+  "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListBulkAssign.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListCellEdit.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListColumnOptionsEdit.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListEnrichmentJsonActions.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListOwnedLogicalNames.ts",
+  "web/apps/web/src/lib/roxList/hooks/useRoxListViewState.ts",
+  "web/apps/web/src/lib/roxList/hooks/useWarmAccountsCache.ts",
+  "web/apps/web/src/lib/roxList/orgWideViews/useDefaultViews.ts",
+  "web/apps/web/src/lib/roxList/orgWideViews/useOrgWideViewActions.tsx",
+  "web/apps/web/src/lib/roxList/orgWideViews/useSharedViewsCreate.tsx",
+  "web/packages/internal-api/src/generated/core/prospect-lists/prospect-lists.ts"
+ ],
+ "membership": [
+  {
+   "layer": "Web screens",
+   "rows": [
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/boards/[list_id]/page.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/boards/[list_id]/page.tsx",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+       "lines": [
+        26,
+        26
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddToListDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddToListDialog.tsx",
+       "lines": [
+        16,
+        16
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityCreateDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityCreateDialog.tsx",
+       "lines": [
+        17,
+        17
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityListPageHeader.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityListPageHeader.tsx",
+       "lines": [
+        20,
+        20
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityRemoveFromListDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityRemoveFromListDialog.tsx",
+       "lines": [
+        18,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActions.tsx",
+       "lines": [
+        42,
+        42
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActionsDataTable.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/DiscoverBatchActionsDataTable.tsx",
+       "lines": [
+        51,
+        51
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachSequencesView/outreachSequenceCells/sequenceContactSourceDisplay.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachSequencesView/outreachSequenceCells/sequenceContactSourceDisplay.tsx",
+       "lines": [
+        9,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+       "lines": [
+        9,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ContactListSelectionDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ContactListSelectionDialog.tsx",
+       "lines": [
+        18,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/PeopleSearchActions.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/PeopleSearchActions.tsx",
+       "lines": [
+        9,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/ProspectListSelectionDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/PeopleSearch/ProspectListSelectionDialog.tsx",
+       "lines": [
+        19,
+        19
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ProspectListActionsDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ProspectListActionsDialog.tsx",
+       "lines": [
+        27,
+        27
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useDefaultProspectLists.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useDefaultProspectLists.ts",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListDelete.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListDelete.tsx",
+       "lines": [
+        19,
+        19
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListsTableState.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListsTableState.ts",
+       "lines": [
+        22,
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddContactDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddContactDialog.tsx",
+       "lines": [
+        34,
+        34
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddLeadDialog.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddLeadDialog.tsx",
+       "lines": [
+        25,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadChooseListStep.tsx",
+     "primary": true,
+     "evidence": "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+     "sources": [
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadChooseListStep.tsx",
+       "lines": [
+        3,
+        3
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadMapColumnsStep.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadMapColumnsStep.tsx",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/useProspectListCsvUpload.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/useProspectListCsvUpload.ts",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+       "lines": [
+        13,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/SalesforceIntegrationRow.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/SalesforceIntegrationRow.tsx",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/index.ts",
+     "primary": true,
+     "evidence": "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+     "sources": [
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/index.ts",
+       "lines": [
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/steps/SalesforceImportMapColumnsStep.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/steps/SalesforceImportMapColumnsStep.tsx",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/ConfigureWebhooksModal.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/ConfigureWebhooksModal.tsx",
+       "lines": [
+        24,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/index.ts",
+     "primary": true,
+     "evidence": "imports web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/ConfigureWebhooksModal.tsx",
+     "sources": [
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/index.ts",
+       "lines": [
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/page.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/page.tsx",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleListView.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleListView.tsx",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+       "lines": [
+        38,
+        38
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CsvUploadBanner.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CsvUploadBanner.tsx",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/EnrichmentDetailsContent.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/EnrichmentDetailsContent.tsx",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ExportCsvModal.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ExportCsvModal.tsx",
+       "lines": [
+        18,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ProspectListPageHeader.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ProspectListPageHeader.tsx",
+       "lines": [
+        46,
+        46
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/userProfileSettings/useProfileAssetSources.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/userProfileSettings/useProfileAssetSources.ts",
+       "lines": [
+        16,
+        16
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/EntityTable.tsx",
+       "lines": [
+        20,
+        20
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/InitialRunCard.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/InitialRunCard.tsx",
+       "lines": [
+        9,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/useOutboundWorkflowDelete.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/autopilot/outbound/useOutboundWorkflowDelete.ts",
+       "lines": [
+        13,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/TabDeletion.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/TabDeletion.tsx",
+       "lines": [
+        24,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/useUserTabs.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/admin/tab-deletion/useUserTabs.ts",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(standalone)/(oskitchen)/oskitchen/composite/roxfile-pointers/page.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(standalone)/(oskitchen)/oskitchen/composite/roxfile-pointers/page.tsx",
+       "lines": [
+        12,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/hooks/react-query/generated/prospect-lists/prospect-lists.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/hooks/react-query/generated/prospect-lists/prospect-lists.ts",
+       "lines": [
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/lib/streamReducers/roxFilePointerReducer.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/lib/streamReducers/roxFilePointerReducer.ts",
+       "lines": [
+        18,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/agentMessages/RoxFilePointerEntityList.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/command/agentMessages/RoxFilePointerEntityList.tsx",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/agentMessages/RoxFilePointerPersonList.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/command/agentMessages/RoxFilePointerPersonList.tsx",
+       "lines": [
+        18,
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/panel/EntityListPanel/EntityListPanel.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/command/panel/EntityListPanel/EntityListPanel.tsx",
+       "lines": [
+        13,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/command/panel/chatEntityListPanel.registration.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/command/panel/chatEntityListPanel.registration.tsx",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/insights/insightsFilter/insightsFilterAccounts/ViewPickerContent.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/insights/insightsFilter/insightsFilterAccounts/ViewPickerContent.tsx",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/sequenceBuilder/campaignEditor/PeopleCleverColumnsEditor.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/sequenceBuilder/campaignEditor/PeopleCleverColumnsEditor.tsx",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/components/settings/user-metadata/endUserViews/EndUserViewsSettings.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/settings/user-metadata/endUserViews/EndUserViewsSettings.tsx",
+       "lines": [
+        12,
+        12
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+       "lines": [
+        3,
+        3
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListBulkAssign.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListBulkAssign.ts",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListCellEdit.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListCellEdit.ts",
+       "lines": [
+        8,
+        8
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnOptionsEdit.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnOptionsEdit.ts",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListEnrichmentJsonActions.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListEnrichmentJsonActions.ts",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListOwnedLogicalNames.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListOwnedLogicalNames.ts",
+       "lines": [
+        5,
+        5
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListViewState.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListViewState.ts",
+       "lines": [
+        36,
+        36
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useWarmAccountsCache.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useWarmAccountsCache.ts",
+       "lines": [
+        9,
+        9
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/orgWideViews/useDefaultViews.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/orgWideViews/useDefaultViews.ts",
+       "lines": [
+        3,
+        3
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/orgWideViews/useOrgWideViewActions.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/orgWideViews/useOrgWideViewActions.tsx",
+       "lines": [
+        14,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/orgWideViews/useSharedViewsCreate.tsx",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/orgWideViews/useSharedViewsCreate.tsx",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/packages/internal-api/src/generated/core/prospect-lists/prospect-lists.ts",
+     "primary": true,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/packages/internal-api/src/generated/core/prospect-lists/prospect-lists.ts",
+       "lines": [
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+       "lines": [
+        6,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
+       "lines": [
+        26,
+        26
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
+       "lines": [
+        65,
+        65
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CampaignFlowModal.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/CampaignFlowModal.tsx",
+       "lines": [
+        37,
+        37
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/invalidateProspectListDataQueries.ts",
+       "lines": [
+        8,
+        8
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/useEnrichmentPolling.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/hooks/useEnrichmentPolling.ts",
+       "lines": [
+        13,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/[workflowId]/workflowsComponents/workflowsDataSelector/workflowDataSelectorFetcher.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/workflows/studio/[workflowId]/workflowsComponents/workflowsDataSelector/workflowDataSelectorFetcher.tsx",
+       "lines": [
+        21,
+        21
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListAddColumnActions.tsx",
+       "lines": [
+        63,
+        63
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListCleverColumnDetails.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListCleverColumnDetails.ts",
+       "lines": [
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnActions.tsx",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnActions.tsx",
+       "lines": [
+        37,
+        37
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnRename.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/hooks/useRoxListColumnRename.ts",
+       "lines": [
+        7,
+        7
+       ]
+      }
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/overview/useRoxListOverviewController.ts",
+     "primary": false,
+     "evidence": "route tag prospect-lists",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        157,
+        157
+       ]
+      },
+      {
+       "path": "web/apps/web/src/lib/roxList/overview/useRoxListOverviewController.ts",
+       "lines": [
+        17,
+        17
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "HTTP routes",
+   "rows": [
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        10,
+        10
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        51,
+        51
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        57,
+        57
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "Background workers",
+   "rows": [
+    {
+     "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/enrichment/business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py; imports backend/src/temporal/activities/enrichment/csv_import.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        104,
+        104
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        42,
+        42
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        54,
+        54
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        64,
+        64
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        198,
+        198
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "primary": true,
+     "evidence": "imports backend/src/data_store/s3_csv_store.py; imports backend/src/rox_core/api/prospect_lists/constants.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py; imports backend/src/rox_core/api/prospect_lists/manual_column_value_write.py; imports backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        14,
+        14
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        33,
+        33
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        39,
+        39
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        43,
+        43
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        54,
+        54
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/data_store/s3_csv_store.py; imports backend/src/rox_core/api/prospect_lists/constants.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        51,
+        51
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        59,
+        59
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        40,
+        40
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        41,
+        41
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/tasks/listeners/prospect_ingestion_helpers.py",
+     "primary": true,
+     "evidence": "imports backend/src/enrichment/handlers/auto_update_handler.py",
+     "sources": [
+      {
+       "path": "backend/src/tasks/listeners/prospect_ingestion_helpers.py",
+       "lines": [
+        31,
+        31
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "primary": true,
+     "evidence": "imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/data_store/s3_csv_store.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
+     "sources": [
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        312,
+        312
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        56,
+        56
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        121,
+        121
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        192,
+        192
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        197,
+        197
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/enrichment/business.py; imports backend/src/rox_core/api/prospect_lists/constants.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        5993,
+        5993
+       ]
+      },
+      {
+       "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "Business logic",
+   "rows": [
+    {
+     "path": "backend/src/data_store/s3_csv_store.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py; imports backend/src/temporal/activities/enrichment/csv_import.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        15,
+        15
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        14,
+        14
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+       "lines": [
+        192,
+        192
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/enrichment/business.py; imports backend/src/rox_core/api/enrichment/dependency_utils.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+       "lines": [
+        28,
+        28
+       ]
+      },
+      {
+       "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+       "lines": [
+        29,
+        29
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        1835,
+        1835
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        1135,
+        1135
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        954,
+        954
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "primary": true,
+     "evidence": "imports backend/src/enrichment/handlers/auto_update_handler.py; imports backend/src/rox_core/api/enrichment/dependency_utils.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py; imports backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+       "lines": [
+        28,
+        28
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        62,
+        62
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        92,
+        92
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        104,
+        104
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        1835,
+        1835
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/dependency_utils.py",
+     "primary": true,
+     "evidence": "imports backend/src/enrichment/handlers/auto_update_handler.py; imports backend/src/rox_core/api/enrichment/business.py",
+     "sources": [
+      {
+       "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+       "lines": [
+        29,
+        29
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        62,
+        62
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+     "primary": true,
+     "evidence": "imports backend/src/data_store/s3_csv_store.py; imports backend/src/rox_core/api/prospect_lists/constants.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py; imports backend/src/rox_core/api/prospect_lists/lead_list_add.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        30,
+        30
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        31,
+        31
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        34,
+        34
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        45,
+        45
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/constants.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py; imports backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        30,
+        30
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        22,
+        22
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        33,
+        33
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        40,
+        40
+       ]
+      },
+      {
+       "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/data_store/s3_csv_store.py; imports backend/src/rox_core/api/prospect_lists/constants.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_dto.py; imports backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        31,
+        31
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        15,
+        15
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        22,
+        22
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        23,
+        23
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        42,
+        42
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/enrichment/business.py; imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/rox_core/api/prospect_lists/csv_upload_business.py; imports backend/src/rox_core/api/prospect_lists/endpoints.py; imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/enrichment/business.py",
+       "lines": [
+        92,
+        92
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        34,
+        34
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+       "lines": [
+        23,
+        23
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+       "lines": [
+        57,
+        57
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        39,
+        39
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/lead_list_add.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/prospect_lists/bulk_add_business.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+       "lines": [
+        45,
+        45
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        51,
+        51
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/manual_column_value_write.py",
+     "primary": true,
+     "evidence": "imports backend/src/tasks/executors/prospect_list_contact_csv_upload.py; imports backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "sources": [
+      {
+       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+       "lines": [
+        43,
+        43
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+       "lines": [
+        52,
+        52
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "tldr": {
+  "summary": [
+   {
+    "text": "Owns 52 HTTP endpoints in 1 API groups: Prospect Lists.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       160,
+       160
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Reached from 40 HTTP endpoints and 13 workers in other features: Bulkuploadcontacts + 6 more workers, Csv Upload, Csvcompanyregistrationbatch + 1 more workflows, Enrichment, Enrichment workflows.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       112,
+       112
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       139,
+       139
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       94,
+       94
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       51,
+       51
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       71,
+       71
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1127,
+       1127
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       152,
+       152
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1483,
+       1483
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1434,
+       1434
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       217,
+       217
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       318,
+       318
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       707,
+       707
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       422,
+       422
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       261,
+       261
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1155,
+       1155
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1185,
+       1185
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1634,
+       1634
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       171,
+       171
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1524,
+       1524
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       877,
+       877
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       903,
+       903
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       860,
+       860
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       936,
+       936
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1010,
+       1010
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1067,
+       1067
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1571,
+       1571
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1670,
+       1670
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1599,
+       1599
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1232,
+       1232
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1294,
+       1294
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       1383,
+       1383
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+      "lines": [
+       4273,
+       4273
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+      "lines": [
+       794,
+       794
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+      "lines": [
+       2172,
+       2172
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+      "lines": [
+       58,
+       58
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_import.py",
+      "lines": [
+       191,
+       191
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+      "lines": [
+       69,
+       69
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+      "lines": [
+       236,
+       236
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+      "lines": [
+       174,
+       174
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/planning.py",
+      "lines": [
+       2512,
+       2512
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+      "lines": [
+       49,
+       49
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/planning.py",
+      "lines": [
+       3033,
+       3033
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+      "lines": [
+       76,
+       76
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+      "lines": [
+       192,
+       192
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+      "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_import.py",
+      "lines": [
+       44,
+       44
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+      "lines": [
+       50,
+       50
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/planning.py",
+      "lines": [
+       733,
+       733
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+      "lines": [
+       55,
+       55
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Runs 7 background workers and workflows: ProspectListCSVUploadTaskExecutor, ProspectListContactCSVUploadTaskExecutor, WebhookColumnBackfillWorkflow, enqueue_contact_csv_import_task, finalize_csv_import and 2 more.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+      "lines": [
+       270,
+       270
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+      "lines": [
+       185,
+       185
+      ]
+     },
+     {
+      "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+      "lines": [
+       59,
+       59
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+      "lines": [
+       160,
+       160
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+      "lines": [
+       464,
+       464
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Stores data in: prospect_list_csv_upload_request.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+      "lines": [
+       15,
+       83
+      ]
+     }
+    ]
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Web screens: web/apps/web/src/lib/roxList/hooks (12), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2 (6), web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists (5).",
+    "sources": [
+     {
+      "path": "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+      "lines": [
+       38,
+       38
+      ]
+     },
+     {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    ]
+   },
+   {
+    "text": "HTTP routes: backend/src/rox_core/api/prospect_lists (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Background workers: backend/src/tasks/executors (2), backend/src/rox_core/models/tasks (1), backend/src/tasks/listeners (1).",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+      "lines": [
+       14,
+       14
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/business.py",
+      "lines": [
+       104,
+       104
+      ]
+     },
+     {
+      "path": "backend/src/tasks/listeners/prospect_ingestion_helpers.py",
+      "lines": [
+       31,
+       31
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Business logic: backend/src/rox_core/api/prospect_lists (6), backend/src/rox_core/api/enrichment (2), backend/src/data_store (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/bulk_add_business.py",
+      "lines": [
+       21,
+       21
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/enrichment/business.py",
+      "lines": [
+       62,
+       62
+      ]
+     }
+    ]
+   }
+  ],
+  "table": {
+   "columns": [
+    "Component",
+    "Kind",
+    "Tables used",
+    "Outside services"
+   ],
+   "rows": [
+    [
+     "Web app",
+     "Web app",
+     "—",
+     "—"
+    ],
+    [
+     "Csv Upload API",
+     "HTTP API",
+     "—",
+     "—"
+    ],
+    [
+     "Enrichment API",
+     "HTTP API",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Prospect Lists API",
+     "HTTP API",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Enrichment workflows",
+     "Background workers / workflows",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Csvcompanyregistrationbatch + 2 more workflows",
+     "Background workers / workflows",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Prospecting Coordinator queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Prospect Ingestion queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Prospect List Csv Upload queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Webhook Worker queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Integration queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Frontend Priority Jobs queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Contacts Upload Coordinator queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Extract Contacts From Csv Task queue",
+     "Task queue",
+     "—",
+     "—"
+    ],
+    [
+     "Webhookaddtolist + 1 more workers",
+     "Queue worker",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Salesforceimport workers",
+     "Queue worker",
+     "—",
+     "—"
+    ],
+    [
+     "Bulkuploadcontacts + 2 more workers",
+     "Queue worker",
+     "—",
+     "—"
+    ],
+    [
+     "Prospectlistcsvexport + 1 more workers",
+     "Queue worker",
+     "—",
+     "—"
+    ],
+    [
+     "Prospectlistcsvupload + 1 more workers",
+     "Queue worker",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "Salesforcesourcepollcoordinator + 1 more workers",
+     "Queue worker",
+     "prospect_list_csv_upload_request",
+     "—"
+    ],
+    [
+     "prospect_list_csv_upload_request",
+     "Database",
+     "prospect_list_csv_upload_request",
+     "—"
+    ]
+   ],
+   "sources": [
+    {
+     "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "lines": [
+      15,
+      83
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+     "lines": [
+      38,
+      38
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useDefaultProspectLists.ts",
+     "lines": [
+      5,
+      5
+     ]
+    },
+    {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      112,
+      112
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      139,
+      139
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      94,
+      94
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      71,
+      71
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      1127,
+      1127
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      152,
+      152
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      1483,
+      1483
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      1434,
+      1434
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      217,
+      217
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      318,
+      318
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      4496,
+      4496
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      5811,
+      5811
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+     "lines": [
+      160,
+      160
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+     "lines": [
+      235,
+      235
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+     "lines": [
+      1167,
+      1167
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      129,
+      129
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      448,
+      448
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+     "lines": [
+      174,
+      174
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+     "lines": [
+      49,
+      49
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "lines": [
+      160,
+      160
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/planning.py",
+     "lines": [
+      2512,
+      2512
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "lines": [
+      464,
+      464
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/planning.py",
+     "lines": [
+      733,
+      733
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      192,
+      192
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+     "lines": [
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      34,
+      34
+     ]
+    },
+    {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "lines": [
+      288,
+      288
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2161,
+      2161
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      585,
+      585
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2143,
+      2143
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2209,
+      2209
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      582,
+      582
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      593,
+      593
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2131,
+      2131
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2119,
+      2119
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2125,
+      2125
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      578,
+      578
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      579,
+      579
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2191,
+      2191
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      590,
+      590
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2173,
+      2173
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2179,
+      2179
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      587,
+      587
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2113,
+      2113
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      577,
+      577
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2071,
+      2071
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      570,
+      570
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2107,
+      2107
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      576,
+      576
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+     "lines": [
+      43,
+      43
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      151,
+      151
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      31,
+      31
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      87,
+      87
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+     "lines": [
+      19,
+      19
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_import.py",
+     "lines": [
+      191,
+      191
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_import.py",
+     "lines": [
+      44,
+      44
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+     "lines": [
+      4273,
+      4273
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+     "lines": [
+      794,
+      794
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+     "lines": [
+      2172,
+      2172
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+     "lines": [
+      45,
+      45
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      9,
+      9
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "lines": [
+      270,
+      270
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "lines": [
+      185,
+      185
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "lines": [
+      597,
+      597
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+     "lines": [
+      69,
+      69
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+     "lines": [
+      236,
+      236
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+     "lines": [
+      50,
+      50
+     ]
+    }
+   ],
+   "links": []
+  },
+  "notes": [
+   {
+    "text": "Shares 6 files with Column Metadata.",
+    "sources": [
+     {
+      "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+      "lines": [
+       28,
+       28
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 4 files with Column Alert.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       157,
+       157
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 7 files with List Runs.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+      "lines": [
+       105,
+       105
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 4 files with Rox List Column Metadata.",
+    "sources": [
+     {
+      "path": "backend/src/research/endpoints.py",
+      "lines": [
+       54,
+       54
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "block": {
+  "groups": [
+   {
+    "id": "group-web-app",
+    "label": "Web app",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+     "lines": [
+      6,
+      6
+     ]
+    }
+   },
+   {
+    "id": "column-entry-points",
+    "label": "Entry points",
+    "source": {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      112,
+      112
+     ]
+    }
+   },
+   {
+    "id": "group-http-api",
+    "label": "HTTP API",
+    "source": {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      112,
+      112
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "group-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "parent": "column-entry-points"
+   },
+   {
+    "id": "column-task-queues",
+    "label": "Task queues",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2161,
+      2161
+     ]
+    }
+   },
+   {
+    "id": "column-queue-workers",
+    "label": "Queue workers",
+    "source": {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      55,
+      55
+     ]
+    }
+   },
+   {
+    "id": "column-data-services",
+    "label": "Data & services",
+    "source": {
+     "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "lines": [
+      15,
+      83
+     ]
+    }
+   },
+   {
+    "id": "group-database",
+    "label": "Database",
+    "source": {
+     "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "lines": [
+      15,
+      83
+     ]
+    },
+    "parent": "column-data-services"
+   }
+  ],
+  "nodes": [
+   {
+    "id": "web-app",
+    "label": "Web app",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    "kind": "component",
+    "group": "group-web-app",
+    "many": false,
+    "details": [
+     {
+      "text": "web/apps/web/src/lib/roxList/hooks — 12 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/lib/roxList/hooks/useDefaultList.ts",
+        "lines": [
+         3,
+         3
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2 — 6 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/AddLeadToCampaignModal.tsx",
+        "lines": [
+         38,
+         38
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists — 5 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/opportunities/lists/OpportunityAddExistingPanel.tsx",
+        "lines": [
+         26,
+         26
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ChooseListStep.tsx",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     },
+     {
+      "text": "…/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks — 3 files",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useDefaultProspectLists.ts",
+        "lines": [
+         5,
+         5
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+31 more directories",
+      "sources": [
+       {
+        "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+        "lines": [
+         13,
+         13
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-csv-upload",
+    "label": "Csv Upload API",
+    "source": {
+     "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+     "lines": [
+      112,
+      112
+     ]
+    },
+    "link": "feature-gov-permission",
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "POST /csv_upload/contacts",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         112,
+         112
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DELETE /csv_upload/contacts/<string:file_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         139,
+         139
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /csv_upload/contacts_fields",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         94,
+         94
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /csv_upload/presigned_url",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         51,
+         51
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /csv_upload/presigned_url/sysadmin",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         71,
+         71
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from Permission",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/csv_upload/endpoints.py",
+        "lines": [
+         7,
+         7
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-enrichment",
+    "label": "Enrichment API",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+     "lines": [
+      1127,
+      1127
+     ]
+    },
+    "link": "feature-lists-list-runs",
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /enrichment/available-enrichments/<path:enrichment_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         1127,
+         1127
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /enrichment/capabilities",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         152,
+         152
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /enrichment/evaluate-formula",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         1483,
+         1483
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /enrichment/generate-formula",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         1434,
+         1434
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /enrichment/lists/<list_id>/auto-update",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         217,
+         217
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+30 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         318,
+         318
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from List Runs",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+        "lines": [
+         22,
+         22
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "api-prospect-lists",
+    "label": "Prospect Lists API",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+     "lines": [
+      160,
+      160
+     ]
+    },
+    "kind": "component",
+    "group": "group-http-api",
+    "many": false,
+    "details": [
+     {
+      "text": "GET /prospect_lists",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         160,
+         160
+        ]
+       }
+      ]
+     },
+     {
+      "text": "POST /prospect_lists",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         160,
+         160
+        ]
+       }
+      ]
+     },
+     {
+      "text": "DELETE /prospect_lists/<string:list_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         235,
+         235
+        ]
+       }
+      ]
+     },
+     {
+      "text": "GET /prospect_lists/<string:list_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         235,
+         235
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PUT /prospect_lists/<string:list_id>",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         235,
+         235
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+47 more endpoints",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+        "lines": [
+         1167,
+         1167
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-temporal-activities-enrichment",
+    "label": "Enrichment workflows",
+    "source": {
+     "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+     "lines": [
+      97,
+      97
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "dispatch_dynamic_column_backfill_workers",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+        "lines": [
+         97,
+         97
+        ]
+       }
+      ]
+     },
+     {
+      "text": "dispatch_webhook_column_backfill_workers",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+        "lines": [
+         174,
+         174
+        ]
+       }
+      ]
+     },
+     {
+      "text": "dynamic_column_backfill",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+        "lines": [
+         49,
+         49
+        ]
+       }
+      ]
+     },
+     {
+      "text": "enqueue_contact_csv_import_task",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+        "lines": [
+         160,
+         160
+        ]
+       }
+      ]
+     },
+     {
+      "text": "execute_promote_columns_for_entity",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/planning.py",
+        "lines": [
+         2512,
+         2512
+        ]
+       }
+      ]
+     },
+     {
+      "text": "+5 more workflows",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+        "lines": [
+         464,
+         464
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from Column Metadata, List Runs, outside any feature",
+      "sources": [
+       {
+        "path": "backend/src/temporal/activities/enrichment/dynamic_column_backfill.py",
+        "lines": [
+         7,
+         7
+        ]
+       },
+       {
+        "path": "backend/src/temporal/activities/enrichment/planning.py",
+        "lines": [
+         733,
+         733
+        ]
+       },
+       {
+        "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+        "lines": [
+         55,
+         55
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "temporal-backend-src-temporal-workflows",
+    "label": "Csvcompanyregistrationbatch + 2 more workflows",
+    "source": {
+     "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    "kind": "component",
+    "group": "group-background-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "CsvCompanyRegistrationBatchWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+        "lines": [
+         76,
+         76
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ProspectListCsvImportWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+        "lines": [
+         192,
+         192
+        ]
+       }
+      ]
+     },
+     {
+      "text": "WebhookColumnBackfillWorkflow",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
+        "lines": [
+         59,
+         59
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from List Runs",
+      "sources": [
+       {
+        "path": "backend/src/temporal/workflows/csv_import_workflow.py",
+        "lines": [
+         34,
+         34
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-asyncagentqueuetype-prospecting-coordinator",
+    "label": "Prospecting Coordinator queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2161,
+      2161
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "SELECTION_CHANGE_BACKFILL_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2161,
+         2161
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-asyncagentqueuetype-prospect-ingestion",
+    "label": "Prospect Ingestion queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2143,
+      2143
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "SALESFORCE_IMPORT_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2143,
+         2143
+        ]
+       }
+      ]
+     },
+     {
+      "text": "WEBHOOK_COLUMN_BACKFILL_WORKER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2209,
+         2209
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-asyncagentqueuetype-prospect-list-csv-upload",
+    "label": "Prospect List Csv Upload queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2131,
+      2131
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "PROSPECT_LIST_CONTACT_CSV_UPLOAD_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2131,
+         2131
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PROSPECT_LIST_CSV_EXPORT_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2119,
+         2119
+        ]
+       }
+      ]
+     },
+     {
+      "text": "PROSPECT_LIST_CSV_UPLOAD_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2125,
+         2125
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-asyncagentqueuetype-webhook-worker",
+    "label": "Webhook Worker queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2191,
+      2191
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "WEBHOOK_ADD_TO_LIST_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2191,
+         2191
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-integrationqueuetype-integration",
+    "label": "Integration queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2173,
+      2173
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "SALESFORCE_SOURCE_POLL_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2173,
+         2173
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SALESFORCE_SOURCE_POLL_WORKER_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2179,
+         2179
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-interactionqueuetype-frontend-priority-jobs",
+    "label": "Frontend Priority Jobs queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2113,
+      2113
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "BULK_UPLOAD_CONTACTS_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2113,
+         2113
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-outreachqueuetype-contacts-upload-coordinator",
+    "label": "Contacts Upload Coordinator queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2071,
+      2071
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "CONTACTS_CSV_UPLOAD_COORDINATOR_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2071,
+         2071
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-outreachqueuetype-extract-contacts-from-csv-task",
+    "label": "Extract Contacts From Csv Task queue",
+    "source": {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      2107,
+      2107
+     ]
+    },
+    "kind": "queue",
+    "group": "column-task-queues",
+    "many": false,
+    "details": [
+     {
+      "text": "EXTRACT_CONTACTS_FROM_CSV_TASK",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         2107,
+         2107
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "Webhookaddtolist + 1 more workers",
+    "source": {
+     "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+     "lines": [
+      55,
+      55
+     ]
+    },
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "WebhookAddToListTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+        "lines": [
+         55,
+         55
+        ]
+       }
+      ]
+     },
+     {
+      "text": "WebhookColumnBackfillWorkerTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+        "lines": [
+         43,
+         43
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from outside any feature",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+        "lines": [
+         22,
+         22
+        ]
+       },
+       {
+        "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+        "lines": [
+         151,
+         151
+        ]
+       },
+       {
+        "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+        "lines": [
+         31,
+         31
+        ]
+       },
+       {
+        "path": "backend/src/tasks/executors/webhook_add_to_list.py",
+        "lines": [
+         87,
+         87
+        ]
+       },
+       {
+        "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+        "lines": [
+         17,
+         17
+        ]
+       },
+       {
+        "path": "backend/src/tasks/executors/webhook_column_backfill_worker.py",
+        "lines": [
+         19,
+         19
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-crm-graph",
+    "label": "Salesforceimport workers",
+    "source": {
+     "path": "backend/src/tasks/executors/salesforce_import.py",
+     "lines": [
+      191,
+      191
+     ]
+    },
+    "link": "feature-crm-graph",
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "SalesforceImportTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_import.py",
+        "lines": [
+         191,
+         191
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from Graph",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_import.py",
+        "lines": [
+         44,
+         44
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-contacts-csv-upload-task",
+    "label": "Bulkuploadcontacts + 2 more workers",
+    "source": {
+     "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+     "lines": [
+      4273,
+      4273
+     ]
+    },
+    "link": "feature-lists-contacts-csv-upload-task",
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "BulkUploadContactsTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+        "lines": [
+         4273,
+         4273
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ContactsCSVUploadCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+        "lines": [
+         794,
+         794
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ExtractContactsfromCSVTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+        "lines": [
+         2172,
+         2172
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from Contacts Csv Upload Task",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/contacts_csv_upload.py",
+        "lines": [
+         17,
+         17
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-list-runs",
+    "label": "Prospectlistcsvexport + 1 more workers",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+     "lines": [
+      58,
+      58
+     ]
+    },
+    "link": "feature-lists-list-runs",
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "ProspectListCSVExportTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+        "lines": [
+         58,
+         58
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SelectionChangeBackfillCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/selection_change_backfill_coordinator.py",
+        "lines": [
+         45,
+         45
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from List Runs",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
+        "lines": [
+         9,
+         9
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-list-csv-upload-request",
+    "label": "Prospectlistcsvupload + 1 more workers",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "lines": [
+      270,
+      270
+     ]
+    },
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "ProspectListCSVUploadTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+        "lines": [
+         270,
+         270
+        ]
+       }
+      ]
+     },
+     {
+      "text": "ProspectListContactCSVUploadTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+        "lines": [
+         185,
+         185
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
+    "label": "Salesforcesourcepollcoordinator + 1 more workers",
+    "source": {
+     "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+     "lines": [
+      69,
+      69
+     ]
+    },
+    "link": "feature-lists-prospect-source-integration",
+    "kind": "component",
+    "group": "column-queue-workers",
+    "many": false,
+    "details": [
+     {
+      "text": "SalesforceSourcePollCoordinatorTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+        "lines": [
+         69,
+         69
+        ]
+       }
+      ]
+     },
+     {
+      "text": "SalesforceSourcePollWorkerTaskExecutor",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+        "lines": [
+         236,
+         236
+        ]
+       }
+      ]
+     },
+     {
+      "text": "Calls into this feature from Prospect Source Integration",
+      "sources": [
+       {
+        "path": "backend/src/tasks/executors/salesforce_source_polling.py",
+        "lines": [
+         50,
+         50
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "store-prospect-list-csv-upload-request",
+    "label": "prospect_list_csv_upload_request",
+    "source": {
+     "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+     "lines": [
+      15,
+      83
+     ]
+    },
+    "kind": "store",
+    "group": "group-database",
+    "many": false,
+    "details": []
+   }
+  ],
+  "edges": [
+   {
+    "src": "api-enrichment",
+    "dst": "queue-asyncagentqueuetype-prospecting-coordinator",
+    "label": "enqueues SELECTION_CHANGE_BACKFILL_COORDINATOR_TASK",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      4496,
+      4496
+     ]
+    }
+   },
+   {
+    "src": "api-prospect-lists",
+    "dst": "queue-asyncagentqueuetype-prospect-list-csv-upload",
+    "label": "enqueues 2 task types",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      129,
+      129
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-activities-enrichment",
+    "dst": "queue-asyncagentqueuetype-prospecting-coordinator",
+    "label": "enqueues SELECTION_CHANGE_BACKFILL_COORDINATOR_TASK",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      4496,
+      4496
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-activities-enrichment",
+    "dst": "queue-asyncagentqueuetype-prospect-list-csv-upload",
+    "label": "enqueues 2 task types",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      129,
+      129
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-prospecting-coordinator",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-list-runs",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      585,
+      585
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-prospect-ingestion",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-crm-graph",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      582,
+      582
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-prospect-ingestion",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      593,
+      593
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-prospect-list-csv-upload",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-list-runs",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      578,
+      578
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-prospect-list-csv-upload",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-list-csv-upload-request",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      579,
+      579
+     ]
+    }
+   },
+   {
+    "src": "queue-asyncagentqueuetype-webhook-worker",
+    "dst": "queue-worker-backend-src-tasks-executors-outside",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      590,
+      590
+     ]
+    }
+   },
+   {
+    "src": "queue-integrationqueuetype-integration",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      587,
+      587
+     ]
+    }
+   },
+   {
+    "src": "queue-interactionqueuetype-frontend-priority-jobs",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-contacts-csv-upload-task",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      577,
+      577
+     ]
+    }
+   },
+   {
+    "src": "queue-outreachqueuetype-contacts-upload-coordinator",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-contacts-csv-upload-task",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      570,
+      570
+     ]
+    }
+   },
+   {
+    "src": "queue-outreachqueuetype-extract-contacts-from-csv-task",
+    "dst": "queue-worker-backend-src-tasks-executors-feature-lists-contacts-csv-upload-task",
+    "label": "consumed by",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      576,
+      576
+     ]
+    }
+   },
+   {
+    "src": "web-app",
+    "dst": "api-prospect-lists",
+    "label": "HTTP",
+    "source": {
+     "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/AccountsAIColumnModal/useAccountsAIColumnModal.ts",
+     "lines": [
+      6,
+      6
+     ]
+    }
+   },
+   {
+    "src": "api-enrichment",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      5811,
+      5811
+     ]
+    }
+   },
+   {
+    "src": "api-prospect-lists",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      448,
+      448
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-list-csv-upload-request",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "lines": [
+      597,
+      597
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-feature-lists-prospect-source-integration",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      5811,
+      5811
+     ]
+    }
+   },
+   {
+    "src": "queue-worker-backend-src-tasks-executors-outside",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/rox_core/api/enrichment/business.py",
+     "lines": [
+      5811,
+      5811
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-activities-enrichment",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads & writes",
+    "source": {
+     "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
+     "lines": [
+      448,
+      448
+     ]
+    }
+   },
+   {
+    "src": "temporal-backend-src-temporal-workflows",
+    "dst": "store-prospect-list-csv-upload-request",
+    "label": "reads",
+    "source": {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "lines": [
+      288,
+      288
+     ]
+    }
+   }
+  ]
+ },
+ "block_figures": [],
+ "data": {
+  "sql_tables": [
+   "prospect_list_csv_upload_request"
+  ],
+  "nosql": [],
+  "relations": [],
+  "domains": [],
+  "columns": []
+ },
+ "sequences": [],
+ "states": [],
+ "related": [
+  {
+   "label": "Lists, tabs, columns & insights",
+   "page": "domain-lists",
+   "source": {
+    "path": "backend/src/rox_core/models/tasks/prospect_list_csv_upload.py",
+    "lines": [
+     15,
+     83
+    ]
+   }
+  },
+  {
+   "label": "Column Metadata",
+   "page": "feature-lists-column-metadata",
+   "source": {
+    "path": "backend/src/enrichment/handlers/auto_update_handler.py",
+    "lines": [
+     28,
+     28
+    ]
+   }
+  },
+  {
+   "label": "Column Alert",
+   "page": "feature-lists-column-alert",
+   "source": {
+    "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+    "lines": [
+     157,
+     157
+    ]
+   }
+  },
+  {
+   "label": "List Runs",
+   "page": "feature-lists-list-runs",
+   "source": {
+    "path": "backend/src/rox_core/api/enrichment/endpoints.py",
+    "lines": [
+     105,
+     105
+    ]
+   }
+  },
+  {
+   "label": "Rox List Column Metadata",
+   "page": "feature-lists-rox-list-column-metadata",
+   "source": {
+    "path": "backend/src/research/endpoints.py",
+    "lines": [
+     54,
+     54
+    ]
+   }
+  }
+ ]
+}

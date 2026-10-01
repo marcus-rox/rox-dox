@@ -35,7 +35,19 @@ class NotionSource(Model):
 Source = CodeSource | NotionSource
 
 
-_MAX_NODE_DETAILS = 6
+class MembershipRow(Model):
+    path: str
+    primary: bool
+    evidence: str
+    sources: list[Source] = Field(min_length=1)
+
+
+class MembershipGroup(Model):
+    layer: str
+    rows: list[MembershipRow]
+
+
+_MAX_NODE_DETAILS = 7
 _MAX_NODE_DETAIL_TEXT_LENGTH = 90
 
 
@@ -191,11 +203,13 @@ class BlockDiagram(Model):
         incoming_nodes = {edge.dst for edge in self.edges}
         outgoing_nodes = {edge.src for edge in self.edges}
         for node in self.nodes:
-            if node.kind == "queue" and (
-                node.id not in incoming_nodes or node.id not in outgoing_nodes
+            if (
+                node.kind == "queue"
+                and node.id not in incoming_nodes
+                and node.id not in outgoing_nodes
             ):
                 raise ValueError(
-                    f"block diagram: queue '{node.id}' needs a producer and a "
+                    f"block diagram: queue '{node.id}' needs a producer or a "
                     "consumer edge"
                 )
         return self
@@ -382,10 +396,18 @@ class DataModel(Model):
         return self
 
 
+class SummaryTableLink(Model):
+    row: int = Field(ge=0)
+    column: int = Field(ge=0)
+    page: str
+
+
 class SummaryTable(Model):
     columns: list[str]
     rows: list[list[str]]
     sources: list[Source] = Field(min_length=1)
+    links: list[SummaryTableLink] = Field(default_factory=list)
+    title: str | None = None
 
     @model_validator(mode="after")
     def validate_rows(self) -> SummaryTable:
@@ -395,6 +417,16 @@ class SummaryTable(Model):
                     f"TLDR table row {row_number} has {len(row)} cells; "
                     f"expected {len(self.columns)} columns"
                 )
+        positions = [(link.row, link.column) for link in self.links]
+        duplicate = _first_duplicate([f"{row}:{column}" for row, column in positions])
+        if duplicate is not None:
+            raise ValueError(f"TLDR table has duplicate page link at {duplicate}")
+        for row, column in positions:
+            if row >= len(self.rows) or column >= len(self.columns):
+                raise ValueError(
+                    f"TLDR table page link at row {row}, column {column} "
+                    "is outside the table"
+                )
         return self
 
 
@@ -403,6 +435,7 @@ class Tldr(Model):
     key_points: list[Claim]
     table: SummaryTable
     notes: list[Claim]
+    additional_tables: list[SummaryTable] | None = None
 
 
 class Related(Model):
@@ -425,6 +458,7 @@ class Page(Model):
     commit: str
     parent: str | None
     paths: list[str] = Field(min_length=1)
+    membership: list[MembershipGroup] = Field(default_factory=list)
     tldr: Tldr
     block: BlockDiagram
     block_figures: list[BlockFigure] = Field(default_factory=list)
@@ -472,6 +506,11 @@ def page_sources(
     sources.extend(_claim_sources(page.tldr.summary, "summary"))
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
     sources.extend((("TLDR table", source) for source in page.tldr.table.sources))
+    sources.extend(
+        (f"TLDR {table.title or 'additional'} table", source)
+        for table in page.tldr.additional_tables or []
+        for source in table.sources
+    )
     sources.extend(_claim_sources(page.tldr.notes, "note"))
     sources.extend(
         (
@@ -601,5 +640,11 @@ def page_sources(
     )
     sources.extend(
         (f"related '{related.label}'", related.source) for related in page.related
+    )
+    sources.extend(
+        (f"membership {group.layer} file {row.path}", source)
+        for group in page.membership
+        for row in group.rows
+        for source in row.sources
     )
     return sources

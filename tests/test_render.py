@@ -8,7 +8,7 @@ from pathlib import Path
 from rox_dox.links import source_url
 from rox_dox.model import Page
 from rox_dox.repo_tree import RepoEntry
-from rox_dox.render import page_href, render_page
+from rox_dox.render import page_href, render_folder_page, render_page
 from rox_dox.schema import extract_tables
 from rox_dox.tree import build_tree
 
@@ -34,6 +34,15 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     payload["tldr"]["summary"][0]["sources"].append(
         {"path": "pkg/a.py", "lines": [4, 5]}
     )
+    payload["tldr"]["additional_tables"] = [
+        {
+            "title": "Links to other domains",
+            "columns": ["This table", "Other table", "Other domain", "Signal"],
+            "rows": [["sessions", "users", "People", "ID column name"]],
+            "links": [{"row": 0, "column": 2, "page": "domain-people"}],
+            "sources": [{"path": "pkg/a.py", "lines": [6, 6]}],
+        }
+    ]
     page = _empty_page(payload)
     document = render_page(
         page,
@@ -61,9 +70,63 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     assert f'<a href="{first_source_url}">[1]</a>' in document
     assert f'<a href="{second_source_url}">[2]</a>' in document
     assert f'<a href="{table_source_url}">[1]</a>' in document
+    assert "<h3>Links to other domains</h3>" in document
+    assert f'href="{page_href(page.id, "domain-people")}"' in document
     assert re.search(r"<h3>Summary</h3>.*?<h3>Key Points</h3>", document, re.DOTALL)
     assert "<h3>Table</h3>" in document
     assert "<h3>Interesting Notes</h3>" in document
+
+
+def test_more_than_three_sources_collapse_in_claims_and_table(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    sources = [
+        {"path": f"pkg/source-{index}.py", "lines": [index, index]}
+        for index in range(1, 5)
+    ]
+    payload["tldr"]["summary"][0]["sources"] = sources
+    payload["tldr"]["table"]["sources"] = sources
+    page = _empty_page(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert (
+        document.count('<details class="citations"><summary>Sources (4)</summary>') == 2
+    )
+    assert (
+        '<div class="table-sources">Sources: '
+        '<details class="citations"><summary>Sources (4)</summary>'
+    ) in document
+    assert ".citation-links {\n  overflow-wrap: anywhere;" in document
+
+
+def test_three_or_fewer_sources_remain_inline(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["tldr"]["summary"][0]["sources"] = [
+        {"path": f"pkg/source-{index}.py", "lines": [index, index]}
+        for index in range(1, 4)
+    ]
+    page = _empty_page(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert '<span class="citations"><sup><a href="' in document
+    assert "<summary>Sources (3)</summary>" not in document
 
 
 def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
@@ -661,24 +724,36 @@ def test_feature_tree_and_explorer_are_separate(
         document,
         re.DOTALL,
     )
-    explorer = re.search(
+    site_nav = re.search(
         r'<nav id="site-nav" aria-label="Site navigation">(.*?)</nav>',
         document,
         re.DOTALL,
     )
+    explorer = re.search(
+        r'<nav id="explorer" aria-label="Repository explorer">(.*?)</nav>',
+        document,
+        re.DOTALL,
+    )
     assert feature_tree is not None
+    assert site_nav is not None
     assert explorer is not None
     feature_html = feature_tree.group(1)
     explorer_html = explorer.group(1)
-    rows = []
-    for match in re.finditer(
-        r'<a class="row ([^"]+)" href="([^"]+)"[^>]*>(.*?)</a>',
-        explorer_html,
-        re.DOTALL,
-    ):
-        label = re.search(r"<span>(.*?)</span>", match.group(3), re.DOTALL)
-        assert label is not None
-        rows.append((match.group(1), match.group(2), label.group(1)))
+
+    def nav_rows(nav_html: str) -> list[tuple[str, str, str]]:
+        rows = []
+        for match in re.finditer(
+            r'<a class="row ([^"]+)" href="([^"]+)"[^>]*>(.*?)</a>',
+            nav_html,
+            re.DOTALL,
+        ):
+            label = re.search(r"<span>(.*?)</span>", match.group(3), re.DOTALL)
+            assert label is not None
+            rows.append((match.group(1), match.group(2), label.group(1)))
+        return rows
+
+    explorer_html = explorer.group(1)
+    explorer_rows = nav_rows(explorer_html)
 
     assert '<a class="row page current"' in feature_html
     assert 'aria-current="page"' in feature_html
@@ -688,22 +763,18 @@ def test_feature_tree_and_explorer_are_separate(
     assert 'aria-current="page"' not in explorer_html
     assert "a.py" not in explorer_html
     assert any(
-        "pending" in classes
-        and href == f"{REPO_URL}/tree/{root.commit}/pkg"
-        and label == "pkg"
-        for classes, href, label in rows
+        "folder" in classes and href == "folders/pkg.html" and label == "pkg"
+        for classes, href, label in explorer_rows
     )
     assert any(
-        "pending" in classes
-        and href == f"{REPO_URL}/tree/{root.commit}/models"
-        and label == "models"
-        for classes, href, label in rows
+        "folder" in classes and href == "folders/models.html" and label == "models"
+        for classes, href, label in explorer_rows
     )
     assert any(
         "file" in classes
         and href == f"{REPO_URL}/blob/{root.commit}/README.md"
         and label == "README.md"
-        for classes, href, label in rows
+        for classes, href, label in explorer_rows
     )
     folder_positions = [
         explorer_html.index(f"<span>{label}</span>") for label in ("pkg", "models")
@@ -713,6 +784,90 @@ def test_feature_tree_and_explorer_are_separate(
         for label in ("README.md", "pyproject.toml")
     ]
     assert max(folder_positions) < min(file_positions)
+
+
+def test_membership_section_follows_tldr_and_uses_numbered_citations(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    root = _empty_page(page_data)
+    domain_payload = copy.deepcopy(page_data)
+    domain_payload.update(
+        {
+            "id": "domain",
+            "title": "Domain",
+            "kind": "domain",
+            "parent": root.id,
+            "paths": ["pkg"],
+        }
+    )
+    domain = _empty_page(domain_payload)
+    feature_payload = copy.deepcopy(page_data)
+    feature_payload.update(
+        {
+            "id": "feature",
+            "title": "Feature",
+            "kind": "feature",
+            "parent": domain.id,
+            "paths": ["pkg/a.py"],
+            "membership": [
+                {
+                    "layer": "Web screens",
+                    "rows": [
+                        {
+                            "path": "web/src/page.tsx",
+                            "primary": True,
+                            "evidence": "route tag campaigns",
+                            "sources": [{"path": "pkg/a.py", "lines": [2, 2]}],
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+    feature = _empty_page(feature_payload)
+    tree = build_tree([root, domain, feature])
+
+    document = render_page(
+        feature,
+        tree=tree,
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert document.index('id="tldr"') < document.index('id="membership"')
+    assert document.index('id="membership"') < document.index('id="block"')
+    assert 'href="#membership">Why these files are one feature' in document
+    assert "<summary>Web screens — 1 files (0 shared)</summary>" in document
+    assert '<th scope="col">File</th>' in document
+    assert '<th scope="col">Primary/shared</th>' in document
+    assert '<th scope="col">Evidence</th>' in document
+    assert ">route tag campaigns" in document
+    assert 'href="https://github.com/Rox-AI/rox-core/blob/' in document
+    assert "overflow-wrap: anywhere" in document
+
+
+def test_folder_page_toc_lists_folder_sections(
+    page_data: dict[str, object],
+) -> None:
+    root = Page.model_validate(page_data)
+
+    document = render_folder_page(
+        folder_path=".",
+        tree=build_tree([root]),
+        entries={},
+        repo_url=REPO_URL,
+        feature_rows=[],
+        uncovered_count=2,
+        child_folders=[],
+        tests_only=False,
+    )
+
+    assert 'href="#feature-coverage">Feature coverage' in document
+    assert 'href="#uncovered-files">Uncovered files' in document
+    assert 'href="#tldr"' not in document
+    assert 'href="#block"' not in document
 
 
 def test_feature_tree_leaf_row_has_no_chevron(
