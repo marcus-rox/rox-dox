@@ -1,6 +1,6 @@
 ---
 name: generate-rox-docs
-description: Author and build a rox-dox page for any rox-core folder — TLDR, block, schema, sequence and state diagrams, related links and Notion context — with every element cited at a pinned rox-core commit. Use when writing or revising a page model under pages/ or when the user asks to document a rox-core folder.
+description: Author and build a rox-dox page for any rox-core folder — TLDR, block, schema, sequence and state diagrams, and related links — with every element cited at a pinned rox-core commit. Use when writing or revising a page model under pages/ or when the user asks to document a rox-core folder.
 ---
 
 # generate-rox-docs

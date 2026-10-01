@@ -22,6 +22,7 @@ def test_duplicate_page_ids_are_reported(page_data: dict[str, object]) -> None:
 def test_zero_root_pages_are_reported(page_data: dict[str, object]) -> None:
     payload = copy.deepcopy(page_data)
     payload["id"] = "child"
+    payload["kind"] = "feature"
     payload["parent"] = "missing"
     payload["paths"] = ["pkg"]
 
@@ -48,6 +49,7 @@ def test_multiple_root_pages_are_reported(page_data: dict[str, object]) -> None:
 def test_missing_parent_names_child_and_parent(page_data: dict[str, object]) -> None:
     child = copy.deepcopy(page_data)
     child["id"] = "child"
+    child["kind"] = "feature"
     child["parent"] = "missing"
     child["paths"] = ["pkg"]
 
@@ -59,10 +61,12 @@ def test_missing_parent_names_child_and_parent(page_data: dict[str, object]) -> 
 def test_parent_cycles_are_reported(page_data: dict[str, object]) -> None:
     first = copy.deepcopy(page_data)
     first["id"] = "first"
+    first["kind"] = "feature"
     first["parent"] = "second"
     first["paths"] = ["pkg"]
     second = copy.deepcopy(page_data)
     second["id"] = "second"
+    second["kind"] = "feature"
     second["parent"] = "first"
     second["paths"] = ["pkg/sub"]
 
@@ -110,54 +114,168 @@ def test_root_paths_must_be_exactly_the_repository_root(
     assert "root page 'rox-core' paths must be exactly ['.']" in problems
 
 
-def test_child_paths_must_be_contained_by_parent_paths(
+def test_domain_must_have_root_parent(
     page_data: dict[str, object],
 ) -> None:
-    child = copy.deepcopy(page_data)
-    child["id"] = "child"
-    child["parent"] = "rox-core"
-    child["paths"] = ["pkg"]
-    leaf = copy.deepcopy(page_data)
-    leaf["id"] = "leaf"
-    leaf["parent"] = "child"
-    leaf["paths"] = ["other"]
+    feature = copy.deepcopy(page_data)
+    feature["id"] = "feature"
+    feature["kind"] = "feature"
+    feature["parent"] = "rox-core"
+    feature["paths"] = ["pkg"]
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain"
+    domain["kind"] = "domain"
+    domain["parent"] = "feature"
+    domain["paths"] = ["pkg"]
 
     problems = tree_problems(
         [
             Page.model_validate(page_data),
-            Page.model_validate(child),
-            Page.model_validate(leaf),
-        ]
-    )
-
-    assert "page 'leaf' path 'other' is outside parent 'child' paths" in problems
-
-
-def test_two_pages_cannot_claim_the_same_path(
-    page_data: dict[str, object],
-) -> None:
-    first_child = copy.deepcopy(page_data)
-    first_child["id"] = "first"
-    first_child["parent"] = "rox-core"
-    first_child["paths"] = ["pkg"]
-    second_child = copy.deepcopy(first_child)
-    second_child["id"] = "second"
-    second_child["title"] = "Second"
-
-    problems = tree_problems(
-        [
-            Page.model_validate(page_data),
-            Page.model_validate(first_child),
-            Page.model_validate(second_child),
+            Page.model_validate(feature),
+            Page.model_validate(domain),
         ]
     )
 
     assert any(
-        "path 'pkg'" in problem
-        and "page 'first'" in problem
-        and "page 'second'" in problem
+        "page 'domain' has kind 'domain' but parent 'feature' has kind 'feature'"
+        in problem
         for problem in problems
     )
+
+
+def test_feature_cannot_be_a_direct_child_of_root(
+    page_data: dict[str, object],
+) -> None:
+    feature = copy.deepcopy(page_data)
+    feature["id"] = "feature"
+    feature["kind"] = "feature"
+    feature["parent"] = "rox-core"
+    feature["paths"] = ["pkg"]
+
+    problems = tree_problems(
+        [
+            Page.model_validate(page_data),
+            Page.model_validate(feature),
+        ]
+    )
+
+    assert (
+        "page 'feature' has kind 'feature' but parent 'rox-core' has kind 'root'; "
+        "features require a domain or feature parent"
+    ) in problems
+
+
+def test_non_root_page_cannot_have_root_kind(page_data: dict[str, object]) -> None:
+    nested_root = copy.deepcopy(page_data)
+    nested_root["id"] = "nested-root"
+    nested_root["title"] = "Nested root"
+    nested_root["parent"] = "rox-core"
+    nested_root["paths"] = ["pkg"]
+
+    problems = tree_problems(
+        [
+            Page.model_validate(page_data),
+            Page.model_validate(nested_root),
+        ]
+    )
+
+    assert (
+        "page 'nested-root' has kind 'root' but parent 'rox-core' has kind 'root'"
+    ) in problems
+
+
+def test_root_page_must_have_root_kind(page_data: dict[str, object]) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["kind"] = "domain"
+
+    problems = tree_problems([Page.model_validate(payload)])
+
+    assert (
+        "page 'rox-core' has kind 'domain' with parent kind 'none'; "
+        "root pages must have kind 'root'"
+    ) in problems
+
+
+def test_feature_paths_can_be_outside_parent_paths(
+    page_data: dict[str, object],
+) -> None:
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain"
+    domain["kind"] = "domain"
+    domain["parent"] = "rox-core"
+    domain["paths"] = ["pkg"]
+    feature = copy.deepcopy(page_data)
+    feature["id"] = "feature"
+    feature["kind"] = "feature"
+    feature["parent"] = "domain"
+    feature["paths"] = ["other/thing"]
+
+    problems = tree_problems(
+        [
+            Page.model_validate(page_data),
+            Page.model_validate(domain),
+            Page.model_validate(feature),
+        ]
+    )
+
+    assert problems == []
+
+
+def test_features_can_share_a_path(page_data: dict[str, object]) -> None:
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain"
+    domain["kind"] = "domain"
+    domain["parent"] = "rox-core"
+    domain["paths"] = ["pkg"]
+    first = copy.deepcopy(page_data)
+    first["id"] = "first"
+    first["title"] = "First"
+    first["kind"] = "feature"
+    first["parent"] = "domain"
+    first["paths"] = ["other/thing"]
+    second = copy.deepcopy(first)
+    second["id"] = "second"
+    second["title"] = "Second"
+
+    problems = tree_problems(
+        [
+            Page.model_validate(page_data),
+            Page.model_validate(domain),
+            Page.model_validate(first),
+            Page.model_validate(second),
+        ]
+    )
+
+    assert problems == []
+
+
+def test_feature_can_have_a_feature_parent(page_data: dict[str, object]) -> None:
+    domain = copy.deepcopy(page_data)
+    domain["id"] = "domain"
+    domain["kind"] = "domain"
+    domain["parent"] = "rox-core"
+    domain["paths"] = ["pkg"]
+    parent_feature = copy.deepcopy(page_data)
+    parent_feature["id"] = "parent-feature"
+    parent_feature["kind"] = "feature"
+    parent_feature["parent"] = "domain"
+    parent_feature["paths"] = ["other/thing"]
+    child_feature = copy.deepcopy(page_data)
+    child_feature["id"] = "child-feature"
+    child_feature["kind"] = "feature"
+    child_feature["parent"] = "parent-feature"
+    child_feature["paths"] = ["pkg/sub"]
+
+    problems = tree_problems(
+        [
+            Page.model_validate(page_data),
+            Page.model_validate(domain),
+            Page.model_validate(parent_feature),
+            Page.model_validate(child_feature),
+        ]
+    )
+
+    assert problems == []
 
 
 def test_tree_orders_children_and_returns_root_first_ancestors(
@@ -165,11 +283,13 @@ def test_tree_orders_children_and_returns_root_first_ancestors(
 ) -> None:
     middle = copy.deepcopy(page_data)
     middle["id"] = "middle"
+    middle["kind"] = "domain"
     middle["parent"] = "rox-core"
     middle["paths"] = ["pkg"]
     first = copy.deepcopy(page_data)
     first["id"] = "z-page"
     first["title"] = "Same title"
+    first["kind"] = "feature"
     first["parent"] = "middle"
     first["paths"] = ["pkg/z"]
     second = copy.deepcopy(first)

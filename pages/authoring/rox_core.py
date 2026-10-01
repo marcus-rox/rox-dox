@@ -1054,40 +1054,6 @@ tldr = {
     ],
 }
 
-notion = [
-    {
-        "title": "REST API Layer",
-        "url": "https://www.notion.so/376fe3091319814ebe00c88e8f1a4735",
-        "last_edited": "2026-06-05",
-        "excerpt": "Builds the Flask app, configures CORS/OTel/DB/migrations/bcrypt, registers K8s probes, initializes FlaskExecutor, registers blueprints, and starts in-process listeners for some deploy targets.",
-    },
-    {
-        "title": "Backend Layering",
-        "url": "https://www.notion.so/376fe3091319812996d7c57c2cef876c",
-        "last_edited": "2026-06-05",
-        "excerpt": "How to run each backend service locally by DEPLOY_TARGET (REALTIMEAGENT on 5003, SOR on 5004, …) and how the backend layers fit together.",
-    },
-    {
-        "title": "Rox In-VPC Deployment",
-        "url": "https://www.notion.so/3dffe309131980e69fe9db18762c706d",
-        "last_edited": "2026-09-22",
-        "excerpt": "Reference deployment: eval, public-api and webhook autoscale on CPU up to 3; async-agent (1-6) and core-backfill (1-8) autoscale on queue depth.",
-    },
-    {
-        "title": "K8s Migration High Level",
-        "url": "https://www.notion.so/31efe309131980108e54cb0a8e0cac65",
-        "last_edited": "2026-06-22",
-        "excerpt": "Workload deployment definitions live in rox-core so the same commit history captures the code, build inputs and deploy intent for each service.",
-    },
-    {
-        "title": "Long-Lived Idle Sessions and Connection Pooling RCA",
-        "url": "https://www.notion.so/337fe309131981a58d75f43dbc8a718b",
-        "last_edited": "2026-04-03",
-        "excerpt": "discover_listeners_for_deploy_target() walks every queue type for the deploy target; for targets in QUEUE_CONFIGS, create_app() starts listeners in-process.",
-    },
-]
-
-
 BUS = "backend/src/rox_core/api/tasks/business.py"
 TH = "backend/src/tasks/task_handler.py"
 TASKM = "backend/src/rox_core/models/task.py"
@@ -2756,6 +2722,7 @@ block_figures = [
 page = {
     "id": "rox-core",
     "title": "rox-core",
+    "kind": "root",
     "commit": COMMIT,
     "parent": None,
     "paths": ["."],
@@ -2766,7 +2733,6 @@ page = {
     "sequences": sequences,
     "states": states,
     "related": related,
-    "notion": notion,
 }
 
 out = Path(__file__).resolve().parents[1] / "rox-core.json"

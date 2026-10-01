@@ -133,11 +133,6 @@ def page_problems(
             _source_problem(label, source, page, repo, line_count_cache, commit_exists)
         )
 
-    for notion_doc in page.notion:
-        problem = _notion_problem(f"notion '{notion_doc.title}'", notion_doc.url)
-        if problem is not None:
-            problems.append(problem)
-
     if commit_exists:
         for path in page.paths:
             if path == ".":

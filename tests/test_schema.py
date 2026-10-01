@@ -153,6 +153,7 @@ def test_build_warns_only_for_requested_duplicate_tables(
     requested_page["data"]["sql_tables"] = ["users"]
     unrequested_page = copy.deepcopy(page_data)
     unrequested_page["id"] = "sessions"
+    unrequested_page["kind"] = "domain"
     unrequested_page["parent"] = "rox-core"
     unrequested_page["paths"] = ["pkg"]
     unrequested_page["commit"] = commit

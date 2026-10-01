@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping
-from datetime import date
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -418,16 +417,10 @@ class Related(Model):
         return self
 
 
-class NotionDoc(Model):
-    title: str = Field(min_length=1)
-    url: str
-    last_edited: date
-    excerpt: str = Field(min_length=1, max_length=600)
-
-
 class Page(Model):
     id: str
     title: str
+    kind: Literal["root", "domain", "feature"]
     commit: str
     parent: str | None
     paths: list[str] = Field(min_length=1)
@@ -438,7 +431,6 @@ class Page(Model):
     sequences: list[Sequence]
     states: list[StateMachine]
     related: list[Related]
-    notion: list[NotionDoc]
 
     @field_validator("paths")
     @classmethod
