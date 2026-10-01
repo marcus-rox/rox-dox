@@ -20,7 +20,7 @@ from rox_dox.features import (
     FeatureMap,
     TableLink,
 )
-from rox_dox.model import CodeSource, Page
+from rox_dox.model import CodeSource, Page, page_sources
 from rox_dox.schema import Column, Table
 
 
@@ -764,6 +764,13 @@ def test_table_relations_keep_the_strongest_signal_per_unordered_pair() -> None:
         TableLink(
             a="sessions",
             b="users",
+            signal="id_column",
+            path="backend/src/models/session.py",
+            line=35,
+        ),
+        TableLink(
+            a="sessions",
+            b="users",
             signal="same_file",
             path="backend/src/models/session.py",
             line=50,
@@ -790,10 +797,30 @@ def test_table_relations_keep_the_strongest_signal_per_unordered_pair() -> None:
     ) == (
         "sessions",
         "users",
-        "declared FK",
-        "enforced",
+        "model ForeignKey",
+        "symbolic",
         "backend/src/models/session.py",
         (40, 40),
+    )
+
+
+def test_id_column_schema_relation_is_symbolic() -> None:
+    relation = _table_relations(
+        [
+            TableLink(
+                a="email_message",
+                b="person",
+                signal="id_column",
+                path="backend/src/models/email_message.py",
+                line=18,
+            )
+        ]
+    )[0]
+
+    assert (relation.label, relation.kind, relation.source.lines) == (
+        "ID column name",
+        "symbolic",
+        (18, 18),
     )
 
 
@@ -852,3 +879,70 @@ def test_domain_schema_key_tables_include_cross_feature_relation_endpoints() -> 
     assert [
         (relation.src, relation.dst, relation.label) for relation in data.relations
     ] == [("d", "z", "ORM join")]
+
+
+def test_domain_tldr_lists_cited_links_to_other_domains() -> None:
+    source = CodeSource(path="backend/src/models/alpha.py", lines=(8, 8))
+    tables = {
+        name: Table(
+            name=name,
+            class_name=name.capitalize(),
+            columns=[Column(name="id", type="Integer", primary_key=True)],
+            source=CodeSource(
+                path=f"backend/src/models/{name}.py",
+                lines=(1, 4),
+            ),
+        )
+        for name in ("alpha", "person")
+    }
+    feature_map = FeatureMap(
+        commit="a" * 40,
+        domain="activity",
+        threshold=0.25,
+        tables=["alpha"],
+        features=[Feature(id="alpha", tables=["alpha"], files=[], table_links=[])],
+        cross_links=[],
+        external_links=[
+            TableLink(
+                a="alpha",
+                b="person",
+                signal="id_column",
+                path=source.path,
+                line=source.lines[0],
+            )
+        ],
+        uncovered=[],
+        unmapped_tags=[],
+        counts=FeatureCounts(
+            domain_files=0,
+            primary_placed=0,
+            shared=0,
+            uncovered=0,
+            web=0,
+            deployment=0,
+            skills=0,
+            unparseable=0,
+        ),
+    )
+
+    domain_page = feature_pages(
+        feature_map,
+        root_id="rox-core",
+        domain_title="Activity",
+        names={},
+        tables=tables,
+        domain_titles={"people": "People"},
+        table_domains={"alpha": "activity", "person": "people"},
+    )[0]
+
+    link_table = domain_page.tldr.additional_tables[0]
+    assert link_table.title == "Links to other domains"
+    assert link_table.columns == [
+        "This table",
+        "Other table",
+        "Other domain",
+        "Signal",
+    ]
+    assert link_table.rows == [["alpha", "person", "People", "ID column name"]]
+    assert link_table.links[0].page == "domain-people"
+    assert ("TLDR Links to other domains table", source) in page_sources(domain_page)

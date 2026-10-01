@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from tqdm import tqdm
 
 from rox_dox.cache import get_or_compute
-from rox_dox.relations import find_relation_candidates
+from rox_dox.relations import RelationCandidate, find_relation_candidates
 from rox_dox.schema import Table, extract_tables
 
 
@@ -92,6 +92,7 @@ class FeatureMap(BaseModel):
     tables: list[str]
     features: list[Feature]
     cross_links: list[TableLink] = Field(default_factory=list)
+    external_links: list[TableLink] = Field(default_factory=list)
     uncovered: list[UncoveredFile]
     unmapped_tags: list[str]
     counts: FeatureCounts
@@ -631,6 +632,7 @@ def _table_links(
     graph: Mapping[str, _GraphFile],
     tables: Mapping[str, Table],
     domain_table_names: list[str],
+    relation_candidates: Collection[RelationCandidate] | None = None,
 ) -> dict[tuple[str, str], list[_RawLink]]:
     table_set = set(domain_table_names)
     links: defaultdict[tuple[str, str], dict[str, _RawLink]] = defaultdict(dict)
@@ -664,7 +666,11 @@ def _table_links(
                 )
                 links[(link.a, link.b)][link.signal] = link
 
-    candidates = find_relation_candidates(repo, commit, domain_table_names)
+    candidates = (
+        relation_candidates
+        if relation_candidates is not None
+        else find_relation_candidates(repo, commit, domain_table_names)
+    )
     for candidate in tqdm(candidates, desc="Relation candidates", unit="candidate"):
         source_table = candidate.src.split(".", 1)[0]
         target_table = candidate.dst.split(".", 1)[0]
@@ -681,6 +687,83 @@ def _table_links(
         )
         links[(link.a, link.b)].setdefault(link.signal, link)
     return {pair: list(signals.values()) for pair, signals in links.items()}
+
+
+def _external_table_links(
+    domain: str,
+    domain_tables: Mapping[str, Collection[str]],
+    tables: Mapping[str, Table],
+    graph: Mapping[str, _GraphFile],
+    candidates: Collection[RelationCandidate],
+) -> list[TableLink]:
+    table_domains = {
+        table_name: domain_id
+        for domain_id, table_names in domain_tables.items()
+        for table_name in table_names
+    }
+    raw_links = []
+    for table_name in sorted(tables):
+        source_domain = table_domains.get(table_name)
+        if source_domain is None:
+            continue
+        for column in tables[table_name].columns:
+            if not column.foreign_key:
+                continue
+            target_table = column.foreign_key.split(".", 1)[0]
+            target_domain = table_domains.get(target_table)
+            if (
+                source_domain == target_domain
+                or domain not in {source_domain, target_domain}
+            ):
+                continue
+            raw_links.append(
+                _normalise_link(
+                    table_name,
+                    target_table,
+                    "fk",
+                    tables[table_name].source.path,
+                    _foreign_key_line(graph, tables, table_name, target_table),
+                )
+            )
+    for candidate in candidates:
+        if candidate.signal == "same_file" or candidate.signal.endswith(":ambiguous"):
+            continue
+        source_table = candidate.src.split(".", 1)[0]
+        target_table = candidate.dst.split(".", 1)[0]
+        source_domain = table_domains.get(source_table)
+        target_domain = table_domains.get(target_table)
+        if (
+            source_domain is None
+            or target_domain is None
+            or source_domain == target_domain
+            or domain not in {source_domain, target_domain}
+        ):
+            continue
+        raw_links.append(
+            _normalise_link(
+                source_table,
+                target_table,
+                candidate.signal,
+                candidate.path,
+                candidate.line,
+            )
+        )
+    links: dict[tuple[str, str, str], _RawLink] = {}
+    for link in sorted(
+        raw_links,
+        key=lambda item: (item.a, item.b, item.signal, item.path, item.line),
+    ):
+        links.setdefault((link.a, link.b, link.signal), link)
+    return [
+        TableLink(
+            a=link.a,
+            b=link.b,
+            signal=link.signal,
+            path=link.path,
+            line=link.line,
+        )
+        for link in links.values()
+    ]
 
 
 def _cross_feature_links(
@@ -1105,17 +1188,32 @@ def _build_feature_map(
         }
         for table in domain_table_names
     }
+    all_table_names = sorted(tables)
+    relation_candidates = find_relation_candidates(repo, commit, all_table_names)
     links = _table_links(
         repo,
         commit,
         graph,
         tables,
         domain_table_names,
+        relation_candidates,
     )
+    external_links = _external_table_links(
+        domain,
+        domain_tables,
+        tables,
+        graph,
+        relation_candidates,
+    )
+    clustering_links = {
+        pair: pair_links
+        for pair, pair_links in links.items()
+        if any(link.signal != "id_column" for link in pair_links)
+    }
     clusters = _clusters(
         domain_table_names,
         users,
-        links,
+        clustering_links,
         threshold,
     )
     cluster_by_table = {
@@ -1463,6 +1561,7 @@ def _build_feature_map(
         tables=domain_table_names,
         features=table_features,
         cross_links=cross_links,
+        external_links=external_links,
         uncovered=uncovered_files,
         unmapped_tags=sorted(unmapped_tags),
         counts=FeatureCounts(

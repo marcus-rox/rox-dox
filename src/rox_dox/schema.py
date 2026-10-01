@@ -19,6 +19,7 @@ class Column(SchemaModel):
     type: str
     primary_key: bool = False
     foreign_key: str | None = None
+    line: int = 1
 
 
 class Table(SchemaModel):
@@ -128,6 +129,7 @@ def _column(class_statement: ast.stmt) -> Column | None:
         type=_column_type(value, annotation),
         primary_key=primary_key,
         foreign_key=_foreign_key_target(value),
+        line=class_statement.lineno,
     )
 
 

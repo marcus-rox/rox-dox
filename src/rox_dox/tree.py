@@ -87,9 +87,15 @@ def tree_problems(pages: list[Page]) -> list[str]:
                         f"kind '{target_kind or 'unspecified'}'; expected "
                         f"'{expected_kind}'"
                     )
-        for link in page.tldr.table.links:
-            if link.page not in page_ids:
-                problems.append(f"TLDR table: link to missing page '{link.page}'")
+        for table in [
+            page.tldr.table,
+            *(page.tldr.additional_tables or []),
+        ]:
+            for link in table.links:
+                if link.page not in page_ids:
+                    problems.append(
+                        f"TLDR table: link to missing page '{link.page}'"
+                    )
 
     for page in pages:
         if page.parent is None:

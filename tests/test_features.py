@@ -378,6 +378,76 @@ def test_cross_links_keep_only_relations_between_distinct_features(
     assert all(owner[link.a] != owner[link.b] for link in feature_map.cross_links)
 
 
+def test_id_column_links_do_not_change_clustering_and_include_external_domains(
+    tmp_path: Path,
+) -> None:
+    sources = {
+        "backend/src/activity/alpha.py": (
+            "from sqlalchemy import Column, String\n"
+            "\n"
+            "class Alpha:\n"
+            '    __tablename__ = "alpha"\n'
+            "    id = Column(String)\n"
+            "    person_id = Column(String)\n"
+        ),
+        "backend/src/activity/beta.py": (
+            "from sqlalchemy import Column, String\n"
+            "\n"
+            "class Beta:\n"
+            '    __tablename__ = "beta"\n'
+            "    id = Column(String)\n"
+            "    alpha_id = Column(String)\n"
+        ),
+        "backend/src/activity/gamma_delta.py": (
+            "from sqlalchemy import Column, String\n"
+            "\n"
+            "class Gamma:\n"
+            '    __tablename__ = "gamma"\n'
+            "    id = Column(String)\n"
+            "\n"
+            "class Delta:\n"
+            '    __tablename__ = "delta"\n'
+            "    gamma_id = Column(String)\n"
+        ),
+        "backend/src/people/person.py": (
+            "from sqlalchemy import Column, String\n"
+            "\n"
+            "class Person:\n"
+            '    __tablename__ = "person"\n'
+            "    id = Column(String)\n"
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+
+    feature_map = build_feature_map(
+        repo,
+        commit,
+        {
+            "activity": ["alpha", "beta", "gamma", "delta"],
+            "people": ["person"],
+        },
+        "activity",
+    )
+
+    assert {frozenset(feature.tables) for feature in feature_map.features} == {
+        frozenset({"alpha"}),
+        frozenset({"beta"}),
+        frozenset({"gamma", "delta"}),
+    }
+    assert [
+        (link.a, link.b, link.signal) for link in feature_map.cross_links
+    ] == [("alpha", "beta", "id_column")]
+    grouped_tables = next(
+        feature
+        for feature in feature_map.features
+        if set(feature.tables) == {"gamma", "delta"}
+    )
+    assert any(link.signal == "id_column" for link in grouped_tables.table_links)
+    assert [
+        (link.a, link.b, link.signal) for link in feature_map.external_links
+    ] == [("alpha", "person", "id_column")]
+
+
 def test_evidence_check_reports_partnerless_file(tmp_path: Path) -> None:
     sources = _base_sources()
     sources["backend/src/rox_core/orphan.py"] = (
@@ -531,7 +601,9 @@ def test_build_feature_maps_reuses_shared_graph_and_scope(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    repo, commit = _commit_sources(tmp_path, _base_sources())
+    sources = _base_sources()
+    sources["backend/src/rox_core/cache_scope_check.py"] = "scope_marker = True\n"
+    repo, commit = _commit_sources(tmp_path, sources)
     domain_tables = {"seq": ["campaign", "sequence"]}
     counts = {"_snapshot": 0, "_parse_graph": 0, "_domain_scope": 0}
 

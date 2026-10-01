@@ -404,6 +404,7 @@ class SummaryTable(Model):
     rows: list[list[str]]
     sources: list[Source] = Field(min_length=1)
     links: list[SummaryTableLink] = Field(default_factory=list)
+    title: str | None = None
 
     @model_validator(mode="after")
     def validate_rows(self) -> SummaryTable:
@@ -431,6 +432,7 @@ class Tldr(Model):
     key_points: list[Claim]
     table: SummaryTable
     notes: list[Claim]
+    additional_tables: list[SummaryTable] | None = None
 
 
 class Related(Model):
@@ -501,6 +503,11 @@ def page_sources(
     sources.extend(_claim_sources(page.tldr.summary, "summary"))
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
     sources.extend((("TLDR table", source) for source in page.tldr.table.sources))
+    sources.extend(
+        (f"TLDR {table.title or 'additional'} table", source)
+        for table in page.tldr.additional_tables or []
+        for source in table.sources
+    )
     sources.extend(_claim_sources(page.tldr.notes, "note"))
     sources.extend(
         (f"block group {group.id}", group.source) for group in page.block.groups

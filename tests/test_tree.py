@@ -123,6 +123,25 @@ def test_missing_schema_domain_page_link_is_reported(
     assert "schema domain 'identity': link to missing page 'missing'" in problems
 
 
+def test_missing_additional_tldr_table_page_link_is_reported(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["tldr"]["additional_tables"] = [
+        {
+            "title": "Links to other domains",
+            "columns": ["This table", "Other table", "Other domain", "Signal"],
+            "rows": [["sessions", "users", "People", "ID column name"]],
+            "links": [{"row": 0, "column": 2, "page": "domain-people"}],
+            "sources": [{"path": "pkg/a.py", "lines": [1, 1]}],
+        }
+    ]
+
+    problems = tree_problems([Page.model_validate(payload)])
+
+    assert "TLDR table: link to missing page 'domain-people'" in problems
+
+
 def test_schema_domain_page_link_must_match_page_kind(
     page_data: dict[str, object],
 ) -> None:

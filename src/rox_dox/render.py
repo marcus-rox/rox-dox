@@ -22,6 +22,7 @@ from rox_dox.model import (
     Sequence as SequenceDiagram,
     Source,
     StateMachine,
+    SummaryTable,
     page_sources,
 )
 from rox_dox.plantuml import DiagramError, render_svg
@@ -575,8 +576,7 @@ def _claim_list(
     return f'<ul class="claim-list">{items}</ul>'
 
 
-def _table_html(page: Page, *, repo_url: str) -> str:
-    table = page.tldr.table
+def _table_html(page: Page, table: SummaryTable, *, repo_url: str) -> str:
     headings = "".join(
         f'<th scope="col">{_escape(column)}</th>' for column in table.columns
     )
@@ -620,13 +620,24 @@ def _tldr_html(page: Page, *, repo_url: str) -> str:
         if page.tldr.notes
         else f'<p class="empty">{EMPTY_MESSAGE}</p>'
     )
+    tables = [
+        ("Table", page.tldr.table),
+        *(
+            (table.title or "Additional table", table)
+            for table in page.tldr.additional_tables or []
+        ),
+    ]
+    table_sections = "".join(
+        f"<h3>{_escape(title)}</h3>"
+        f"{_table_html(page, table, repo_url=repo_url)}"
+        for title, table in tables
+    )
     return (
         "<h3>Summary</h3>"
         f"{summary}"
         "<h3>Key Points</h3>"
         f"{key_points}"
-        "<h3>Table</h3>"
-        f"{_table_html(page, repo_url=repo_url)}"
+        f"{table_sections}"
         "<h3>Interesting Notes</h3>"
         f"{notes}"
     )

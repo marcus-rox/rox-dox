@@ -78,6 +78,11 @@ def main() -> None:
             }
 
     primary_features = {}
+    table_domains = {
+        table: feature_map.domain
+        for feature_map in feature_maps
+        for table in feature_map.tables
+    }
     for candidate in feature_maps:
         for feature in candidate.features:
             display_name = names.get(candidate.domain, {}).get(feature.id)
@@ -105,6 +110,8 @@ def main() -> None:
                 component_facts=components_by_commit[feature_map.commit],
                 component_imports=imports_by_commit[feature_map.commit],
                 primary_features=primary_features,
+                domain_titles=domain_titles,
+                table_domains=table_domains,
             )
         )
 

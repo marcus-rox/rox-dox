@@ -1246,12 +1246,14 @@ _RELATION_PRIORITY = {
     "fk": 0,
     "primaryjoin": 1,
     "comparison": 2,
-    "commented_fk": 3,
+    "id_column": 3,
+    "commented_fk": 4,
 }
 _RELATION_LABELS = {
-    "fk": ("declared FK", "enforced"),
+    "fk": ("model ForeignKey", "symbolic"),
     "primaryjoin": ("ORM join", "symbolic"),
     "comparison": ("query join", "symbolic"),
+    "id_column": ("ID column name", "symbolic"),
     "commented_fk": ("commented-out FK", "symbolic"),
 }
 
@@ -1264,14 +1266,14 @@ def _table_relations(links: Collection[TableLink]) -> list[Relation]:
         pair = tuple(sorted((link.a, link.b)))
         current = strongest.get(pair)
         candidate_key = (
-            _RELATION_PRIORITY.get(link.signal, 4),
+            _RELATION_PRIORITY.get(link.signal, 5),
             link.path,
             link.line,
             link.signal,
         )
         current_key = (
             (
-                _RELATION_PRIORITY.get(current.signal, 4),
+                _RELATION_PRIORITY.get(current.signal, 5),
                 current.path,
                 current.line,
                 current.signal,
@@ -1728,6 +1730,8 @@ def _domain_tldr(
     component_facts: Mapping[str, FileFacts],
     component_imports: Mapping[str, Mapping[str, int]],
     primary_features: Mapping[str, tuple[str, str]],
+    domain_titles: Mapping[str, str],
+    table_domains: Mapping[str, str],
 ) -> Tldr:
     table_names = sorted(
         {table for feature in feature_map.features for table in feature.tables}
@@ -1916,6 +1920,54 @@ def _domain_tldr(
         )
         for (source_feature, target_feature), sources in import_notes
     )
+    external_rows = []
+    external_links = []
+    external_sources = []
+    for link in feature_map.external_links:
+        a_domain = table_domains.get(link.a)
+        b_domain = table_domains.get(link.b)
+        if (
+            a_domain is None
+            or b_domain is None
+            or a_domain == b_domain
+            or feature_map.domain not in {a_domain, b_domain}
+        ):
+            continue
+        own_table, other_table = (
+            (link.a, link.b)
+            if a_domain == feature_map.domain
+            else (link.b, link.a)
+        )
+        other_domain = b_domain if a_domain == feature_map.domain else a_domain
+        external_rows.append(
+            [
+                own_table,
+                other_table,
+                domain_titles.get(other_domain, _humanize(other_domain)),
+                _RELATION_LABELS.get(link.signal, (link.signal, "symbolic"))[0],
+            ]
+        )
+        external_links.append(
+            SummaryTableLink(
+                row=len(external_rows) - 1,
+                column=2,
+                page=f"domain-{other_domain}",
+            )
+        )
+        external_sources.append(_source(link.path, link.line))
+    additional_tables = (
+        [
+            SummaryTable(
+                title="Links to other domains",
+                columns=["This table", "Other table", "Other domain", "Signal"],
+                rows=external_rows,
+                links=external_links,
+                sources=_unique_sources(external_sources),
+            )
+        ]
+        if external_rows
+        else None
+    )
     return Tldr(
         summary=summary,
         key_points=key_points,
@@ -1933,6 +1985,7 @@ def _domain_tldr(
             sources=_unique_sources([*row_sources, *table_sources]),
         ),
         notes=notes,
+        additional_tables=additional_tables,
     )
 
 
@@ -1989,6 +2042,8 @@ def _domain_page(
     component_facts: Mapping[str, FileFacts],
     component_imports: Mapping[str, Mapping[str, int]],
     primary_features: Mapping[str, tuple[str, str]],
+    domain_titles: Mapping[str, str],
+    table_domains: Mapping[str, str],
 ) -> Page:
     domain_page_id = f"domain-{feature_map.domain}"
     primary_paths = sorted(
@@ -2020,6 +2075,8 @@ def _domain_page(
             component_facts,
             component_imports,
             primary_features,
+            domain_titles,
+            table_domains,
         ),
         block=block,
         block_figures=figures,
@@ -2046,6 +2103,8 @@ def feature_pages(
     component_facts: Mapping[str, FileFacts] | None = None,
     component_imports: Mapping[str, Mapping[str, int]] | None = None,
     primary_features: Mapping[str, tuple[str, str]] | None = None,
+    domain_titles: Mapping[str, str] | None = None,
+    table_domains: Mapping[str, str] | None = None,
 ) -> list[Page]:
     runtime_facts = component_facts or {}
     runtime_imports = component_imports or {}
@@ -2060,6 +2119,8 @@ def feature_pages(
             component_facts=runtime_facts,
             component_imports=runtime_imports,
             primary_features=primary_feature_owners,
+            domain_titles=domain_titles or {},
+            table_domains=table_domains or {},
         )
     ]
     pages.extend(

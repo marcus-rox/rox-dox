@@ -34,6 +34,15 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     payload["tldr"]["summary"][0]["sources"].append(
         {"path": "pkg/a.py", "lines": [4, 5]}
     )
+    payload["tldr"]["additional_tables"] = [
+        {
+            "title": "Links to other domains",
+            "columns": ["This table", "Other table", "Other domain", "Signal"],
+            "rows": [["sessions", "users", "People", "ID column name"]],
+            "links": [{"row": 0, "column": 2, "page": "domain-people"}],
+            "sources": [{"path": "pkg/a.py", "lines": [6, 6]}],
+        }
+    ]
     page = _empty_page(payload)
     document = render_page(
         page,
@@ -61,6 +70,8 @@ def test_tldr_claim_and_table_citations_link_to_numbered_sources(
     assert f'<a href="{first_source_url}">[1]</a>' in document
     assert f'<a href="{second_source_url}">[2]</a>' in document
     assert f'<a href="{table_source_url}">[1]</a>' in document
+    assert "<h3>Links to other domains</h3>" in document
+    assert f'href="{page_href(page.id, "domain-people")}"' in document
     assert re.search(r"<h3>Summary</h3>.*?<h3>Key Points</h3>", document, re.DOTALL)
     assert "<h3>Table</h3>" in document
     assert "<h3>Interesting Notes</h3>" in document
