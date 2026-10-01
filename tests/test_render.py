@@ -251,8 +251,15 @@ def test_domain_schema_renders_legend_table_guide_and_key_table_sources(
     assert schema is not None
     guide = schema.group(1)
     assert "Each card is a domain" in guide
-    assert "solid" in guide and "dashed" in guide and "dotted" in guide
+    assert "orange = primary / referenced key" in guide
+    assert "blue = referencing (FK-like) column" in guide
+    assert "solid blue = DB-enforced FK" in guide
+    assert "dashed grey = symbolic reference (no constraint)" in guide
+    assert "dotted amber = blob pointer" in guide
     assert "keys the arrows use are listed on the right" in guide
+    assert "width: 34px" in document
+    assert "border-top-style: dashed" in document
+    assert "border-top-style: dotted" in document
     assert "<h3>Table guide</h3>" in guide
     assert (
         '<details id="schema-guide-identity"><summary>Identity — 2 tables</summary>'

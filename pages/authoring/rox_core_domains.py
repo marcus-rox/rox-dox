@@ -175,6 +175,8 @@ ROOT_COLUMNS: list[list[str]] = [
     [
         "agents",
         "tasks",
+    ],
+    [
         "conversation messages",
         "chat:conversation:{conversation_id}:stream:{stream_id}",
     ],

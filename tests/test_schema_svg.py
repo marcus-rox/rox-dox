@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -64,18 +65,19 @@ def test_domain_schema_cards_show_key_tables_and_all_tables_in_guide(
     )
 
     assert svg.count('class="schema-card schema-domain"') == 1
-    assert 'width="348" height="244" viewBox="0 0 348 244"' in svg
+    assert 'width="348" height="266" viewBox="0 0 348 266"' in svg
     assert "Identity" in svg
     assert "2 tables" in svg
     assert svg.count(">users</text>") == 1
     assert "sessions" not in svg
     assert f'href="{source_href}"' in svg
     assert 'href="#schema-guide-identity"' in svg
-    assert "Shared tenant keys are summarized here." in svg
+    assert "Shared tenant" in svg
+    assert "summarized" in svg
     assert f'href="{note_href}"' in svg
 
 
-def test_nosql_store_headers_wrap_long_keys(
+def test_nosql_store_width_expands_for_long_keys(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
 ) -> None:
@@ -97,7 +99,56 @@ def test_nosql_store_headers_wrap_long_keys(
     )
 
     assert "".join(header_lines) == store_name
-    assert len(header_lines) == 2
+    assert len(header_lines) == 1
+    store_width = re.search(r'<rect x="0" y="0" width="([0-9]+)"', store_markup)
+    assert store_width is not None
+    assert 400 <= int(store_width.group(1)) <= 520
+
+
+def test_wrapped_header_text_stays_inside_header_box(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+) -> None:
+    repo, commit = git_repo
+    payload = _domain_payload(page_data)
+    payload["data"]["domains"][0]["title"] = (
+        "Tenancy organizations users authentication billing and permissions"
+    )
+    page = _page(payload)
+
+    svg = schema_svg(page, repo_url=REPO_URL, tables=extract_tables(repo, commit))
+    root = ET.fromstring(svg)
+    namespace = {"svg": "http://www.w3.org/2000/svg"}
+    domain_card = root.find(
+        './/svg:g[@class="schema-card schema-domain"]',
+        namespace,
+    )
+    assert domain_card is not None
+    header = next(
+        rect
+        for rect in domain_card.findall("svg:rect", namespace)
+        if rect.get("fill") == "#1f2937"
+    )
+    header_height = float(header.get("height", "0"))
+    header_text = [
+        text
+        for text in domain_card.iter("{http://www.w3.org/2000/svg}text")
+        if text.get("font-size") in {"10.5", "12.5"}
+    ]
+    header_lines = [
+        text
+        for text in domain_card.iter("{http://www.w3.org/2000/svg}text")
+        if text.get("font-size") == "12.5"
+    ]
+    first_row_top = min(
+        float(line.get("y1", "0"))
+        for line in domain_card.findall("svg:line", namespace)
+    )
+
+    assert len(header_lines) >= 2
+    assert header_text
+    assert all(0 < float(text.get("y", "0")) <= header_height for text in header_text)
+    assert first_row_top >= header_height
 
 
 def test_domain_schema_relations_use_kind_styles_and_key_endpoints(

@@ -394,9 +394,15 @@ th {
 .schema-legend-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1rem;
+  gap: 0.55rem 1.4rem;
   margin: 0.4rem 0;
-  padding-left: 1.2rem;
+  padding: 0;
+  list-style: none;
+}
+.schema-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 .schema-pk {
   color: #b45309;
@@ -410,16 +416,23 @@ th {
   color: #9ca3af;
 }
 .schema-line {
-  font-weight: 600;
+  display: inline-block;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
 }
 .schema-line-enforced {
   color: #2563eb;
 }
 .schema-line-symbolic {
   color: #9ca3af;
+  border-top-style: dashed;
 }
 .schema-line-blob {
   color: #d97706;
+  border-top-style: dotted;
 }
 .schema-table-list {
   font-family: Menlo, Consolas, monospace;
@@ -784,14 +797,16 @@ def _schema_legend(page: Page) -> str:
         '<div class="schema-legend">'
         "<strong>Legend</strong>"
         '<ul class="schema-legend-list">'
-        '<li><span class="schema-pk">PK</span> primary key; '
-        '<span class="schema-fk">FK column</span> foreign-key-like column</li>'
-        '<li><span class="schema-line schema-line-enforced">solid</span> '
-        'DB-enforced FK; <span class="schema-line schema-line-symbolic">dashed</span> '
-        "symbolic reference (no constraint); "
-        '<span class="schema-line schema-line-blob">dotted</span> blob pointer</li>'
+        '<li><span class="schema-pk">PK</span> orange = primary / referenced key</li>'
+        '<li><span class="schema-fk">FK</span> blue = referencing (FK-like) column</li>'
+        '<li><span class="schema-line schema-line-enforced" aria-hidden="true"></span> '
+        "solid blue = DB-enforced FK</li>"
+        '<li><span class="schema-line schema-line-symbolic" aria-hidden="true"></span> '
+        "dashed grey = symbolic reference (no constraint)</li>"
+        '<li><span class="schema-line schema-line-blob" aria-hidden="true"></span> '
+        "dotted amber = blob pointer</li>"
         "<li>dot = referenced (one) side; arrow = many side</li>"
-        '<li><span class="schema-boilerplate">grey</span> shared boilerplate columns</li>'
+        '<li><span class="schema-boilerplate">grey</span> = shared boilerplate columns</li>'
         "</ul>"
         f"{domain_note}</div>"
     )

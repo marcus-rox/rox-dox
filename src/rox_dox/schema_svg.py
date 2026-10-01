@@ -11,12 +11,18 @@ from rox_dox.plantuml import DiagramError
 from rox_dox.schema import Column, Table
 
 CARD_WIDTH = 300
+CARD_WIDTH_CAP = 520
 CARD_GAP = 36
 COLUMN_GAP = 160
 LEFT_MARGIN = 24
 ROW_HEIGHT = 18
-HEADER_HEIGHT = 26
+HEADER_VERTICAL_PADDING = 6
+HEADER_LINE_HEIGHT = 16
+HEADER_BASELINE_OFFSET = 13
+HEADER_COUNT_GAP = 12
 CARD_PADDING = 12
+DOMAIN_KEY_GAP = 24
+MONOSPACE_CHAR_WIDTH = 0.62
 PK_COLOR = "#b45309"
 FK_COLOR = "#2563eb"
 BOILERPLATE_COLOR = "#9ca3af"
@@ -75,11 +81,11 @@ def _escape(value: object, *, quote: bool = False) -> str:
 
 
 def _text_width(value: str, font_size: float = 11.5) -> float:
-    return len(value) * font_size * 0.61
+    return len(value) * font_size * MONOSPACE_CHAR_WIDTH
 
 
 def _wrap_text(value: str, max_width: float, font_size: float = 11.5) -> list[str]:
-    max_chars = max(1, int(max_width / (font_size * 0.61)))
+    max_chars = max(1, int(max_width / (font_size * MONOSPACE_CHAR_WIDTH)))
     words = value.split()
     if not words:
         return [""]
@@ -110,7 +116,7 @@ def _wrap_text(value: str, max_width: float, font_size: float = 11.5) -> list[st
 
 
 def _truncate(value: str, max_width: float, font_size: float = 11.5) -> str:
-    max_chars = max(1, int(max_width / (font_size * 0.61)))
+    max_chars = max(1, int(max_width / (font_size * MONOSPACE_CHAR_WIDTH)))
     if len(value) <= max_chars:
         return value
     if max_chars <= 1:
@@ -316,14 +322,49 @@ def _header_lines(
     )
 
 
-def _domain_item(domain: SchemaDomain) -> _Item:
-    widest_table_name = max(
-        (_text_width(table_name) + 36 for table_name in domain.key_tables),
-        default=CARD_WIDTH,
+def _header_height(line_count: int) -> int:
+    return 2 * HEADER_VERTICAL_PADDING + HEADER_LINE_HEIGHT * line_count
+
+
+def _domain_item(
+    domain: SchemaDomain,
+    *,
+    tables: Mapping[str, Table],
+    roles: Mapping[tuple[str, str], set[str]],
+) -> _Item:
+    count = f"{len(domain.tables)} tables"
+    header_width = (
+        _text_width(domain.title, font_size=12.5)
+        + HEADER_COUNT_GAP
+        + _text_width(count, font_size=10.5)
+        + 2 * CARD_PADDING
     )
-    width = max(CARD_WIDTH, math.ceil(widest_table_name))
-    header_lines = _header_lines(domain.title, width=width, reserved_width=76)
-    header_height = max(HEADER_HEIGHT, len(header_lines) * 18)
+    row_widths = []
+    for table_name in domain.key_tables:
+        table = tables[table_name]
+        key_names = [
+            column.name
+            for column in table.columns
+            if (table_name, column.name) in roles
+        ]
+        key_text = ", ".join(key_names)
+        row_widths.append(
+            _text_width(table_name)
+            + DOMAIN_KEY_GAP
+            + _text_width(key_text)
+            + 2 * CARD_PADDING
+        )
+    width = min(
+        CARD_WIDTH_CAP,
+        max(CARD_WIDTH, math.ceil(max(header_width, *row_widths))),
+    )
+    reserved_width = HEADER_COUNT_GAP + _text_width(count, font_size=10.5)
+    header_lines = _header_lines(
+        domain.title,
+        width=width,
+        reserved_width=reserved_width,
+    )
+    header_height = _header_height(len(header_lines))
     note_lines = sum(
         len(_wrap_text(note.text, width - 2 * CARD_PADDING)) for note in domain.notes
     )
@@ -358,28 +399,39 @@ def _table_item(table: Table) -> _Item:
         ),
     )
     header_lines = _header_lines(table.name, width=width)
-    height = (
-        max(HEADER_HEIGHT, len(header_lines) * 18) + len(table.columns) * ROW_HEIGHT
-    )
+    header_height = _header_height(len(header_lines))
+    height = header_height + len(table.columns) * ROW_HEIGHT
     return _Item(
         name=table.name,
         kind="table",
         width=width,
         height=height,
-        header_height=max(HEADER_HEIGHT, len(header_lines) * 18),
+        header_height=header_height,
         header_lines=header_lines,
     )
 
 
-def _store_item(store_name: str, fields: Sequence[str]) -> _Item:
-    header_lines = _header_lines(store_name, width=CARD_WIDTH)
-    height = max(HEADER_HEIGHT, len(header_lines) * 18) + (1 + len(fields)) * ROW_HEIGHT
+def _store_item(store_name: str, kind: str, fields: Sequence[str]) -> _Item:
+    row_width = (
+        max(
+            [_text_width(kind), *(_text_width(field) for field in fields)],
+            default=0,
+        )
+        + 2 * CARD_PADDING
+    )
+    header_width = _text_width(store_name, font_size=12.5) + 2 * CARD_PADDING
+    width = min(
+        CARD_WIDTH_CAP, max(CARD_WIDTH, math.ceil(max(row_width, header_width)))
+    )
+    header_lines = _header_lines(store_name, width=width)
+    header_height = _header_height(len(header_lines))
+    height = header_height + (1 + len(fields)) * ROW_HEIGHT
     return _Item(
         name=store_name,
         kind="store",
-        width=CARD_WIDTH,
+        width=width,
         height=height,
-        header_height=max(HEADER_HEIGHT, len(header_lines) * 18),
+        header_height=header_height,
         header_lines=header_lines,
     )
 
@@ -387,12 +439,19 @@ def _store_item(store_name: str, fields: Sequence[str]) -> _Item:
 def _build_items(
     page: Page,
     tables: Mapping[str, Table],
+    edges: Sequence[_Edge],
 ) -> list[_Item]:
+    roles = _endpoint_roles(edges)
     if page.data.domains:
-        items = [_domain_item(domain) for domain in page.data.domains]
+        items = [
+            _domain_item(domain, tables=tables, roles=roles)
+            for domain in page.data.domains
+        ]
     else:
         items = [_table_item(tables[table_name]) for table_name in page.data.sql_tables]
-    items.extend(_store_item(store.name, store.fields) for store in page.data.nosql)
+    items.extend(
+        _store_item(store.name, store.kind, store.fields) for store in page.data.nosql
+    )
     return items
 
 
@@ -513,20 +572,29 @@ def _domain_key_markup(
     *,
     y: float,
 ) -> str:
-    available_width = item.width - 2 * CARD_PADDING - _text_width(table_name) - 12
-    remaining = max(1, int(available_width / (11.5 * 0.61)))
+    available_width = max(
+        0,
+        item.width - 2 * CARD_PADDING - _text_width(table_name) - DOMAIN_KEY_GAP,
+    )
+    remaining = available_width
     segments: list[tuple[str, str]] = []
     truncated = False
+    added_ellipsis = False
     for index, (column_name, column_roles) in enumerate(used):
         separator = ", " if index else ""
-        if len(separator) >= remaining:
+        separator_width = _text_width(separator)
+        if separator_width > remaining:
             truncated = True
             break
-        label_width = remaining - len(separator)
-        if len(column_name) > label_width:
-            visible = "…" if label_width == 1 else f"{column_name[: label_width - 1]}…"
+        label_width = remaining - separator_width
+        column_width = _text_width(column_name)
+        if column_width > label_width:
             if separator:
                 segments.append((separator, "#111827"))
+            if label_width <= 0:
+                truncated = True
+                break
+            visible = _truncate(column_name, label_width)
             role_color = (
                 PK_COLOR
                 if "dst" in column_roles and "src" not in column_roles
@@ -535,6 +603,7 @@ def _domain_key_markup(
             segments.append((visible, role_color))
             remaining = 0
             truncated = True
+            added_ellipsis = True
             break
         role_color = (
             PK_COLOR
@@ -544,8 +613,8 @@ def _domain_key_markup(
         if separator:
             segments.append((separator, "#111827"))
         segments.append((column_name, role_color))
-        remaining -= len(separator) + len(column_name)
-    if truncated and remaining > 0:
+        remaining -= separator_width + column_width
+    if truncated and not added_ellipsis and remaining >= _text_width("…"):
         segments.append(("…", "#111827"))
     rendered = []
     total_width = sum(_text_width(text) for text, _ in segments)
@@ -578,7 +647,11 @@ def _svg_text(
 def _header_text(item: _Item) -> str:
     lines: list[str] = []
     for line_number, line in enumerate(item.header_lines):
-        y = 17 + line_number * 18
+        y = (
+            HEADER_VERTICAL_PADDING
+            + HEADER_BASELINE_OFFSET
+            + line_number * HEADER_LINE_HEIGHT
+        )
         lines.append(
             _svg_text(
                 CARD_PADDING,
@@ -615,7 +688,7 @@ def _card_header(
         pieces.append(
             _svg_text(
                 item.width - CARD_PADDING,
-                17,
+                HEADER_VERTICAL_PADDING + HEADER_BASELINE_OFFSET,
                 count,
                 fill="#cbd5e1",
                 font_size=10.5,
@@ -1058,7 +1131,7 @@ def schema_svg(
             sql_names=sql_names,
             authored_edges=edges,
         )
-    items = _build_items(page, tables)
+    items = _build_items(page, tables, edges)
     columns = _layout_columns(page, items)
     width, height = _place_items(columns)
     same_column_counts: dict[int, int] = {}
