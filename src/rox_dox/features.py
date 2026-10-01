@@ -1,0 +1,1295 @@
+from __future__ import annotations
+
+import ast
+import math
+import re
+import subprocess
+from collections import Counter, defaultdict
+from collections.abc import Collection, Mapping
+from dataclasses import dataclass, field
+from pathlib import Path, PurePosixPath
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict
+from tqdm import tqdm
+
+from rox_dox.relations import find_relation_candidates
+from rox_dox.schema import Table, extract_tables
+
+
+class FeatureEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["table", "call", "route", "reference"]
+    path: str
+    line: int
+    table: str | None = None
+    to: str | None = None
+    tag: str | None = None
+    target: str | None = None
+
+
+class FeatureFile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    primary: bool
+    reason: Literal["tables", "calls", "called_by", "route", "reference"]
+    evidence: list[FeatureEvidence]
+
+
+class TableLink(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    a: str
+    b: str
+    signal: str
+    path: str
+    line: int
+
+
+class Feature(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    tables: list[str]
+    files: list[FeatureFile]
+    table_links: list[TableLink]
+
+
+class UncoveredFile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    reason: Literal["no shared table or call in its feature", "no feature reached"]
+
+
+class FeatureCounts(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    domain_files: int
+    primary_placed: int
+    shared: int
+    uncovered: int
+    web: int
+    deployment: int
+    skills: int
+    unparseable: int
+
+
+class FeatureMap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    commit: str
+    domain: str
+    threshold: float
+    tables: list[str]
+    features: list[Feature]
+    uncovered: list[UncoveredFile]
+    unmapped_tags: list[str]
+    counts: FeatureCounts
+
+
+@dataclass
+class _Snapshot:
+    files: dict[str, str]
+    all_paths: set[str]
+
+
+@dataclass
+class _GraphFile:
+    path: str
+    module: str
+    source: str
+    tree: ast.Module
+    imports: list[str] = field(default_factory=list)
+    import_lines: dict[str, int] = field(default_factory=dict)
+    tables: set[str] = field(default_factory=set)
+    table_lines: dict[str, int] = field(default_factory=dict)
+    defines: set[str] = field(default_factory=set)
+    reexport_only: bool = False
+    domains: list[str] = field(default_factory=list)
+    domain_reason: str | None = None
+
+
+@dataclass(frozen=True)
+class _RawLink:
+    a: str
+    b: str
+    signal: str
+    path: str
+    line: int
+
+
+@dataclass
+class _Placement:
+    feature: int
+    primary: bool
+    reason: Literal["tables", "calls", "called_by", "route", "reference"]
+    evidence: list[FeatureEvidence]
+
+
+_GENERATED_ROUTE = re.compile(r"generated/(?:core/)?([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)")
+_TS_IMPORT = re.compile(
+    r"""(?:\bfrom\s*["']([^"']+)["']|\bfrom\s+["']([^"']+)["']|"""
+    r"""\bimport\s*\(\s*["']([^"']+)["']\s*\)|"""
+    r"""\brequire\s*\(\s*["']([^"']+)["']\s*\))"""
+)
+_NAMESPACE_CALL = "FlaskRestxNamespace"
+_DEPLOYMENT_ROOTS = (
+    "k8s/",
+    "cicd/",
+    ".circleci/",
+    ".github/workflows/",
+)
+
+
+def _is_excluded(path: str) -> bool:
+    pure_path = PurePosixPath(path)
+    excluded_segments = {"tests", "test", "__tests__", "migrations", "alembic"}
+    if any(
+        segment in excluded_segments or segment.startswith("tests_")
+        for segment in pure_path.parts
+    ):
+        return True
+    filename = pure_path.name
+    return (
+        filename == "conftest.py"
+        or filename.startswith("test_")
+        or filename.endswith("_test.py")
+        or ".test." in filename
+        or ".spec." in filename
+    )
+
+
+def _git_tree(repo: Path, commit: str) -> list[tuple[str, str]]:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "ls-tree",
+            "-r",
+            "-z",
+            "--end-of-options",
+            commit,
+        ],
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"could not list git tree at {commit}: {result.stderr.decode().strip()}"
+        )
+    entries = []
+    for record in result.stdout.split(b"\0"):
+        if not record:
+            continue
+        metadata, path_bytes = record.split(b"\t", 1)
+        mode, object_type, object_id = metadata.decode().split(" ", 2)
+        if object_type != "blob" or mode == "120000":
+            continue
+        entries.append((path_bytes.decode(), object_id))
+    return entries
+
+
+def _git_blobs(repo: Path, objects: list[tuple[str, str]]) -> dict[str, str]:
+    if not objects:
+        return {}
+    request = "".join(f"{object_id}\n" for _, object_id in objects).encode()
+    result = subprocess.run(
+        ["git", "-C", str(repo), "cat-file", "--batch"],
+        check=True,
+        input=request,
+        capture_output=True,
+    )
+    output = result.stdout
+    offset = 0
+    contents = {}
+    for path, object_id in objects:
+        header_end = output.index(b"\n", offset)
+        header = output[offset:header_end].decode()
+        found_id, object_type, size_text = header.split(" ", 2)
+        if found_id != object_id or object_type != "blob":
+            raise RuntimeError(f"could not read {path} at {object_id}")
+        offset = header_end + 1
+        size = int(size_text)
+        contents[path] = output[offset : offset + size].decode(
+            "utf-8", errors="replace"
+        )
+        offset += size + 1
+    return contents
+
+
+def _snapshot(repo: Path, commit: str) -> _Snapshot:
+    tree = _git_tree(repo, commit)
+    selected = []
+    all_paths = {path for path, _ in tree}
+    for path, object_id in tree:
+        excluded = _is_excluded(path)
+        backend = path.startswith("backend/src/") and path.endswith(".py")
+        web = path.startswith("web/") and path.endswith((".ts", ".tsx"))
+        deployment = (
+            path.startswith(_DEPLOYMENT_ROOTS)
+            or "/Dockerfile" in path
+            or path.startswith("Dockerfile")
+            or ("/" not in path and path.endswith((".yml", ".yaml")))
+        )
+        skill = path.startswith(".agents/skills/")
+        if not excluded and (backend or web or deployment or skill):
+            selected.append((path, object_id))
+    return _Snapshot(_git_blobs(repo, selected), all_paths)
+
+
+def _module_name(path: str) -> str:
+    relative = PurePosixPath(path).relative_to("backend/src")
+    parts = list(relative.with_suffix("").parts)
+    if parts and parts[-1] == "__init__":
+        parts.pop()
+    return ".".join(parts)
+
+
+def _call_name(expression: ast.expr) -> str | None:
+    if isinstance(expression, ast.Name):
+        return expression.id
+    if isinstance(expression, ast.Attribute):
+        return expression.attr
+    return None
+
+
+def _attribute_parts(expression: ast.expr) -> list[str] | None:
+    parts = []
+    while isinstance(expression, ast.Attribute):
+        parts.append(expression.attr)
+        expression = expression.value
+    if not isinstance(expression, ast.Name):
+        return None
+    return [expression.id, *reversed(parts)]
+
+
+def _relative_module(module: str, node: ast.ImportFrom) -> str:
+    package_parts = module.split(".")
+    if module and not node.level:
+        return node.module or ""
+    if module:
+        package_parts = (
+            package_parts if module.endswith("__init__") else package_parts[:-1]
+        )
+    base = package_parts[: len(package_parts) - node.level + 1]
+    return ".".join([*base, *([node.module] if node.module else [])])
+
+
+def _reexport_only(tree: ast.Module) -> bool:
+    return all(
+        isinstance(node, (ast.Import, ast.ImportFrom, ast.Expr, ast.Assign))
+        for node in tree.body
+    )
+
+
+def _parse_graph(
+    snapshot: _Snapshot,
+    tables: Mapping[str, Table],
+    domain_table_names: set[str],
+) -> tuple[dict[str, _GraphFile], int]:
+    paths = sorted(
+        path
+        for path in snapshot.files
+        if path.startswith("backend/src/")
+        and path.endswith(".py")
+        and not _is_excluded(path)
+    )
+    module_to_path = {}
+    parsed: dict[str, _GraphFile] = {}
+    unparseable = 0
+    for path in tqdm(paths, desc="Parsing backend files", unit="file"):
+        try:
+            tree = ast.parse(snapshot.files[path], filename=path)
+        except SyntaxError:
+            unparseable += 1
+            continue
+        module = _module_name(path)
+        module_to_path[module] = path
+        parsed[path] = _GraphFile(
+            path=path,
+            module=module,
+            source=snapshot.files[path],
+            tree=tree,
+            reexport_only=_reexport_only(tree),
+        )
+
+    packages = {module.split(".")[0] for module in module_to_path if module}
+    class_tables: defaultdict[str, list[str]] = defaultdict(list)
+    tables_by_path: defaultdict[str, list[tuple[str, str]]] = defaultdict(list)
+    for table in tables.values():
+        if table.name not in domain_table_names:
+            continue
+        class_tables[table.class_name].append(table.name)
+        tables_by_path[table.source.path].append((table.class_name, table.name))
+    for names in class_tables.values():
+        names.sort()
+
+    for path in sorted(parsed):
+        graph_file = parsed[path]
+        aliases: dict[str, str] = {}
+        imports: set[str] = set()
+        touched: set[str] = set()
+        for node in ast.walk(graph_file.tree):
+            if isinstance(node, ast.ImportFrom):
+                module = _relative_module(graph_file.module, node)
+                if not module or module.split(".")[0] not in packages:
+                    continue
+                for alias in node.names:
+                    full = f"{module}.{alias.name}"
+                    if full in module_to_path:
+                        imports.add(full)
+                        aliases[alias.asname or alias.name] = full
+                    else:
+                        if module in module_to_path:
+                            imports.add(module)
+                        touched.update(class_tables.get(alias.name, ()))
+                continue
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.split(".")[0] not in packages:
+                        continue
+                    imports.add(alias.name)
+                    aliases[alias.asname or alias.name] = alias.name
+                continue
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr in class_tables
+                and isinstance(node.value, ast.Name)
+                and node.value.id in aliases
+            ):
+                touched.update(class_tables[node.attr])
+
+        defined = {
+            table.name
+            for table in tables.values()
+            if table.name in domain_table_names and table.source.path == path
+        }
+        touched.update(defined)
+        graph_file.imports = sorted(
+            module_to_path[module]
+            for module in imports
+            if module in module_to_path and module_to_path[module] != path
+        )
+        graph_file.tables = touched
+        graph_file.defines = defined
+        for module in graph_file.imports:
+            graph_file.import_lines[module] = _first_import_line(
+                graph_file.tree, module, module_to_path
+            )
+        for table_name in touched:
+            graph_file.table_lines[table_name] = _table_line(
+                path, table_name, tables, graph_file.tree
+            )
+    return parsed, unparseable
+
+
+def _first_import_line(
+    tree: ast.Module,
+    target: str,
+    module_to_path: Mapping[str, str],
+) -> int:
+    target_module = next(
+        (module for module, path in module_to_path.items() if path == target), target
+    )
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name == target_module for alias in node.names):
+                return node.lineno
+        elif isinstance(node, ast.ImportFrom):
+            module = _relative_module("", node)
+            if module == target_module or any(
+                f"{module}.{alias.name}" == target_module for alias in node.names
+            ):
+                return node.lineno
+    return 1
+
+
+def _table_line(
+    path: str,
+    table_name: str,
+    tables: Mapping[str, Table],
+    tree: ast.Module,
+) -> int:
+    table = tables[table_name]
+    if table.source.path != path:
+        return 1
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == table.class_name:
+            return node.lineno
+    return table.source.lines[0]
+
+
+def _domain_scope(
+    graph: Mapping[str, _GraphFile],
+    domain_tables: Mapping[str, Collection[str]],
+) -> tuple[dict[str, list[str]], dict[str, str]]:
+    table_domain = {
+        table: domain_id
+        for domain_id, tables in domain_tables.items()
+        for table in tables
+    }
+    table_counts = Counter(
+        table for graph_file in graph.values() for table in graph_file.tables
+    )
+    file_count = len(graph)
+    idf = {
+        table: math.log(file_count / count)
+        for table, count in table_counts.items()
+        if count
+    }
+    domains: dict[str, list[str]] = {}
+    reasons: dict[str, str] = {}
+    for path in sorted(graph):
+        graph_file = graph[path]
+        if not graph_file.tables or (
+            path.endswith("__init__.py") and graph_file.reexport_only
+        ):
+            continue
+        scores = Counter()
+        for table in graph_file.tables:
+            domain_id = table_domain.get(table)
+            if domain_id is not None and table in idf:
+                scores[domain_id] += idf[table]
+        if not scores:
+            continue
+        highest = max(scores.values())
+        domains[path] = sorted(
+            domain_id for domain_id, score in scores.items() if score >= highest - 1e-9
+        )
+        reasons[path] = "tables"
+
+    importers: defaultdict[str, list[str]] = defaultdict(list)
+    for path in sorted(graph):
+        for imported in graph[path].imports:
+            importers[imported].append(path)
+
+    def vote(neighbors: Collection[str], share: float) -> str | None:
+        counter = Counter(
+            domain_id
+            for neighbor in neighbors
+            if neighbor in domains
+            for domain_id in domains[neighbor]
+        )
+        total = sum(1 for neighbor in neighbors if neighbor in domains)
+        if not total or not counter:
+            return None
+        domain_id, count = counter.most_common(1)[0]
+        return domain_id if count / total > share else None
+
+    for _ in range(2):
+        new: dict[str, str] = {}
+        for path in sorted(graph):
+            if path in domains:
+                continue
+            domain_id = vote(graph[path].imports, 0.5)
+            if domain_id is not None:
+                new[path] = domain_id
+        for path, domain_id in new.items():
+            domains[path] = [domain_id]
+            reasons[path] = "calls"
+
+    for path in sorted(graph):
+        if path in domains:
+            continue
+        domain_id = vote(importers[path], 0.999)
+        if domain_id is not None:
+            domains[path] = [domain_id]
+            reasons[path] = "called_by"
+    for path, domain_ids in domains.items():
+        graph[path].domains = domain_ids
+        graph[path].domain_reason = reasons[path]
+    return domains, reasons
+
+
+def _normalise_link(a: str, b: str, signal: str, path: str, line: int) -> _RawLink:
+    left, right = sorted((a, b))
+    return _RawLink(left, right, signal, path, line)
+
+
+def _foreign_key_line(
+    graph: Mapping[str, _GraphFile],
+    tables: Mapping[str, Table],
+    table_name: str,
+    target: str,
+) -> int:
+    table = tables[table_name]
+    graph_file = graph.get(table.source.path)
+    if graph_file is not None:
+        for node in ast.walk(graph_file.tree):
+            if not isinstance(node, ast.ClassDef) or node.name != table.class_name:
+                continue
+            for call in ast.walk(node):
+                if (
+                    not isinstance(call, ast.Call)
+                    or _call_name(call.func) != "ForeignKey"
+                ):
+                    continue
+                if any(
+                    isinstance(argument, ast.Constant)
+                    and isinstance(argument.value, str)
+                    and argument.value.split(".", 1)[0] == target
+                    for argument in call.args
+                ):
+                    return call.lineno
+    return table.source.lines[0]
+
+
+def _table_links(
+    repo: Path,
+    commit: str,
+    graph: Mapping[str, _GraphFile],
+    tables: Mapping[str, Table],
+    domain_table_names: list[str],
+) -> dict[tuple[str, str], list[_RawLink]]:
+    table_set = set(domain_table_names)
+    links: defaultdict[tuple[str, str], dict[str, _RawLink]] = defaultdict(dict)
+    for table_name in domain_table_names:
+        table = tables[table_name]
+        for column in table.columns:
+            if not column.foreign_key:
+                continue
+            target = column.foreign_key.split(".", 1)[0]
+            if target not in table_set or target == table_name:
+                continue
+            link = _normalise_link(
+                table_name,
+                target,
+                "fk",
+                table.source.path,
+                _foreign_key_line(graph, tables, table_name, target),
+            )
+            links[(link.a, link.b)][link.signal] = link
+        for other_name in domain_table_names:
+            if other_name == table_name:
+                continue
+            other = tables[other_name]
+            if other.source.path == table.source.path:
+                link = _normalise_link(
+                    table_name,
+                    other_name,
+                    "same_file",
+                    table.source.path,
+                    table.source.lines[0],
+                )
+                links[(link.a, link.b)][link.signal] = link
+
+    candidates = find_relation_candidates(repo, commit, domain_table_names)
+    for candidate in tqdm(candidates, desc="Relation candidates", unit="candidate"):
+        source_table = candidate.src.split(".", 1)[0]
+        target_table = candidate.dst.split(".", 1)[0]
+        if source_table not in table_set or target_table not in table_set:
+            continue
+        if source_table == target_table:
+            continue
+        link = _normalise_link(
+            source_table,
+            target_table,
+            candidate.signal,
+            candidate.path,
+            candidate.line,
+        )
+        links[(link.a, link.b)].setdefault(link.signal, link)
+    return {pair: list(signals.values()) for pair, signals in links.items()}
+
+
+def _clusters(
+    tables: list[str],
+    users: Mapping[str, set[str]],
+    links: Mapping[tuple[str, str], list[_RawLink]],
+    threshold: float,
+) -> list[list[str]]:
+    linked = set(links)
+
+    def similarity(left: str, right: str) -> float:
+        left_users = users[left]
+        right_users = users[right]
+        union = left_users | right_users
+        jaccard = len(left_users & right_users) / len(union) if union else 0
+        pair = tuple(sorted((left, right)))
+        return jaccard + (0.5 if pair in linked else 0)
+
+    clusters = [[table] for table in tables]
+    while True:
+        best: tuple[float, int, int] | None = None
+        for left_index in range(len(clusters)):
+            for right_index in range(left_index + 1, len(clusters)):
+                score = sum(
+                    similarity(left, right)
+                    for left in clusters[left_index]
+                    for right in clusters[right_index]
+                ) / (len(clusters[left_index]) * len(clusters[right_index]))
+                if best is None or score > best[0]:
+                    best = (score, left_index, right_index)
+        if best is None or best[0] < threshold:
+            return clusters
+        _, left_index, right_index = best
+        clusters[left_index] = sorted([*clusters[left_index], *clusters[right_index]])
+        del clusters[right_index]
+
+
+def _evidence_sort_key(evidence: FeatureEvidence) -> tuple[str, str, int, str]:
+    value = evidence.table or evidence.to or evidence.tag or evidence.target or ""
+    return evidence.kind, evidence.path, evidence.line, value
+
+
+def _bounded_evidence(evidence: Collection[FeatureEvidence]) -> list[FeatureEvidence]:
+    unique = {
+        (
+            item.kind,
+            item.path,
+            item.line,
+            item.table,
+            item.to,
+            item.tag,
+            item.target,
+        ): item
+        for item in evidence
+    }
+    return sorted(unique.values(), key=_evidence_sort_key)[:5]
+
+
+def _backend_evidence(
+    path: str,
+    feature: int,
+    owner: Mapping[str, int],
+    graph: Mapping[str, _GraphFile],
+    touch: Mapping[str, set[str]],
+    primary_files: Mapping[int, set[str]],
+) -> list[FeatureEvidence]:
+    evidence: list[FeatureEvidence] = []
+    graph_file = graph[path]
+    for table in sorted(touch[path]):
+        peers = [
+            peer
+            for peer in primary_files[feature]
+            if peer != path and table in touch.get(peer, set())
+        ]
+        if peers:
+            evidence.append(
+                FeatureEvidence(
+                    kind="table",
+                    table=table,
+                    path=path,
+                    line=graph_file.table_lines.get(table, 1),
+                )
+            )
+    for imported in graph_file.imports:
+        if owner.get(imported) == feature and imported != path:
+            evidence.append(
+                FeatureEvidence(
+                    kind="call",
+                    to=imported,
+                    path=path,
+                    line=graph_file.import_lines.get(imported, 1),
+                )
+            )
+    for importer, importer_file in graph.items():
+        if owner.get(importer) != feature or importer == path:
+            continue
+        if path not in importer_file.imports:
+            continue
+        evidence.append(
+            FeatureEvidence(
+                kind="call",
+                to=importer,
+                path=importer,
+                line=importer_file.import_lines.get(path, 1),
+            )
+        )
+    return _bounded_evidence(evidence)
+
+
+def _has_backend_evidence(
+    path: str,
+    feature: int,
+    owner: Mapping[str, int],
+    graph: Mapping[str, _GraphFile],
+    touch: Mapping[str, set[str]],
+    primary_files: Mapping[int, set[str]],
+) -> bool:
+    return bool(_backend_evidence(path, feature, owner, graph, touch, primary_files))
+
+
+def _resolve_web_import(
+    path: str,
+    imported: str,
+    web_files: set[str],
+) -> str | None:
+    imported = imported.split("?", 1)[0]
+    if imported.startswith("#/"):
+        base = PurePosixPath("web/apps/web/src") / imported[2:]
+    elif imported.startswith("."):
+        base = PurePosixPath(path).parent / imported
+    else:
+        return None
+    candidate = str(base)
+    options = [candidate]
+    if not candidate.endswith((".ts", ".tsx")):
+        options.extend(
+            [
+                f"{candidate}.ts",
+                f"{candidate}.tsx",
+                f"{candidate}/index.ts",
+                f"{candidate}/index.tsx",
+            ]
+        )
+    return next((option for option in options if option in web_files), None)
+
+
+def _line_number(source: str, position: int) -> int:
+    return source.count("\n", 0, position) + 1
+
+
+def _namespace_map(
+    graph: Mapping[str, _GraphFile],
+) -> dict[str, tuple[str, int]]:
+    namespaces: dict[str, tuple[str, int]] = {}
+    for path in sorted(graph):
+        graph_file = graph[path]
+        for node in ast.walk(graph_file.tree):
+            if (
+                not isinstance(node, ast.Call)
+                or _call_name(node.func) != _NAMESPACE_CALL
+            ):
+                continue
+            for keyword in node.keywords:
+                if (
+                    keyword.arg == "name"
+                    and isinstance(keyword.value, ast.Constant)
+                    and isinstance(keyword.value.value, str)
+                ):
+                    namespaces.setdefault(
+                        keyword.value.value.replace("_", "-"),
+                        (path, keyword.value.lineno),
+                    )
+    return namespaces
+
+
+def _route_tags(path: str, source: str) -> dict[str, int]:
+    tags = {}
+    for match in _GENERATED_ROUTE.finditer(path + "\n" + source):
+        if match.group(1) != match.group(2):
+            continue
+        position = match.start()
+        if position < len(path) + 1:
+            line = 1
+        else:
+            line = _line_number(source, position - len(path) - 1)
+        tags.setdefault(match.group(1), line)
+    return tags
+
+
+def _web_imports(path: str, source: str) -> list[tuple[str, int]]:
+    imports = []
+    for match in _TS_IMPORT.finditer(source):
+        imported = next((group for group in match.groups() if group), None)
+        if imported is not None:
+            imports.append((imported, _line_number(source, match.start())))
+    return imports
+
+
+def _primary_feature_for_path(
+    path: str,
+    owner: Mapping[str, int],
+) -> int | None:
+    return owner.get(path)
+
+
+def _external_placements(
+    snapshot: _Snapshot,
+    primary_owner: Mapping[str, int],
+    graph: Mapping[str, _GraphFile],
+    category_paths: Collection[str],
+) -> dict[str, list[_Placement]]:
+    primary_tokens: list[tuple[str, str, int]] = []
+    for path, feature in primary_owner.items():
+        relative = path.removeprefix("backend/src/")
+        if len(PurePosixPath(relative).parts) >= 2:
+            primary_tokens.append((path, path, feature))
+            primary_tokens.append((relative, path, feature))
+        module = graph[path].module
+        if len(module.split(".")) >= 2:
+            primary_tokens.append((module, path, feature))
+
+    results: dict[str, list[_Placement]] = {}
+    for path in sorted(category_paths):
+        source = snapshot.files[path]
+        by_feature: Counter[int] = Counter()
+        evidence_by_feature: defaultdict[int, list[FeatureEvidence]] = defaultdict(list)
+        for line_number, line in enumerate(source.splitlines(), 1):
+            for token, target_path, feature in primary_tokens:
+                if not re.search(rf"(?<![\w]){re.escape(token)}(?![\w])", line):
+                    continue
+                by_feature[feature] += 1
+                evidence_by_feature[feature].append(
+                    FeatureEvidence(
+                        kind="reference",
+                        target=token,
+                        path=path,
+                        line=line_number,
+                    )
+                )
+        if not by_feature:
+            continue
+        highest = max(by_feature.values())
+        primary = min(
+            feature for feature, count in by_feature.items() if count == highest
+        )
+        results[path] = [
+            _Placement(
+                feature=feature,
+                primary=feature == primary,
+                reason="reference",
+                evidence=_bounded_evidence(evidence_by_feature[feature]),
+            )
+            for feature in sorted(by_feature)
+        ]
+    return results
+
+
+def _validate_evidence(
+    snapshot: _Snapshot,
+    feature_map: FeatureMap,
+) -> None:
+    for feature in feature_map.features:
+        for file in feature.files:
+            for evidence in file.evidence:
+                source = snapshot.files.get(evidence.path)
+                if source is None:
+                    raise ValueError(
+                        f"evidence path '{evidence.path}' is not in {feature.id}"
+                    )
+                if not 1 <= evidence.line <= len(source.splitlines()):
+                    raise ValueError(
+                        f"evidence line {evidence.line} for '{evidence.path}' "
+                        "is outside the pinned source"
+                    )
+
+
+def build_feature_map(
+    repo: Path,
+    commit: str,
+    domain_tables: Mapping[str, Collection[str]],
+    domain: str,
+    *,
+    threshold: float = 0.25,
+) -> FeatureMap:
+    if domain not in domain_tables:
+        raise ValueError(f"unknown domain '{domain}'")
+    snapshot = _snapshot(repo, commit)
+    tables = extract_tables(repo, commit)
+    domain_table_names = sorted(set(domain_tables[domain]))
+    all_domain_tables = {table for names in domain_tables.values() for table in names}
+    graph, parse_counts = _parse_graph(snapshot, tables, all_domain_tables)
+    domains, domain_reasons = _domain_scope(graph, domain_tables)
+    domain_files = sorted(path for path in domains if domain in domains[path])
+    touch = {
+        path: graph[path].tables & set(domain_table_names) for path in domain_files
+    }
+    users = {
+        table: {
+            path
+            for path in domain_files
+            if table in touch[path]
+            and not path.endswith("__init__.py")
+            and table not in graph[path].defines
+        }
+        for table in domain_table_names
+    }
+    links = _table_links(
+        repo,
+        commit,
+        graph,
+        tables,
+        domain_table_names,
+    )
+    clusters = _clusters(
+        domain_table_names,
+        users,
+        links,
+        threshold,
+    )
+    cluster_by_table = {
+        table: index for index, cluster in enumerate(clusters) for table in cluster
+    }
+    local_idf = {
+        table: math.log(len(domain_files) / max(1, len(users[table])))
+        for table in domain_table_names
+    }
+    owner: dict[str, int] = {}
+    for path in domain_files:
+        if not touch[path]:
+            continue
+        scores = [
+            sum(
+                local_idf[table]
+                for table in touch[path]
+                if cluster_by_table[table] == feature
+            )
+            for feature in range(len(clusters))
+        ]
+        owner[path] = max(range(len(clusters)), key=lambda feature: scores[feature])
+    imports = {
+        path: set(graph[path].imports) & set(domain_files) for path in domain_files
+    }
+    for _ in range(3):
+        for path in domain_files:
+            if path in owner:
+                continue
+            neighbors = [
+                owner[neighbor] for neighbor in imports[path] if neighbor in owner
+            ]
+            neighbors.extend(
+                owner[neighbor]
+                for neighbor in domain_files
+                if path in imports[neighbor] and neighbor in owner
+            )
+            if neighbors:
+                owner[path] = Counter(neighbors).most_common(1)[0][0]
+
+    primary_files = {
+        feature: {
+            path
+            for path, assigned_feature in owner.items()
+            if assigned_feature == feature
+        }
+        for feature in range(len(clusters))
+    }
+    valid_owner: dict[str, int] = {}
+    uncovered: dict[str, str] = {}
+    for path, feature in owner.items():
+        if _has_backend_evidence(
+            path,
+            feature,
+            owner,
+            graph,
+            touch,
+            primary_files,
+        ):
+            valid_owner[path] = feature
+        else:
+            uncovered[path] = "no shared table or call in its feature"
+
+    placements: defaultdict[str, list[_Placement]] = defaultdict(list)
+    for path, feature in valid_owner.items():
+        reason = domain_reasons[path]
+        placements[path].append(
+            _Placement(
+                feature=feature,
+                primary=True,
+                reason=reason,  # type: ignore[arg-type]
+                evidence=_backend_evidence(
+                    path,
+                    feature,
+                    valid_owner,
+                    graph,
+                    touch,
+                    {
+                        feature_id: {
+                            item
+                            for item, assigned in valid_owner.items()
+                            if assigned == feature_id
+                        }
+                        for feature_id in range(len(clusters))
+                    },
+                ),
+            )
+        )
+        if touch[path]:
+            primary_score = sum(
+                local_idf[table]
+                for table in touch[path]
+                if cluster_by_table[table] == feature
+            )
+            for other_feature in range(len(clusters)):
+                if other_feature == feature:
+                    continue
+                other_score = sum(
+                    local_idf[table]
+                    for table in touch[path]
+                    if cluster_by_table[table] == other_feature
+                )
+                if other_score == 0 or other_score < 0.5 * primary_score:
+                    continue
+                evidence = _backend_evidence(
+                    path,
+                    other_feature,
+                    valid_owner,
+                    graph,
+                    touch,
+                    {
+                        feature_id: {
+                            item
+                            for item, assigned in valid_owner.items()
+                            if assigned == feature_id
+                        }
+                        for feature_id in range(len(clusters))
+                    },
+                )
+                if evidence:
+                    placements[path].append(
+                        _Placement(
+                            feature=other_feature,
+                            primary=False,
+                            reason=reason,  # type: ignore[arg-type]
+                            evidence=evidence,
+                        )
+                    )
+
+    namespace_map = _namespace_map(graph)
+    web_paths = sorted(
+        path
+        for path in snapshot.files
+        if path.startswith("web/")
+        and path.endswith((".ts", ".tsx"))
+        and not _is_excluded(path)
+    )
+    web_files = set(web_paths)
+    web_placements: dict[str, list[_Placement]] = {}
+    unmapped_tags: set[str] = set()
+    for path in web_paths:
+        tags = _route_tags(path, snapshot.files[path])
+        feature_tags: defaultdict[int, list[str]] = defaultdict(list)
+        route_evidence: defaultdict[int, list[FeatureEvidence]] = defaultdict(list)
+        for tag, line in tags.items():
+            endpoint = namespace_map.get(tag)
+            if endpoint is None:
+                unmapped_tags.add(tag)
+                continue
+            endpoint_path, endpoint_line = endpoint
+            endpoint_feature = valid_owner.get(endpoint_path)
+            if endpoint_feature is None:
+                continue
+            feature_tags[endpoint_feature].append(tag)
+            route_evidence[endpoint_feature].extend(
+                [
+                    FeatureEvidence(
+                        kind="route",
+                        tag=tag,
+                        path=path,
+                        line=line,
+                    ),
+                    FeatureEvidence(
+                        kind="route",
+                        tag=tag,
+                        path=endpoint_path,
+                        line=endpoint_line,
+                    ),
+                ]
+            )
+        if not feature_tags:
+            continue
+        primary = min(
+            (
+                feature
+                for feature, tagged in feature_tags.items()
+                if len(tagged) == max(len(items) for items in feature_tags.values())
+            ),
+            default=None,
+        )
+        if primary is None:
+            continue
+        web_placements[path] = [
+            _Placement(
+                feature=feature,
+                primary=feature == primary,
+                reason="route",
+                evidence=_bounded_evidence(route_evidence[feature]),
+            )
+            for feature in sorted(feature_tags)
+        ]
+
+    for _ in range(2):
+        for path in web_paths:
+            if path in web_placements or _route_tags(path, snapshot.files[path]):
+                continue
+            imported_paths = [
+                resolved
+                for imported, _ in _web_imports(path, snapshot.files[path])
+                if (resolved := _resolve_web_import(path, imported, web_files))
+                and resolved in web_placements
+            ]
+            imported_features = [
+                placement.feature
+                for imported_path in imported_paths
+                for placement in web_placements[imported_path]
+                if placement.primary
+            ]
+            if not imported_features:
+                continue
+            counts = Counter(imported_features)
+            feature, count = counts.most_common(1)[0]
+            if count / len(imported_paths) <= 0.5:
+                continue
+            evidence = [
+                FeatureEvidence(
+                    kind="call",
+                    to=imported_path,
+                    path=path,
+                    line=next(
+                        line
+                        for imported, line in _web_imports(path, snapshot.files[path])
+                        if _resolve_web_import(path, imported, web_files)
+                        == imported_path
+                    ),
+                )
+                for imported_path in imported_paths
+            ]
+            web_placements[path] = [
+                _Placement(
+                    feature=feature,
+                    primary=True,
+                    reason="calls",
+                    evidence=_bounded_evidence(evidence),
+                )
+            ]
+
+    deployment_paths = {
+        path
+        for path in snapshot.files
+        if not _is_excluded(path)
+        and (
+            path.startswith(_DEPLOYMENT_ROOTS)
+            or "/Dockerfile" in path
+            or path.startswith("Dockerfile")
+            or ("/" not in path and path.endswith((".yml", ".yaml")))
+        )
+    }
+    skill_paths = {
+        path
+        for path in snapshot.files
+        if path.startswith(".agents/skills/") and not _is_excluded(path)
+    }
+    external_placements = _external_placements(
+        snapshot,
+        valid_owner,
+        graph,
+        deployment_paths | skill_paths,
+    )
+    feature_files: defaultdict[int, list[FeatureFile]] = defaultdict(list)
+    for path, file_placements in placements.items():
+        for placement in file_placements:
+            feature_files[placement.feature].append(
+                FeatureFile(
+                    path=path,
+                    primary=placement.primary,
+                    reason=placement.reason,
+                    evidence=placement.evidence,
+                )
+            )
+    for path, file_placements in web_placements.items():
+        for placement in file_placements:
+            feature_files[placement.feature].append(
+                FeatureFile(
+                    path=path,
+                    primary=placement.primary,
+                    reason=placement.reason,
+                    evidence=placement.evidence,
+                )
+            )
+    for path, file_placements in external_placements.items():
+        for placement in file_placements:
+            feature_files[placement.feature].append(
+                FeatureFile(
+                    path=path,
+                    primary=placement.primary,
+                    reason=placement.reason,
+                    evidence=placement.evidence,
+                )
+            )
+
+    table_features = []
+    for feature_index, cluster in enumerate(clusters):
+        feature_id = min(
+            cluster,
+            key=lambda table: (-len(users[table]), table),
+        )
+        raw_files = sorted(
+            feature_files[feature_index],
+            key=lambda file: file.path,
+        )
+        raw_links = [
+            link
+            for pair, pair_links in links.items()
+            if set(pair).issubset(cluster)
+            for link in pair_links
+        ]
+        table_features.append(
+            Feature(
+                id=feature_id,
+                tables=sorted(cluster),
+                files=raw_files,
+                table_links=[
+                    TableLink(
+                        a=link.a,
+                        b=link.b,
+                        signal=link.signal,
+                        path=link.path,
+                        line=link.line,
+                    )
+                    for link in sorted(
+                        raw_links,
+                        key=lambda link: (
+                            link.a,
+                            link.b,
+                            link.signal,
+                            link.path,
+                            link.line,
+                        ),
+                    )
+                ],
+            )
+        )
+
+    table_features.sort(
+        key=lambda feature: (
+            -sum(file.primary for file in feature.files),
+            feature.id,
+        )
+    )
+    for path in domain_files:
+        if path not in owner:
+            uncovered[path] = "no feature reached"
+    uncovered_files = [
+        UncoveredFile(path=path, reason=reason)
+        for path, reason in sorted(uncovered.items())
+    ]
+    result = FeatureMap(
+        commit=commit,
+        domain=domain,
+        threshold=threshold,
+        tables=domain_table_names,
+        features=table_features,
+        uncovered=uncovered_files,
+        unmapped_tags=sorted(unmapped_tags),
+        counts=FeatureCounts(
+            domain_files=len(domain_files),
+            primary_placed=len(
+                {
+                    file.path
+                    for feature in table_features
+                    for file in feature.files
+                    if file.primary
+                }
+            ),
+            shared=sum(
+                1
+                for feature in table_features
+                for file in feature.files
+                if not file.primary
+            ),
+            uncovered=len(uncovered_files),
+            web=len(web_placements),
+            deployment=sum(
+                1 for path in external_placements if path in deployment_paths
+            ),
+            skills=sum(1 for path in external_placements if path in skill_paths),
+            unparseable=parse_counts,
+        ),
+    )
+    _validate_evidence(snapshot, result)
+    return result
