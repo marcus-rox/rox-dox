@@ -12,7 +12,6 @@ from rox_dox.tree import build_tree
 REPO_URL = "https://github.com/Rox-AI/rox-core"
 SECTION_IDS = [
     "tldr",
-    "contents",
     "block",
     "schema",
     "sequences",
@@ -76,7 +75,19 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
             "states",
         )
     )
-    toc = re.search(r'<ul class="toc">(.*?)</ul>', document, re.DOTALL)
+    sidebar = re.search(r'<div id="sidebar">(.*?)</div>', document, re.DOTALL)
+    assert sidebar is not None
+    sidebar_html = sidebar.group(1)
+    toc_position = sidebar_html.index('<nav id="toc" aria-label="On this page">')
+    explorer_position = sidebar_html.index(
+        '<nav id="site-nav" aria-label="Site navigation">'
+    )
+    assert toc_position < explorer_position
+    toc = re.search(
+        r'<nav id="toc" aria-label="On this page">(.*?)</nav>',
+        sidebar_html,
+        re.DOTALL,
+    )
     assert toc is not None
     assert re.findall(r'href="#([^"]+)"', toc.group(1)) == [
         "tldr",

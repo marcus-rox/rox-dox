@@ -53,23 +53,37 @@ body {
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
-#site-nav, #context {
+#sidebar {
+  grid-area: nav;
   position: sticky;
   top: 0;
   max-height: 100vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+#toc, #site-nav, #context {
   padding: 1rem;
   border: 1px solid #e2e7ee;
   border-radius: 14px;
   background: #fff;
 }
+#toc {
+  flex: 0 0 auto;
+}
 #site-nav {
-  grid-area: nav;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 #context {
   grid-area: aside;
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
 }
-#context > h2 {
+#toc > h2, #site-nav > h2, #context > h2 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
 }
@@ -259,7 +273,7 @@ blockquote {
       "aside";
     padding: 1rem 0.75rem 2rem;
   }
-  #site-nav, #context {
+  #sidebar, #context {
     position: static;
     max-height: none;
   }
@@ -386,7 +400,11 @@ def _table_of_contents() -> str:
         f'<li><a href="#{section_id}">{_escape(title)}</a></li>'
         for section_id, title in SECTION_LINKS
     )
-    return f'<ul class="toc">{links}</ul>'
+    return (
+        '<nav id="toc" aria-label="On this page">'
+        "<h2>On this page</h2>"
+        f'<ul class="toc">{links}</ul></nav>'
+    )
 
 
 def _sources_details(
@@ -672,6 +690,7 @@ def _site_nav_html(tree: SiteTree, page: Page) -> str:
     root_item = _tree_item(tree, page.id, tree.root, ancestors)
     return (
         '<nav id="site-nav" aria-label="Site navigation">'
+        "<h2>Explorer</h2>"
         f'<ul class="page-tree">{root_item}</ul></nav>'
     )
 
@@ -741,7 +760,6 @@ def render_page(
     sections = "".join(
         [
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
-            _section("contents", "Table of contents", _table_of_contents()),
             _block_section(page, repo_url=repo_url, jar=jar),
             _schema_section(page, repo_url=repo_url, tables=tables, jar=jar),
             _sequence_section(page, repo_url=repo_url, jar=jar),
@@ -755,7 +773,8 @@ def render_page(
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{_escape(page.title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
-        f'<body><div class="page-shell">{_site_nav_html(tree, page)}'
+        f'<body><div class="page-shell"><div id="sidebar">'
+        f"{_table_of_contents()}{_site_nav_html(tree, page)}</div>"
         f'<main class="page-main">{_breadcrumbs_html(tree, page)}'
         f"{page_header}{sections}</main>"
         f"{_context_panel_html(page)}</div></body></html>"

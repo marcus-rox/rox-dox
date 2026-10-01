@@ -53,14 +53,15 @@ whole tree with the current page highlighted.
 *Level 2 · page renderer · serves `R-1`*
 
 Every page SHALL present, in order: a TLDR in the recap format (Summary, Key Points, Table,
-Interesting Notes), a table of contents, a UML block diagram, a UML schema diagram of the SQL
-and NoSQL data the module owns, UML sequence diagrams for its happy paths, UML state diagrams
-for its stateful entities, and links to related modules and systems.
+Interesting Notes), a UML block diagram, a UML schema diagram of the SQL and NoSQL data the
+module owns, UML sequence diagrams for its happy paths, UML state diagrams for its stateful
+entities, and links to related modules and systems; and SHALL show a table of contents of those
+sections at the top of the left panel, above the navigation tree.
 
 #### Scenario: complete page
 - GIVEN any generated page
 - WHEN it is opened in a browser with no network access
-- THEN every section above is present in that order and every diagram renders
+- THEN every section above is present in that order, the table of contents sits above the navigation tree, and every diagram renders
 
 #### Scenario: nothing to show
 - GIVEN a module that owns no data or has no stateful entity
