@@ -8,6 +8,7 @@ from rox_dox.links import source_url
 from rox_dox.model import Page
 from rox_dox.repo_tree import RepoEntry
 from rox_dox.render import page_href, render_page
+from rox_dox.schema import extract_tables
 from rox_dox.tree import build_tree
 
 REPO_URL = "https://github.com/Rox-AI/rox-core"
@@ -80,6 +81,137 @@ def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
     expected_diagrams = len(page.sequences) + len(page.states)
     assert document.count('<div class="diagram diagram-scroll">') == expected_diagrams
     assert ".diagram-scroll svg {\n  max-width: none;\n}" in document
+    assert (
+        ".diagram svg {\n"
+        "  display: block;\n"
+        "  max-width: 100%;\n"
+        "  height: auto;\n"
+        "  margin: 0 auto;\n}"
+    ) in document
+
+
+def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["sequences"].append(copy.deepcopy(payload["sequences"][0]))
+    payload["states"].append(copy.deepcopy(payload["states"][0]))
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+
+    diagram_ids = re.findall(
+        r'<article class="diagram-card zoom-figure" id="([^"]+)">',
+        document,
+    )
+    expand_targets = re.findall(
+        r'<a class="expand" href="#([^"]+)">Expand full screen</a>',
+        document,
+    )
+    close_targets = re.findall(
+        r'<a class="collapse" href="#([^"]+)">Close</a>',
+        document,
+    )
+    assert diagram_ids == [
+        "block-figure",
+        "fig-schema",
+        "fig-sequences-1",
+        "fig-sequences-2",
+        "fig-states-1",
+        "fig-states-2",
+    ]
+    assert expand_targets == diagram_ids
+    assert close_targets == [
+        "block",
+        "schema",
+        "sequences",
+        "sequences",
+        "states",
+        "states",
+    ]
+    assert document.count('<div class="diagram diagram-scroll">') == (
+        1 + len(page.sequences) + len(page.states)
+    )
+
+    left_toggle = '<input class="panel-toggle" id="toggle-left" type="checkbox">'
+    right_toggle = '<input class="panel-toggle" id="toggle-right" type="checkbox">'
+    page_shell = '<div class="page-shell">'
+    assert left_toggle in document and right_toggle in document
+    assert document.index(left_toggle) < document.index(page_shell)
+    assert document.index(right_toggle) < document.index(page_shell)
+    assert '<main class="page-main"><div class="panel-controls">' in document
+    assert 'for="toggle-left"><span class="expanded">◀ Panel</span>' in document
+    assert 'for="toggle-right"><span class="expanded">Panel ▶</span>' in document
+    assert '<span class="collapsed">▶ Panel</span>' in document
+    assert '<span class="collapsed">Panel ◀</span>' in document
+    assert (
+        ".page-shell {\n"
+        "  display: grid;\n"
+        "  grid-template-columns: 280px minmax(0, 1fr) 320px;"
+    ) in document
+    assert (
+        "#toggle-left:checked ~ .page-shell {\n"
+        "  grid-template-columns: 0 minmax(0, 1fr) 320px;\n}"
+    ) in document
+    assert (
+        "#toggle-right:checked ~ .page-shell {\n"
+        "  grid-template-columns: 280px minmax(0, 1fr) 0;\n}"
+    ) in document
+    assert (
+        "#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
+        "  grid-template-columns: 0 minmax(0, 1fr) 0;\n}"
+    ) in document
+    assert "@media (max-width: 1100px)" in document
+    assert (
+        "  #toggle-left:checked ~ .page-shell,\n"
+        "  #toggle-right:checked ~ .page-shell,\n"
+        "  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
+        "    grid-template-columns: minmax(0, 1fr);\n  }"
+    ) in document
+    assert "<script" not in document
+
+
+def test_schema_sources_include_authored_relations(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions.user_id",
+            "dst": "users.id",
+            "label": "implicit foreign key",
+            "source": {"path": "pkg/a.py", "lines": [4, 5]},
+        }
+    ]
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+    schema = re.search(r'<section id="schema">(.*?)</section>', document, re.DOTALL)
+    assert schema is not None
+
+    relation_url = source_url(
+        page.data.relations[0].source,
+        repo_url=REPO_URL,
+        commit=page.commit,
+    )
+    assert "relation sessions.user_id -&gt; users.id" in schema.group(1)
+    assert relation_url in schema.group(1)
 
 
 def test_related_page_links_are_relative_and_external_targets_link_out(
@@ -218,12 +350,12 @@ def test_same_title_diagrams_only_list_their_own_sources(
     )
 
     sequence_cards = re.findall(
-        r'<article class="diagram-card">(.*?)</article>',
+        r'<article class="diagram-card zoom-figure" id="[^"]+">(.*?)</article>',
         re.search(r'<section id="sequences">.*?</section>', document, re.DOTALL)[0],
         re.DOTALL,
     )
     state_cards = re.findall(
-        r'<article class="diagram-card">(.*?)</article>',
+        r'<article class="diagram-card zoom-figure" id="[^"]+">(.*?)</article>',
         re.search(r'<section id="states">.*?</section>', document, re.DOTALL)[0],
         re.DOTALL,
     )
