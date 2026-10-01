@@ -28,9 +28,20 @@ class NotionSource(Model):
 Source = CodeSource | NotionSource
 
 
+_MAX_NODE_DETAILS = 6
+_MAX_NODE_DETAIL_TEXT_LENGTH = 90
+
+
 class Claim(Model):
     text: str
     sources: list[Source] = Field(min_length=1)
+
+
+class Group(Model):
+    id: str
+    label: str
+    source: Source
+    parent: str | None = None
 
 
 class Node(Model):
@@ -39,6 +50,39 @@ class Node(Model):
     source: Source
     link: str | None = None
     kind: Literal["component", "store", "external", "queue"] = "component"
+    group: str | None = None
+    details: list[Claim] = Field(default_factory=list, max_length=_MAX_NODE_DETAILS)
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_details(cls, values: Any) -> Any:
+        if not isinstance(values, dict):
+            return values
+        node_id = values.get("id", "<unknown>")
+        details = values.get("details", [])
+        if not isinstance(details, list):
+            return values
+        if len(details) > _MAX_NODE_DETAILS:
+            raise ValueError(
+                f"block node '{node_id}' has {len(details)} details; "
+                f"maximum is {_MAX_NODE_DETAILS}"
+            )
+        for detail_number, detail in enumerate(details, start=1):
+            if isinstance(detail, dict):
+                text = detail.get("text")
+            elif isinstance(detail, Claim):
+                text = detail.text
+            else:
+                text = None
+            if isinstance(text, str) and not (
+                1 <= len(text) <= _MAX_NODE_DETAIL_TEXT_LENGTH
+            ):
+                raise ValueError(
+                    f"block node '{node_id}' detail {detail_number}: "
+                    f"text length {len(text)} must be between 1 and "
+                    f"{_MAX_NODE_DETAIL_TEXT_LENGTH}"
+                )
+        return values
 
 
 class Edge(Model):
@@ -58,16 +102,72 @@ class Edge(Model):
 
 
 class BlockDiagram(Model):
+    direction: Literal["left-right", "top-down"] = "left-right"
+    groups: list[Group] = Field(default_factory=list)
     nodes: list[Node]
     edges: list[Edge]
 
     @model_validator(mode="after")
     def validate_structure(self) -> BlockDiagram:
+        group_ids = [group.id for group in self.groups]
+        duplicate_group_id = _first_duplicate(group_ids)
+        if duplicate_group_id is not None:
+            raise ValueError(
+                f"block diagram: duplicate group id '{duplicate_group_id}'"
+            )
+
         node_ids = [node.id for node in self.nodes]
         declared_nodes = set(node_ids)
         duplicate_id = _first_duplicate(node_ids)
         if duplicate_id is not None:
             raise ValueError(f"block diagram: duplicate node id '{duplicate_id}'")
+
+        declared_groups = set(group_ids)
+        shared_id = next(
+            (group_id for group_id in group_ids if group_id in declared_nodes),
+            None,
+        )
+        if shared_id is not None:
+            raise ValueError(f"block diagram: duplicate group/node id '{shared_id}'")
+
+        groups_by_id = {group.id: group for group in self.groups}
+        for group in self.groups:
+            if group.parent is not None and group.parent not in declared_groups:
+                raise ValueError(
+                    f"block diagram: group '{group.id}': "
+                    f"unknown parent '{group.parent}'"
+                )
+        for node in self.nodes:
+            if node.group is not None and node.group not in declared_groups:
+                raise ValueError(
+                    f"block diagram: node '{node.id}': unknown group '{node.group}'"
+                )
+
+        for group in self.groups:
+            visited: set[str] = set()
+            current_id: str | None = group.id
+            while current_id is not None:
+                if current_id in visited:
+                    raise ValueError(
+                        f"block diagram: group parent cycle includes '{current_id}'"
+                    )
+                visited.add(current_id)
+                current_id = groups_by_id[current_id].parent
+
+        groups_with_children = {
+            group.parent for group in self.groups if group.parent is not None
+        }
+        groups_with_nodes = {
+            node.group for node in self.nodes if node.group is not None
+        }
+        for group in self.groups:
+            if (
+                group.id not in groups_with_children
+                and group.id not in groups_with_nodes
+            ):
+                raise ValueError(
+                    f"block diagram: group '{group.id}' has no nodes or child groups"
+                )
 
         for edge in self.edges:
             if edge.src not in declared_nodes:
@@ -253,7 +353,19 @@ def page_sources(page: Page) -> list[tuple[str, Source]]:
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
     sources.extend((("TLDR table", source) for source in page.tldr.table.sources))
     sources.extend(_claim_sources(page.tldr.notes, "note"))
+    sources.extend(
+        (f"block group {group.id}", group.source) for group in page.block.groups
+    )
     sources.extend((f"block node {node.id}", node.source) for node in page.block.nodes)
+    sources.extend(
+        (
+            f"block node {node.id} detail {detail_number}",
+            source,
+        )
+        for node in page.block.nodes
+        for detail_number, detail in enumerate(node.details, start=1)
+        for source in detail.sources
+    )
     sources.extend(
         (f"block edge {edge.src}->{edge.dst}", edge.source) for edge in page.block.edges
     )
