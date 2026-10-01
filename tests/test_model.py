@@ -378,3 +378,23 @@ def test_notion_doc_excerpt_accepts_600_characters() -> None:
     )
 
     assert len(document.excerpt) == 600
+
+
+def test_relation_source_is_enumerated_for_citation_checks(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions.user_id",
+            "dst": "users.id",
+            "label": "implicit foreign key",
+            "source": {"path": "pkg/a.py", "lines": [4, 5]},
+        }
+    ]
+    page = Page.model_validate(payload)
+
+    assert (
+        "relation sessions.user_id -> users.id",
+        page.data.relations[0].source,
+    ) in page_sources(page)

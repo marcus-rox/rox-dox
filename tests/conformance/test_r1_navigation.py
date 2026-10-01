@@ -58,8 +58,20 @@ def test_three_page_navigation_and_relative_links_resolve(
     assert "rox-core/pkg.html" in root_hrefs
     assert "rox-core/pkg/sub.html" in root_hrefs
     assert '<details open><summary><a class="row page current"' in root
-    assert len(re.findall(r"<details open>", child)) == 2
-    assert len(re.findall(r"<details open>", leaf)) == 3
+    child_site_nav = re.search(
+        r'<nav id="site-nav" aria-label="Site navigation">.*?</nav>',
+        child,
+        re.DOTALL,
+    )
+    leaf_site_nav = re.search(
+        r'<nav id="site-nav" aria-label="Site navigation">.*?</nav>',
+        leaf,
+        re.DOTALL,
+    )
+    assert child_site_nav is not None
+    assert leaf_site_nav is not None
+    assert len(re.findall(r"<details open>", child_site_nav.group())) == 2
+    assert len(re.findall(r"<details open>", leaf_site_nav.group())) == 3
     assert "Covers: <code>.</code>" in root
     assert "Covers: <code>pkg</code>" in child
     assert "Covers: <code>pkg/sub</code>" in leaf

@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from urllib.parse import quote
 
 from rox_dox.links import source_url
-from rox_dox.model import Page, Sequence, Source, StateMachine
+from rox_dox.model import Page, Relation, Sequence, Source, StateMachine
 from rox_dox.plantuml import DiagramError
 from rox_dox.schema import Table
 
@@ -57,7 +57,13 @@ def _plantuml_url(url: str) -> str:
 
 
 def _linked_label(url: str, label: str) -> str:
-    escaped_label = _escape_label(label).replace("[", "~[").replace("]", "~]")
+    escaped_label = (
+        _escape_label(label)
+        .replace("[", "~[")
+        .replace("]", "~]")
+        .replace("{", "&#123;")
+        .replace("}", "&#125;")
+    )
     return f"[[{_plantuml_url(url)}{{{LINK_TOOLTIP}}} {escaped_label}]]"
 
 
@@ -73,6 +79,49 @@ def _element_url(page: Page, repo_url: str, source: Source) -> str:
     return source_url(source, repo_url=repo_url, commit=page.commit)
 
 
+def _relation_endpoint_alias(
+    endpoint: str,
+    *,
+    relation: Relation,
+    page: Page,
+    tables: Mapping[str, Table],
+    sql_aliases: Mapping[str, str],
+    nosql_aliases: Mapping[str, str],
+) -> str:
+    if endpoint in nosql_aliases:
+        return nosql_aliases[endpoint]
+
+    store_name, separator, _ = endpoint.partition("::")
+    if separator and store_name in nosql_aliases:
+        return nosql_aliases[store_name]
+
+    if "." not in endpoint:
+        raise DiagramError(
+            f"page '{page.id}' relation '{relation.src} -> {relation.dst}': "
+            f"endpoint '{endpoint}' is not a declared NoSQL store or SQL table.column"
+        )
+
+    table_name, column_name = endpoint.rsplit(".", 1)
+    if table_name not in sql_aliases:
+        raise DiagramError(
+            f"page '{page.id}' relation '{relation.src} -> {relation.dst}': "
+            f"SQL table '{table_name}' for endpoint '{endpoint}' is not listed"
+        )
+
+    table = tables.get(table_name)
+    if table is None:
+        raise DiagramError(
+            f"page '{page.id}' relation '{relation.src} -> {relation.dst}': "
+            f"SQL table '{table_name}' for endpoint '{endpoint}' is missing"
+        )
+    if column_name not in {column.name for column in table.columns}:
+        raise DiagramError(
+            f"page '{page.id}' relation '{relation.src} -> {relation.dst}': "
+            f"SQL column '{endpoint}' is missing"
+        )
+    return sql_aliases[table_name]
+
+
 def _aliases(ids: list[str], prefix: str) -> dict[str, str]:
     return {element_id: f"{prefix}_{index}" for index, element_id in enumerate(ids)}
 
@@ -84,16 +133,38 @@ def schema_plantuml(
     tables: Mapping[str, Table],
 ) -> str:
     sql_aliases = _aliases(page.data.sql_tables, "sql")
+    nosql_aliases = _aliases(
+        [store.name for store in page.data.nosql],
+        "nosql",
+    )
+    resolved_relations = [
+        (
+            relation,
+            _relation_endpoint_alias(
+                relation.src,
+                relation=relation,
+                page=page,
+                tables=tables,
+                sql_aliases=sql_aliases,
+                nosql_aliases=nosql_aliases,
+            ),
+            _relation_endpoint_alias(
+                relation.dst,
+                relation=relation,
+                page=page,
+                tables=tables,
+                sql_aliases=sql_aliases,
+                nosql_aliases=nosql_aliases,
+            ),
+        )
+        for relation in page.data.relations
+    ]
     for table_name in page.data.sql_tables:
         if table_name not in tables:
             raise DiagramError(
                 f"SQL table '{table_name}' is missing for page '{page.id}'"
             )
 
-    nosql_aliases = _aliases(
-        [store.name for store in page.data.nosql],
-        "nosql",
-    )
     lines = _diagram_header(smetana=True)
     lines.extend(["hide circle", "hide empty methods"])
     for table_name in page.data.sql_tables:
@@ -138,6 +209,11 @@ def schema_plantuml(
                 f"{sql_aliases[table_name]} --> {sql_aliases[referenced_name]} : "
                 f"{_linked_label(url, column.name)}"
             )
+    for relation, src_alias, dst_alias in resolved_relations:
+        url = _element_url(page, repo_url, relation.source)
+        lines.append(
+            f"{src_alias} ..> {dst_alias} : {_linked_label(url, relation.label)}"
+        )
     lines.append("@enduml")
     return "\n".join(lines)
 

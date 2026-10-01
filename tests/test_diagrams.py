@@ -81,6 +81,95 @@ def test_schema_diagram_links_tables_stores_and_in_scope_foreign_keys(
     assert "sql_0 -->" not in out_of_scope_source
 
 
+def test_schema_relations_render_as_linked_dashed_edges(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    relation_source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["data"]["relations"] = [
+        {
+            "src": "sessions.user_id",
+            "dst": "users.id",
+            "label": "implicit foreign key",
+            "source": relation_source,
+        },
+        {
+            "src": "sessions.id",
+            "dst": "sessions.id",
+            "label": "self relation",
+            "source": relation_source,
+        },
+        {
+            "src": "cache::not-a-declared-field",
+            "dst": "users.id",
+            "label": "NoSQL field is free text",
+            "source": relation_source,
+        },
+    ]
+    page = _page(payload)
+    tables = extract_tables(repo, commit)
+
+    source = schema_plantuml(page, repo_url=REPO_URL, tables=tables)
+    svg = render_svg(source, plantuml_jar)
+    relation_url = source_url(
+        page.data.relations[0].source,
+        repo_url=REPO_URL,
+        commit=page.commit,
+    )
+
+    assert f"sql_1 ..> sql_0 : [[{relation_url}" in source
+    assert "sql_1 ..> sql_1 :" in source
+    assert "nosql_0 ..> sql_0 :" in source
+    assert "implicit foreign key" in svg
+    assert "self relation" in svg
+    assert "NoSQL field is free text" in svg
+    assert relation_url in _links(svg)
+
+
+@pytest.mark.parametrize(
+    ("src", "dst", "expected"),
+    [
+        ("outside.id", "users.id", "SQL table 'outside'"),
+        ("users.missing", "sessions.id", "SQL column 'users.missing'"),
+        ("unknown::field", "users.id", "endpoint 'unknown::field'"),
+        ("malformed", "users.id", "endpoint 'malformed'"),
+    ],
+)
+def test_schema_relation_endpoints_must_be_declared(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    src: str,
+    dst: str,
+    expected: str,
+) -> None:
+    repo, commit = git_repo
+    payload = copy.deepcopy(page_data)
+    payload["data"]["relations"] = [
+        {
+            "src": src,
+            "dst": dst,
+            "label": "invalid relation",
+            "source": {"path": "pkg/a.py", "lines": [1, 2]},
+        }
+    ]
+    page = _page(payload)
+
+    with pytest.raises(DiagramError) as error:
+        schema_plantuml(
+            page,
+            repo_url=REPO_URL,
+            tables=extract_tables(repo, commit),
+        )
+
+    message = str(error.value)
+    assert "page 'rox-core'" in message
+    assert f"relation '{src} -> {dst}'" in message
+    assert expected in message
+
+
 def test_sequence_diagram_autonumbers_and_links_participants_and_steps(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],
@@ -113,6 +202,20 @@ def test_sequence_diagram_autonumbers_and_links_participants_and_steps(
         repo_url=REPO_URL,
         commit=commit,
     ) in _links(svg)
+
+
+def test_sequence_step_message_with_braces_renders_literal_label(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["sequences"][0]["steps"][0]["message"] = "POST /message/{x}"
+    page = _page(payload)
+    source = sequence_plantuml(page, page.sequences[0], repo_url=REPO_URL)
+    svg = render_svg(source, plantuml_jar)
+
+    assert "POST /message/&#123;x&#125;" in source
+    assert "POST /message/{x}" in svg
 
 
 def test_state_diagram_links_states_initial_arrow_and_transitions(

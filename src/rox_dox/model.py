@@ -277,9 +277,17 @@ class NoSqlStore(Model):
     source: Source
 
 
+class Relation(Model):
+    src: str
+    dst: str
+    label: str
+    source: Source
+
+
 class DataModel(Model):
     sql_tables: list[str] = Field(default_factory=list)
     nosql: list[NoSqlStore] = Field(default_factory=list)
+    relations: list[Relation] = Field(default_factory=list)
 
 
 class SummaryTable(Model):
@@ -421,6 +429,10 @@ def page_sources(page: Page) -> list[tuple[str, Source]]:
 
     sources.extend(
         (f"NoSQL store {store.name}", store.source) for store in page.data.nosql
+    )
+    sources.extend(
+        (f"relation {relation.src} -> {relation.dst}", relation.source)
+        for relation in page.data.relations
     )
     sources.extend(
         (f"related '{related.label}'", related.source) for related in page.related

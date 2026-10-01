@@ -49,6 +49,14 @@ body {
   margin: 0;
   line-height: 1.6;
 }
+.panel-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
 .page-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 320px;
@@ -58,6 +66,51 @@ body {
   max-width: 1600px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+}
+#toggle-left:checked ~ .page-shell {
+  grid-template-columns: 0 minmax(0, 1fr) 320px;
+}
+#toggle-right:checked ~ .page-shell {
+  grid-template-columns: 280px minmax(0, 1fr) 0;
+}
+#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+#toggle-left:checked ~ .page-shell #sidebar,
+#toggle-right:checked ~ .page-shell #context {
+  display: none;
+}
+.panel-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.panel-toggle-button {
+  display: inline-flex;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #fff;
+  color: #344054;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.panel-toggle-button .collapsed {
+  display: none;
+}
+#toggle-left:checked ~ .page-shell .panel-toggle-left .expanded,
+#toggle-right:checked ~ .page-shell .panel-toggle-right .expanded {
+  display: none;
+}
+#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed,
+#toggle-right:checked ~ .page-shell .panel-toggle-right .collapsed {
+  display: inline;
+}
+#toggle-left:focus-visible ~ .page-shell .panel-toggle-left,
+#toggle-right:focus-visible ~ .page-shell .panel-toggle-right {
+  outline: 2px solid #3b6fd8;
+  outline-offset: 2px;
 }
 #sidebar {
   grid-area: nav;
@@ -302,13 +355,13 @@ th {
   justify-content: space-between;
   gap: 1rem;
 }
-.figure-bar .collapse, .block-figure:target .figure-bar .expand {
+.figure-bar .collapse, .zoom-figure:target .figure-bar .expand {
   display: none;
 }
-.block-figure:target .figure-bar .collapse {
+.zoom-figure:target .figure-bar .collapse {
   display: inline;
 }
-.block-figure:target {
+.zoom-figure:target {
   position: fixed;
   inset: 0;
   z-index: 10;
@@ -317,7 +370,7 @@ th {
   overflow: auto;
   background: #fff;
 }
-.block-figure:target .block-scroll {
+.zoom-figure:target .diagram {
   border: 0;
 }
 .block-scroll svg {
@@ -338,6 +391,9 @@ th {
   max-width: 100%;
   height: auto;
   margin: 0 auto;
+}
+.diagram-scroll svg {
+  max-width: none;
 }
 .sources {
   margin-top: 0.75rem;
@@ -360,6 +416,27 @@ blockquote {
 .related-list li {
   overflow-wrap: anywhere;
 }
+#related summary {
+  cursor: pointer;
+  list-style: none;
+}
+#related summary::-webkit-details-marker {
+  display: none;
+}
+#related summary h2 {
+  display: inline-block;
+  margin: 0;
+}
+#related details[open] summary {
+  margin-bottom: 0.75rem;
+}
+#related summary h2::before {
+  content: "\25B8\00A0";
+  color: #6b7686;
+}
+#related details[open] summary h2::before {
+  content: "\25BE\00A0";
+}
 @media (max-width: 1100px) {
   .page-shell {
     grid-template-columns: minmax(0, 1fr);
@@ -368,6 +445,11 @@ blockquote {
       "main"
       "aside";
     padding: 1rem 0.75rem 2rem;
+  }
+  #toggle-left:checked ~ .page-shell,
+  #toggle-right:checked ~ .page-shell,
+  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
+    grid-template-columns: minmax(0, 1fr);
   }
   #sidebar, #context {
     position: static;
@@ -381,12 +463,12 @@ blockquote {
   }
 }"""
 SECTION_LINKS = (
+    ("related", "Related"),
     ("tldr", "TLDR"),
     ("block", "Block diagram"),
     ("schema", "Schema"),
     ("sequences", "Sequence diagrams"),
     ("states", "State diagrams"),
-    ("related", "Related"),
 )
 EMPTY_MESSAGE = "Nothing to show for this module."
 SVG_NAMESPACE_ATTRIBUTES = (
@@ -560,7 +642,10 @@ def _encode_url_schemes(value: str) -> str:
 
 
 def _diagram_markup(source: str, *, jar: Path) -> str:
-    return f'<div class="diagram">{_inline_svg(render_svg(source, jar))}</div>'
+    return (
+        f'<div class="diagram diagram-scroll">'
+        f"{_inline_svg(render_svg(source, jar))}</div>"
+    )
 
 
 def _diagram_card(
@@ -568,6 +653,8 @@ def _diagram_card(
     source: str,
     elements: Iterable[tuple[str, Source]],
     *,
+    diagram_id: str,
+    section_id: str,
     page: Page,
     repo_url: str,
     jar: Path,
@@ -577,8 +664,11 @@ def _diagram_card(
     except DiagramError as error:
         raise DiagramError(f"{title}: {error}") from error
     return (
-        '<article class="diagram-card">'
+        f'<article class="diagram-card zoom-figure" id="{_escape(diagram_id)}">'
+        '<div class="figure-bar">'
         f"<h3>{_escape(title)}</h3>"
+        f'<a class="expand" href="#{_escape(diagram_id)}">Expand full screen</a>'
+        f'<a class="collapse" href="#{_escape(section_id)}">Close</a></div>'
         f"{diagram_markup}"
         f"{_sources_details(elements, page=page, repo_url=repo_url)}"
         "</article>"
@@ -596,7 +686,7 @@ def _block_section(page: Page, *, repo_url: str) -> str:
         if label.startswith(("block group ", "block node ", "block edge "))
     ]
     card = (
-        '<article class="diagram-card block-figure" id="block-figure">'
+        '<article class="diagram-card zoom-figure" id="block-figure">'
         '<div class="figure-bar"><h3>System overview</h3>'
         '<a class="expand" href="#block-figure">Expand full screen</a>'
         '<a class="collapse" href="#block">Close</a></div>'
@@ -618,6 +708,10 @@ def _schema_sources(
     elements.extend(
         (f"NoSQL store {store.name}", store.source) for store in page.data.nosql
     )
+    elements.extend(
+        (f"relation {relation.src} -> {relation.dst}", relation.source)
+        for relation in page.data.relations
+    )
     return elements
 
 
@@ -628,13 +722,15 @@ def _schema_section(
     tables: Mapping[str, Table],
     jar: Path,
 ) -> str:
-    if not page.data.sql_tables and not page.data.nosql:
+    if not page.data.sql_tables and not page.data.nosql and not page.data.relations:
         return _section("schema", "Schema", f'<p class="empty">{EMPTY_MESSAGE}</p>')
     diagram = schema_plantuml(page, repo_url=repo_url, tables=tables)
     card = _diagram_card(
         "Data stores",
         diagram,
         _schema_sources(page, tables),
+        diagram_id="fig-schema",
+        section_id="schema",
         page=page,
         repo_url=repo_url,
         jar=jar,
@@ -672,11 +768,13 @@ def _sequence_section(page: Page, *, repo_url: str, jar: Path) -> str:
             sequence.title,
             sequence_plantuml(page, sequence, repo_url=repo_url),
             _sequence_elements(sequence),
+            diagram_id=f"fig-sequences-{number}",
+            section_id="sequences",
             page=page,
             repo_url=repo_url,
             jar=jar,
         )
-        for sequence in page.sequences
+        for number, sequence in enumerate(page.sequences, start=1)
     )
     return _section("sequences", "Sequence diagrams", cards)
 
@@ -709,11 +807,13 @@ def _state_section(page: Page, *, repo_url: str, jar: Path) -> str:
             state_machine.title,
             state_plantuml(page, state_machine, repo_url=repo_url),
             _state_elements(state_machine),
+            diagram_id=f"fig-states-{number}",
+            section_id="states",
             page=page,
             repo_url=repo_url,
             jar=jar,
         )
-        for state_machine in page.states
+        for number, state_machine in enumerate(page.states, start=1)
     )
     return _section("states", "State diagrams", cards)
 
@@ -736,11 +836,18 @@ def _related_item(
 
 def _related_section(page: Page, *, repo_url: str) -> str:
     if not page.related:
-        return _section("related", "Related", f'<p class="empty">{EMPTY_MESSAGE}</p>')
-    items = "".join(
-        _related_item(related, page=page, repo_url=repo_url) for related in page.related
+        content = f'<p class="empty">{EMPTY_MESSAGE}</p>'
+    else:
+        items = "".join(
+            _related_item(related, page=page, repo_url=repo_url)
+            for related in page.related
+        )
+        content = f'<ul class="related-list">{items}</ul>'
+    return (
+        '<section id="related"><details open>'
+        "<summary><h2>Related</h2></summary>"
+        f"{content}</details></section>"
     )
-    return _section("related", "Related", f'<ul class="related-list">{items}</ul>')
 
 
 def _page_link(tree: SiteTree, from_id: str, to_id: str) -> str:
@@ -936,12 +1043,12 @@ def render_page(
     page_header = _page_header_html(tree, page)
     sections = "".join(
         [
+            _related_section(page, repo_url=repo_url),
             _section("tldr", "TLDR", _tldr_html(page, repo_url=repo_url)),
             _block_section(page, repo_url=repo_url),
             _schema_section(page, repo_url=repo_url, tables=tables, jar=jar),
             _sequence_section(page, repo_url=repo_url, jar=jar),
             _state_section(page, repo_url=repo_url, jar=jar),
-            _related_section(page, repo_url=repo_url),
         ]
     )
     document = (
@@ -950,10 +1057,17 @@ def render_page(
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{_escape(page.title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
-        f'<body><div class="page-shell"><div id="sidebar">'
+        f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
+        f'<input class="panel-toggle" id="toggle-right" type="checkbox">'
+        f'<div class="page-shell"><div id="sidebar">'
         f"{_table_of_contents()}"
         f"{_site_nav_html(tree, page, entries=entries, repo_url=repo_url)}</div>"
-        f'<main class="page-main">{_breadcrumbs_html(tree, page)}'
+        f'<main class="page-main"><div class="panel-controls">'
+        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
+        '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
+        '<label class="panel-toggle-button panel-toggle-right" for="toggle-right">'
+        '<span class="expanded">Panel ▶</span><span class="collapsed">Panel ◀</span></label>'
+        f"</div>{_breadcrumbs_html(tree, page)}"
         f"{page_header}{sections}</main>"
         f"{_context_panel_html(page)}</div></body></html>"
     )
