@@ -143,40 +143,30 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
     )
 
     left_toggle = '<input class="panel-toggle" id="toggle-left" type="checkbox">'
-    right_toggle = '<input class="panel-toggle" id="toggle-right" type="checkbox">'
     page_shell = '<div class="page-shell">'
-    assert left_toggle in document and right_toggle in document
+    assert left_toggle in document
+    assert 'id="toggle-right"' not in document
+    assert 'id="context"' not in document
     assert document.index(left_toggle) < document.index(page_shell)
-    assert document.index(right_toggle) < document.index(page_shell)
     assert '<main class="page-main"><div class="panel-controls">' in document
     assert 'for="toggle-left"><span class="expanded">◀ Panel</span>' in document
-    assert 'for="toggle-right"><span class="expanded">Panel ▶</span>' in document
+    assert 'for="toggle-right"' not in document
     assert '<span class="collapsed">▶ Panel</span>' in document
-    assert '<span class="collapsed">Panel ◀</span>' in document
     assert (
         ".page-shell {\n"
         "  display: grid;\n"
-        "  grid-template-columns: 280px minmax(0, 1fr) 320px;"
+        "  grid-template-columns: 280px minmax(0, 1fr);"
     ) in document
     assert (
         "#toggle-left:checked ~ .page-shell {\n"
-        "  grid-template-columns: 0 minmax(0, 1fr) 320px;\n}"
-    ) in document
-    assert (
-        "#toggle-right:checked ~ .page-shell {\n"
-        "  grid-template-columns: 280px minmax(0, 1fr) 0;\n}"
-    ) in document
-    assert (
-        "#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
-        "  grid-template-columns: 0 minmax(0, 1fr) 0;\n}"
+        "  grid-template-columns: 0 minmax(0, 1fr);\n}"
     ) in document
     assert "@media (max-width: 1100px)" in document
     assert (
-        "  #toggle-left:checked ~ .page-shell,\n"
-        "  #toggle-right:checked ~ .page-shell,\n"
-        "  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {\n"
+        "  #toggle-left:checked ~ .page-shell {\n"
         "    grid-template-columns: minmax(0, 1fr);\n  }"
     ) in document
+    assert "toggle-right" not in document
     assert "<script" not in document
 
 

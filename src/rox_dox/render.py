@@ -16,7 +16,6 @@ from rox_dox.diagrams import (
 from rox_dox.links import page_href, source_url
 from rox_dox.model import (
     Claim,
-    NotionDoc,
     Page,
     Related,
     Sequence as SequenceDiagram,
@@ -59,8 +58,8 @@ body {
 }
 .page-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 320px;
-  grid-template-areas: "nav main aside";
+  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-areas: "nav main";
   align-items: start;
   gap: 1rem;
   max-width: 1600px;
@@ -68,16 +67,9 @@ body {
   padding: 2rem 1.5rem 4rem;
 }
 #toggle-left:checked ~ .page-shell {
-  grid-template-columns: 0 minmax(0, 1fr) 320px;
+  grid-template-columns: 0 minmax(0, 1fr);
 }
-#toggle-right:checked ~ .page-shell {
-  grid-template-columns: 280px minmax(0, 1fr) 0;
-}
-#toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
-  grid-template-columns: 0 minmax(0, 1fr) 0;
-}
-#toggle-left:checked ~ .page-shell #sidebar,
-#toggle-right:checked ~ .page-shell #context {
+#toggle-left:checked ~ .page-shell #sidebar {
   display: none;
 }
 .panel-controls {
@@ -100,15 +92,10 @@ body {
   display: none;
 }
 #toggle-left:checked ~ .page-shell .panel-toggle-left .expanded,
-#toggle-right:checked ~ .page-shell .panel-toggle-right .expanded {
-  display: none;
-}
-#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed,
-#toggle-right:checked ~ .page-shell .panel-toggle-right .collapsed {
+#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed {
   display: inline;
 }
-#toggle-left:focus-visible ~ .page-shell .panel-toggle-left,
-#toggle-right:focus-visible ~ .page-shell .panel-toggle-right {
+#toggle-left:focus-visible ~ .page-shell .panel-toggle-left {
   outline: 2px solid #3b6fd8;
   outline-offset: 2px;
 }
@@ -121,7 +108,7 @@ body {
   flex-direction: column;
   gap: 0.75rem;
 }
-#toc, #site-nav, #context {
+#toc, #site-nav {
   padding: 1rem;
   border: 1px solid #e2e7ee;
   border-radius: 14px;
@@ -135,42 +122,9 @@ body {
   min-height: 0;
   overflow-y: auto;
 }
-#context {
-  grid-area: aside;
-  position: sticky;
-  top: 0;
-  max-height: 100vh;
-  overflow-y: auto;
-}
-#toc > h2, #site-nav > h2, #context > h2 {
+#toc > h2, #site-nav > h2 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
-}
-#context > h2:not(:first-child) {
-  margin-top: 1.25rem;
-}
-.notion-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.notion-doc {
-  padding: 0.45rem 0;
-  border-top: 1px solid #eef1f5;
-  font-size: 0.92rem;
-  line-height: 1.35;
-}
-.notion-doc:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.notion-doc a {
-  color: #182230;
-  text-decoration: none;
-}
-.notion-doc a:hover {
-  color: #145bc4;
-  text-decoration: underline;
 }
 .page-main {
   grid-area: main;
@@ -495,16 +449,13 @@ blockquote {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "nav"
-      "main"
-      "aside";
+      "main";
     padding: 1rem 0.75rem 2rem;
   }
-  #toggle-left:checked ~ .page-shell,
-  #toggle-right:checked ~ .page-shell,
-  #toggle-left:checked ~ #toggle-right:checked ~ .page-shell {
+  #toggle-left:checked ~ .page-shell {
     grid-template-columns: minmax(0, 1fr);
   }
-  #sidebar, #context {
+  #sidebar {
     position: static;
     max-height: none;
   }
@@ -1171,23 +1122,6 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
     )
 
 
-def _notion_doc_html(document: NotionDoc) -> str:
-    return f'<li class="notion-doc">{_anchor(document.url, document.title)}</li>'
-
-
-def _context_panel_html(page: Page) -> str:
-    notion_content = "".join(_notion_doc_html(document) for document in page.notion)
-    if notion_content:
-        notion_content = f'<ul class="notion-list">{notion_content}</ul>'
-    else:
-        notion_content = '<p class="empty">No related Notion pages.</p>'
-    return (
-        '<aside id="context" aria-label="Context">'
-        f"<h2>Notion</h2>{notion_content}"
-        '<h2>Slack</h2><p class="empty">Not yet available.</p></aside>'
-    )
-
-
 def render_page(
     page: Page,
     *,
@@ -1216,17 +1150,14 @@ def render_page(
         f"<title>{_escape(page.title)}</title>"
         f"<style>{PAGE_CSS}</style></head>"
         f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
-        f'<input class="panel-toggle" id="toggle-right" type="checkbox">'
         f'<div class="page-shell"><div id="sidebar">'
         f"{_table_of_contents()}"
         f"{_site_nav_html(tree, page, entries=entries, repo_url=repo_url)}</div>"
         f'<main class="page-main"><div class="panel-controls">'
         '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
         '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
-        '<label class="panel-toggle-button panel-toggle-right" for="toggle-right">'
-        '<span class="expanded">Panel ▶</span><span class="collapsed">Panel ◀</span></label>'
         f"</div>{_breadcrumbs_html(tree, page)}"
         f"{page_header}{sections}</main>"
-        f"{_context_panel_html(page)}</div></body></html>"
+        "</div></body></html>"
     )
     return _offline_html(document)
