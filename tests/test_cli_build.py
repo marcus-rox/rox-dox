@@ -65,6 +65,106 @@ def test_build_writes_complete_page_under_page_id_path(
     assert "<svg" in document
 
 
+def test_build_only_writes_matching_pages_with_a_complete_navigation_tree(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pages_dir = tmp_path / "pages"
+    pages_dir.mkdir()
+    output_dir = tmp_path / "site"
+    root_page = copy.deepcopy(page_data)
+    domain_page = copy.deepcopy(page_data)
+    domain_page.update(
+        {
+            "id": "domain-activity",
+            "kind": "domain",
+            "parent": "rox-core",
+            "paths": ["pkg"],
+        }
+    )
+    feature_page = copy.deepcopy(page_data)
+    feature_page.update(
+        {
+            "id": "feature-activity-integration",
+            "kind": "feature",
+            "parent": "domain-activity",
+            "paths": ["pkg"],
+        }
+    )
+    _write_page(pages_dir, "root.json", root_page)
+    _write_page(pages_dir, "domain.json", domain_page)
+    _write_page(pages_dir, "feature.json", feature_page)
+
+    exit_code = cli.main(
+        [
+            *_build_args(pages_dir, git_repo[0], output_dir, plantuml_jar),
+            "--only",
+            "feature-activity-*",
+            "--no-folder-pages",
+        ]
+    )
+
+    assert exit_code == 0
+    assert "1 pages written to" in capsys.readouterr().out
+    assert sorted(path.name for path in output_dir.glob("*.html")) == [
+        "feature-activity-integration.html"
+    ]
+    document = (output_dir / "feature-activity-integration.html").read_text(
+        encoding="utf-8"
+    )
+    nav = re.search(
+        r'<nav id="feature-tree" aria-label="Feature tree">(.*?)</nav>',
+        document,
+        re.DOTALL,
+    )
+    assert nav is not None
+    for page_id in ("rox-core", "domain-activity", "feature-activity-integration"):
+        assert f'href="{page_id}.html"' in nav.group(1)
+
+
+def test_build_only_still_validates_unselected_pages(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pages_dir = tmp_path / "pages"
+    pages_dir.mkdir()
+    output_dir = tmp_path / "site"
+    root_page = copy.deepcopy(page_data)
+    domain_page = copy.deepcopy(page_data)
+    domain_page.update(
+        {
+            "id": "domain-activity",
+            "kind": "domain",
+            "parent": "rox-core",
+            "paths": ["pkg"],
+        }
+    )
+    domain_page["data"]["sql_tables"] = ["missing_table"]
+    _write_page(pages_dir, "root.json", root_page)
+    _write_page(pages_dir, "domain.json", domain_page)
+
+    exit_code = cli.main(
+        [
+            *_build_args(pages_dir, git_repo[0], output_dir, plantuml_jar),
+            "--only",
+            "rox-core",
+            "--no-folder-pages",
+        ]
+    )
+
+    assert exit_code == 1
+    assert "domain.json: SQL table 'missing_table' not found" in (
+        capsys.readouterr().out
+    )
+    assert not output_dir.exists()
+
+
 def test_build_warns_for_nonadjacent_block_edges(
     tmp_path: Path,
     git_repo: tuple[Path, str],

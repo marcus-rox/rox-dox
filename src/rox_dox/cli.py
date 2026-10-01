@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import subprocess
@@ -44,6 +45,15 @@ def _parse_tables(value: str) -> tuple[str, ...]:
     return tables
 
 
+def _parse_page_globs(value: str) -> tuple[str, ...]:
+    patterns = tuple(pattern.strip() for pattern in value.split(","))
+    if not patterns or any(not pattern for pattern in patterns):
+        raise argparse.ArgumentTypeError(
+            "page globs must be a comma-separated list of non-empty patterns"
+        )
+    return patterns
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rox-dox")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -62,6 +72,8 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("tools/plantuml.jar"),
     )
+    build.add_argument("--only", type=_parse_page_globs)
+    build.add_argument("--no-folder-pages", action="store_true")
 
     relations = commands.add_parser("relations")
     relations.add_argument("--repo", type=Path, required=True)
@@ -404,7 +416,10 @@ def _build_pages(args: argparse.Namespace) -> int:
             )
         else:
             output_paths[output_path] = page_file
-            pages_to_render.append((page_file, page, tables, output_path))
+            if args.only is None or any(
+                fnmatch.fnmatchcase(page.id, pattern) for pattern in args.only
+            ):
+                pages_to_render.append((page_file, page, tables, output_path))
 
     problems.extend((args.pages_dir, problem) for problem in tree_problems(valid_pages))
 
@@ -438,30 +453,33 @@ def _build_pages(args: argparse.Namespace) -> int:
     entries = {
         root_page.id: list_entries(args.repo, root_page.commit, "."),
     }
-    feature_maps, map_problems = _load_feature_maps(args.features)
-    if map_problems:
-        for problem in map_problems:
-            print(problem)
-        return 1
-    feature_maps = [
-        feature_map
-        for feature_map in feature_maps
-        if feature_map.commit == root_page.commit
-    ]
-    all_paths = list_tree_paths(args.repo, root_page.commit)
-    folder_result = _build_folder_pages(
-        args=args,
-        tree=tree,
-        root_page=root_page,
-        entries=entries,
-        feature_maps=feature_maps,
-        all_paths=all_paths,
-    )
-    if isinstance(folder_result, list):
-        for problem in folder_result:
-            print(problem)
-        return 1
-    extra_pages, uncovered_count = folder_result
+    extra_pages: list[tuple[Path, str]] = []
+    uncovered_count = 0
+    if not args.no_folder_pages:
+        feature_maps, map_problems = _load_feature_maps(args.features)
+        if map_problems:
+            for problem in map_problems:
+                print(problem)
+            return 1
+        feature_maps = [
+            feature_map
+            for feature_map in feature_maps
+            if feature_map.commit == root_page.commit
+        ]
+        all_paths = list_tree_paths(args.repo, root_page.commit)
+        folder_result = _build_folder_pages(
+            args=args,
+            tree=tree,
+            root_page=root_page,
+            entries=entries,
+            feature_maps=feature_maps,
+            all_paths=all_paths,
+        )
+        if isinstance(folder_result, list):
+            for problem in folder_result:
+                print(problem)
+            return 1
+        extra_pages, uncovered_count = folder_result
     rendered_pages: list[tuple[Path, str]] = []
     render_problems: list[tuple[Path, str]] = []
     for page_file, page, tables, output_path in pages_to_render:

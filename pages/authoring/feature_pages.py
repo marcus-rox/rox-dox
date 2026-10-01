@@ -16,6 +16,7 @@ def main() -> None:
         description="Generate cited domain and feature pages from feature maps."
     )
     parser.add_argument("--repo", type=Path, default=DEFAULT_REPO)
+    parser.add_argument("--domain", default="all")
     args = parser.parse_args()
     repo = args.repo.resolve()
 
@@ -28,6 +29,15 @@ def main() -> None:
         feature_maps.append(
             FeatureMap.model_validate(json.loads(map_file.read_text(encoding="utf-8")))
         )
+    if args.domain != "all" and not any(
+        feature_map.domain == args.domain for feature_map in feature_maps
+    ):
+        raise SystemExit(f"unknown domain: {args.domain}")
+    selected_maps = [
+        feature_map
+        for feature_map in feature_maps
+        if args.domain == "all" or feature_map.domain == args.domain
+    ]
 
     root_page = json.loads((pages_dir / "rox-core.json").read_text(encoding="utf-8"))
     names = json.loads(
@@ -40,7 +50,7 @@ def main() -> None:
     components_by_commit = {}
     imports_by_commit = {}
     generated = []
-    for feature_map in feature_maps:
+    for feature_map in selected_maps:
         if feature_map.commit not in tables_by_commit:
             tables_by_commit[feature_map.commit] = extract_tables(
                 repo, feature_map.commit
@@ -84,7 +94,7 @@ def main() -> None:
                 ):
                     primary_features[file.path] = (display_name, page_id)
 
-    for feature_map in feature_maps:
+    for feature_map in selected_maps:
         generated.extend(
             feature_pages(
                 feature_map,
@@ -123,7 +133,15 @@ def main() -> None:
         )
     for directory, expected_paths in expected.items():
         for old_path in directory.glob("*.json"):
-            if old_path not in expected_paths:
+            belongs_to_selected_domain = (
+                directory == output_dirs["domain"] and old_path.stem == args.domain
+            ) or (
+                directory == output_dirs["feature"]
+                and old_path.stem.startswith(f"feature-{args.domain}-")
+            )
+            if old_path not in expected_paths and (
+                args.domain == "all" or belongs_to_selected_domain
+            ):
                 old_path.unlink()
 
 
