@@ -217,9 +217,7 @@ def test_publisher_push_uses_temporary_askpass_and_isolated_git_config(
     assert runner.environment["GIT_CONFIG_NOSYSTEM"] == "1"
     assert runner.environment[TOKEN_ENV] == token
     assert "Username*) echo x-access-token" in runner.askpass_content
-    assert 'printf \'%s\\n\' "$MARCUS_ROX_DOX_GITHUB_TOKEN"' in (
-        runner.askpass_content
-    )
+    assert "printf '%s\\n' \"$MARCUS_ROX_DOX_GITHUB_TOKEN\"" in (runner.askpass_content)
     assert runner.askpass_mode == 0o700
     assert token not in runner.askpass_content
     assert runner.askpass_path is not None
