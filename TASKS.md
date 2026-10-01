@@ -1,630 +1,888 @@
-# rox-dox sprint tasks
+# rox-dox sprint tasks — feature tree
 
-**Status:** Approved 2026-09-30.
+**Status:** Draft 2026-10-01, awaiting Marcus. Decomposes PLAN.md next steps 1–3 against SPEC.md.
+The folder-tree tasks are in TASKS_deprecated.md.
 
 ## Manifest
 
 | # | Task | Satisfies | Parent plan step | Depends on | Priority |
 |---|---|---|---|---|---|
-| 1 | Define the page model and citation validator | R-4 | Next step 1 | — | High |
-| 2 | Render one complete offline design-doc page | R-2, R-4 | Next step 1 | 1 | High |
-| 3 | Add recursive navigation and page linking | R-1, R-2 | Next step 1 | 2 | High |
-| 4 | Add Notion context to generated pages | R-3 | Next step 1 | 2 | High |
-| 5 | Generate the first three real rox-core pages | R-1, R-2, R-3, R-4 | Next step 1 | 3, 4 | High |
-| 6 | Define and run the generalized rox-core generation skill | R-1, R-2, R-3, R-4 | Next step 2 | 5 | Medium |
+| 1 | Sequences & outreach code is grouped into features, with evidence | R-6, R-9 | Next step 1 | — | High |
+| 2 | The left panel navigates a root → domain → feature tree | R-5 | Next step 2 | — | High |
+| 3 | Every folder in the Explorer opens a docs page | R-7, R-6 | Next step 2 | 1, 2 | High |
+| 4 | The Notion panel is removed from every page | R-3 (retired) | Decided: no Notion on pages | — | Medium |
+| 5 | Sequences & outreach has a domain page and a page per feature | R-5, R-9, R-2, R-4 | Next step 2 | 1, 2, 3, 4 | High |
+| 6 | Every remaining domain has a feature map and pages | R-5, R-6, R-9, R-2, R-4 | Next step 3 | 5 | Medium |
+| 7 | One unattended daily run rebuilds the site as a rox-dox PR | R-8 | Next step 3 | 5 | Medium |
 
-## Requirement coverage
+Priority is inferred from each plan step's position; the plan gives none explicitly.
 
-| Requirement | Status now | Tasks | Status if this sprint lands |
+| Req | Status now | Tasks | Status if the sprint lands |
 |---|---|---|---|
-| R-1 | unbound | 3, 5, 6 | ✅ for the generated scope |
-| R-2 | unbound | 2, 3, 5, 6 | ✅ |
-| R-3 | unbound | 4, 5, 6 | ✅ |
-| R-4 | unbound | 1, 2, 5, 6 | ✅ |
+| R-2 | ✅ | 5, 6 | ✅ — holds on the new pages |
+| R-3 | retired | 4 | retired, with its panel and test gone |
+| R-4 | ✅ | 5, 6 | ✅ — holds on the new pages |
+| R-5 | unbound | 2, 5, 6 | ✅ |
+| R-6 | unbound | 1, 3, 6 | ✅ |
+| R-7 | unbound | 3 | ✅ |
+| R-8 | unbound | 7 | ✅ |
+| R-9 | unbound | 1, 5, 6 | ✅ |
 
 ## Parallel execution plan
 
 | Wave | Tasks | Blocked by |
 |---|---|---|
-| 1 | 1 | — |
-| 2 | 2 | 1 |
-| 3 | 3, 4 | 2 |
-| 4 | 5 | 3, 4 |
-| 5 | 6 | 5 |
+| 1 | 1, 2, 4 | — |
+| 2 | 3 | Tasks 1, 2 |
+| 3 | 5 | Wave 2 and Task 4 |
+| 4 | 6, 7 | Task 5 |
 
-The maximum useful parallelism is two tasks in Wave 3.
+Maximum useful parallelism is 3 (Wave 1). Task 5 is the bottleneck: it is the first time
+feature grouping, navigation and folder pages meet on real content.
 
 ---
 
-# Task 1 — Define the page model and citation validator
+# Task 1 — Sequences & outreach code is grouped into features, with evidence
 
-**Satisfies:** R-4.
+**Satisfies:** R-6, R-9.
 
 ## User story
 
-As the documentation generator, I want every page element represented with a source, so that
-uncited or stale documentation cannot be rendered.
+As Marcus, a researcher without production access, I want the Sequences & outreach domain's
+code split into features with the reason each file belongs to its feature, so that I can
+check the grouping before any page is written about it.
 
 ## Context
 
-The approved design is model-first: a structured page model is validated before a deterministic
-renderer produces HTML and UML diagrams.
+rox-core is split by layer, so one feature's routes, logic, workers and screens sit in
+distant folders (PLAN.md, Constraint 3). Sibling-folder overlap was near zero, so grouping
+has to follow shared tables and calls across the whole repo (PLAN.md, Decided). This task
+produces the grouping for one domain, which plan step 1 asks Marcus to review.
 
 ## Scope
 
 In scope:
-- A structured model for TLDR claims, tables, diagram nodes and edges, sequence steps, states,
-  transitions, related links, and Notion references.
-- Code sources pinned to a commit and line range.
-- Notion sources.
-- Validation of missing, malformed, and stale sources.
+- A command that, at a pinned rox-core commit, assigns backend, web, agent-skill and
+  deployment-config files to features of one domain by shared tables and calls.
+- A feature map file in rox-dox: per feature, its files, the tables they read and write, and
+  the calls between them, each cited.
+- The list of in-domain files no feature covers.
+- Excluding tests and migrations.
 
 Out of scope:
-- HTML rendering.
-- Notion searching.
-- Automatic authoring of page models.
+- Writing any page (Task 5).
+- The other domains (Task 6).
+- Choosing a fixed child count: overlap decides (PLAN.md, Decided).
+- Deciding when a feature is a leaf (PLAN.md, Open; Task 5).
 
 ## Requirements
 
-- Every emitted claim and diagram element has at least one source.
-- Code sources identify a file, commit, and valid line range.
-- Invalid or stale sources fail the build and identify the affected element.
+- The command reads rox-core only through `git show` at the pinned commit.
+- A file is in the domain when it reads or writes one of the domain's tables, or is called by
+  a file that does.
+- Each feature lists its files, and every file in it shares at least one cited table or call
+  with another file of that feature.
+- Web files join a feature through the backend routes they call.
+- Every in-domain file is on a feature or on the uncovered list.
+- Rerunning at the same commit gives a byte-identical feature map.
 
 ## Acceptance criteria
 
-- Given a page model with an uncited arrow, when validation runs, then it fails naming that arrow.
-- Given a page model with a line range absent at its pinned commit, when validation runs, then it
-  fails naming the source.
-- Given a valid page model, when validation runs, then it succeeds.
-- Errors and edge cases: a missing commit, missing file, invalid line range, undeclared diagram
-  endpoint, or invalid Notion source fails explicitly.
+- Given the pinned commit, when the command runs for Sequences & outreach, then it writes a
+  feature map where each feature lists files, tables and calls, each with a source.
+- Given that map, when any file is checked, then it shares a cited table or call with another
+  file of its feature.
+- Given the web code, when the map is built, then web files that call a domain route appear
+  on that route's feature.
+- Given the domain's files, when the map is built, then every one is on a feature or on the
+  uncovered list, and no test or migration appears anywhere.
+- Given two runs at the same commit, when their outputs are compared, then they are
+  byte-identical.
+- Given the map, when Marcus reviews it, then he accepts the features and the uncovered list,
+  or the grouping is revised.
+- Errors and edge cases: a shared model or utility called by several features is listed on
+  each of them, not dropped (PLAN.md, Open); a file that touches no table and is called by
+  nothing in the domain stays out of the domain rather than being forced into a feature.
 
 ## Definition of Done
 
 - All acceptance criteria pass.
-- R-4 is green in the SPEC conformance table.
-- Code is reviewed and merged.
-- Appropriate automated tests pass.
-- The change is deployed to the local repository workflow.
-- No unresolved critical defects remain.
-
-## Dependencies and constraints
-
-- Sources must be checkable without production database access.
-- The model must support every section required by R-2.
-
-## Proof of value
-
-**Discharges:** Plan → Decided — model first, then render, so citation checking is deterministic.
-
-**Claim:** If every acceptance criterion holds, the generator has a checkable source boundary
-before rendering.
-
-**Premises:**
-1. Uncited elements fail validation — source: acceptance criterion 1.
-2. Stale code sources fail validation — source: acceptance criterion 2.
-3. Valid models pass validation — source: acceptance criterion 3.
-
-**Argument:**
-1. Every rendered element must first be represented in the model.
-2. The validator rejects the two failure classes that would make an element unverifiable.
-3. Therefore, rendering receives only structurally cited models.
-
-**Attempted counterexample:** A semantically incorrect claim can cite a real line range. That is
-not a structural citation failure and must be caught by review of generated pages.
-
-**Falsifier:** A page with a missing or stale source passes validation.
-
-**Verdict:** Proved for structural citation validity; semantic support remains a review concern.
-
-## References
-
-- Design: PLAN.md — Model first, then render.
-- Technical specification: SPEC.md — R-4.
-- Related issues: Task 2 — Render one complete offline design-doc page.
-
-## Delivery
-
-- Owner: TBD
-- Priority: High
-- Estimate: TBD
-- Sprint: TBD
-- Parent epic: Next step 1 — Generator plus 3 real pages
-
----
-
-# Task 2 — Render one complete offline design-doc page
-
-**Satisfies:** R-2, R-4.
-
-## User story
-
-As a researcher, I want one generated page to contain the complete design-doc layout offline, so
-that I can understand a module without production access or network access.
-
-## Context
-
-Every page has the same ordered sections and uses inline UML diagrams and CSS.
-
-## Scope
-
-In scope:
-- Recap TLDR, table of contents, UML block, schema, sequence, and state sections.
-- Inline SVG and CSS.
-- Empty-section placeholders.
-- Source links on emitted content.
-
-Out of scope:
-- Recursive page discovery.
-- Notion search.
-- Whole-tree generation.
-
-## Requirements
-
-- Sections appear in the order specified by R-2.
-- The output is self-contained and opens without network access.
-- UML diagrams render inline.
-
-## Acceptance criteria
-
-- Given a valid page model, when the renderer runs, then it produces one self-contained HTML page
-  with all required sections in order.
-- Given a section with no applicable content, when the page opens, then that section remains and
-  explains that there is nothing to show.
-- Given a generated page with network access disabled, when it opens, then its content and
-  diagrams still render.
-- Errors and edge cases: invalid diagram syntax or an uncited model fails the build rather than
-  emitting partial HTML.
-
-## Definition of Done
-
-- All acceptance criteria pass.
-- R-2 is green in the SPEC conformance table.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean) — for this task, the
+  feature-map half of R-6 and R-9; their page halves land in Tasks 3 and 5.
 - Code is reviewed and merged.
 - Appropriate automated and manual tests pass.
-- The page opens from a local clone in VS Code or Cursor.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the feature map is committed in rox-dox.
 - No unresolved critical defects remain.
 
 ## Dependencies and constraints
 
-- Depends on Task 1.
-- Diagrams are UML.
-- Block diagrams use an approximately 24-box readability guide; sequence and state diagrams
-  use an approximately 12-element guide. The root schema is a domain overview; submodule
-  schema pages show all in-scope tables and columns.
+- Blocking open question (PLAN.md, Open): the exact overlap measure and when two groups are
+  one feature. This task tunes it against Marcus's review; it is not settled in advance.
+- Open (PLAN.md): how web code joins a feature; this task tests "through the routes it calls".
+- Open (PLAN.md): where code that touches no table goes; this task reports how much there is.
+- Assumption carried from the Proof of value: Marcus's review covers whether the uncovered
+  list is small enough, since the plan gives no number.
+- Depends on: none (Wave 1). Unblocks Tasks 3 and 5.
 
 ## Proof of value
 
-**Discharges:** Plan → Constraints — pages are self-contained HTML with UML diagrams.
+**Discharges:** Plan → Next step 1 — falsifier "Marcus judges the groups are not features, or
+much of the domain's code can't be placed."
 
-**Claim:** If every acceptance criterion holds, one generated page demonstrates the fixed offline
-  design-doc contract.
+**Claim:** If every acceptance criterion of this task holds, then neither half of the falsifier
+fires.
 
 **Premises:**
-1. All sections appear in order — source: acceptance criterion 1.
-2. Empty sections remain visible — source: acceptance criterion 2.
-3. The page renders without network access — source: acceptance criterion 3.
+1. Marcus reviews the feature map and accepts the features — source: this task's Acceptance
+   criteria.
+2. Every in-domain file is on a feature or on the uncovered list — source: this task's
+   Acceptance criteria.
+3. Marcus's acceptance covers the size of the uncovered list — source: Assumption
+   (unverified); the plan gives no threshold for "much".
 
 **Argument:**
-1. The ordered section check establishes the document shape.
-2. The empty-section check establishes stable shape across modules.
-3. The offline check establishes the local viewing contract.
-4. Therefore, the page satisfies the design-doc rendering contract.
+1. From Premise 1, Marcus has not judged the groups to be non-features.
+2. From Premise 2, every file the domain could fail to place is visible on the uncovered list.
+3. From Premise 3, Marcus has judged that list not to be "much" of the domain.
+4. Therefore neither half of the falsifier fires.
 
-**Attempted counterexample:** A page can pass while a diagram is visually unreadable. The
-readability guide requires review of the rendered page before this task is accepted.
+**Attempted counterexample:** Marcus accepts the feature list but never looks at the uncovered
+list, which holds most of the domain. Premises 1 and 2 hold and the second half of the
+falsifier fires — this is why Premise 3 is needed.
 
-**Falsifier:** Any required section is missing, reordered, or dependent on a network resource.
+**Falsifier:** A later page (Task 5) shows a feature whose files share nothing real, despite
+each sharing a cited table or call — the evidence rule would then be too weak.
 
-**Verdict:** Conditional on visual review of the rendered diagrams.
+**Verdict:** Conditional on Marcus's review covering the uncovered list (Premise 3), echoed in
+Dependencies and constraints.
 
 ## References
 
-- Design: PLAN.md — self-contained HTML, UML, and readability guide.
-- Technical specification: SPEC.md — R-2 and R-4.
-- Related issues: Task 1 — Define the page model and citation validator; Task 3 — Add recursive navigation and page linking.
+- Design: PLAN.md — Constraint 3, Decided, Open; Figure 2
+- Technical specification: SPEC.md — R-6, R-9
+- Related issues: Task 3 — Every folder in the Explorer opens a docs page; Task 5 — Sequences
+  & outreach has a domain page and a page per feature
 
 ## Delivery
 
 - Owner: TBD
-- Priority: High
-- Estimate: TBD
+- Priority: High (inferred)
+- Estimate: about half a session (PLAN.md, Next step 1)
 - Sprint: TBD
-- Parent epic: Next step 1 — Generator plus 3 real pages
+- Parent epic: Next step 1 — Feature map for one domain
 
 ---
 
-# Task 3 — Add recursive navigation and page linking
+# Task 2 — The left panel navigates a root → domain → feature tree
 
-**Satisfies:** R-1, R-2.
+**Satisfies:** R-5.
 
 ## User story
 
-As a researcher, I want to click from rox-core into any folder and back, so that each click gives
-me a more detailed view of the system.
+As Marcus, I want the left panel to show the root, the domains and their features as one tree,
+with breadcrumbs and child lists on every page, so that I can drill from the whole system to
+one feature in a few clicks.
 
 ## Context
 
-The tree is generalized: nothing in rox-core is off limits, including `web`, `k8s`, and
-`.agents/skills`. A page may represent a folder or a regrouping required for readability.
+Today the left panel's tree mirrors rox-core folders (PLAN_deprecated.md). The feature tree
+replaces it: level 1 is the schema domains the root shows, however many there are, below them the features (PLAN.md, Decided,
+Figure 1). A feature page covers files from several distant folders.
 
 ## Scope
 
 In scope:
-- Root page, parent links, child links, breadcrumbs, and left navigation.
-- Clickable diagram links between pages.
-- Coverage of every rox-core folder in the configured documentation scope.
+- Page models that cover several disjoint source paths and say whether they are the root, a
+  domain or a feature.
+- The left panel's tree built from page parents, below the table of contents.
+- Breadcrumbs and a children list on every page.
+- Stub domain and feature pages in tests to prove navigation.
 
 Out of scope:
-- Notion retrieval.
-- Semantic correctness review of page narratives.
+- Clicking folders in the Explorer (Task 3).
+- Writing real domain or feature content (Task 5).
+- Grouping code into features (Task 1).
 
 ## Requirements
 
-- The navigation tree includes every in-scope folder.
-- Every page links to its parent and children where they exist.
-- The current page is highlighted.
+- A page model can list any number of disjoint source paths.
+- Each page is marked root, domain or feature, and a domain's parent is the root.
+- The left panel shows the full root → domain → feature tree with the current page
+  highlighted, below the table of contents.
+- Every page has a breadcrumb back to the root and lists its children.
+- The existing root page builds unchanged apart from its new children.
+- Conformance tests for R-5 are drafted for Marcus to accept.
 
 ## Acceptance criteria
 
-- Given the root page, when a reader clicks an in-scope folder, then its page opens and links
-  back to the root.
-- Given a page with children, when it opens, then the left navigation and page content list all
-  children.
-- Given a leaf page, when it opens, then it has no child links and still has parent navigation.
-- Errors and edge cases: duplicate paths, orphan pages, and links to missing pages fail the build.
+- Given a root, one domain and two features whose paths are in distant folders, when the site
+  is built, then all four pages build and each feature lists both of its paths.
+- Given those pages, when any page opens, then the left panel shows the whole tree below the
+  table of contents with that page highlighted.
+- Given a feature page, when it opens, then its breadcrumb reads root → domain → feature and
+  its children are listed.
+- Given a domain whose parent is not the root, when the site is built, then the build fails
+  naming that domain.
+- Given the current root page model, when it is rebuilt, then it is unchanged apart from
+  listing its children.
+- Given the drafted `test_r5_*` conformance tests, when Marcus accepts them, then they are
+  committed and pass.
+- Errors and edge cases: a feature listed under two domains fails the build naming the
+  feature, because every page appears once in the tree.
 
 ## Definition of Done
 
 - All acceptance criteria pass.
-- R-1 is green for the generated scope.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean) — for this task, the
+  "drilling down" scenario of R-5; the "leaf" scenario lands in Task 5.
 - Code is reviewed and merged.
 - Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the site builds locally from the pinned commit.
 - No unresolved critical defects remain.
 
 ## Dependencies and constraints
 
-- Depends on Task 2.
-- Tree scope includes all rox-core folders.
-- A 3,051-folder repository inventory is an input to the coverage strategy; the generator must
-  define a readable regrouping where a one-page-per-folder output is not useful.
+- Pages stay self-contained HTML that open offline (PLAN.md, Constraint 5).
+- Depends on: none (Wave 1). Unblocks Tasks 3 and 5.
 
 ## Proof of value
 
-**Discharges:** Plan → Objective — start at the rox-core root and click to deeper module pages.
+**Discharges:** Plan → Decided — "Left panel: table of contents, then the feature tree" and
+Objective — "open the rox-core root, click a domain, then a feature".
 
-**Claim:** If every acceptance criterion holds, every generated page is reachable through the
-navigation tree and links back toward the root.
+**Claim:** If every acceptance criterion of this task holds, then a reader can go from the root
+to any feature by clicking through the left panel's feature tree.
 
 **Premises:**
-1. Every in-scope folder appears in the tree — source: acceptance criterion 1.
-2. Parent and child links are emitted — source: acceptance criteria 2 and 3.
-3. Missing and orphan links fail — source: acceptance criterion 4.
+1. The left panel shows the whole root → domain → feature tree on every page, below the table
+   of contents — source: this task's Acceptance criteria.
+2. Every domain's parent is the root, and every page appears once — source: this task's
+   Acceptance criteria.
+3. Feature pages can cover several distant paths — source: this task's Acceptance criteria.
 
 **Argument:**
-1. Coverage makes every target a node in the tree.
-2. Parent and child links connect each node to its surrounding levels.
-3. Link validation prevents disconnected output.
-4. Therefore, the reader can drill down and return.
+1. From Premise 2, every feature is reachable from the root through exactly one domain.
+2. From Premise 1, each step of that path is a visible, clickable row on every page.
+3. From Premise 3, a cross-layer feature is one page rather than several folder pages.
+4. Therefore the reader reaches any feature from the root by clicking.
 
-**Attempted counterexample:** A folder inventory may contain generated or irrelevant directories
-that should be regrouped. The acceptance criterion requires the final generated scope to be
-explicit and complete, not silently omitted.
+**Attempted counterexample:** A feature whose parent is another feature, three levels down.
+Premise 1 shows the whole tree, so it is still visible and reachable; no case found where the
+criteria hold and a feature is unreachable.
 
-**Falsifier:** An in-scope folder cannot be reached from the root or a generated link resolves to
-no page.
+**Falsifier:** With all of the real domains' pages (Task 6), the tree is too long to scan in the
+left panel.
 
-**Verdict:** Proved given the dependency-based regrouping approved in PLAN.md.
+**Verdict:** Proved.
 
 ## References
 
-- Design: PLAN.md — module tree and progressively lower abstraction.
-- Technical specification: SPEC.md — R-1.
-- Related issues: Task 2 — Render one complete offline design-doc page; Task 4 — Add Notion context to generated pages.
+- Design: PLAN.md — Decided, Figure 1
+- Technical specification: SPEC.md — R-5
+- Related issues: Task 3 — Every folder in the Explorer opens a docs page; Task 5 — Sequences
+  & outreach has a domain page and a page per feature
 
 ## Delivery
 
 - Owner: TBD
-- Priority: High
+- Priority: High (inferred)
 - Estimate: TBD
 - Sprint: TBD
-- Parent epic: Next step 1 — Generator plus 3 real pages
+- Parent epic: Next step 2 — Pages for that domain
 
 ---
 
-# Task 4 — Add Notion context to generated pages
+# Task 3 — Every folder in the Explorer opens a docs page
 
-**Satisfies:** R-3.
+**Satisfies:** R-7, R-6.
 
 ## User story
 
-As a researcher, I want related Notion context beside each page, so that I can understand why
-the code exists in addition to what it does.
+As Marcus, I want every folder I click in the Explorer to open a docs page listing the
+features that use its files, so that I never get dropped onto GitHub when I want to know what
+a folder is for.
 
 ## Context
 
-Notion is a supplemental source. Slack remains a visible future slot, but is not an active
-source for these pages.
+Today a folder without its own page links out to GitHub (PLAN_deprecated.md). Under the
+feature tree no folder gets its own page; a folder's files can belong to several features
+(PLAN.md, Decided).
 
 ## Scope
 
 In scope:
-- Right-side Notion panel with each document shown as its linked title.
-- Empty-state handling.
-- Slack placeholder below the Notion panel.
-- Notion citations in page models.
+- A generated docs page per rox-core folder, listing every feature page that covers files in
+  it.
+- An uncovered-files page listing files no feature covers.
+- A line on the root page saying tests and migrations are not documented.
 
 Out of scope:
-- Slack search or Slack-derived claims.
-- Production usage metrics.
+- Writing feature content (Task 5).
+- File-level links: clicking a file may still show its source.
+- Pages per folder with their own diagrams (PLAN.md, Out of scope).
 
 ## Requirements
 
-- Every page has the right-side context panel.
-- Related Notion entries show each document as its linked title.
-- The Slack section is present below Notion.
+- Every folder in the Explorer links to its folder docs page, never to GitHub.
+- A folder docs page lists every feature page covering files in that folder.
+- A folder with uncovered files links to the uncovered-files page.
+- The uncovered-files page lists every in-scope file on no feature page.
+- The root page states that tests and migrations are not covered.
+- Conformance tests for R-6 and R-7 are drafted for Marcus to accept.
 
 ## Acceptance criteria
 
-- Given related Notion pages, when a page opens, then the panel shows each as its linked title.
-- Given no related Notion pages, when a page opens, then the panel remains and shows an empty state.
-- Given any page, when the right panel opens, then the Slack section appears below Notion.
-- Errors and edge cases: invalid links, missing titles, or malformed dates fail authoring/build
-  validation rather than producing misleading context.
+- Given a folder whose files belong to two features, when the reader clicks it, then a docs
+  page opens linking to both features, with no GitHub link on it.
+- Given a folder whose files no feature covers, when the reader clicks it, then its docs page
+  points to the uncovered-files page.
+- Given a feature map with an uncovered file, when the site is built, then that file is on the
+  uncovered-files page.
+- Given the root page, when it opens, then it says tests and migrations are not covered.
+- Given the built site, when every Explorer folder link is checked, then none points to GitHub.
+- Given the drafted `test_r6_*` and `test_r7_*` conformance tests, when Marcus accepts them,
+  then they are committed and pass.
+- Errors and edge cases: a folder that holds only tests or migrations opens a docs page saying
+  it is not documented, rather than a broken link.
 
 ## Definition of Done
 
 - All acceptance criteria pass.
-- R-3 is green.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean) — for R-6, on the
+  Sequences & outreach domain; full coverage lands in Task 6.
 - Code is reviewed and merged.
 - Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the site builds locally from the pinned commit.
 - No unresolved critical defects remain.
 
 ## Dependencies and constraints
 
-- Depends on Task 2.
-- Notion content is gathered during page authoring and stored in the page model.
-- Pages remain viewable without network access.
+- Needs Task 1's feature map for file → feature assignment and the uncovered list.
+- Needs Task 2's multi-path feature pages and tree.
+- Depends on: Tasks 1, 2 (Wave 2). Unblocks Task 5.
 
 ## Proof of value
 
-**Discharges:** Plan → Decided — Notion context is included in v1 and Slack is represented by a
-placeholder.
+**Discharges:** Plan → Decided — "Clicking a folder opens a docs page listing the feature pages
+that cover its files, never GitHub."
 
-**Claim:** If every acceptance criterion holds, each page provides offline supplemental Notion
-context without making Slack an active source.
+**Claim:** If every acceptance criterion of this task holds, then clicking any Explorer folder
+opens docs listing the features that cover it, and never GitHub.
 
 **Premises:**
-1. Related entries show all required fields — source: acceptance criterion 1.
-2. Empty pages still show the panel — source: acceptance criterion 2.
-3. Slack appears below Notion — source: acceptance criterion 3.
+1. No Explorer folder link points to GitHub — source: this task's Acceptance criteria.
+2. A folder's docs page links to every feature covering its files — source: this task's
+   Acceptance criteria.
+3. A folder with no covered files points to the uncovered-files page or says it is not
+   documented — source: this task's Acceptance criteria.
 
 **Argument:**
-1. The panel has a stable shape whether or not matches exist.
-2. Each displayed Notion fact has the fields needed to inspect its provenance.
-3. The Slack placeholder preserves the intended layout without unsupported content.
-4. Therefore, the context-panel contract is met.
+1. Every folder either has covered files, or has none.
+2. With covered files, Premise 2 gives a page listing their features.
+3. With none, Premise 3 gives a docs page instead of a dead end.
+4. From Premise 1, neither case opens GitHub.
+5. Therefore the claim holds for every folder.
 
-**Attempted counterexample:** A Notion page can change after authoring. The page remains a
-snapshot; regeneration is responsible for refreshing it.
+**Attempted counterexample:** A folder added since the feature map was built. It appears in the
+Explorer but not in the map. Premise 3 still applies, since none of its files is covered, so
+it opens a docs page; no case found where the criteria hold and the claim fails.
 
-**Falsifier:** A generated page omits a required Notion field or requires network access to open.
+**Falsifier:** Marcus clicks a folder and the listed features don't explain it, for example
+because one feature owns 1 of its 40 files and the rest are uncovered.
 
-**Verdict:** Proved for the generated snapshot.
+**Verdict:** Proved.
 
 ## References
 
-- Design: PLAN.md — model-first rendering and Notion context.
-- Technical specification: SPEC.md — R-3.
-- Related issues: Task 2 — Render one complete offline design-doc page; Task 5 — Generate the first three real rox-core pages.
+- Design: PLAN.md — Decided, Out of scope
+- Technical specification: SPEC.md — R-6, R-7
+- Related issues: Task 1 — Sequences & outreach code is grouped into features, with evidence;
+  Task 2 — The left panel navigates a root → domain → feature tree
 
 ## Delivery
 
 - Owner: TBD
-- Priority: High
+- Priority: High (inferred)
 - Estimate: TBD
 - Sprint: TBD
-- Parent epic: Next step 1 — Generator plus 3 real pages
+- Parent epic: Next step 2 — Pages for that domain
 
 ---
 
-# Task 5 — Generate the first three real rox-core pages
+# Task 4 — The Notion panel is removed from every page
 
-**Satisfies:** R-1, R-2, R-3, R-4.
+**Satisfies:** R-3 (retired by Marcus; this task removes the code and test behind it).
 
 ## User story
 
-As a researcher, I want to review a real root-to-leaf path, so that I can decide whether the
-documentation format is useful before generating the whole repository.
+As Marcus, I want the Notion and Slack panel gone from every page, so that pages carry only
+code-cited content and nobody keeps hand-picking Notion links.
 
 ## Context
 
-The first vertical slice is rox-core root → chat → one leaf module.
+Automatic Notion lookup was dropped and `R-3` retired (PLAN.md, Decided; SPEC.md). The
+right-hand context panel, the page model's Notion field, the root's five hand-picked Notion
+titles and the R-3 conformance test still exist.
 
 ## Scope
 
 In scope:
-- Three real page models.
-- Root, chat, and one leaf page.
-- All required diagrams and panels.
-- Local offline review.
+- Removing the right-hand panel from the page layout.
+- Removing Notion entries from the page model and the root page's authoring script.
+- Removing `tests/conformance/test_r3_context.py`, as `R-3` is retired.
+- Removing Notion steps from the generate-rox-docs skill.
 
 Out of scope:
-- The complete rox-core tree.
-- Automated generation skill.
+- Notion as a citation source under `R-4`, which stays verbatim.
+- Any other page section.
 
 ## Requirements
 
-- The three pages are linked as a drill-down path.
-- Each page uses the fixed layout and citation checks.
-- The pages are understandable from the code and available Notion context.
+- No page has a right-hand Notion or Slack panel.
+- Page models have no Notion field, and a model that still has one fails validation.
+- The root page regenerates without its Notion entries and is otherwise unchanged.
+- The R-3 conformance test is gone; the rest of the conformance suite is unchanged.
+- generate-rox-docs no longer mentions Notion context.
 
 ## Acceptance criteria
 
-- Given a local clone, when the root page opens, then the reader can click through chat to the
-  leaf and back.
-- Given the three generated pages, when the conformance checks run, then all four requirements
-  pass for this slice.
-- Given a page review, when the diagrams and TLDR are compared with the source, then no
-  contradiction is found.
-- Errors and edge cases: any missing page, broken link, stale citation, or contradiction blocks
-  the slice from being accepted.
+- Given any built page, when it opens, then there is no Notion or Slack panel.
+- Given a page model with a Notion field, when it is checked, then validation fails naming the
+  field.
+- Given the root authoring script, when it regenerates, then the JSON differs from the
+  current one only by the removed Notion entries.
+- Given the conformance suite, when it is diffed against `main`, then the only change is the
+  deleted R-3 test.
+- Given the generate-rox-docs skill, when it is searched for "Notion", then nothing is found.
+- Errors and edge cases: a citation whose source is a Notion page still renders and passes
+  `R-4`, because only the panel is retired.
 
 ## Definition of Done
 
 - All acceptance criteria pass.
-- R-1 through R-4 are green for the slice.
-- Code and generated pages are reviewed and merged.
+- The conformance table shows `R-3` retired with no test, and the rest of the conformance
+  suite is unchanged (`git diff --exit-code` over it is clean apart from the deleted R-3
+  test).
+- Code is reviewed and merged.
 - Appropriate automated and manual tests pass.
-- Pages open locally in VS Code or Cursor.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the site builds locally from the pinned commit.
 - No unresolved critical defects remain.
 
 ## Dependencies and constraints
 
-- Depends on Tasks 3 and 4.
-- The root schema shows one card per domain with key tables; submodule schema pages show every
-  in-scope table and column.
-- Block diagrams follow an approximate 24-box readability guide; sequence and state diagrams
-  follow an approximate 12-element guide.
+- Deleting the R-3 conformance test is allowed only because Marcus retired `R-3`.
+- Depends on: none (Wave 1). Unblocks Task 5.
 
 ## Proof of value
 
-**Discharges:** Plan → Next step 1 — generator plus three real pages.
+**Discharges:** Plan → Decided — "No Notion on pages (SPEC `R-3` retired)."
 
-**Claim:** If every acceptance criterion holds, the project has a reviewable end-to-end slice
-before whole-tree generation.
+**Claim:** If every acceptance criterion of this task holds, then no page shows Notion content.
 
 **Premises:**
-1. The three pages form a linked path — source: acceptance criterion 1.
-2. All requirements pass for the slice — source: acceptance criterion 2.
-3. Human review finds no contradiction — source: acceptance criterion 3.
+1. No built page has a Notion or Slack panel — source: this task's Acceptance criteria.
+2. A page model with a Notion field fails validation — source: this task's Acceptance
+   criteria.
+3. generate-rox-docs no longer asks for Notion context — source: this task's Acceptance
+   criteria.
 
 **Argument:**
-1. The path demonstrates navigation.
-2. Conformance demonstrates the renderer and validator integration.
-3. Review demonstrates usefulness against real code.
-4. Therefore, the first slice supplies evidence for whole-tree generation.
+1. From Premise 1, current pages show none.
+2. From Premise 2, no future page model can carry Notion entries.
+3. From Premise 3, the procedure no longer produces them.
+4. Therefore no page shows Notion content.
 
-**Attempted counterexample:** A three-page slice may not expose problems in unusual folders such
-as k8s or skills. Those are deferred to Task 6's whole-tree coverage.
+**Attempted counterexample:** A TLDR claim cited to a Notion page. It shows a Notion link as a
+citation, not as context, which `R-4` still allows and the plan doesn't forbid. No case found
+where the criteria hold and a Notion context panel appears.
 
-**Falsifier:** Marcus rejects the pages as unreadable or a cited claim contradicts rox-core.
+**Falsifier:** Marcus wants Notion citations gone too; the plan's decision would then need
+widening.
 
-**Verdict:** Proved for the slice; not evidence of whole-tree correctness.
+**Verdict:** Proved.
 
 ## References
 
-- Design: PLAN.md — Next step 1.
-- Technical specification: SPEC.md — R-1 through R-4.
-- Related issues: Task 3 — Add recursive navigation and page linking; Task 4 — Add Notion context to generated pages.
+- Design: PLAN.md — Decided, Out of scope
+- Technical specification: SPEC.md — R-3 (retired), R-4
+- Related issues: Task 5 — Sequences & outreach has a domain page and a page per feature
 
 ## Delivery
 
 - Owner: TBD
-- Priority: High
+- Priority: Medium (inferred: a decision, not a next step)
 - Estimate: TBD
 - Sprint: TBD
-- Parent epic: Next step 1 — Generator plus 3 real pages
+- Parent epic: Decided — No Notion on pages
 
 ---
 
-# Task 6 — Define and run the generalized rox-core generation skill
+# Task 5 — Sequences & outreach has a domain page and a page per feature
 
-**Satisfies:** R-1, R-2, R-3, R-4.
+**Satisfies:** R-5, R-9, R-2, R-4.
 
 ## User story
 
-As a Devin operator, I want one reusable generation skill that accepts a repository and module
-scope, so that the same documentation process works across every rox-core folder.
+As Marcus, I want a Sequences & outreach domain page and one page per feature that shows the
+feature end to end, so that I can see what each feature stores and how it runs without reading
+the code.
 
 ## Context
 
-The approved plan's second step is a `generate-rox-docs` skill. It must handle the complete
-rox-core tree, including web, k8s, and `.agents/skills`.
+This is the first time the existing page and diagram skills run below the root (PLAN.md,
+Decided: skills unchanged). Its falsifier is whether Marcus can tell from a feature page what
+it stores and how it runs (PLAN.md, Next step 2).
 
 ## Scope
 
 In scope:
-- Skill instructions for discovering folders and source material.
-- Page-model authoring and citation validation.
-- Notion lookup and page rendering.
-- Whole-tree coverage and merge-safe output ownership.
+- One domain page and one page per feature from Task 1's accepted map, authored with
+  generate-rox-docs and the four diagram skills.
+- A "why these files are one feature" section on each feature page, built from the feature
+  map's cited tables and calls.
+- Deciding with Marcus when a feature is a leaf.
+- Linking the domain from the root's left panel.
 
 Out of scope:
-- Slack search.
-- Production usage analysis.
-- Requiring a hosted documentation site.
+- Changing the diagram skills (PLAN.md, Decided).
+- Other domains (Task 6).
+- Notion context (Task 4).
 
 ## Requirements
 
-- The skill can generate pages for any permitted rox-core folder.
-- Generated output passes the same navigation, layout, Notion, and citation checks.
-- The skill has a deterministic ownership rule so parallel work does not overwrite another
-  module's subtree.
+- Each page has every R-2 section in order, and an empty section says so.
+- Every claim, box, arrow, step, transition and relationship is cited at the pinned commit.
+- Each leaf feature page shows every part of its feature that exists: HTTP routes, business
+  logic, background workers, web screens and tables.
+- Each feature page shows the cited tables and calls its files share.
+- Diagrams taken from rox-core docs are checked against code first (PLAN.md, Constraint 2).
+- No block figure has more than five layout problems (PLAN.md, Constraint 4).
+- Each page is regenerated by its own authoring script, byte for byte.
+- Conformance tests for R-9 and R-5's leaf scenario are drafted for Marcus to accept.
 
 ## Acceptance criteria
 
-- Given any in-scope folder, when the skill runs, then it produces or updates that folder's page
-  and the links needed to reach it.
-- Given parallel module generation, when outputs are combined, then no two workers own the same
-  page path.
-- Given generated output, when the conformance suite runs, then R-1 through R-4 pass for the
-  generated scope.
-- Errors and edge cases: unsupported file types, missing source history, failed Notion lookup,
-  and page ownership collisions fail with an actionable error.
+- Given each new page, when it opens offline, then every R-2 section is present in order and
+  every diagram renders.
+- Given each new page, when it is built, then the citation check passes with no uncited or
+  stale element.
+- Given a leaf feature page, when it opens, then its routes, logic, workers, screens and tables
+  appear on it, or the page says which of them the feature has none of.
+- Given a feature page, when it opens, then a section shows the shared tables and calls, each
+  linked to code.
+- Given each block figure, when it is built, then it reports at most five layout problems.
+- Given each authoring script, when it is rerun, then its page JSON is byte-identical.
+- Given the pages, when Marcus reads a feature page, then he can say what it stores and how it
+  runs, and spot checks against the code find no contradiction.
+- Given the drafted `test_r9_*` and R-5 leaf tests, when Marcus accepts them, then they are
+  committed and pass.
+- Errors and edge cases: a feature with no background worker or no web screen shows that
+  section present and saying so, rather than omitting it.
 
 ## Definition of Done
 
 - All acceptance criteria pass.
-- R-1 through R-4 are green for the generated scope.
-- The skill is reviewed and merged.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean).
+- Code is reviewed and merged.
 - Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the site builds locally from the pinned commit.
 - No unresolved critical defects remain.
 
 ## Dependencies and constraints
 
-- Depends on Task 5.
-- The skill lives in rox-dox under `.agents/skills/`.
-- Every folder is eligible; the final grouping policy must preserve navigability for the
-  repository's approximately 3,051 folders.
+- Blocking open question (PLAN.md, Open): when a feature is a leaf; decided with Marcus here.
+- Needs Task 1's accepted feature map, Task 2's tree, Task 3's folder pages and Task 4's
+  layout without the Notion panel.
+- Depends on: Tasks 1, 2, 3, 4 (Wave 3). Unblocks Tasks 6 and 7.
 
 ## Proof of value
 
-**Discharges:** Plan → Next step 2 — whole rox-core tree via the `generate-rox-docs` skill.
+**Discharges:** Plan → Next step 2 — falsifier "Marcus can't tell from a feature page what it
+stores and how it runs, or a spot check contradicts the code."
 
-**Claim:** If every acceptance criterion holds, the approved generation process can be reused
-across the complete rox-core folder tree without losing citations or navigation.
+**Claim:** If every acceptance criterion of this task holds, then neither half of the falsifier
+fires.
 
 **Premises:**
-1. Any in-scope folder can be generated — source: acceptance criterion 1.
-2. Parallel output ownership is disjoint — source: acceptance criterion 2.
-3. Generated output passes all requirements — source: acceptance criterion 3.
+1. Marcus reads a feature page and can say what it stores and how it runs — source: this
+   task's Acceptance criteria.
+2. Spot checks against the code find no contradiction — source: this task's Acceptance
+   criteria.
+3. Every element is cited and the citation check passes — source: this task's Acceptance
+   criteria.
 
 **Argument:**
-1. Folder coverage establishes generality.
-2. Ownership establishes safe parallel execution.
-3. Conformance establishes that reuse preserves the page contract.
-4. Therefore, the skill operationalizes whole-tree generation.
+1. From Premise 1, the first half of the falsifier does not fire.
+2. From Premise 2, the second half does not fire on the spot-checked elements.
+3. From Premise 3, every element not spot-checked still points at real code at the pinned
+   commit.
+4. Therefore neither half of the falsifier fires.
 
-**Attempted counterexample:** A generated page can be structurally valid but semantically wrong.
-The source citation requirement and spot checks reduce this risk but do not prove semantic
-correctness for every narrative sentence.
+**Attempted counterexample:** A cited arrow whose line exists but says something else, on a page
+Marcus didn't spot-check. Premise 3 holds, since the line exists, and the second half of the
+falsifier fires. The citation check catches missing lines, not misread ones. Spot checks
+bound this risk without removing it; not exhaustively searched.
 
-**Falsifier:** A supported folder cannot be generated, or whole-tree output contains an orphan,
-uncited, stale, or contradictory page.
+**Falsifier:** A later reader finds a cited claim that its cited line doesn't support.
 
-**Verdict:** Proved given the approved dependency-based regrouping and skill location.
+**Verdict:** Conditional on spot checks being representative of the pages; the risk is echoed
+here: spot checks sample, they don't prove every element.
 
 ## References
 
-- Design: PLAN.md — Next step 2 and decided model-first architecture.
-- Technical specification: SPEC.md — R-1 through R-4.
-- Related issues: Task 5 — Generate the first three real rox-core pages.
+- Design: PLAN.md — Next step 2, Constraints 2 and 4, Decided
+- Technical specification: SPEC.md — R-2, R-4, R-5, R-9
+- Related issues: Task 1; Task 2; Task 3; Task 4; Task 6 — Every remaining domain has a
+  feature map and pages; Task 7 — One unattended daily run rebuilds the site as a rox-dox PR
 
 ## Delivery
 
 - Owner: TBD
-- Priority: Medium
-- Estimate: TBD
+- Priority: High (inferred)
+- Estimate: about 1 session (PLAN.md, Next step 2, which this task completes with Tasks 2–3)
 - Sprint: TBD
-- Parent epic: Next step 2 — Whole rox-core tree via `generate-rox-docs`
+- Parent epic: Next step 2 — Pages for that domain
+
+---
+
+# Task 6 — Every remaining domain has a feature map and pages
+
+**Satisfies:** R-5, R-6, R-9, R-2, R-4.
+
+## User story
+
+As Marcus, I want every domain grouped into features and documented the way Sequences &
+outreach is, so that I can find any part of rox-core from the root.
+
+## Context
+
+Task 5 proves the procedure on one domain. This task applies it to every other domain the root shows,
+however many there are (PLAN.md, Next step 3), and decides where code that touches no table goes.
+
+## Scope
+
+In scope:
+- Feature maps (Task 1's command) for every other domain, each reviewed by Marcus.
+- Domain and feature pages for each, authored as in Task 5.
+- A home for code that touches no table, if Task 1 shows there is enough of it.
+
+Out of scope:
+- The scheduled run (Task 7).
+- New diagram rules (PLAN.md, Decided).
+
+## Requirements
+
+- The set of domain pages is read from the root's domain grouping at the documented commit,
+  never from a fixed list or count.
+- Every domain has an accepted feature map and pages meeting Task 5's requirements.
+- Every in-scope rox-core file is on a feature page or on the uncovered-files page.
+- Code that touches no table has a decided home, reviewed by Marcus.
+
+## Acceptance criteria
+
+- Given each remaining domain, when its feature map is reviewed, then Marcus accepts it.
+- Given a root grouping with one domain added or removed, when the site is rebuilt, then
+  there is exactly one domain page per domain the root shows.
+- Given each new page, when it is built, then it meets every acceptance criterion of Task 5.
+- Given the whole site, when every in-scope file is checked, then each one is on a feature
+  page or on the uncovered-files page.
+- Given code that touches no table, when the site is built, then it sits where Marcus decided,
+  or on the uncovered-files page.
+- Errors and edge cases: a file claimed by features in two domains appears on both, and the
+  build does not count it twice toward coverage.
+
+## Definition of Done
+
+- All acceptance criteria pass.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean).
+- Code is reviewed and merged.
+- Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, and the site builds locally from the pinned commit.
+- No unresolved critical defects remain.
+
+## Dependencies and constraints
+
+- Blocking open question (PLAN.md, Open): where code that touches no table goes.
+- Open (PLAN.md): whether shared code gets its own page.
+- Assumption carried from the Proof of value: Marcus's spot checks are representative, as in
+  Task 5.
+- Likely an epic of its own: one task per domain if it is split further.
+- Depends on: Task 5 (Wave 4).
+
+## Proof of value
+
+**Discharges:** Plan → Objective — "open the rox-core root, click a domain, then a feature, and
+see that feature end to end".
+
+**Claim:** If every acceptance criterion of this task holds, then every domain's features are
+reachable from the root and documented end to end.
+
+**Premises:**
+1. Every domain has pages meeting Task 5's acceptance criteria — source: this task's
+   Acceptance criteria.
+2. Every in-scope file is on a feature page or on the uncovered-files page — source: this
+   task's Acceptance criteria.
+3. Task 5's proof is Conditional on representative spot checks — source: Proof of Task 5.
+
+**Argument:**
+1. From Premise 1 and Task 2, every domain's features are in the tree under the root.
+2. From Premise 2, no in-scope file is missing from the site.
+3. From Premise 3, the end-to-end accuracy of each page is as strong as Task 5's.
+4. Therefore the objective holds for every domain, at Task 5's strength.
+
+**Attempted counterexample:** A large share of rox-core lands on the uncovered-files page.
+Premise 2 holds, but the objective fails for that code. Marcus's review of each feature map and
+the decided home for table-less code are what catch this.
+
+**Falsifier:** The uncovered-files page grows large across runs as rox-core adds code.
+
+**Verdict:** Conditional on representative spot checks (inherited from Task 5), echoed in
+Dependencies and constraints.
+
+## References
+
+- Design: PLAN.md — Next step 3, Open
+- Technical specification: SPEC.md — R-2, R-4, R-5, R-6, R-9
+- Related issues: Task 1; Task 5; Task 7 — One unattended daily run rebuilds the site as a
+  rox-dox PR
+
+## Delivery
+
+- Owner: TBD
+- Priority: Medium (inferred)
+- Estimate: TBD (PLAN.md gives 1–2 sessions for Next step 3 as a whole)
+- Sprint: TBD
+- Parent epic: Next step 3 — Every domain plus the scheduled run
+
+---
+
+# Task 7 — One unattended daily run rebuilds the site as a rox-dox PR
+
+**Satisfies:** R-8.
+
+## User story
+
+As a daily scheduled Devin run, I want one command and one written procedure that rebuild the
+feature maps and every page at the latest rox-core `main` and open a rox-dox PR from a new
+branch, so that Marcus gets up-to-date docs without asking.
+
+## Context
+
+Every run rebuilds everything from scratch; there is no change detection (PLAN.md, Decided,
+Figure 2). Marcus asked for the output as a PR from a new branch (SPEC.md, R-8).
+
+## Scope
+
+In scope:
+- One command that rebuilds the feature maps, runs every page's authoring step, and builds the
+  site at one named rox-core commit.
+- A skill that tells the scheduled run how to rewrite pages whose cited code changed, using
+  generate-rox-docs.
+- A schedule that runs it daily at 00:00 UTC and opens a rox-dox PR from a new branch.
+- No PR when any page fails, with the failing pages named.
+
+Out of scope:
+- Regenerating only changed pages (PLAN.md, Out of scope).
+- Running per rox-core PR (PLAN.md, Out of scope).
+- Merging the PR, which stays Marcus's.
+
+## Requirements
+
+- A run pins one rox-core commit, the latest `main` at its start, and every page names it.
+- A successful run opens one rox-dox PR from a new branch carrying the rebuilt site.
+- A run with any failing page opens no PR and reports every failing page.
+- The schedule runs daily at 00:00 UTC with no human step before the PR.
+- Conformance tests for R-8 are drafted for Marcus to accept.
+
+## Acceptance criteria
+
+- Given the latest rox-core `main`, when a run finishes, then a new rox-dox PR exists from a new
+  branch and every page in it names the same commit.
+- Given a run in which one page fails its build, when it ends, then no PR is opened and the
+  failing page is named.
+- Given the schedule, when 00:00 UTC passes, then a run starts and finishes with no human step.
+- Given the drafted `test_r8_*` conformance tests, when Marcus accepts them, then they are
+  committed and pass.
+- Errors and edge cases: a stale citation after rox-core changes is rewritten from the new code
+  by the run, or the page fails and is named, never published stale.
+
+## Definition of Done
+
+- All acceptance criteria pass.
+- Every requirement in `Satisfies` is ✅ in the spec's conformance table, with the
+  conformance suite unchanged (`git diff --exit-code` over it is clean).
+- Code is reviewed and merged.
+- Appropriate automated and manual tests pass.
+- Accessibility, security, and performance requirements are met.
+- Documentation, analytics, and release notes are updated where applicable.
+- The change is merged to rox-dox `main`, the daily schedule is active, and its first run has
+  opened a rox-dox PR.
+- No unresolved critical defects remain.
+
+## Dependencies and constraints
+
+- The run pushes to marcus-rox/rox-dox with the repo's personal token, since the org GitHub
+  integration can't reach it.
+- Assumption carried from the Proof of value: an agent-written page that passes the build is
+  correct as often as a Task 5 page, with no spot check per run.
+- Depends on: Task 5 (Wave 4).
+
+## Proof of value
+
+**Discharges:** Plan → Next step 3 — falsifier "an unattended run fails, or spot-checked pages
+are wrong."
+
+**Claim:** If every acceptance criterion of this task holds, then unattended runs succeed and
+publish only pages that passed their build.
+
+**Premises:**
+1. A daily run starts and finishes with no human step — source: this task's Acceptance
+   criteria.
+2. A run with a failing page opens no PR and names the page — source: this task's Acceptance
+   criteria.
+3. Pages that pass the build are as accurate as Task 5's — source: Assumption (unverified).
+
+**Argument:**
+1. From Premise 1, the "unattended run fails" half does not fire on a healthy run.
+2. From Premise 2, a failing run publishes nothing wrong and says why.
+3. From Premise 3, spot checks of a published PR should find pages as accurate as Task 5's.
+4. Therefore the falsifier fires only if Premise 3 is false.
+
+**Attempted counterexample:** rox-core renames a service; the run rewrites a figure with the new
+name but keeps an arrow whose cited line still exists with a changed meaning. The build passes
+and the page is wrong, which is why Premise 3 is an assumption.
+
+**Falsifier:** Marcus spot-checks a run's PR and finds pages wrong.
+
+**Verdict:** Conditional on Premise 3, echoed in Dependencies and constraints.
+
+## References
+
+- Design: PLAN.md — Next step 3, Decided, Figure 2
+- Technical specification: SPEC.md — R-8
+- Related issues: Task 5; Task 6 — Every remaining domain has a feature map and pages
+
+## Delivery
+
+- Owner: TBD
+- Priority: Medium (inferred)
+- Estimate: TBD (PLAN.md gives 1–2 sessions for Next step 3 as a whole)
+- Sprint: TBD
+- Parent epic: Next step 3 — Every domain plus the scheduled run
