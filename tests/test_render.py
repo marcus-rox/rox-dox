@@ -626,7 +626,7 @@ def test_block_sources_table_includes_group_and_detail_citations(
     assert f'<a href="{detail_url}">Source</a>' in block_html
 
 
-def test_explorer_shows_documented_pages_and_pending_repository_entries(
+def test_explorer_links_folders_and_repository_files(
     page_data: dict[str, object],
     plantuml_jar: Path,
 ) -> None:
@@ -671,39 +671,53 @@ def test_explorer_shows_documented_pages_and_pending_repository_entries(
         re.DOTALL,
     )
     assert site_nav is not None
-    nav_html = site_nav.group(1)
-    rows = []
-    for match in re.finditer(
-        r'<a class="row ([^"]+)" href="([^"]+)"[^>]*>(.*?)</a>',
-        nav_html,
+    explorer = re.search(
+        r'<nav id="explorer" aria-label="Repository explorer">(.*?)</nav>',
+        document,
         re.DOTALL,
-    ):
-        label = re.search(r"<span>(.*?)</span>", match.group(3), re.DOTALL)
-        assert label is not None
-        rows.append((match.group(1), match.group(2), label.group(1)))
+    )
+    assert explorer is not None
+
+    def nav_rows(nav_html: str) -> list[tuple[str, str, str]]:
+        rows = []
+        for match in re.finditer(
+            r'<a class="row ([^"]+)" href="([^"]+)"[^>]*>(.*?)</a>',
+            nav_html,
+            re.DOTALL,
+        ):
+            label = re.search(r"<span>(.*?)</span>", match.group(3), re.DOTALL)
+            assert label is not None
+            rows.append((match.group(1), match.group(2), label.group(1)))
+        return rows
+
+    page_rows = nav_rows(site_nav.group(1))
+    explorer_html = explorer.group(1)
+    explorer_rows = nav_rows(explorer_html)
 
     assert any(
         "page" in classes and href == page_href(root.id, child.id) and label == "pkg"
-        for classes, href, label in rows
+        for classes, href, label in page_rows
+    )
+    assert 'aria-current="page"' in site_nav.group(1)
+    assert any(
+        "folder" in classes and href == "folders/pkg.html" and label == "pkg"
+        for classes, href, label in explorer_rows
     )
     assert any(
-        "pending" in classes
-        and href == f"{REPO_URL}/tree/{root.commit}/models"
-        and label == "models"
-        for classes, href, label in rows
+        "folder" in classes and href == "folders/models.html" and label == "models"
+        for classes, href, label in explorer_rows
     )
     assert any(
         "file" in classes
         and href == f"{REPO_URL}/blob/{root.commit}/README.md"
         and label == "README.md"
-        for classes, href, label in rows
+        for classes, href, label in explorer_rows
     )
-    assert 'aria-current="page"' in nav_html
     folder_positions = [
-        nav_html.index(f"<span>{label}</span>") for label in ("pkg", "models")
+        explorer_html.index(f"<span>{label}</span>") for label in ("pkg", "models")
     ]
     file_positions = [
-        nav_html.index(f"<span>{label}</span>")
+        explorer_html.index(f"<span>{label}</span>")
         for label in ("README.md", "pyproject.toml")
     ]
     assert max(folder_positions) < min(file_positions)

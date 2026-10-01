@@ -58,7 +58,7 @@ def test_build_writes_complete_page_under_page_id_path(
 
     output_file = output_dir / "domain/root.html"
     assert exit_code == 0
-    assert "1 pages written to" in capsys.readouterr().out
+    assert "6 pages written to" in capsys.readouterr().out
     assert output_file.is_file()
     document = output_file.read_text(encoding="utf-8")
     assert re.search(r'<section id="tldr">', document)

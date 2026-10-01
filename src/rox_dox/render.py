@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import posixpath
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
@@ -121,7 +122,7 @@ body {
   flex-direction: column;
   gap: 0.75rem;
 }
-#toc, #site-nav, #context {
+#toc, #site-nav, #explorer, #context {
   padding: 1rem;
   border: 1px solid #e2e7ee;
   border-radius: 14px;
@@ -131,6 +132,11 @@ body {
   flex: 0 0 auto;
 }
 #site-nav {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+#explorer {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -142,7 +148,7 @@ body {
   max-height: 100vh;
   overflow-y: auto;
 }
-#toc > h2, #site-nav > h2, #context > h2 {
+#toc > h2, #site-nav > h2, #explorer > h2, #context > h2 {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;
 }
@@ -275,6 +281,11 @@ h1, h2, h3 {
 }
 .submodules {
   margin: 0.5rem 0 0;
+}
+.repo-tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 section {
   margin: 1rem 0;
@@ -579,9 +590,21 @@ def _table_html(page: Page, *, repo_url: str) -> str:
     headings = "".join(
         f'<th scope="col">{_escape(column)}</th>' for column in table.columns
     )
+    links = {(link.row, link.column): link.page for link in table.links}
     rows = "".join(
-        "<tr>" + "".join(f"<td>{_escape(cell)}</td>" for cell in row) + "</tr>"
-        for row in table.rows
+        "<tr>"
+        + "".join(
+            "<td>"
+            + (
+                _anchor(page_href(page.id, links[(row_index, column_index)]), cell)
+                if (row_index, column_index) in links
+                else _escape(cell)
+            )
+            + "</td>"
+            for column_index, cell in enumerate(row)
+        )
+        + "</tr>"
+        for row_index, row in enumerate(table.rows)
     )
     citations = _citation_links(table.sources, page=page, repo_url=repo_url)
     return (
@@ -1056,59 +1079,55 @@ def _sort_key(item: tuple[bool, str, str]) -> tuple[int, str]:
     return (0 if is_dir else 1, label.lower())
 
 
+def _relative_href(current_path: str, target_path: str) -> str:
+    return quote(
+        posixpath.relpath(target_path, posixpath.dirname(current_path) or "."),
+        safe="/",
+    )
+
+
+def _folder_target(folder_path: str) -> str:
+    return "folders/index.html" if folder_path == "." else f"folders/{folder_path}.html"
+
+
 def _tree_item(
     tree: SiteTree,
-    current: Page,
     page_id: str,
     *,
+    current_page_id: str | None,
+    current_path: str,
     expanded_ids: set[str],
-    entries: Mapping[str, Sequence[RepoEntry]],
-    repo_url: str,
 ) -> str:
     page = tree.pages[page_id]
-    css_class = "page current" if page_id == current.id else "page"
+    css_class = "page current" if page_id == current_page_id else "page"
+    child_ids = tree.children_of(page_id)
+    icon = CHEVRON_ICON + FOLDER_ICON if child_ids else SPACER_ICON + FOLDER_ICON
     row = _explorer_row(
-        CHEVRON_ICON + FOLDER_ICON,
+        icon,
         page.title,
-        page_href(current.id, page_id),
+        _relative_href(current_path, f"{page_id}.html"),
         css_class,
     )
-    child_ids = tree.children_of(page_id)
-    documented_paths = {
-        path for child_id in child_ids for path in tree.pages[child_id].paths
-    }
     items: list[tuple[bool, str, str]] = [
         (
             True,
             tree.pages[child_id].title,
             _tree_item(
                 tree,
-                current,
                 child_id,
+                current_page_id=current_page_id,
+                current_path=current_path,
                 expanded_ids=expanded_ids,
-                entries=entries,
-                repo_url=repo_url,
             ),
         )
         for child_id in child_ids
     ]
-    for entry in entries.get(page_id, []):
-        if entry.path in documented_paths:
-            continue
-        href = _entry_href(entry, page=current, repo_url=repo_url)
-        if entry.is_dir:
-            markup = _explorer_row(
-                SPACER_ICON + FOLDER_ICON,
-                entry.name,
-                href,
-                "folder pending",
-                "No page yet",
-            )
-        else:
-            markup = _explorer_row(SPACER_ICON + FILE_ICON, entry.name, href, "file")
-        items.append((entry.is_dir, entry.name, f"<li>{markup}</li>"))
     if not items:
-        return f"<li>{row}</li>"
+        open_attribute = " open" if page_id in expanded_ids else ""
+        return (
+            f"<li><details{open_attribute}><summary>{row}</summary>"
+            "<ul></ul></details></li>"
+        )
     open_attribute = " open" if page_id in expanded_ids else ""
     children = "".join(
         markup for _is_dir, _label, markup in sorted(items, key=_sort_key)
@@ -1121,24 +1140,103 @@ def _tree_item(
 
 def _site_nav_html(
     tree: SiteTree,
-    page: Page,
     *,
-    entries: Mapping[str, Sequence[RepoEntry]],
-    repo_url: str,
+    current_path: str,
+    current_page_id: str | None,
 ) -> str:
-    expanded_ids = {tree.root, page.id, *tree.ancestors(page.id)}
+    expanded_ids = {tree.root}
+    if current_page_id is not None:
+        expanded_ids.update({current_page_id, *tree.ancestors(current_page_id)})
     root_item = _tree_item(
         tree,
-        page,
         tree.root,
+        current_page_id=current_page_id,
+        current_path=current_path,
         expanded_ids=expanded_ids,
-        entries=entries,
-        repo_url=repo_url,
     )
     return (
         '<nav id="site-nav" aria-label="Site navigation">'
-        "<h2>Explorer</h2>"
+        "<h2>Features</h2>"
         f'<ul class="page-tree">{root_item}</ul></nav>'
+    )
+
+
+def _explorer_html(
+    root_page: Page,
+    *,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    current_path: str,
+    repo_url: str,
+    folders_only: bool = False,
+    folder_path: str | None = None,
+    child_folders: Sequence[tuple[str, str]] = (),
+) -> str:
+    items: list[tuple[bool, str, str]] = []
+    if folder_path is not None:
+        if folder_path != ".":
+            parent = posixpath.dirname(folder_path) or "."
+            href = _relative_href(current_path, _folder_target(parent))
+            markup = _explorer_row(
+                SPACER_ICON + FOLDER_ICON,
+                "..",
+                href,
+                "folder",
+            )
+            items.append(
+                (
+                    True,
+                    "..",
+                    f"<li>{markup}</li>",
+                )
+            )
+        folders = (
+            child_folders
+            if folder_path != "."
+            else [
+                (entry.name, entry.path)
+                for entry in entries.get(root_page.id, [])
+                if entry.is_dir
+            ]
+        )
+        for name, path in folders:
+            href = _relative_href(current_path, _folder_target(path))
+            items.append(
+                (
+                    True,
+                    name,
+                    f"<li>{_explorer_row(SPACER_ICON + FOLDER_ICON, name, href, 'folder')}</li>",
+                )
+            )
+        content = "".join(markup for _, _, markup in sorted(items, key=_sort_key))
+        if not content:
+            content = '<li class="empty">No subfolders.</li>'
+        return (
+            '<nav id="explorer" aria-label="Repository explorer">'
+            "<h2>Explorer</h2>"
+            f'<ul class="repo-tree">{content}</ul></nav>'
+        )
+    for entry in entries.get(root_page.id, []):
+        if folders_only and not entry.is_dir:
+            continue
+        if entry.is_dir:
+            href = _relative_href(current_path, _folder_target(entry.path))
+            markup = _explorer_row(
+                SPACER_ICON + FOLDER_ICON,
+                entry.name,
+                href,
+                "folder",
+            )
+        else:
+            href = _entry_href(entry, page=root_page, repo_url=repo_url)
+            markup = _explorer_row(SPACER_ICON + FILE_ICON, entry.name, href, "file")
+        items.append((entry.is_dir, entry.name, f"<li>{markup}</li>"))
+    content = "".join(markup for _, _, markup in sorted(items, key=_sort_key))
+    if not content:
+        content = '<li class="empty">No repository entries.</li>'
+    return (
+        '<nav id="explorer" aria-label="Repository explorer">'
+        "<h2>Explorer</h2>"
+        f'<ul class="repo-tree">{content}</ul></nav>'
     )
 
 
@@ -1188,6 +1286,64 @@ def _context_panel_html(page: Page) -> str:
     )
 
 
+def _panel_controls_html() -> str:
+    return (
+        '<div class="panel-controls">'
+        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
+        '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
+        '<label class="panel-toggle-button panel-toggle-right" for="toggle-right">'
+        '<span class="expanded">Panel ▶</span><span class="collapsed">Panel ◀</span></label>'
+        "</div>"
+    )
+
+
+def _document_shell(
+    title: str,
+    main_content: str,
+    *,
+    tree: SiteTree,
+    root_page: Page,
+    context_page: Page,
+    current_path: str,
+    current_page_id: str | None,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+    folders_only: bool = False,
+    folder_path: str | None = None,
+    child_folders: Sequence[tuple[str, str]] = (),
+) -> str:
+    sidebar = (
+        _table_of_contents()
+        + _site_nav_html(
+            tree,
+            current_path=current_path,
+            current_page_id=current_page_id,
+        )
+        + _explorer_html(
+            root_page,
+            entries=entries,
+            current_path=current_path,
+            repo_url=repo_url,
+            folders_only=folders_only,
+            folder_path=folder_path,
+            child_folders=child_folders,
+        )
+    )
+    document = (
+        "<!doctype html>\n"
+        '<html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        f"<title>{_escape(title)}</title>"
+        f"<style>{PAGE_CSS}</style></head>"
+        f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
+        f'<input class="panel-toggle" id="toggle-right" type="checkbox">'
+        f'<div class="page-shell"><div id="sidebar">{sidebar}</div>'
+        f'<main class="page-main">{_panel_controls_html()}{main_content}</main>'
+        f"{_context_panel_html(context_page)}</div></body></html>"
+    )
+    return _offline_html(document)
+
+
 def render_page(
     page: Page,
     *,
@@ -1198,6 +1354,7 @@ def render_page(
     entries: Mapping[str, Sequence[RepoEntry]] = NO_ENTRIES,
 ) -> str:
     emit_diagram_warnings(page)
+    root_page = tree.pages[tree.root]
     page_header = _page_header_html(tree, page)
     sections = "".join(
         [
@@ -1209,24 +1366,162 @@ def render_page(
             _state_section(page, repo_url=repo_url, jar=jar),
         ]
     )
-    document = (
-        "<!doctype html>\n"
-        '<html lang="en"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        f"<title>{_escape(page.title)}</title>"
-        f"<style>{PAGE_CSS}</style></head>"
-        f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
-        f'<input class="panel-toggle" id="toggle-right" type="checkbox">'
-        f'<div class="page-shell"><div id="sidebar">'
-        f"{_table_of_contents()}"
-        f"{_site_nav_html(tree, page, entries=entries, repo_url=repo_url)}</div>"
-        f'<main class="page-main"><div class="panel-controls">'
-        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
-        '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
-        '<label class="panel-toggle-button panel-toggle-right" for="toggle-right">'
-        '<span class="expanded">Panel ▶</span><span class="collapsed">Panel ◀</span></label>'
-        f"</div>{_breadcrumbs_html(tree, page)}"
-        f"{page_header}{sections}</main>"
-        f"{_context_panel_html(page)}</div></body></html>"
+    main_content = _breadcrumbs_html(tree, page) + page_header + sections
+    return _document_shell(
+        page.title,
+        main_content,
+        tree=tree,
+        root_page=root_page,
+        context_page=page,
+        current_path=f"{page.id}.html",
+        current_page_id=page.id,
+        entries=entries,
+        repo_url=repo_url,
     )
-    return _offline_html(document)
+
+
+def render_folder_page(
+    *,
+    folder_path: str,
+    tree: SiteTree,
+    root_page: Page,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+    feature_rows: Sequence[tuple[str, str, str, str, int, int, int]],
+    uncovered_count: int,
+    child_folders: Sequence[tuple[str, str]],
+    tests_only: bool,
+) -> str:
+    current_path = _folder_target(folder_path)
+    folder_label = folder_path
+    rows = "".join(
+        "<tr>"
+        f"<td>{_anchor(_relative_href(current_path, f'{feature_id}.html'), feature_title)}</td>"
+        f"<td>{_anchor(_relative_href(current_path, f'{domain_id}.html'), domain_title)}</td>"
+        f"<td>{files}</td><td>{primary}</td><td>{shared}</td>"
+        "</tr>"
+        for (
+            feature_title,
+            feature_id,
+            domain_title,
+            domain_id,
+            files,
+            primary,
+            shared,
+        ) in feature_rows
+    )
+    if not rows:
+        rows = '<tr><td colspan="5" class="empty">No feature pages cover files here.</td></tr>'
+    feature_table = (
+        '<div class="table-scroll"><table><thead><tr>'
+        "<th>Feature</th><th>Domain</th><th>Files</th><th>Primary</th><th>Shared</th>"
+        f"</tr></thead><tbody>{rows}</tbody></table></div>"
+    )
+    child_links = "".join(
+        f"<li>{_anchor(_relative_href(current_path, _folder_target(path)), name)}</li>"
+        for name, path in child_folders
+    )
+    child_section = (
+        f"<section><h2>Subfolders</h2><ul>{child_links}</ul></section>"
+        if child_links
+        else ""
+    )
+    test_note = (
+        '<p class="empty">Tests and migrations are not documented.</p>'
+        if tests_only
+        else ""
+    )
+    main_content = (
+        '<header class="page-header"><h1>Repository folder</h1>'
+        f"<p><code>{_escape(folder_label)}</code></p></header>"
+        f"<section><h2>Feature coverage</h2>{feature_table}</section>"
+        f"<section><h2>Uncovered files</h2><p>{uncovered_count} in-scope files "
+        f"{_anchor(_relative_href(current_path, 'uncovered.html'), 'listed in the uncovered inventory')}.</p>"
+        f"{test_note}</section>{child_section}"
+    )
+    folder_context = root_page.model_copy(update={"notion": []})
+    return _document_shell(
+        f"Folder: {folder_label}",
+        main_content,
+        tree=tree,
+        root_page=root_page,
+        context_page=folder_context,
+        current_path=current_path,
+        current_page_id=None,
+        entries=entries,
+        repo_url=repo_url,
+        folders_only=True,
+        folder_path=folder_path,
+        child_folders=child_folders,
+    )
+
+
+def render_uncovered_page(
+    *,
+    tree: SiteTree,
+    root_page: Page,
+    entries: Mapping[str, Sequence[RepoEntry]],
+    repo_url: str,
+    uncovered: Mapping[str, Sequence[tuple[str, str]]],
+    map_reports: Sequence[tuple[str, Sequence[tuple[str, str]]]],
+) -> str:
+    current_path = "uncovered.html"
+    grouped: dict[str, list[str]] = {}
+    for path in sorted(uncovered):
+        top = path.split("/", 1)[0]
+        grouped.setdefault(top, []).append(path)
+    groups = []
+    for top, paths in sorted(grouped.items()):
+        items = "".join(
+            "<li><code>"
+            + _escape(path)
+            + "</code>"
+            + (
+                " — "
+                + _escape(
+                    "; ".join(
+                        f"{domain}: {reason}" for domain, reason in uncovered[path]
+                    )
+                )
+                if uncovered[path]
+                else ""
+            )
+            + "</li>"
+            for path in paths
+        )
+        groups.append(
+            f"<details><summary>{_escape(top)} — {len(paths)} files</summary>"
+            f"<ul>{items}</ul></details>"
+        )
+    map_details = []
+    for domain, files in map_reports:
+        items = "".join(
+            f"<li><code>{_escape(path)}</code> — {_escape(reason)}</li>"
+            for path, reason in files
+        )
+        if not items:
+            items = '<li class="empty">No map-specific uncovered entries.</li>'
+        map_details.append(
+            f"<details><summary>{_escape(domain)} map — {len(files)} uncovered entries</summary>"
+            f"<ul>{items}</ul></details>"
+        )
+    global_items = "".join(groups) or '<p class="empty">No uncovered files.</p>'
+    main_content = (
+        '<header class="page-header"><h1>Uncovered files</h1>'
+        f"<p>{len(uncovered)} unique in-scope files are not placed on any feature page.</p></header>"
+        f"<section><h2>Global inventory</h2>{global_items}</section>"
+        f"<section><h2>Per-map reasons</h2>{''.join(map_details)}</section>"
+    )
+    inventory_context = root_page.model_copy(update={"notion": []})
+    return _document_shell(
+        "Uncovered files",
+        main_content,
+        tree=tree,
+        root_page=root_page,
+        context_page=inventory_context,
+        current_path=current_path,
+        current_page_id=None,
+        entries=entries,
+        repo_url=repo_url,
+        folders_only=True,
+    )
