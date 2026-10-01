@@ -214,7 +214,8 @@ s_teams_queue = S(
 domain_groups = [
     {"id": "callers", "label": "Callers", "source": s_web_list},
     {"id": "services", "label": "HTTP services", "source": s_interaction},
-    {"id": "async", "label": "Workflows + queues", "source": s_calendar_workflow},
+    {"id": "workflows", "label": "Workflows", "source": s_calendar_workflow},
+    {"id": "queues", "label": "Queues", "source": s_integration_queues},
     {
         "id": "background-workers",
         "label": "Background workers",
@@ -285,7 +286,7 @@ domain_nodes = [
     N(
         "temporal",
         "Temporal sync workflows",
-        "async",
+        "workflows",
         s_calendar_workflow,
         [
             D(
@@ -302,7 +303,7 @@ domain_nodes = [
     N(
         "sqs",
         "SQS queues",
-        "async",
+        "queues",
         s_integration_queues,
         [
             D(
@@ -468,7 +469,8 @@ s_microsoft_graph = S(BMC, 'BASE_GRAPH_URL = "https://graph.microsoft.com/v1.0"'
 feature_groups = [
     {"id": "callers", "label": "Callers", "source": s_settings},
     {"id": "services", "label": "HTTP services", "source": s_integration_route},
-    {"id": "async", "label": "Workflows + queues", "source": s_calendar_workflow},
+    {"id": "workflows", "label": "Workflows", "source": s_calendar_workflow},
+    {"id": "queues", "label": "Queues", "source": s_feature_queues},
     {
         "id": "background-workers",
         "label": "Background workers",
@@ -515,7 +517,7 @@ feature_nodes = [
     N(
         "temporal",
         "Temporal sync workflows",
-        "async",
+        "workflows",
         s_calendar_workflow,
         [
             D("CalendarInitialSync, EmailInitialSync", s_calendar_workflow),
@@ -526,7 +528,7 @@ feature_nodes = [
     N(
         "sqs",
         "SQS integration queues",
-        "async",
+        "queues",
         s_feature_queues,
         [
             D(

@@ -3,8 +3,8 @@
 Top-level groups become columns, read left to right. Nested groups become
 labelled sections inside their column. Edges leave a card on its right side
 and enter the target on its left side, routed orthogonally through the gutters
-between columns; edges that skip columns or point backwards travel along a
-shared channel below the columns.
+between columns. Forward skips use a clear corridor where possible, with
+same-column, backward, and blocked skips using a shared channel below.
 """
 
 from __future__ import annotations
@@ -458,14 +458,12 @@ def _layout(
     gutter_count = len(columns) + 1
     lanes: list[list[Edge]] = [[] for _ in range(gutter_count)]
     entry_labels: list[float] = [0.0] * gutter_count
-    channel_edges = []
     for edge in edges:
         exit_gutter = endpoint_column[edge.src] + 1
         entry_gutter = endpoint_column[edge.dst]
         lanes[exit_gutter].append(edge)
         if exit_gutter != entry_gutter:
             lanes[entry_gutter].append(edge)
-            channel_edges.append(edge)
         entry_labels[entry_gutter] = max(
             entry_labels[entry_gutter], _label_width(edge.label)
         )
@@ -571,6 +569,63 @@ def _layout(
                 gutter_lefts[gutter] + LANE_MARGIN + index * LANE_STEP
             )
 
+    corridor_y: dict[int, float] = {}
+    chosen_corridors: list[tuple[int, int, float]] = []
+    corridor_top = TOP_MARGIN + COLUMN_CAPTION_HEIGHT
+    for edge in edges:
+        exit_gutter = endpoint_column[edge.src] + 1
+        entry_gutter = endpoint_column[edge.dst]
+        if exit_gutter >= entry_gutter:
+            continue
+
+        crossed_columns = columns[exit_gutter:entry_gutter]
+        blocked_bands = [
+            (card.y - LANE_STEP, card.y + card.height + LANE_STEP)
+            for column in crossed_columns
+            for card in column.cards
+        ]
+        blocked_bands.extend(
+            (section.y - LANE_STEP, section.y + section.height + LANE_STEP)
+            for column in crossed_columns
+            for section in column.sections
+        )
+        start_y = starts[id(edge)][1]
+        end_y = ends[id(edge)][1]
+        midpoint = (start_y + end_y) / 2
+        band_edges = [
+            candidate
+            for band_top, band_bottom in blocked_bands
+            for candidate in (band_top - 1, band_bottom + 1)
+        ]
+        candidates = [
+            start_y,
+            end_y,
+            *sorted(band_edges, key=lambda candidate: abs(candidate - midpoint)),
+        ]
+        for candidate in candidates:
+            if not corridor_top <= candidate <= columns_bottom:
+                continue
+            if any(
+                band_top <= candidate <= band_bottom
+                for band_top, band_bottom in blocked_bands
+            ):
+                continue
+            if any(
+                max(exit_gutter, other_exit) <= min(entry_gutter, other_entry)
+                and abs(candidate - other_y) < LANE_STEP
+                for other_exit, other_entry, other_y in chosen_corridors
+            ):
+                continue
+            corridor_y[id(edge)] = candidate
+            chosen_corridors.append((exit_gutter, entry_gutter, candidate))
+            break
+
+    channel_edges = [
+        edge
+        for edge in edges
+        if endpoint_column[edge.src] + 1 != endpoint_column[edge.dst]
+        and id(edge) not in corridor_y
+    ]
     channel_y = {
         id(edge): channel_top + index * CHANNEL_STEP
         for index, edge in enumerate(channel_edges)
@@ -583,11 +638,24 @@ def _layout(
         start = starts[id(edge)]
         end = ends[id(edge)]
         first_lane = lane_x[(exit_gutter, id(edge))]
+        via_channel = False
         if exit_gutter == entry_gutter:
             points = [start, (first_lane, start[1]), (first_lane, end[1]), end]
+        elif exit_gutter < entry_gutter and id(edge) in corridor_y:
+            last_lane = lane_x[(entry_gutter, id(edge))]
+            lane_y = corridor_y[id(edge)]
+            points = [
+                start,
+                (first_lane, start[1]),
+                (first_lane, lane_y),
+                (last_lane, lane_y),
+                (last_lane, end[1]),
+                end,
+            ]
         else:
             last_lane = lane_x[(entry_gutter, id(edge))]
             bus = channel_y[id(edge)]
+            via_channel = True
             points = [
                 start,
                 (first_lane, start[1]),
@@ -602,7 +670,7 @@ def _layout(
                 points=points,
                 label_x=end[0] - 8,
                 label_y=end[1] - 5,
-                via_channel=len(points) > 4,
+                via_channel=via_channel,
             )
         )
 
@@ -619,6 +687,8 @@ MAX_LAYOUT_PROBLEMS = 5
 
 
 def block_layout_problems(diagram: BlockDiagram) -> list[str]:
+    _, _, routes, _, _ = _layout(diagram)
+    channel_edges = {id(route.edge) for route in routes if route.via_channel}
     top_level_groups = [group for group in diagram.groups if group.parent is None]
     groups_by_id = {group.id: group for group in diagram.groups}
     top_level_column = {group.id: index for index, group in enumerate(top_level_groups)}
@@ -640,14 +710,15 @@ def block_layout_problems(diagram: BlockDiagram) -> list[str]:
     endpoint_column = {**node_column, **group_column}
     problems = []
     for edge in diagram.edges:
+        if id(edge) not in channel_edges:
+            continue
         source_column = endpoint_column[edge.src]
         target_column = endpoint_column[edge.dst]
-        if target_column != source_column + 1:
-            problems.append(
-                f"{edge.src} -> {edge.dst} (columns {source_column} -> "
-                f"{target_column}; expected {source_column} -> "
-                f"{source_column + 1})"
-            )
+        problems.append(
+            f"{edge.src} -> {edge.dst} (columns {source_column} -> "
+            f"{target_column}; expected {source_column} -> "
+            f"{source_column + 1})"
+        )
     return problems
 
 
