@@ -674,3 +674,16 @@ def test_relation_source_is_enumerated_for_citation_checks(
         "relation sessions.user_id -> users.id",
         page.data.relations[0].source,
     ) in page_sources(page)
+
+
+def test_page_block_note_source_is_enumerated_for_citation_checks(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [4, 5]}
+    payload["block"]["notes"] = [
+        {"text": "Runtime flow note.", "sources": [source]}
+    ]
+    page = Page.model_validate(payload)
+
+    assert ("block note 1", page.block.notes[0].sources[0]) in page_sources(page)

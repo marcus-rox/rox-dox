@@ -864,3 +864,35 @@ def test_feature_tree_expands_current_path_and_labels_children(
     )
     assert "<strong>Domains:</strong>" in root_document
     assert "<strong>Features:</strong>" in domain_document
+
+
+def test_page_block_diagram_renders_notes_and_cited_sources(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [4, 5]}
+    payload["block"]["notes"] = [
+        {"text": "Runtime flow note.", "sources": [source]}
+    ]
+    payload["data"]["sql_tables"] = []
+    payload["data"]["nosql"] = []
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    figure = document.split('id="block-figure"', maxsplit=1)[1].split(
+        "</article>", maxsplit=1
+    )[0]
+    assert figure.index("block-scroll") < figure.index("Runtime flow note.")
+    assert "block note 1" in figure
+    assert source_url(
+        page.block.notes[0].sources[0],
+        repo_url=REPO_URL,
+        commit=page.commit,
+    ) in figure

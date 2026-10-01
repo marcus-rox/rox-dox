@@ -1,0 +1,673 @@
+{
+  "id": "feature-activity-integration",
+  "title": "Integration connections & sync",
+  "kind": "feature",
+  "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+  "parent": "domain-activity",
+  "paths": [
+    "backend/src/rox_core/api/integrations"
+  ],
+  "tldr": {
+    "summary": [
+      {
+        "text": "1 connect → 2 save integration and start sync → 3 Temporal enqueues extraction chunks → 4 SQS workers update status and fetch provider events.",
+        "sources": [
+          {
+            "path": "backend/src/rox_core/api/integrations/endpoints.py",
+            "lines": [
+              249,
+              249
+            ]
+          },
+          {
+            "path": "backend/src/rox_core/api/integrations/business.py",
+            "lines": [
+              1675,
+              1675
+            ]
+          },
+          {
+            "path": "backend/src/rox_core/api/integrations/business.py",
+            "lines": [
+              1995,
+              1995
+            ]
+          },
+          {
+            "path": "backend/src/temporal/activities/calendar_sync/enqueue_chunk.py",
+            "lines": [
+              72,
+              72
+            ]
+          },
+          {
+            "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+            "lines": [
+              462,
+              462
+            ]
+          },
+          {
+            "path": "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+            "lines": [
+              38,
+              38
+            ]
+          }
+        ]
+      }
+    ],
+    "key_points": [],
+    "table": {
+      "columns": [
+        "component",
+        "role"
+      ],
+      "rows": [
+        [
+          "web app",
+          "Callers"
+        ],
+        [
+          "Google / Microsoft OAuth",
+          "Callers"
+        ],
+        [
+          "INTERACTION /integrations",
+          "HTTP services"
+        ],
+        [
+          "Temporal sync workflows",
+          "Workflows + queues"
+        ],
+        [
+          "SQS integration queues",
+          "Workflows + queues"
+        ],
+        [
+          "Integration workers",
+          "Background workers"
+        ],
+        [
+          "PostgreSQL",
+          "Stores"
+        ],
+        [
+          "Google / Microsoft APIs",
+          "Provider APIs"
+        ]
+      ],
+      "sources": [
+        {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            616,
+            616
+          ]
+        },
+        {
+          "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+          "lines": [
+            295,
+            295
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            447,
+            704
+          ]
+        },
+        {
+          "path": "backend/src/temporal/workflows/calendar_initial_sync.py",
+          "lines": [
+            124,
+            124
+          ]
+        },
+        {
+          "path": "backend/src/tasks/types.py",
+          "lines": [
+            1124,
+            1134
+          ]
+        },
+        {
+          "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+          "lines": [
+            103,
+            103
+          ]
+        },
+        {
+          "path": "backend/src/rox_core/models/integration.py",
+          "lines": [
+            117,
+            117
+          ]
+        },
+        {
+          "path": "backend/src/ext_integrations/calendar_integration/base_google_calendar.py",
+          "lines": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    "notes": []
+  },
+  "block": {
+    "groups": [
+      {
+        "id": "callers",
+        "label": "Callers",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            616,
+            616
+          ]
+        }
+      },
+      {
+        "id": "services",
+        "label": "HTTP services",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            447,
+            704
+          ]
+        }
+      },
+      {
+        "id": "async",
+        "label": "Workflows + queues",
+        "source": {
+          "path": "backend/src/temporal/workflows/calendar_initial_sync.py",
+          "lines": [
+            124,
+            124
+          ]
+        }
+      },
+      {
+        "id": "background-workers",
+        "label": "Background workers",
+        "source": {
+          "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+          "lines": [
+            103,
+            103
+          ]
+        }
+      },
+      {
+        "id": "stores",
+        "label": "Stores",
+        "source": {
+          "path": "backend/src/rox_core/models/integration.py",
+          "lines": [
+            117,
+            117
+          ]
+        }
+      },
+      {
+        "id": "provider-apis",
+        "label": "Provider APIs",
+        "source": {
+          "path": "backend/src/ext_integrations/calendar_integration/base_google_calendar.py",
+          "lines": [
+            16,
+            16
+          ]
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "id": "web",
+        "label": "web app",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            616,
+            616
+          ]
+        },
+        "kind": "component",
+        "group": "callers",
+        "many": false,
+        "details": [
+          {
+            "text": "Settings: connect, preferences, status",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/integrations/endpoints.py",
+                "lines": [
+                  616,
+                  616
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "oauth",
+        "label": "Google / Microsoft OAuth",
+        "source": {
+          "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+          "lines": [
+            295,
+            295
+          ]
+        },
+        "kind": "external",
+        "group": "callers",
+        "many": false,
+        "details": [
+          {
+            "text": "Redirects back to /api/integrations/gcal/callback",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+                "lines": [
+                  295,
+                  295
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "interaction",
+        "label": "INTERACTION /integrations",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            447,
+            704
+          ]
+        },
+        "kind": "component",
+        "group": "services",
+        "many": true,
+        "details": [
+          {
+            "text": "create, get, update, delete integration",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/integrations/endpoints.py",
+                "lines": [
+                  447,
+                  704
+                ]
+              }
+            ]
+          },
+          {
+            "text": "preferences and integration_status",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/api/integrations/endpoints.py",
+                "lines": [
+                  704,
+                  704
+                ]
+              }
+            ]
+          },
+          {
+            "text": "admin connect fans out to every user",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                "lines": [
+                  241,
+                  241
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "temporal",
+        "label": "Temporal sync workflows",
+        "source": {
+          "path": "backend/src/temporal/workflows/calendar_initial_sync.py",
+          "lines": [
+            124,
+            124
+          ]
+        },
+        "kind": "queue",
+        "group": "async",
+        "many": false,
+        "details": [
+          {
+            "text": "CalendarInitialSync, EmailInitialSync",
+            "sources": [
+              {
+                "path": "backend/src/temporal/workflows/calendar_initial_sync.py",
+                "lines": [
+                  124,
+                  124
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Org-wide backfill for admin installs",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+                "lines": [
+                  503,
+                  503
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sqs",
+        "label": "SQS integration queues",
+        "source": {
+          "path": "backend/src/tasks/types.py",
+          "lines": [
+            1124,
+            1134
+          ]
+        },
+        "kind": "queue",
+        "group": "async",
+        "many": true,
+        "details": [
+          {
+            "text": "Calendar and email extraction coordinators",
+            "sources": [
+              {
+                "path": "backend/src/tasks/types.py",
+                "lines": [
+                  1124,
+                  1134
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workers",
+        "label": "Integration workers",
+        "source": {
+          "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+          "lines": [
+            103,
+            103
+          ]
+        },
+        "kind": "component",
+        "group": "background-workers",
+        "many": true,
+        "details": [
+          {
+            "text": "Calendar extraction coordinator",
+            "sources": [
+              {
+                "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+                "lines": [
+                  103,
+                  103
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "postgres",
+        "label": "PostgreSQL",
+        "source": {
+          "path": "backend/src/rox_core/models/integration.py",
+          "lines": [
+            117,
+            117
+          ]
+        },
+        "kind": "store",
+        "group": "stores",
+        "many": false,
+        "details": [
+          {
+            "text": "integration, integration_preferences",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  117,
+                  117
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  500,
+                  500
+                ]
+              }
+            ]
+          },
+          {
+            "text": "integration_*_mapping, integration_status",
+            "sources": [
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  608,
+                  608
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  838,
+                  838
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  916,
+                  916
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  1047,
+                  1047
+                ]
+              },
+              {
+                "path": "backend/src/rox_core/models/integration.py",
+                "lines": [
+                  551,
+                  551
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "providers",
+        "label": "Google / Microsoft APIs",
+        "source": {
+          "path": "backend/src/ext_integrations/calendar_integration/base_google_calendar.py",
+          "lines": [
+            16,
+            16
+          ]
+        },
+        "kind": "external",
+        "group": "provider-apis",
+        "many": false,
+        "details": [
+          {
+            "text": "Google Calendar and Gmail",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/calendar_integration/base_google_calendar.py",
+                "lines": [
+                  16,
+                  16
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Microsoft Graph",
+            "sources": [
+              {
+                "path": "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+                "lines": [
+                  38,
+                  38
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "src": "web",
+        "dst": "interaction",
+        "label": "connect",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/endpoints.py",
+          "lines": [
+            249,
+            249
+          ]
+        }
+      },
+      {
+        "src": "oauth",
+        "dst": "interaction",
+        "label": "OAuth callback",
+        "source": {
+          "path": "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+          "lines": [
+            295,
+            295
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "postgres",
+        "label": "save integration",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/business.py",
+          "lines": [
+            1675,
+            1675
+          ]
+        }
+      },
+      {
+        "src": "interaction",
+        "dst": "temporal",
+        "label": "start initial sync",
+        "source": {
+          "path": "backend/src/rox_core/api/integrations/business.py",
+          "lines": [
+            1995,
+            1995
+          ]
+        }
+      },
+      {
+        "src": "temporal",
+        "dst": "sqs",
+        "label": "enqueue sync chunks",
+        "source": {
+          "path": "backend/src/temporal/activities/calendar_sync/enqueue_chunk.py",
+          "lines": [
+            72,
+            72
+          ]
+        }
+      },
+      {
+        "src": "sqs",
+        "dst": "workers",
+        "label": "long-poll",
+        "source": {
+          "path": "backend/src/util/listener_utils.py",
+          "lines": [
+            22,
+            22
+          ]
+        }
+      },
+      {
+        "src": "workers",
+        "dst": "postgres",
+        "label": "update integration status",
+        "source": {
+          "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
+          "lines": [
+            462,
+            462
+          ]
+        }
+      },
+      {
+        "src": "workers",
+        "dst": "providers",
+        "label": "fetch events",
+        "source": {
+          "path": "backend/src/ext_integrations/calendar_integration/base_microsoft_calendar.py",
+          "lines": [
+            38,
+            38
+          ]
+        }
+      }
+    ]
+  },
+  "block_figures": [],
+  "data": {
+    "sql_tables": [],
+    "nosql": [],
+    "relations": [],
+    "domains": [],
+    "columns": []
+  },
+  "sequences": [],
+  "states": [],
+  "related": [
+    {
+      "label": "Activity integrations",
+      "page": "domain-activity",
+      "source": {
+        "path": "backend/src/rox_core/api/register_namespaces.py",
+        "lines": [
+          176,
+          176
+        ]
+      }
+    }
+  ]
+}

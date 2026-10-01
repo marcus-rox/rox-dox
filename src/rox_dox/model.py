@@ -110,6 +110,7 @@ class Edge(Model):
 
 
 class BlockDiagram(Model):
+    notes: list[Claim] = Field(default_factory=list)
     groups: list[Group] = Field(default_factory=list)
     nodes: list[Node]
     edges: list[Edge]
@@ -472,6 +473,14 @@ def page_sources(
     sources.extend(_claim_sources(page.tldr.key_points, "key point"))
     sources.extend((("TLDR table", source) for source in page.tldr.table.sources))
     sources.extend(_claim_sources(page.tldr.notes, "note"))
+    sources.extend(
+        (
+            f"block note {note_number}",
+            source,
+        )
+        for note_number, note in enumerate(page.block.notes, start=1)
+        for source in note.sources
+    )
     sources.extend(
         (f"block group {group.id}", group.source) for group in page.block.groups
     )

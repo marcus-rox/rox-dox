@@ -689,8 +689,16 @@ def _block_section(page: Page, *, repo_url: str) -> str:
         elements = [
             (label, source)
             for label, source in page_sources(page)
-            if label.startswith(("block group ", "block node ", "block edge "))
+            if label.startswith(
+                ("block group ", "block node ", "block edge ", "block note ")
+            )
         ]
+        notes = (
+            f'<div class="figure-notes">'
+            f"{_claim_list(page.block.notes, page=page, repo_url=repo_url)}</div>"
+            if page.block.notes
+            else ""
+        )
         cards.append(
             '<article class="diagram-card zoom-figure" id="block-figure">'
             '<div class="figure-bar"><h3>Figure 1. System overview</h3>'
@@ -698,6 +706,7 @@ def _block_section(page: Page, *, repo_url: str) -> str:
             '<a class="collapse" href="#block">Close</a></div>'
             f'<div class="diagram block-scroll">'
             f"{block_svg(page.block, page=page, repo_url=repo_url)}</div>"
+            f"{notes}"
             f"{_sources_details(elements, page=page, repo_url=repo_url)}"
             "</article>"
         )
