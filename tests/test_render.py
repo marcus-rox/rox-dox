@@ -201,3 +201,52 @@ def test_same_title_diagrams_only_list_their_own_sources(
     assert second_state_url not in state_cards[0]
     assert second_state_url in state_cards[1]
     assert first_state_url not in state_cards[1]
+
+
+def test_block_sources_table_includes_group_and_detail_citations(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    block = payload["block"]
+    group_source = {"path": "pkg/a.py", "lines": [4, 5]}
+    detail_source = {"path": "pkg/a.py", "lines": [6, 7]}
+    block["groups"] = [
+        {
+            "id": "backend",
+            "label": "Backend",
+            "source": group_source,
+        }
+    ]
+    block["nodes"][0]["group"] = "backend"
+    block["nodes"][0]["details"] = [
+        {
+            "text": "Handles requests",
+            "sources": [detail_source],
+        }
+    ]
+    payload["data"]["sql_tables"] = []
+    payload["data"]["nosql"] = []
+    payload["sequences"] = []
+    payload["states"] = []
+    page = Page.model_validate(payload)
+
+    document = render_page(page, repo_url=REPO_URL, tables={}, jar=plantuml_jar)
+    block_section = re.search(r'<section id="block">.*?</section>', document, re.DOTALL)
+    assert block_section is not None
+    block_html = block_section.group()
+
+    group_url = source_url(
+        page.block.groups[0].source,
+        repo_url=REPO_URL,
+        commit=page.commit,
+    )
+    detail_url = source_url(
+        page.block.nodes[0].details[0].sources[0],
+        repo_url=REPO_URL,
+        commit=page.commit,
+    )
+    assert '<th scope="row">block group backend</th>' in block_html
+    assert '<th scope="row">block node api detail 1</th>' in block_html
+    assert f'<a href="{group_url}">Source</a>' in block_html
+    assert f'<a href="{detail_url}">Source</a>' in block_html
