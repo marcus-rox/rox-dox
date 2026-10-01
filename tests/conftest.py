@@ -165,7 +165,6 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
             }
         ],
         "related": [],
-        "notion": [],
     }
 
 
@@ -173,14 +172,6 @@ def page_data(git_repo: tuple[Path, str]) -> dict[str, object]:
 def site_pages(page_data: dict[str, object]) -> list[dict[str, object]]:
     root = copy.deepcopy(page_data)
     root["title"] = "rox-core"
-    root["notion"] = [
-        {
-            "title": "API guide",
-            "url": "https://www.notion.so/rox/API-guide-123",
-            "last_edited": "2026-06-10",
-            "excerpt": "Reference material for the public API.",
-        }
-    ]
 
     child = copy.deepcopy(page_data)
     child["id"] = "rox-core/pkg"
