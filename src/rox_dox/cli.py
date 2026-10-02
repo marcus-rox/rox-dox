@@ -22,6 +22,13 @@ from rox_dox.features import (
     is_feature_path,
 )
 from rox_dox.model import Page
+from rox_dox.outline import (
+    OutlineInputError,
+    format_markdown,
+    outline_sources,
+    read_commit,
+    read_worktree,
+)
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
 from rox_dox.rebuild import (
@@ -79,6 +86,12 @@ def _parser() -> argparse.ArgumentParser:
     relations.add_argument("--repo", type=Path, required=True)
     relations.add_argument("--commit", required=True)
     relations.add_argument("--tables", type=_parse_tables, required=True)
+
+    outline = commands.add_parser("outline")
+    outline.add_argument("paths", nargs="+")
+    outline.add_argument("--repo", type=Path)
+    outline.add_argument("--commit")
+    outline.add_argument("--json", action="store_true", dest="as_json")
 
     rebuild = commands.add_parser("rebuild")
     rebuild.add_argument("--repo", type=Path, required=True)
@@ -268,9 +281,7 @@ def _build_folder_pages(
         if domain_page is None:
             continue
         for feature in feature_map.features:
-            feature_id = (
-                f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
-            )
+            feature_id = f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
             feature_page = tree.pages.get(feature_id)
             if feature_page is None:
                 continue
@@ -566,12 +577,38 @@ def _rebuild(args: argparse.Namespace) -> int:
     )
 
 
+def _outline(args: argparse.Namespace) -> int:
+    if (args.repo is None) != (args.commit is None):
+        print("--repo and --commit must be given together", file=sys.stderr)
+        return 2
+    try:
+        if args.repo is None:
+            sources = read_worktree([Path(path) for path in args.paths])
+        else:
+            sources = read_commit(args.repo, args.commit, args.paths)
+    except (OutlineInputError, RuntimeError) as error:
+        print(error, file=sys.stderr)
+        return 2
+    outlines = outline_sources(sources)
+    if args.as_json:
+        print(
+            json.dumps({"files": [outline.to_json() for outline in outlines]}, indent=2)
+        )
+    else:
+        print(format_markdown(outlines), end="")
+    if any(outline.error is not None for outline in outlines):
+        return 1
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "relations":
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":
         return _rebuild(args)
+    if args.command == "outline":
+        return _outline(args)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")
