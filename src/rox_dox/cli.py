@@ -30,6 +30,13 @@ from rox_dox.lint import (
     summary_line,
 )
 from rox_dox.model import Page
+from rox_dox.outline import (
+    OutlineInputError,
+    format_markdown,
+    outline_sources,
+    read_commit,
+    read_worktree,
+)
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
 from rox_dox.rebuild import (
@@ -97,7 +104,11 @@ def _parser() -> argparse.ArgumentParser:
         dest="page_ids",
     )
     lint_diagrams.add_argument("--json", action="store_true")
-
+    outline = commands.add_parser("outline")
+    outline.add_argument("paths", nargs="+")
+    outline.add_argument("--repo", type=Path)
+    outline.add_argument("--commit")
+    outline.add_argument("--json", action="store_true", dest="as_json")
     rebuild = commands.add_parser("rebuild")
     rebuild.add_argument("--repo", type=Path, required=True)
     rebuild.add_argument("--commit")
@@ -628,6 +639,30 @@ def _rebuild(args: argparse.Namespace) -> int:
     )
 
 
+def _outline(args: argparse.Namespace) -> int:
+    if (args.repo is None) != (args.commit is None):
+        print("--repo and --commit must be given together", file=sys.stderr)
+        return 2
+    try:
+        if args.repo is None:
+            sources = read_worktree([Path(path) for path in args.paths])
+        else:
+            sources = read_commit(args.repo, args.commit, args.paths)
+    except (OutlineInputError, RuntimeError) as error:
+        print(error, file=sys.stderr)
+        return 2
+    outlines = outline_sources(sources)
+    if args.as_json:
+        print(
+            json.dumps({"files": [outline.to_json() for outline in outlines]}, indent=2)
+        )
+    else:
+        print(format_markdown(outlines), end="")
+    if any(outline.error is not None for outline in outlines):
+        return 1
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "relations":
@@ -636,6 +671,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _rebuild(args)
     if args.command == "lint-diagrams":
         return _lint_diagrams(args)
+    if args.command == "outline":
+        return _outline(args)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")

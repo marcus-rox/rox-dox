@@ -10,6 +10,7 @@ Always-on pointers to repository skills. Load a skill when its trigger fires.
 - `call-tree`: `.agents/skills/call-tree/SKILL.md`
 - `daily-rebuild`: `.agents/skills/daily-rebuild/SKILL.md`
 - `outline`: `.agents/skills/outline/SKILL.md`
+- `rox-dox outline PATH ... [--repo R --commit C] [--json]`: per-file top-level classes, functions and UPPER_CASE constants with line and first docstring line.
 - `block-diagram`: `.agents/skills/block-diagram/SKILL.md`
 - `sequence-diagram`: `.agents/skills/sequence-diagram/SKILL.md`
 - `schema-diagram`: `.agents/skills/schema-diagram/SKILL.md`
