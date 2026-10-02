@@ -180,6 +180,7 @@ def test_rebuild_skips_steps_depending_on_failed_root_page(
     assert statuses["feature pages (pages/authoring/feature_pages.py)"] == "skipped"
     assert statuses["site build"] == "skipped"
     assert statuses["page commit validation"] == "skipped"
+    assert statuses["diagram lint"] == "skipped"
     assert "needle not found" in next(
         step["diagnostic"]
         for step in report["steps"]

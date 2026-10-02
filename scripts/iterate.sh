@@ -49,6 +49,33 @@ timed_step "partial build" uv run rox-dox build pages \
     --only "domain-${domain},feature-${domain}-*" \
     --no-folder-pages
 
+shopt -s nullglob
+feature_pages=("$project_root"/pages/features/"feature-${domain}-"*.json)
+[[ ${#feature_pages[@]} -gt 0 ]] || {
+    printf 'No feature pages found for domain %s\n' "$domain" >&2
+    exit 1
+}
+lint_page_ids=("domain-${domain}")
+for feature_page in "${feature_pages[@]}"; do
+    page_id=${feature_page##*/}
+    lint_page_ids+=("${page_id%.json}")
+done
+timed_lint() {
+    local started=$SECONDS
+    local lint_status=0
+    local output summary
+    output=$(uv run rox-dox lint-diagrams pages --page "${lint_page_ids[@]}" 2>&1) \
+        || lint_status=$?
+    if [[ $lint_status -le 1 && -n $output ]]; then
+        summary=${output##*$'\n'}
+    else
+        summary="lint unavailable"
+    fi
+    printf 'lint: %s\n' "$summary"
+    printf 'diagram lint: %ss\n' "$((SECONDS - started))"
+}
+timed_lint
+
 timed_step "screenshot domain-${domain}" google-chrome \
     --headless=new \
     --no-sandbox \
@@ -57,12 +84,6 @@ timed_step "screenshot domain-${domain}" google-chrome \
     "--screenshot=${shots_dir}/domain-${domain}.png" \
     "file://${site_dir}/domain-${domain}.html"
 
-shopt -s nullglob
-feature_pages=("$project_root"/pages/features/"feature-${domain}-"*.json)
-[[ ${#feature_pages[@]} -gt 0 ]] || {
-    printf 'No feature pages found for domain %s\n' "$domain" >&2
-    exit 1
-}
 for feature_page in "${feature_pages[@]}"; do
     page_id=${feature_page##*/}
     page_id=${page_id%.json}

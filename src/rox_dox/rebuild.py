@@ -14,6 +14,15 @@ from urllib.request import Request, urlopen
 
 from tqdm import tqdm
 
+from rox_dox.lint import (
+    GENERATED_PREFIXES,
+    LintInputError,
+    lint_pages,
+    load_component_ids,
+    load_pages,
+    summary_line,
+)
+
 ROX_CORE_URL = "https://github.com/Rox-AI/rox-core"
 PUBLISH_REMOTE = "https://github.com/marcus-rox/rox-dox.git"
 PUBLISH_API = "https://api.github.com/repos/marcus-rox/rox-dox/pulls"
@@ -32,6 +41,7 @@ STEP_NAMES = (
     "feature pages (pages/authoring/feature_pages.py)",
     "site build",
     "page commit validation",
+    "diagram lint",
 )
 
 StepStatus = Literal["success", "failure", "skipped"]
@@ -849,6 +859,68 @@ def run_rebuild(
             else:
                 _append_step(
                     steps, progress, STEP_NAMES[6], "success", step_started, clock()
+                )
+
+        if not pages_ok or commit is None:
+            skipped_at = clock()
+            _append_step(
+                steps,
+                progress,
+                STEP_NAMES[7],
+                "skipped",
+                skipped_at,
+                skipped_at,
+                "generated pages are unavailable",
+            )
+        else:
+            step_started = clock()
+            try:
+                pages = load_pages(pages_dir)
+                findings = lint_pages(pages, load_component_ids(pages_dir))
+            except LintInputError as error:
+                _add_page_failure(
+                    failures,
+                    _page_path(pages_dir, project_root),
+                    str(error),
+                )
+                _append_step(
+                    steps,
+                    progress,
+                    STEP_NAMES[7],
+                    "failure",
+                    step_started,
+                    clock(),
+                    str(error),
+                )
+            else:
+                diagnostic = summary_line(findings, len(pages))
+                page_files = _page_ids(pages_dir)
+                generated_errors = [
+                    finding
+                    for finding in findings
+                    if finding.severity == "error"
+                    and finding.page.startswith(GENERATED_PREFIXES)
+                ]
+                for finding in generated_errors:
+                    page_file = page_files.get(finding.page)
+                    label = (
+                        _page_path(Path(page_file), project_root)
+                        if page_file is not None
+                        else _page_path(pages_dir, project_root)
+                    )
+                    _add_page_failure(
+                        failures,
+                        label,
+                        f"{finding.figure} {finding.rule}: {finding.message}",
+                    )
+                _append_step(
+                    steps,
+                    progress,
+                    STEP_NAMES[7],
+                    "failure" if generated_errors else "success",
+                    step_started,
+                    clock(),
+                    diagnostic,
                 )
 
     pipeline_success = all(step["status"] == "success" for step in steps)
