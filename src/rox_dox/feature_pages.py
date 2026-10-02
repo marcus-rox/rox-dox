@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -40,6 +40,8 @@ from rox_dox.projection import project_component_diagram
 from rox_dox.schema import Table
 
 Layer = Literal["web", "routes", "workers", "models", "logic", "skills", "deploy"]
+
+MAX_CALLER_IMPORT_HOPS = 3
 
 LAYER_ORDER: tuple[Layer, ...] = (
     "web",
@@ -164,22 +166,53 @@ def _feature_callers(
 ) -> tuple[_Caller, ...]:
     member_paths = {file.path for file in feature.files}
     callers = []
-    for path, imports in sorted(component_imports.items()):
+    for path in sorted(component_imports):
         if path in member_paths:
             continue
         facts = component_facts.get(path)
         if facts is None or not (facts.endpoints or facts.workers):
             continue
-        targets = tuple(sorted(set(imports) & member_paths))
+
+        targets: set[str] = set()
+        import_lines: set[int] = set()
+        pending: deque[tuple[str, int, int | None]] = deque([(path, 0, None)])
+        visited: set[tuple[str, int | None]] = {(path, None)}
+        while pending:
+            current_path, hops, first_import_line = pending.popleft()
+            if hops >= MAX_CALLER_IMPORT_HOPS:
+                continue
+            for imported_path, import_line in sorted(
+                component_imports.get(current_path, {}).items()
+            ):
+                next_first_import_line = (
+                    import_line if first_import_line is None else first_import_line
+                )
+                if imported_path in member_paths:
+                    targets.add(imported_path)
+                    import_lines.add(next_first_import_line)
+                    continue
+                imported_facts = component_facts.get(imported_path)
+                if (
+                    imported_facts is None
+                    or imported_facts.endpoints
+                    or imported_facts.workers
+                ):
+                    continue
+                state = (imported_path, next_first_import_line)
+                if state in visited:
+                    continue
+                visited.add(state)
+                pending.append((imported_path, hops + 1, next_first_import_line))
+
         if not targets:
             continue
         owner = primary_features.get(path)
         callers.append(
             _Caller(
                 path=path,
-                targets=targets,
+                targets=tuple(sorted(targets)),
                 import_sources=tuple(
-                    _source(path, imports[target]) for target in targets
+                    _source(path, line) for line in sorted(import_lines)
                 ),
                 owner_name=owner[0] if owner else None,
                 owner_page=owner[1] if owner else None,

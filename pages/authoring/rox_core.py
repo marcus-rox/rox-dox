@@ -2866,21 +2866,21 @@ component_catalog = [
         "root_id": "postgres",
         "label": "PostgreSQL",
         "kind": "store",
-        "column": "Stores",
+        "column": "Stores & provider APIs",
         "match": {"table_access": True},
     },
     {
         "id": "llm",
         "root_id": "llm",
         "kind": "external",
-        "column": "Provider APIs",
+        "column": "Stores & provider APIs",
         "match": {"external_services": ["OpenAI", "Anthropic", "LiteLLM"]},
     },
     {
         "id": "crm",
         "root_id": "crm",
         "kind": "external",
-        "column": "Provider APIs",
+        "column": "Stores & provider APIs",
         "match": {
             "external_services": [
                 "Salesforce",
@@ -2895,7 +2895,7 @@ component_catalog = [
         "id": "twilio",
         "root_id": "twilio",
         "kind": "external",
-        "column": "Provider APIs",
+        "column": "Stores & provider APIs",
         "match": {"external_services": ["Twilio"]},
     },
 ]

@@ -163,6 +163,16 @@ def _catalog_ids_by_match(
     }
 
 
+def _provider_api_ids(
+    catalog_by_id: Mapping[str, Mapping[str, Any]],
+) -> set[str]:
+    return {
+        component_id
+        for component_id, entry in catalog_by_id.items()
+        if entry.get("match", {}).get("external_services")
+    }
+
+
 def _task_component_id(
     task: TaskType,
     queue_class_components: Mapping[str, str],
@@ -386,6 +396,7 @@ def _prune_early_edges(
     catalog_by_id: Mapping[str, Mapping[str, Any]],
     source_counts: Mapping[tuple[str, str], int],
 ) -> tuple[list[Edge], list[Edge]]:
+    provider_api_ids = _provider_api_ids(catalog_by_id)
     catalog_order = {
         component_id: index for index, component_id in enumerate(catalog_by_id)
     }
@@ -405,7 +416,7 @@ def _prune_early_edges(
     for edge in kept[:]:
         if (
             catalog_by_id.get(edge.src, {}).get("column") in EARLY_COLUMNS
-            and catalog_by_id.get(edge.dst, {}).get("column") == "Provider APIs"
+            and edge.dst in provider_api_ids
             and edge.dst in worker_providers
         ):
             kept.remove(edge)
@@ -519,20 +530,18 @@ def _fit_node_budget(
         if node.id in catalog_by_id
     }
     if len(nodes) > 15:
-        provider_nodes = [
-            node
-            for node in nodes
-            if catalog_by_id.get(node.id, {}).get("column") == "Provider APIs"
-        ]
+        provider_api_ids = _provider_api_ids(catalog_by_id)
+        provider_nodes = [node for node in nodes if node.id in provider_api_ids]
         if provider_nodes:
             provider_ids = {node.id for node in provider_nodes}
             nodes = [node for node in nodes if node.id not in provider_ids]
+            provider_column = str(catalog_by_id[provider_nodes[0].id].get("column", ""))
             nodes.append(
                 _merge_node_group(
                     provider_nodes,
                     node_id="provider-apis",
                     label="Provider APIs",
-                    column="Provider APIs",
+                    column=provider_column,
                     kind="external",
                 )
             )

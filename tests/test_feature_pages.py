@@ -4,8 +4,10 @@ from pathlib import Path
 import pytest
 
 from rox_dox.block_svg import block_layout_problems
+from rox_dox.components import Endpoint, FileFacts
 from rox_dox.feature_pages import (
     _domain_data,
+    _feature_callers,
     _table_relations,
     feature_pages,
     layer_of,
@@ -41,6 +43,184 @@ def test_layer_classifier_uses_first_matching_rule(
     assert layer_of(path) == expected
 
 
+def _caller_facts(path: str, endpoints: list[Endpoint]) -> FileFacts:
+    return FileFacts(
+        path=path,
+        api_group=None,
+        endpoints=endpoints,
+        workers=[],
+        externals=[],
+    )
+
+
+def test_two_hop_feature_caller_cites_its_first_import() -> None:
+    endpoint_path = "api/notes.py"
+    helper_path = "notes/business.py"
+    member_path = "notes/service.py"
+    feature = Feature(
+        id="notes",
+        tables=[],
+        files=[
+            FeatureFile(
+                path=member_path,
+                primary=True,
+                reason="calls",
+                evidence=[],
+            )
+        ],
+        table_links=[],
+    )
+    callers = _feature_callers(
+        feature,
+        {
+            endpoint_path: _caller_facts(
+                endpoint_path,
+                [Endpoint(method="GET", path="/notes", handler="list_notes", line=5)],
+            ),
+            helper_path: _caller_facts(helper_path, []),
+        },
+        {
+            endpoint_path: {helper_path: 12},
+            helper_path: {member_path: 19},
+        },
+        {},
+    )
+
+    assert len(callers) == 1
+    assert callers[0].path == endpoint_path
+    assert callers[0].targets == (member_path,)
+    assert callers[0].import_sources == (
+        CodeSource(path=endpoint_path, lines=(12, 12)),
+    )
+
+
+def test_feature_caller_traversal_stops_at_endpoint_files() -> None:
+    caller_path = "api/notes.py"
+    endpoint_path = "notes/endpoints.py"
+    member_path = "notes/service.py"
+    feature = Feature(
+        id="notes",
+        tables=[],
+        files=[
+            FeatureFile(
+                path=member_path,
+                primary=True,
+                reason="calls",
+                evidence=[],
+            )
+        ],
+        table_links=[],
+    )
+    callers = _feature_callers(
+        feature,
+        {
+            caller_path: _caller_facts(
+                caller_path,
+                [Endpoint(method="GET", path="/notes", handler="list_notes", line=5)],
+            ),
+            endpoint_path: _caller_facts(
+                endpoint_path,
+                [Endpoint(method="POST", path="/notes", handler="create_note", line=9)],
+            ),
+        },
+        {
+            caller_path: {endpoint_path: 12},
+            endpoint_path: {member_path: 19},
+        },
+        {},
+    )
+
+    assert [(caller.path, caller.targets) for caller in callers] == [
+        (endpoint_path, (member_path,))
+    ]
+
+
+def test_four_hop_feature_caller_is_not_found() -> None:
+    caller_path = "api/notes.py"
+    helper_paths = [
+        "notes/helper_one.py",
+        "notes/helper_two.py",
+        "notes/helper_three.py",
+    ]
+    member_path = "notes/service.py"
+    feature = Feature(
+        id="notes",
+        tables=[],
+        files=[
+            FeatureFile(
+                path=member_path,
+                primary=True,
+                reason="calls",
+                evidence=[],
+            )
+        ],
+        table_links=[],
+    )
+    component_facts = {
+        caller_path: _caller_facts(
+            caller_path,
+            [Endpoint(method="GET", path="/notes", handler="list_notes", line=5)],
+        ),
+        **{path: _caller_facts(path, []) for path in helper_paths},
+    }
+    component_imports = {
+        caller_path: {helper_paths[0]: 12},
+        helper_paths[0]: {helper_paths[1]: 19},
+        helper_paths[1]: {helper_paths[2]: 23},
+        helper_paths[2]: {member_path: 31},
+    }
+
+    assert _feature_callers(feature, component_facts, component_imports, {}) == ()
+
+
+def test_feature_callers_and_targets_are_ordered_deterministically() -> None:
+    caller_paths = ["api/z_notes.py", "api/a_notes.py"]
+    member_paths = ["notes/z_service.py", "notes/a_service.py"]
+    feature = Feature(
+        id="notes",
+        tables=[],
+        files=[
+            FeatureFile(
+                path=path,
+                primary=True,
+                reason="calls",
+                evidence=[],
+            )
+            for path in reversed(member_paths)
+        ],
+        table_links=[],
+    )
+    component_facts = {
+        path: _caller_facts(
+            path,
+            [Endpoint(method="GET", path="/notes", handler="list_notes", line=5)],
+        )
+        for path in caller_paths
+    }
+    callers = _feature_callers(
+        feature,
+        component_facts,
+        {
+            caller_paths[0]: {
+                member_paths[0]: 41,
+                member_paths[1]: 12,
+            },
+            caller_paths[1]: {member_paths[0]: 53},
+        },
+        {},
+    )
+
+    assert [caller.path for caller in callers] == [
+        "api/a_notes.py",
+        "api/z_notes.py",
+    ]
+    assert callers[1].targets == ("notes/a_service.py", "notes/z_service.py")
+    assert callers[1].import_sources == (
+        CodeSource(path="api/z_notes.py", lines=(12, 12)),
+        CodeSource(path="api/z_notes.py", lines=(41, 41)),
+    )
+
+
 def test_generated_feature_pages_pass_block_layout() -> None:
     repository_root = Path(__file__).resolve().parents[1]
     page_files = sorted((repository_root / "pages" / "features").glob("*.json"))
@@ -50,38 +230,6 @@ def test_generated_feature_pages_pass_block_layout() -> None:
         page = Page.model_validate(json.loads(page_file.read_text(encoding="utf-8")))
         problems = block_layout_problems(page.block)
         assert not problems, f"{page_file}: {problems}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def test_empty_feature_and_domain_use_key_table_definition_path() -> None:

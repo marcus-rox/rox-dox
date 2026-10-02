@@ -231,7 +231,11 @@ def _check_page_commits(
     project_root: Path,
     commit: str,
 ) -> tuple[int, list[dict[str, object]]]:
-    page_files = sorted(pages_dir.rglob("*.json"))
+    page_files = sorted(
+        page_file
+        for page_file in pages_dir.rglob("*.json")
+        if page_file != pages_dir / "components.json"
+    )
     failures: list[dict[str, object]] = []
     for page_file in page_files:
         label = _page_path(page_file, project_root)
@@ -925,7 +929,10 @@ def run_rebuild(
 
     pipeline_success = all(step["status"] == "success" for step in steps)
     if page_count == 0:
-        page_count = len(list(pages_dir.rglob("*.json")))
+        page_count = sum(
+            page_file != pages_dir / "components.json"
+            for page_file in pages_dir.rglob("*.json")
+        )
     if not domains and maps_ok:
         domains = _domain_counts(project_root, previous_counts)
 

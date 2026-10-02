@@ -96,8 +96,13 @@ def _fixed_clock() -> datetime:
 
 
 def _project_root(path: Path) -> Path:
-    (path / "pages" / "authoring").mkdir(parents=True)
+    pages_dir = path / "pages"
+    (pages_dir / "authoring").mkdir(parents=True)
     (path / "features").mkdir()
+    (pages_dir / "components.json").write_text(
+        json.dumps([{"id": "api"}, {"id": "store"}]) + "\n",
+        encoding="utf-8",
+    )
     (path / "pages" / "authoring" / "COMMIT").write_text(
         "0" * 40 + "\n",
         encoding="utf-8",
@@ -146,7 +151,12 @@ def test_R8_success_publishes_once_and_every_page_uses_run_commit(
         publisher,
     )
 
-    generated_pages = sorted((project_root / "pages").rglob("*.json"))
+    pages_dir = project_root / "pages"
+    generated_pages = sorted(
+        page_file
+        for page_file in pages_dir.rglob("*.json")
+        if page_file != pages_dir / "components.json"
+    )
     assert exit_code == 0
     assert len(publisher.publish_reports) == 1
     assert publisher.publish_reports[0]["commit"] == commit
