@@ -25,7 +25,6 @@ from rox_dox.schema import Table, extract_tables
 
 
 DomainReason = Literal["tables", "calls", "called_by"]
-# Below this many files a process pool's start-up costs more than it saves.
 PARALLEL_MIN_FILES = 50
 PARALLEL_FILE_CHUNKSIZE = 64
 _FORK_CONTEXT = multiprocessing.get_context("fork")
