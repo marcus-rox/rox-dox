@@ -19,6 +19,7 @@ from rox_dox.features import FeatureEvidence, FeatureFile
 from rox_dox.model import BlockDiagram, Claim, CodeSource, Edge, Group, Node
 
 MAX_FLOW_NOTES = 6
+MAX_SOURCES_PER_EDGE = 3
 TEMPORAL_WORKFLOW_DETAIL_LIMIT = 2
 EARLY_COLUMNS = {"Callers", "HTTP services", "Workflows"}
 
@@ -215,8 +216,7 @@ def _endpoint_component_ids(
     return set(matches)
 
 
-def _entry_component_ids(
-    path: str,
+def _worker_component_ids(
     facts: FileFacts,
     catalog_by_id: Mapping[str, Mapping[str, Any]],
     target_components: Mapping[str, str],
@@ -225,12 +225,6 @@ def _entry_component_ids(
     task_types: Mapping[str, TaskType],
 ) -> set[str]:
     matches = set()
-    for entry in catalog_by_id.values():
-        if entry.get("match", {}).get("web_files") and path.startswith("web/"):
-            matches.add(str(entry["id"]))
-    matches.update(
-        _endpoint_component_ids(path, facts, catalog_by_id, target_components)
-    )
     for worker in facts.workers:
         for entry in catalog_by_id.values():
             if worker.kind in entry.get("match", {}).get("worker_kinds", []):
@@ -248,6 +242,35 @@ def _entry_component_ids(
             )
             if component_id is not None:
                 matches.add(component_id)
+    return matches
+
+
+def _entry_component_ids(
+    path: str,
+    facts: FileFacts,
+    catalog_by_id: Mapping[str, Mapping[str, Any]],
+    target_components: Mapping[str, str],
+    queue_class_components: Mapping[str, str],
+    consumers_by_executor: Mapping[str, Collection[TaskConsumer]],
+    task_types: Mapping[str, TaskType],
+) -> set[str]:
+    matches = set()
+    for entry in catalog_by_id.values():
+        if entry.get("match", {}).get("web_files") and path.startswith("web/"):
+            matches.add(str(entry["id"]))
+    matches.update(
+        _endpoint_component_ids(path, facts, catalog_by_id, target_components)
+    )
+    matches.update(
+        _worker_component_ids(
+            facts,
+            catalog_by_id,
+            target_components,
+            queue_class_components,
+            consumers_by_executor,
+            task_types,
+        )
+    )
     return matches
 
 
@@ -618,7 +641,7 @@ def _flow_notes(
             _unique_sources(
                 sources_by_pair.get((edge.src, edge.dst), [edge.source])
                 or [edge.source]
-            )
+            )[:MAX_SOURCES_PER_EDGE]
         )
         if edge.label == "long-poll" and edge.src == "sqs":
             owner_id = edge.dst
@@ -853,6 +876,7 @@ def project_component_diagram(
     table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
     scope_tables: Collection[str],
     external_callers: Mapping[str, Collection[str]],
+    external_caller_hops: Mapping[str, int] | None = None,
 ) -> ComponentProjection:
     catalog_by_id = {str(entry["id"]): entry for entry in component_catalog}
     target_components = _catalog_ids_by_match(component_catalog, "deploy_targets")
@@ -929,40 +953,86 @@ def project_component_diagram(
     )
     external_seeds = []
     external_entry_components = set()
+    external_worker_paths = set()
+    endpoint_fallback_candidates = []
     scope_directories = {PurePosixPath(path).parent for path in scope_paths}
     for caller_path, targets in sorted(external_callers.items()):
         if caller_path in scope_paths:
             continue
-        if PurePosixPath(caller_path).parent not in scope_directories:
-            continue
         caller_facts = component_facts.get(caller_path)
         if caller_facts is None:
             continue
-        caller_components = _endpoint_component_ids(
-            caller_path,
+        target_paths = sorted(set(targets) & scope_paths)
+        if not target_paths:
+            continue
+        if caller_facts.endpoints:
+            caller_components = _endpoint_component_ids(
+                caller_path,
+                caller_facts,
+                catalog_by_id,
+                target_components,
+            )
+            seedable_components = [
+                component_id
+                for component_id in caller_components
+                if catalog_by_id.get(component_id, {}).get("kind")
+                in {"service", "service(many)"}
+            ]
+            if seedable_components:
+                component_id = min(
+                    seedable_components,
+                    key=lambda candidate: (
+                        catalog_order.get(candidate, len(catalog_order)),
+                        candidate,
+                    ),
+                )
+                endpoint_fallback_candidates.append(
+                    (
+                        (external_caller_hops or {}).get(caller_path, 1),
+                        caller_path,
+                        target_paths,
+                        component_id,
+                    )
+                )
+                if PurePosixPath(caller_path).parent in scope_directories:
+                    external_entry_components.add(component_id)
+                    caller_seeds = [
+                        (target, caller_path, component_id, 1)
+                        for target in target_paths
+                        if target not in owner_candidates
+                    ]
+                    external_seeds.extend(caller_seeds)
+
+        worker_components = _worker_component_ids(
             caller_facts,
             catalog_by_id,
             target_components,
+            queue_class_components,
+            consumers_by_executor,
+            task_types,
         )
-        seedable_components = [
+        seedable_worker_components = [
             component_id
-            for component_id in caller_components
-            if catalog_by_id.get(component_id, {}).get("kind")
-            in {"service", "service(many)"}
+            for component_id in worker_components
+            if _requires_scope_entry(catalog_by_id.get(component_id, {}))
         ]
-        if not seedable_components:
-            continue
-        component_id = min(
-            seedable_components,
-            key=lambda candidate: (
-                catalog_order.get(candidate, len(catalog_order)),
-                candidate,
-            ),
-        )
-        external_entry_components.add(component_id)
-        for target in sorted(set(targets) & scope_paths):
-            if target not in owner_candidates:
-                external_seeds.append((target, caller_path, component_id, 1))
+        if seedable_worker_components:
+            component_id = min(
+                seedable_worker_components,
+                key=lambda candidate: (
+                    catalog_order.get(candidate, len(catalog_order)),
+                    candidate,
+                ),
+            )
+            caller_seeds = [
+                (target, caller_path, component_id, 1)
+                for target in target_paths
+                if target not in owner_candidates
+            ]
+            if caller_seeds:
+                external_entry_components.add(component_id)
+                external_worker_paths.add(caller_path)
+                external_seeds.extend(caller_seeds)
     external_candidates = _reachable_component_candidates(
         external_seeds,
         scope_paths,
@@ -977,6 +1047,32 @@ def project_component_diagram(
         external_entry_components,
     )
     owners_by_path = _nearest_component_owners(owner_candidates, catalog_order)
+    if not owners_by_path and endpoint_fallback_candidates:
+        minimum_hops = min(hops for hops, _, _, _ in endpoint_fallback_candidates)
+        fallback_seeds = []
+        for hops, caller_path, targets, component_id in endpoint_fallback_candidates:
+            if hops != minimum_hops:
+                continue
+            external_entry_components.add(component_id)
+            fallback_seeds.extend(
+                (target, caller_path, component_id, 1)
+                for target in targets
+                if target not in owner_candidates
+            )
+        fallback_candidates = _reachable_component_candidates(
+            fallback_seeds,
+            scope_paths,
+            component_imports,
+        )
+        for path, records in fallback_candidates.items():
+            owner_candidates.setdefault(path, set()).update(records)
+        owner_candidates = _eligible_owner_candidates(
+            owner_candidates,
+            catalog_by_id,
+            entry_components.values(),
+            external_entry_components,
+        )
+        owners_by_path = _nearest_component_owners(owner_candidates, catalog_order)
     unreached = sorted(scope_paths - owners_by_path.keys())
 
     edge_sources: defaultdict[tuple[str, str, str], list[CodeSource]] = defaultdict(
@@ -1082,6 +1178,7 @@ def project_component_diagram(
         for path in scope_paths
         if any(worker.kind == "task_executor" for worker in facts_by_path[path].workers)
     }
+    eligible_worker_paths = scope_worker_paths | external_worker_paths
     for consumer in task_facts.consumers:
         task = task_types.get(consumer.task_type)
         if task is None:
@@ -1096,7 +1193,7 @@ def project_component_diagram(
         worker_records = [
             (path, worker)
             for path, worker in workers_by_name.get(consumer.executor, [])
-            if path in scope_worker_paths
+            if path in eligible_worker_paths
         ]
         if not worker_records and consumer.path not in scope_paths:
             continue

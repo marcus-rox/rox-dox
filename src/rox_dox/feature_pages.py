@@ -36,7 +36,7 @@ from rox_dox.model import (
     SummaryTableLink,
     Tldr,
 )
-from rox_dox.projection import project_component_diagram
+from rox_dox.projection import MAX_SOURCES_PER_EDGE, project_component_diagram
 from rox_dox.schema import Table
 
 Layer = Literal["web", "routes", "workers", "models", "logic", "skills", "deploy"]
@@ -126,6 +126,7 @@ class _FeatureBlock:
 class _Caller:
     path: str
     targets: tuple[str, ...]
+    hops: int
     import_sources: tuple[CodeSource, ...]
     owner_name: str | None
     owner_page: str | None
@@ -174,6 +175,7 @@ def _feature_callers(
             continue
 
         targets: set[str] = set()
+        target_hops: dict[str, int] = {}
         import_lines: set[int] = set()
         pending: deque[tuple[str, int, int | None]] = deque([(path, 0, None)])
         visited: set[tuple[str, int | None]] = {(path, None)}
@@ -189,6 +191,10 @@ def _feature_callers(
                 )
                 if imported_path in member_paths:
                     targets.add(imported_path)
+                    target_hops[imported_path] = min(
+                        target_hops.get(imported_path, hops + 1),
+                        hops + 1,
+                    )
                     import_lines.add(next_first_import_line)
                     continue
                 imported_facts = component_facts.get(imported_path)
@@ -211,8 +217,10 @@ def _feature_callers(
             _Caller(
                 path=path,
                 targets=tuple(sorted(targets)),
+                hops=min(target_hops.values()),
                 import_sources=tuple(
-                    _source(path, line) for line in sorted(import_lines)
+                    _source(path, line)
+                    for line in sorted(import_lines)[:MAX_SOURCES_PER_EDGE]
                 ),
                 owner_name=owner[0] if owner else None,
                 owner_page=owner[1] if owner else None,
@@ -727,6 +735,7 @@ def _feature_block(
         table_accesses=table_accesses,
         scope_tables=feature.tables,
         external_callers={caller.path: caller.targets for caller in callers},
+        external_caller_hops={caller.path: caller.hops for caller in callers},
     )
     return _FeatureBlock(
         diagram=projection.diagram,
@@ -1337,6 +1346,7 @@ def _domain_component_diagram(
         files_by_path.setdefault(file.path, file)
     scope_paths = set(files_by_path)
     external_callers: defaultdict[str, set[str]] = defaultdict(set)
+    external_caller_hops = {}
     for feature in feature_map.features:
         for caller in _feature_callers(
             feature,
@@ -1346,6 +1356,10 @@ def _domain_component_diagram(
         ):
             if caller.path not in scope_paths:
                 external_callers[caller.path].update(caller.targets)
+                external_caller_hops[caller.path] = min(
+                    external_caller_hops.get(caller.path, caller.hops),
+                    caller.hops,
+                )
     return project_component_diagram(
         tuple(files_by_path[path] for path in sorted(files_by_path)),
         component_catalog=component_catalog,
@@ -1354,6 +1368,7 @@ def _domain_component_diagram(
         table_accesses=table_accesses,
         scope_tables=feature_map.tables,
         external_callers=external_callers,
+        external_caller_hops=external_caller_hops,
     ).diagram
 
 

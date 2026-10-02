@@ -437,6 +437,55 @@ def test_flow_notes_group_boxes_by_column_and_keep_all_sources() -> None:
     }
 
 
+def test_flow_notes_cap_each_edge_to_the_first_three_sources() -> None:
+    catalog = [
+        _entry(
+            "interaction",
+            "INTERACTION (Flask)",
+            "service",
+            "HTTP services",
+            "component",
+            {},
+        ),
+        _entry("postgres", "PostgreSQL", "store", "Stores", "store", {}),
+    ]
+    catalog_by_id = {entry["id"]: entry for entry in catalog}
+    sources = [
+        CodeSource(path="backend/src/notes.py", lines=(line, line))
+        for line in (50, 10, 40, 20, 30)
+    ]
+    nodes = [
+        Node(
+            id=entry["id"],
+            label=entry["label"],
+            source=CodeSource(path="catalog.py", lines=(1, 1)),
+            group=f"column-{entry['column'].lower().replace(' ', '-')}",
+        )
+        for entry in catalog
+    ]
+    edges = [
+        Edge(
+            src="interaction",
+            dst="postgres",
+            label="reads",
+            source=sources[0],
+        )
+    ]
+
+    notes = _flow_notes(
+        nodes,
+        edges,
+        catalog_by_id,
+        sources_by_pair={("interaction", "postgres"): list(reversed(sources))},
+    )
+
+    assert notes[0].sources == [
+        CodeSource(path="backend/src/notes.py", lines=(10, 10)),
+        CodeSource(path="backend/src/notes.py", lines=(20, 20)),
+        CodeSource(path="backend/src/notes.py", lines=(30, 30)),
+    ]
+
+
 def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> None:
     projection, helper_path = _projection_fixture()
     diagram = projection.diagram
@@ -699,9 +748,13 @@ def test_external_sibling_caller_qualifies_and_seeds_its_scope_file() -> None:
     assert projection.diagram.unreached_files == []
 
 
-def test_external_caller_from_distant_package_does_not_qualify_service() -> None:
-    target_path = "backend/src/rox_core/api/integrations/business.py"
-    caller_path = "backend/src/chat/routes/accounts.py"
+def test_external_worker_caller_outside_sibling_directory_seeds_worker_pool() -> None:
+    target_path = (
+        "backend/src/ext_integrations/calendar_integration/calendar_event_service.py"
+    )
+    caller_path = "backend/src/tasks/executors/calendar_delete.py"
+    endpoint_caller = "backend/src/chat/routes/calendar_events.py"
+    task_types_path = "backend/src/tasks/task_types.py"
     facts = {
         target_path: FileFacts(
             path=target_path,
@@ -712,6 +765,210 @@ def test_external_caller_from_distant_package_does_not_qualify_service() -> None
         ),
         caller_path: FileFacts(
             path=caller_path,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(name="CalendarDeleteExecutor", kind="task_executor", line=9)
+            ],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="CALENDAR_DELETE",
+                    executor="CalendarDeleteExecutor",
+                    path=caller_path,
+                    line=28,
+                )
+            ],
+        ),
+        endpoint_caller: FileFacts(
+            path=endpoint_caller,
+            api_group="chat",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/calendar-events",
+                    handler="list_calendar_events",
+                    line=3,
+                    deploy_target="WEBHOOK",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="CALENDAR_DELETE",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=40,
+                )
+            ],
+        ),
+    }
+    catalog = _runtime_catalog()
+    catalog = [
+        next(entry for entry in catalog if entry["id"] == "webhook"),
+        *(entry for entry in catalog if entry["id"] != "webhook"),
+    ]
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=catalog,
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={
+            caller_path: [target_path],
+            endpoint_caller: [target_path],
+        },
+        external_caller_hops={endpoint_caller: 1},
+    )
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("data_workers", "crm", "API calls"),
+        ("sqs", "data_workers", "long-poll"),
+    }
+    assert target_path not in projection.diagram.unreached_files
+    assert "webhook" not in {node.id for node in projection.diagram.nodes}
+
+
+def test_external_temporal_caller_outside_sibling_directory_seeds_temporal() -> None:
+    target_path = (
+        "backend/src/ext_integrations/calendar_integration/calendar_event_service.py"
+    )
+    caller_path = "backend/src/temporal/workflows/calendar_events.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+        ),
+        caller_path: FileFacts(
+            path=caller_path,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(
+                    name="CalendarEventsWorkflow",
+                    kind="temporal_activity",
+                    line=9,
+                )
+            ],
+            externals=[],
+        ),
+    }
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={target_path: {"calendar_event": (None, 8)}},
+        scope_tables={"calendar_event"},
+        external_callers={caller_path: [target_path]},
+    )
+
+    assert [(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges] == [
+        ("temporal", "postgres", "reads")
+    ]
+
+
+def test_external_endpoint_from_other_directory_does_not_seed_when_sibling_exists() -> (
+    None
+):
+    target_path = "backend/src/rox_core/api/integrations/business.py"
+    sibling_caller = "backend/src/rox_core/api/integrations/routes.py"
+    remote_caller = "backend/src/chat/routes/accounts.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        sibling_caller: FileFacts(
+            path=sibling_caller,
+            api_group="integrations",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/integrations",
+                    handler="get_integrations",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        remote_caller: FileFacts(
+            path=remote_caller,
+            api_group="chat",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=3,
+                    deploy_target="WEBHOOK",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+    }
+    catalog = _runtime_catalog()
+    catalog = [
+        next(entry for entry in catalog if entry["id"] == "webhook"),
+        *(entry for entry in catalog if entry["id"] != "webhook"),
+    ]
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=catalog,
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={
+            sibling_caller: [target_path],
+            remote_caller: [target_path],
+        },
+        external_caller_hops={sibling_caller: 3, remote_caller: 1},
+    )
+
+    assert [(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges] == [
+        ("interaction", "crm", "API calls")
+    ]
+    assert "webhook" not in {node.id for node in projection.diagram.nodes}
+
+
+def test_endpoint_fallback_uses_only_minimum_hop_caller_when_unseeded() -> None:
+    target_path = "backend/src/rox_core/api/integrations/business.py"
+    nearest_caller = "backend/src/chat/routes/calendar_events.py"
+    distant_caller = "backend/src/rox_core/api/admin/routes.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        nearest_caller: FileFacts(
+            path=nearest_caller,
             api_group="chat",
             endpoints=[
                 Endpoint(
@@ -725,20 +982,46 @@ def test_external_caller_from_distant_package_does_not_qualify_service() -> None
             workers=[],
             externals=[],
         ),
+        distant_caller: FileFacts(
+            path=distant_caller,
+            api_group="admin",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/admin/integrations",
+                    handler="get_integrations",
+                    line=4,
+                    deploy_target="WEBHOOK",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
     }
+    catalog = _runtime_catalog()
+    catalog = [
+        next(entry for entry in catalog if entry["id"] == "webhook"),
+        *(entry for entry in catalog if entry["id"] != "webhook"),
+    ]
     projection = project_component_diagram(
         [_file(target_path)],
-        component_catalog=_runtime_catalog(),
+        component_catalog=catalog,
         component_facts=facts,
         component_imports={},
         table_accesses={},
         scope_tables=set(),
-        external_callers={caller_path: [target_path]},
+        external_callers={
+            nearest_caller: [target_path],
+            distant_caller: [target_path],
+        },
+        external_caller_hops={nearest_caller: 1, distant_caller: 3},
     )
 
-    assert projection.diagram.nodes == []
-    assert projection.diagram.edges == []
-    assert projection.diagram.unreached_files == [target_path]
+    assert [(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges] == [
+        ("interaction", "crm", "API calls")
+    ]
+    assert "webhook" not in {node.id for node in projection.diagram.nodes}
+    assert projection.diagram.unreached_files == []
 
 
 def test_ineligible_nearest_seed_falls_back_to_nearest_eligible_owner() -> None:

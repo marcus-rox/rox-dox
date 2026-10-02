@@ -89,6 +89,7 @@ def test_two_hop_feature_caller_cites_its_first_import() -> None:
     assert len(callers) == 1
     assert callers[0].path == endpoint_path
     assert callers[0].targets == (member_path,)
+    assert callers[0].hops == 2
     assert callers[0].import_sources == (
         CodeSource(path=endpoint_path, lines=(12, 12)),
     )
@@ -130,8 +131,8 @@ def test_feature_caller_traversal_stops_at_endpoint_files() -> None:
         {},
     )
 
-    assert [(caller.path, caller.targets) for caller in callers] == [
-        (endpoint_path, (member_path,))
+    assert [(caller.path, caller.targets, caller.hops) for caller in callers] == [
+        (endpoint_path, (member_path,), 1)
     ]
 
 
@@ -215,9 +216,58 @@ def test_feature_callers_and_targets_are_ordered_deterministically() -> None:
         "api/z_notes.py",
     ]
     assert callers[1].targets == ("notes/a_service.py", "notes/z_service.py")
+    assert callers[1].hops == 1
     assert callers[1].import_sources == (
         CodeSource(path="api/z_notes.py", lines=(12, 12)),
         CodeSource(path="api/z_notes.py", lines=(41, 41)),
+    )
+
+
+def test_feature_caller_import_sources_are_capped_to_first_lines() -> None:
+    caller_path = "api/notes.py"
+    helper_paths = [f"notes/helpers/helper_{index}.py" for index in range(5)]
+    member_paths = [f"notes/services/service_{index}.py" for index in range(5)]
+    import_lines = [50, 10, 40, 20, 30]
+    feature = Feature(
+        id="notes",
+        tables=[],
+        files=[
+            FeatureFile(
+                path=path,
+                primary=True,
+                reason="calls",
+                evidence=[],
+            )
+            for path in member_paths
+        ],
+        table_links=[],
+    )
+    component_facts = {
+        caller_path: _caller_facts(
+            caller_path,
+            [Endpoint(method="GET", path="/notes", handler="list_notes", line=5)],
+        ),
+        **{path: _caller_facts(path, []) for path in helper_paths},
+    }
+    component_imports = {
+        caller_path: dict(zip(helper_paths, import_lines, strict=True)),
+        **{
+            helper_path: {member_path: 100 + index}
+            for index, (helper_path, member_path) in enumerate(
+                zip(helper_paths, member_paths, strict=True)
+            )
+        },
+    }
+
+    callers = _feature_callers(feature, component_facts, component_imports, {})
+
+    assert len(callers) == 1
+    assert callers[0].hops == 2
+    assert callers[0].targets == tuple(sorted(member_paths))
+    assert callers[0].import_sources == (
+        CodeSource(path=caller_path, lines=(10, 10)),
+        CodeSource(path=caller_path, lines=(20, 20)),
+        CodeSource(path=caller_path, lines=(30, 30)),
     )
 
 
