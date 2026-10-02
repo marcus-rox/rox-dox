@@ -5992,8 +5992,248 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from Temporal workflows",
+   "participants": [
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "temporal",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/workflow/execution_graph/packages/msteams/msteams.py",
+      "lines": [
+       84,
+       84
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "crm",
+     "label": "CRM + workspace APIs",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       300,
+       303
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       646,
+       646
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       650,
+       650
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "crm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/ext_integrations/ms_teams/bot/token_util.py",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/base.py",
+      "lines": [
+       194,
+       194
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "IntegrationState lifecycle",
+   "entity": "integration.status",
+   "states": [
+    {
+     "id": "CREATED",
+     "label": "CREATED",
+     "source": {
+      "path": "backend/src/rox_core/models/integration.py",
+      "lines": [
+       63,
+       63
+      ]
+     }
+    },
+    {
+     "id": "PROVISIONING",
+     "label": "PROVISIONING",
+     "source": {
+      "path": "backend/src/rox_core/models/integration.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    },
+    {
+     "id": "READY",
+     "label": "READY",
+     "source": {
+      "path": "backend/src/rox_core/models/integration.py",
+      "lines": [
+       65,
+       65
+      ]
+     }
+    },
+    {
+     "id": "ACTION_REQUIRED",
+     "label": "ACTION_REQUIRED",
+     "source": {
+      "path": "backend/src/rox_core/models/integration.py",
+      "lines": [
+       66,
+       66
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/integration.py",
+      "lines": [
+       67,
+       67
+      ]
+     }
+    }
+   ],
+   "transitions": [
+    {
+     "src": "ACTION_REQUIRED",
+     "dst": "READY",
+     "event": "business.py:6929",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/business.py",
+      "lines": [
+       6929,
+       6929
+      ]
+     }
+    },
+    {
+     "src": "ACTION_REQUIRED",
+     "dst": "READY",
+     "event": "business.py:7472",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/business.py",
+      "lines": [
+       7472,
+       7472
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "related": [
   {
    "label": "Activity integrations: email, calendar, meetings, Slack",

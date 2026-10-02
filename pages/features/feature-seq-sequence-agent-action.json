@@ -7470,8 +7470,201 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from Temporal workflows",
+   "participants": [
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "temporal",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/agent_framework/data_interface/sequence_cell/live.py",
+      "lines": [
+       180,
+       180
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       543,
+       543
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       655,
+       655
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py",
+      "lines": [
+       135,
+       135
+      ]
+     }
+    },
+    {
+     "src": "outreach_sched",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
+      "lines": [
+       61,
+       61
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "SequenceAgentActionStatus lifecycle",
+   "entity": "SequenceAgentActionStatus",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_agent_action.py",
+      "lines": [
+       46,
+       46
+      ]
+     }
+    },
+    {
+     "id": "CONVERTED",
+     "label": "CONVERTED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_agent_action.py",
+      "lines": [
+       47,
+       47
+      ]
+     }
+    },
+    {
+     "id": "DISMISSED",
+     "label": "DISMISSED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_agent_action.py",
+      "lines": [
+       48,
+       48
+      ]
+     }
+    },
+    {
+     "id": "POLICY_FAILURE",
+     "label": "POLICY_FAILURE",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_agent_action.py",
+      "lines": [
+       49,
+       49
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",

@@ -10149,8 +10149,235 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/endpoints.py",
+      "lines": [
+       30,
+       30
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       632,
+       632
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       559,
+       559
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_content_evaluator.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_resolution_dao.py",
+      "lines": [
+       66,
+       66
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
+      "lines": [
+       160,
+       160
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "EmailDomainMappingStatus lifecycle",
+   "entity": "EmailDomainMappingStatus",
+   "states": [
+    {
+     "id": "ACTIVE",
+     "label": "ACTIVE",
+     "source": {
+      "path": "backend/src/rox_core/models/email_domain_resolution.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    },
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/email_domain_resolution.py",
+      "lines": [
+       15,
+       15
+      ]
+     }
+    },
+    {
+     "id": "UNRESOLVED",
+     "label": "UNRESOLVED",
+     "source": {
+      "path": "backend/src/rox_core/models/email_domain_resolution.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    },
+    {
+     "id": "CONFLICTING",
+     "label": "CONFLICTING",
+     "source": {
+      "path": "backend/src/rox_core/models/email_domain_resolution.py",
+      "lines": [
+       17,
+       17
+      ]
+     }
+    },
+    {
+     "id": "REJECTED",
+     "label": "REJECTED",
+     "source": {
+      "path": "backend/src/rox_core/models/email_domain_resolution.py",
+      "lines": [
+       18,
+       18
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Companies & people",

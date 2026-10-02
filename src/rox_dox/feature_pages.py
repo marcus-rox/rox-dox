@@ -38,6 +38,9 @@ from rox_dox.model import (
 )
 from rox_dox.projection import MAX_SOURCES_PER_EDGE, project_component_diagram
 from rox_dox.schema import Table
+from rox_dox.sequences import block_sequences
+from rox_dox.state_machines import page_state_machines
+from rox_dox.states import StatesReport
 
 Layer = Literal["web", "routes", "workers", "models", "logic", "skills", "deploy"]
 
@@ -920,6 +923,7 @@ def _feature_page(
     table_accesses: Mapping[str, Mapping[str, tuple[int | None, int | None]]],
     primary_features: Mapping[str, tuple[str, str]],
     component_catalog: Sequence[Mapping[str, Any]],
+    states: StatesReport | None = None,
 ) -> Page:
     title = _feature_name(feature, names)
     domain_id = f"domain-{feature_map.domain}"
@@ -988,8 +992,12 @@ def _feature_page(
             sql_tables=feature.tables,
             relations=_feature_relations(feature),
         ),
-        sequences=[],
-        states=[],
+        sequences=block_sequences(block.diagram),
+        states=page_state_machines(
+            states,
+            paths=[file.path for file in feature.files if file.primary],
+            tables=feature.tables,
+        ),
         related=related,
     )
 
@@ -1386,6 +1394,7 @@ def _domain_page(
     domain_titles: Mapping[str, str],
     table_domains: Mapping[str, str],
     component_catalog: Sequence[Mapping[str, Any]],
+    states: StatesReport | None = None,
 ) -> Page:
     domain_page_id = f"domain-{feature_map.domain}"
     primary_paths = sorted(
@@ -1430,8 +1439,8 @@ def _domain_page(
         block=block,
         block_figures=[],
         data=_domain_data(feature_map, names, tables),
-        sequences=[],
-        states=[],
+        sequences=block_sequences(block),
+        states=page_state_machines(states, paths=(), tables=feature_map.tables),
         related=[
             Related(
                 label="rox-core",
@@ -1457,6 +1466,7 @@ def feature_pages(
     domain_titles: Mapping[str, str] | None = None,
     table_domains: Mapping[str, str] | None = None,
     component_catalog: Sequence[Mapping[str, Any]] = (),
+    states: StatesReport | None = None,
 ) -> list[Page]:
     runtime_facts = component_facts or {}
     runtime_imports = component_imports or {}
@@ -1476,6 +1486,7 @@ def feature_pages(
             domain_titles=domain_titles or {},
             table_domains=table_domains or {},
             component_catalog=component_catalog,
+            states=states,
         )
     ]
     pages.extend(
@@ -1490,6 +1501,7 @@ def feature_pages(
             table_accesses=runtime_table_accesses,
             primary_features=primary_feature_owners,
             component_catalog=component_catalog,
+            states=states,
         )
         for feature in feature_map.features
     )

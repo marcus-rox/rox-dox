@@ -7875,8 +7875,320 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       543,
+       543
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       581,
+       581
+      ]
+     }
+    },
+    {
+     "src": "outreach_sched",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/call_disposition_label/service.py",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "AnalysisStatus lifecycle",
+   "entity": "AnalysisStatus",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       105,
+       105
+      ]
+     }
+    },
+    {
+     "id": "IN_PROGRESS",
+     "label": "IN_PROGRESS",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       106,
+       106
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       107,
+       107
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       108,
+       108
+      ]
+     }
+    },
+    {
+     "id": "SKIPPED",
+     "label": "SKIPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_call.py",
+      "lines": [
+       109,
+       109
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "SequenceTaskStatus lifecycle",
+   "entity": "SequenceTaskStatus",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       47,
+       47
+      ]
+     }
+    },
+    {
+     "id": "PENDING_EMAIL",
+     "label": "PENDING_EMAIL",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       48,
+       48
+      ]
+     }
+    },
+    {
+     "id": "SCHEDULED",
+     "label": "SCHEDULED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       49,
+       49
+      ]
+     }
+    },
+    {
+     "id": "MANUALLY_SCHEDULED",
+     "label": "MANUALLY_SCHEDULED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       50,
+       50
+      ]
+     }
+    },
+    {
+     "id": "IN_PROGRESS",
+     "label": "IN_PROGRESS",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       51,
+       51
+      ]
+     }
+    },
+    {
+     "id": "DISMISSED",
+     "label": "DISMISSED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       52,
+       52
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       53,
+       53
+      ]
+     }
+    },
+    {
+     "id": "EXPORTED",
+     "label": "EXPORTED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       54,
+       54
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       55,
+       55
+      ]
+     }
+    },
+    {
+     "id": "BOUNCED",
+     "label": "BOUNCED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       56,
+       56
+      ]
+     }
+    },
+    {
+     "id": "REGENERATING",
+     "label": "REGENERATING",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       57,
+       57
+      ]
+     }
+    },
+    {
+     "id": "GENERATION_FAILED",
+     "label": "GENERATION_FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       58,
+       58
+      ]
+     }
+    },
+    {
+     "id": "POLICY_FAILURE",
+     "label": "POLICY_FAILURE",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       59,
+       59
+      ]
+     }
+    },
+    {
+     "id": "PENDING_POLICY_CHECK",
+     "label": "PENDING_POLICY_CHECK",
+     "source": {
+      "path": "backend/src/rox_core/models/sequence_task.py",
+      "lines": [
+       61,
+       61
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",

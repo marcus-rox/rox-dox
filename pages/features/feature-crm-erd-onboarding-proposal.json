@@ -11342,8 +11342,287 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/endpoints.py",
+      "lines": [
+       77,
+       77
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding_graph_build_state_service.py",
+      "lines": [
+       84,
+       84
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/erd_onboarding_issue_service.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       507,
+       507
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/salesforce_object_activation_service.py",
+      "lines": [
+       92,
+       92
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "ErdOnboardingProposalStatus lifecycle",
+   "entity": "ErdOnboardingProposalStatus",
+   "states": [
+    {
+     "id": "GENERATED",
+     "label": "GENERATED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       50,
+       50
+      ]
+     }
+    },
+    {
+     "id": "APPROVED",
+     "label": "APPROVED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       52,
+       52
+      ]
+     }
+    },
+    {
+     "id": "COMMITTED",
+     "label": "COMMITTED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       53,
+       53
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       54,
+       54
+      ]
+     }
+    }
+   ],
+   "transitions": [
+    {
+     "src": "GENERATED",
+     "dst": "APPROVED",
+     "event": "onboarding_proposal_service.py:2640",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
+      "lines": [
+       2640,
+       2640
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "ErdOnboardingItemReviewStatus lifecycle",
+   "entity": "ErdOnboardingItemReviewStatus",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       85,
+       85
+      ]
+     }
+    },
+    {
+     "id": "ACCEPTED",
+     "label": "ACCEPTED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       86,
+       86
+      ]
+     }
+    },
+    {
+     "id": "REJECTED",
+     "label": "REJECTED",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       87,
+       87
+      ]
+     }
+    },
+    {
+     "id": "OVERRIDDEN",
+     "label": "OVERRIDDEN",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/erd/onboarding.py",
+      "lines": [
+       88,
+       88
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "SalesforceObjectActivationPhase lifecycle",
+   "entity": "SalesforceObjectActivationPhase",
+   "states": [
+    {
+     "id": "SOURCE_TRIGGERING",
+     "label": "SOURCE_TRIGGERING",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/salesforce_object_activation_dto.py",
+      "lines": [
+       8,
+       8
+      ]
+     }
+    },
+    {
+     "id": "SOURCE_SYNCING",
+     "label": "SOURCE_SYNCING",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/salesforce_object_activation_dto.py",
+      "lines": [
+       9,
+       9
+      ]
+     }
+    },
+    {
+     "id": "GRAPH_PENDING",
+     "label": "GRAPH_PENDING",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/salesforce_object_activation_dto.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "CRM mirror (entity_*, sfdc_*, graph)",

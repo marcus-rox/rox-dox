@@ -3178,7 +3178,90 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
+ "sequences": [
+  {
+   "title": "Flow from Temporal workflows",
+   "participants": [
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "temporal",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/mixrank/dao.py",
+      "lines": [
+       86,
+       86
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       580,
+       580
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "states": [],
  "related": [
   {

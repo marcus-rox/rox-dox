@@ -23836,8 +23836,253 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/app-platform/prepared-leads/src/lib/useAccountContacts.ts",
+      "lines": [
+       2,
+       2
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/people/business.py",
+      "lines": [
+       458,
+       458
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/lambda_coordinator/llm/openai.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/lambda_coordinator/data_connectors/serp_api_connector.py",
+      "lines": [
+       203,
+       203
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       467,
+       467
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       559,
+       559
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       544,
+       544
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/interface.py",
+      "lines": [
+       305,
+       305
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
+      "lines": [
+       192,
+       192
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "EngagementStatus lifecycle",
+   "entity": "EngagementStatus",
+   "states": [
+    {
+     "id": "ENGAGED",
+     "label": "ENGAGED",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/utils.py",
+      "lines": [
+       5,
+       5
+      ]
+     }
+    },
+    {
+     "id": "DISMISSED",
+     "label": "DISMISSED",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/utils.py",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    },
+    {
+     "id": "NEW",
+     "label": "NEW",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/utils.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Companies & people",

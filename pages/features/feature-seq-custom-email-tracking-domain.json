@@ -11606,8 +11606,263 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from Provider push",
+   "participants": [
+    {
+     "id": "provider_push",
+     "label": "Provider push",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       489,
+       516
+      ]
+     }
+    },
+    {
+     "id": "webhook",
+     "label": "WEBHOOK (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "provider_push",
+     "dst": "webhook",
+     "message": "provider events",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/custom_tracking_domain/endpoints.py",
+      "lines": [
+       265,
+       265
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/settings/OutreachSettings/MailboxSettingsTable.tsx",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/ext_integrations/email_integration/email_shim.py",
+      "lines": [
+       1503,
+       1503
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/email_integration/email_shim.py",
+      "lines": [
+       1451,
+       1451
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       518,
+       518
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "CustomTrackingDomainStatus lifecycle",
+   "entity": "CustomTrackingDomainStatus",
+   "states": [
+    {
+     "id": "ACTIVE",
+     "label": "ACTIVE",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/custom_tracking_domain/dto.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    },
+    {
+     "id": "INACTIVE",
+     "label": "INACTIVE",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/custom_tracking_domain/dto.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "RoxEmailStatus lifecycle",
+   "entity": "RoxEmailStatus",
+   "states": [
+    {
+     "id": "SENDING",
+     "label": "SENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    },
+    {
+     "id": "PROCESSING",
+     "label": "PROCESSING",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       39,
+       39
+      ]
+     }
+    },
+    {
+     "id": "SENT",
+     "label": "SENT",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       40,
+       40
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    },
+    {
+     "id": "BOUNCED",
+     "label": "BOUNCED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "id": "OPENED",
+     "label": "OPENED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_email.py",
+      "lines": [
+       43,
+       43
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",

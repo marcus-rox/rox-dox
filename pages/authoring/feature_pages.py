@@ -10,6 +10,7 @@ from rox_dox.components import FileFacts, extract_file_facts
 from rox_dox.feature_pages import feature_pages
 from rox_dox.features import FeatureMap, _cached_parse_graph, _snapshot, parallel_map
 from rox_dox.schema import Table, extract_tables
+from rox_dox.states import StatesReport, find_states
 
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
 
@@ -29,6 +30,7 @@ class _PageInputs:
     primary_features: Mapping[str, tuple[str, str]]
     table_domains: Mapping[str, str]
     component_catalog: Sequence[Mapping[str, Any]]
+    states_by_commit: Mapping[str, StatesReport]
 
 
 def _domain_page_dumps(inputs: _PageInputs, map_index: int) -> list[dict]:
@@ -48,6 +50,7 @@ def _domain_page_dumps(inputs: _PageInputs, map_index: int) -> list[dict]:
             domain_titles=inputs.domain_titles,
             table_domains=inputs.table_domains,
             component_catalog=inputs.component_catalog,
+            states=inputs.states_by_commit[feature_map.commit],
         )
     ]
 
@@ -94,8 +97,10 @@ def main() -> None:
     components_by_commit = {}
     imports_by_commit = {}
     table_accesses_by_commit = {}
+    states_by_commit = {}
     for feature_map in selected_maps:
         if feature_map.commit not in tables_by_commit:
+            states_by_commit[feature_map.commit] = find_states(repo, feature_map.commit)
             tables_by_commit[feature_map.commit] = extract_tables(
                 repo, feature_map.commit
             )
@@ -159,6 +164,7 @@ def main() -> None:
         primary_features=primary_features,
         table_domains=table_domains,
         component_catalog=component_catalog,
+        states_by_commit=states_by_commit,
     )
     generated = [
         page

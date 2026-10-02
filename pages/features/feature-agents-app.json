@@ -5371,7 +5371,131 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "chat",
+     "label": "CHAT (FastAPI)",
+     "source": {
+      "path": "backend/run_chat.py",
+      "lines": [
+       5,
+       17
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "chat",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/chat/routes/events/router.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from INTERACTION (Flask)",
+   "participants": [
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/governance/ownership/app_ownership_resolver.py",
+      "lines": [
+       33,
+       33
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       518,
+       518
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "states": [],
  "related": [
   {

@@ -12666,8 +12666,218 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from Provider push",
+   "participants": [
+    {
+     "id": "provider_push",
+     "label": "Provider push",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       489,
+       516
+      ]
+     }
+    },
+    {
+     "id": "webhook",
+     "label": "WEBHOOK (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "provider_push",
+     "dst": "webhook",
+     "message": "provider events",
+     "source": {
+      "path": "backend/src/rox_core/api/enrichment/webhook_callback.py",
+      "lines": [
+       649,
+       649
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/hooks/useCreateEnrichmentFlows.ts",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from Temporal workflows",
+   "participants": [
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "temporal",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/temporal/activities/enrichment/enqueue_cc_cell.py",
+      "lines": [
+       50,
+       50
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       588,
+       588
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "ListRunStatus lifecycle",
+   "entity": "ListRunStatus",
+   "states": [
+    {
+     "id": "IN_PROGRESS",
+     "label": "IN_PROGRESS",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       33,
+       33
+      ]
+     }
+    },
+    {
+     "id": "CANCEL_REQUESTED",
+     "label": "CANCEL_REQUESTED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       35,
+       35
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    },
+    {
+     "id": "CANCELLED",
+     "label": "CANCELLED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Lists, tabs, columns & insights",

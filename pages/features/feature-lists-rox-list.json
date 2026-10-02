@@ -13889,8 +13889,205 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       172,
+       172
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/prospect_lists/csv_exports_business.py",
+      "lines": [
+       90,
+       90
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/prospect_lists/service.py",
+      "lines": [
+       2699,
+       2699
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       575,
+       575
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       618,
+       618
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "ListRunStatus lifecycle",
+   "entity": "ListRunStatus",
+   "states": [
+    {
+     "id": "IN_PROGRESS",
+     "label": "IN_PROGRESS",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       33,
+       33
+      ]
+     }
+    },
+    {
+     "id": "CANCEL_REQUESTED",
+     "label": "CANCEL_REQUESTED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       35,
+       35
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       36,
+       36
+      ]
+     }
+    },
+    {
+     "id": "CANCELLED",
+     "label": "CANCELLED",
+     "source": {
+      "path": "backend/src/rox_customer/real_time/models/enrichment/orchestration_db_models.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Lists, tabs, columns & insights",

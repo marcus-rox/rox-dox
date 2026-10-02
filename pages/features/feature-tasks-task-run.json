@@ -15808,8 +15808,292 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/agent_actions/endpoints.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/priority_jobs/business.py",
+      "lines": [
+       87,
+       87
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       626,
+       626
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       532,
+       532
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       657,
+       657
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/tasks/executors/enrichment_custom_cell_generation.py",
+      "lines": [
+       86,
+       86
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/graph/graph_version_service.py",
+      "lines": [
+       167,
+       167
+      ]
+     }
+    },
+    {
+     "src": "outreach_sched",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/tasks/executors/campaign_coordinator.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "TaskState lifecycle",
+   "entity": "task_run.current_state, task_run_log.from_state, task_run_log.to_state",
+   "states": [
+    {
+     "id": "CREATED",
+     "label": "CREATED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    },
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       39,
+       39
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       40,
+       40
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    },
+    {
+     "id": "STOPPED",
+     "label": "STOPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "id": "SKIPPED",
+     "label": "SKIPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       43,
+       43
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Background tasks, jobs & metering",

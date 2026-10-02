@@ -11341,8 +11341,223 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/agent_actions/endpoints.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "temporal",
+     "message": "start workflow",
+     "source": {
+      "path": "backend/src/rox_core/api/api_access/agent_action_apis/prospecting/business.py",
+      "lines": [
+       244,
+       244
+      ]
+     }
+    },
+    {
+     "src": "temporal",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_runner.py",
+      "lines": [
+       609,
+       609
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       746,
+       746
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/agent_products/outbound/run_copy_service.py",
+      "lines": [
+       32,
+       32
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "OutboundAgentRunStatus lifecycle",
+   "entity": "OutboundAgentRunStatus",
+   "states": [
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_dto.py",
+      "lines": [
+       87,
+       87
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_dto.py",
+      "lines": [
+       88,
+       88
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_dto.py",
+      "lines": [
+       89,
+       89
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_dto.py",
+      "lines": [
+       90,
+       90
+      ]
+     }
+    },
+    {
+     "id": "CANCELLED",
+     "label": "CANCELLED",
+     "source": {
+      "path": "backend/src/agent_products/outbound/prospecting_dto.py",
+      "lines": [
+       91,
+       91
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",

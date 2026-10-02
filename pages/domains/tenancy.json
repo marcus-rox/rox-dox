@@ -49575,7 +49575,512 @@
   ],
   "columns": []
  },
- "sequences": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "chat",
+     "label": "CHAT (FastAPI)",
+     "source": {
+      "path": "backend/run_chat.py",
+      "lines": [
+       5,
+       17
+      ]
+     }
+    },
+    {
+     "id": "public_api",
+     "label": "PUBLIC_API (FastAPI)",
+     "source": {
+      "path": "backend/run_public_api.py",
+      "lines": [
+       5,
+       10
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    },
+    {
+     "id": "crm",
+     "label": "CRM + workspace APIs",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       300,
+       303
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "chat",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/chat/routes/artifact/router.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    },
+    {
+     "src": "http_clients",
+     "dst": "public_api",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/public_api/routes/enrichment/router.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    },
+    {
+     "src": "chat",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/artifact/service.py",
+      "lines": [
+       406,
+       406
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       542,
+       542
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       505,
+       505
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       544,
+       544
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/agents_core/agents_core_v2/modules/rox_agent_module.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "crm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/ext_integrations/util.py",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/calendar_integration/calendar_metrics.py",
+      "lines": [
+       22,
+       22
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from Provider push",
+   "participants": [
+    {
+     "id": "provider_push",
+     "label": "Provider push",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       489,
+       516
+      ]
+     }
+    },
+    {
+     "id": "webhook",
+     "label": "WEBHOOK (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "provider_push",
+     "dst": "webhook",
+     "message": "provider events",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/custom_tracking_domain/endpoints.py",
+      "lines": [
+       265,
+       265
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    },
+    {
+     "id": "crm",
+     "label": "CRM + workspace APIs",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       300,
+       303
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/app-platform/bitsight-sequence-metrics/src/routes/index.tsx",
+      "lines": [
+       2,
+       2
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/alerts/insight_gen_scheduler.py",
+      "lines": [
+       56,
+       56
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/auth/auth0_legacy/service.py",
+      "lines": [
+       113,
+       113
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       542,
+       542
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       505,
+       505
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       544,
+       544
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/research/research_agent/base_research_agent_executor.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/agents_core/agents_core_v2/modules/rox_agent_module.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "crm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/ext_integrations/util.py",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/calendar_integration/calendar_metrics.py",
+      "lines": [
+       22,
+       22
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "states": [],
  "related": [
   {

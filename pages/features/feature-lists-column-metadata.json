@@ -15920,7 +15920,223 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
+ "sequences": [
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "crm",
+     "label": "CRM + workspace APIs",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       300,
+       303
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/app-platform/ntt-oppty-reports/src/lib/realDeals.ts",
+      "lines": [
+       5,
+       5
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "temporal",
+     "message": "start workflow",
+     "source": {
+      "path": "backend/src/rox_core/api/enrichment/business.py",
+      "lines": [
+       1021,
+       1021
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/enrichment/business.py",
+      "lines": [
+       4496,
+       4496
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "crm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+      "lines": [
+       1284,
+       1284
+      ]
+     }
+    },
+    {
+     "src": "temporal",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/temporal/activities/enrichment/webhook_column_backfill.py",
+      "lines": [
+       185,
+       185
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       536,
+       536
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       507,
+       507
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/agent_framework/data_interface/column/live.py",
+      "lines": [
+       31,
+       31
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/account_research_sections/business.py",
+      "lines": [
+       852,
+       852
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "states": [],
  "related": [
   {

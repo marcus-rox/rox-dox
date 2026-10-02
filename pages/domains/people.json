@@ -31240,8 +31240,328 @@
   ],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "chat",
+     "label": "CHAT (FastAPI)",
+     "source": {
+      "path": "backend/run_chat.py",
+      "lines": [
+       5,
+       17
+      ]
+     }
+    },
+    {
+     "id": "public_api",
+     "label": "PUBLIC_API (FastAPI)",
+     "source": {
+      "path": "backend/run_public_api.py",
+      "lines": [
+       5,
+       10
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "chat",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/chat/routes/org_chart/router.py",
+      "lines": [
+       27,
+       27
+      ]
+     }
+    },
+    {
+     "src": "http_clients",
+     "dst": "public_api",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/public_api/routes/prospects/router.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/app-platform/prepared-leads/src/lib/useAccountContacts.ts",
+      "lines": [
+       2,
+       2
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/leads/unified_lead_merge_queue.py",
+      "lines": [
+       45,
+       45
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/data_extraction/svc/services/company_enrichment_service/sql_enrichment_function.py",
+      "lines": [
+       162,
+       162
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       467,
+       467
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       507,
+       507
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       545,
+       545
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/lambda_coordinator/llm/openai.py",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/lambda_coordinator/data_connectors/serp_api_connector.py",
+      "lines": [
+       203,
+       203
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/company/email_domain_merge_backfill_job.py",
+      "lines": [
+       160,
+       160
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "OrgChartGenerateState lifecycle",
+   "entity": "org_chart_generate_response.state",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       124,
+       124
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       125,
+       125
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       126,
+       126
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/org_chart.py",
+      "lines": [
+       127,
+       127
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "rox-core",

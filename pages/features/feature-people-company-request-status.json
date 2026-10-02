@@ -15758,8 +15758,158 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       468,
+       468
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/data_extraction/business.py",
+      "lines": [
+       244,
+       244
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "TaskState lifecycle",
+   "entity": "task_run.current_state, task_run_log.from_state, task_run_log.to_state",
+   "states": [
+    {
+     "id": "CREATED",
+     "label": "CREATED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    },
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       39,
+       39
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       40,
+       40
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    },
+    {
+     "id": "STOPPED",
+     "label": "STOPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "id": "SKIPPED",
+     "label": "SKIPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       43,
+       43
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Companies & people",
