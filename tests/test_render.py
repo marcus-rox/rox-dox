@@ -233,6 +233,7 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
         "    grid-template-columns: minmax(0, 1fr);\n  }"
     ) in document
     assert "toggle-right" not in document
+    assert ".panel-toggle {\n  position: fixed;\n  top: 0;\n  left: 0;" in document
     assert "<script src" not in document
     assert document.count("<script>") == 1
 

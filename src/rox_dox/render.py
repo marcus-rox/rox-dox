@@ -129,7 +129,10 @@ body {
   line-height: 1.6;
 }
 .panel-toggle {
-  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
   width: 1px;
   height: 1px;
   overflow: hidden;
