@@ -68,10 +68,12 @@ one, with no follow-up implied, is the clearest signal for this skill.
 
 ## Where to look
 
-**Read every file in scope in full before writing its table.** Do not infer a file's
-contents from its name, its neighbor's pattern, or a prior summary of it from earlier in
-the conversation — a file that was read once already may have changed, and a name like
-`client.py` says nothing about what's actually inside.
+Run `rox-dox outline <paths>` (add `--repo <rox-core> --commit <sha>` to read a pinned
+commit, `--json` for structured rows). It lists every file in scope with its top-level
+classes, functions and UPPER_CASE constants, each with its line and the first line of its
+docstring, and marks empty or imports-only files. Rewrite each doc into a what-it-does
+line; read the file only for rows whose doc is empty or unclear. Never infer a row from a
+file's name, a neighbor's pattern, or an earlier summary.
 
 If a file is large enough that "one row per definition" would run past ~15 rows, group
 related rows under a sub-heading inside that file's table (e.g. "Validation," "The actual
@@ -81,7 +83,7 @@ call") rather than dropping rows silently to hit a count.
 
 ## Done when
 
-Every file in scope has exactly one table (or one line noting it's empty/trivial); every
+Every file `rox-dox outline` listed has exactly one table (or one line noting it's empty/trivial); every
 description states what the thing does in plain language; nothing is invented that isn't
 actually in the file; and a reader could locate anything mentioned by name alone without
 needing file:line references.
