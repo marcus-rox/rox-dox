@@ -6748,8 +6748,194 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/outreachBatchActions/SequenceBatchActions.tsx",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_send.py",
+      "lines": [
+       1475,
+       1475
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/sequence/linkedin_limits.py",
+      "lines": [
+       288,
+       288
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       521,
+       521
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/integrations/linkedin_reply_ingestion.py",
+      "lines": [
+       91,
+       91
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "RoxLinkedinStatus lifecycle",
+   "entity": "RoxLinkedinStatus",
+   "states": [
+    {
+     "id": "IN_PROGRESS",
+     "label": "IN_PROGRESS",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+      "lines": [
+       14,
+       14
+      ]
+     }
+    },
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+      "lines": [
+       15,
+       15
+      ]
+     }
+    },
+    {
+     "id": "PROCESSING",
+     "label": "PROCESSING",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+      "lines": [
+       16,
+       16
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+      "lines": [
+       17,
+       17
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_linkedin_message.py",
+      "lines": [
+       18,
+       18
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",

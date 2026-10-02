@@ -26095,8 +26095,481 @@
   ],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "chat",
+     "label": "CHAT (FastAPI)",
+     "source": {
+      "path": "backend/run_chat.py",
+      "lines": [
+       5,
+       17
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "public_api",
+     "label": "PUBLIC_API (FastAPI)",
+     "source": {
+      "path": "backend/run_public_api.py",
+      "lines": [
+       5,
+       10
+      ]
+     }
+    },
+    {
+     "id": "llm",
+     "label": "LLM providers",
+     "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+       99,
+       99
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "chat",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/chat/routes/eval/digests.py",
+      "lines": [
+       97,
+       97
+      ]
+     }
+    },
+    {
+     "src": "http_clients",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/rox_core/api/agent_actions/endpoints.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    },
+    {
+     "src": "http_clients",
+     "dst": "public_api",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/public_api/routes/enrichment/router.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "llm",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/agents_core/rxa/engines/embedding_engine.py",
+      "lines": [
+       2,
+       2
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from Temporal workflows",
+   "participants": [
+    {
+     "id": "temporal",
+     "label": "Temporal workflows",
+     "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+       600,
+       600
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "temporal",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/public_api/async_jobs/jobs/lifecycle.py",
+      "lines": [
+       118,
+       118
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       504,
+       504
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       518,
+       518
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       544,
+       544
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
+      "lines": [
+       3583,
+       3583
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/data_store/cold_storage_store/cold_storage_store.py",
+      "lines": [
+       165,
+       165
+      ]
+     }
+    },
+    {
+     "src": "outreach_sched",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/tasks/executors/campaign_coordinator.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "DigestTaskState lifecycle",
+   "entity": "digest_task.current_state, digest_task_request.current_state",
+   "states": [
+    {
+     "id": "SUBMITTED",
+     "label": "SUBMITTED",
+     "source": {
+      "path": "backend/src/rox_core/models/digest_task.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/digest_task.py",
+      "lines": [
+       24,
+       24
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/digest_task.py",
+      "lines": [
+       25,
+       25
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "TaskState lifecycle",
+   "entity": "task_run.current_state, task_run_log.from_state, task_run_log.to_state",
+   "states": [
+    {
+     "id": "CREATED",
+     "label": "CREATED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       37,
+       37
+      ]
+     }
+    },
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       38,
+       38
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       39,
+       39
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       40,
+       40
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    },
+    {
+     "id": "STOPPED",
+     "label": "STOPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "id": "SKIPPED",
+     "label": "SKIPPED",
+     "source": {
+      "path": "backend/src/rox_core/models/task.py",
+      "lines": [
+       43,
+       43
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "ExtractionTaskState lifecycle",
+   "entity": "extraction_task_status_log.from_state, extraction_task_status_log.to_state",
+   "states": [
+    {
+     "id": "CREATED",
+     "label": "CREATED",
+     "source": {
+      "path": "backend/src/rox_core/models/utils/data_extraction_enum.py",
+      "lines": [
+       63,
+       63
+      ]
+     }
+    },
+    {
+     "id": "QUEUED",
+     "label": "QUEUED",
+     "source": {
+      "path": "backend/src/rox_core/models/utils/data_extraction_enum.py",
+      "lines": [
+       64,
+       64
+      ]
+     }
+    },
+    {
+     "id": "RUNNING",
+     "label": "RUNNING",
+     "source": {
+      "path": "backend/src/rox_core/models/utils/data_extraction_enum.py",
+      "lines": [
+       65,
+       65
+      ]
+     }
+    },
+    {
+     "id": "COMPLETED",
+     "label": "COMPLETED",
+     "source": {
+      "path": "backend/src/rox_core/models/utils/data_extraction_enum.py",
+      "lines": [
+       66,
+       66
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/utils/data_extraction_enum.py",
+      "lines": [
+       67,
+       67
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "rox-core",

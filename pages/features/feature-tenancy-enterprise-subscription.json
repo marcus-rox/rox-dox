@@ -21722,8 +21722,374 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from HTTP clients",
+   "participants": [
+    {
+     "id": "http_clients",
+     "label": "HTTP clients",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "public_api",
+     "label": "PUBLIC_API (FastAPI)",
+     "source": {
+      "path": "backend/run_public_api.py",
+      "lines": [
+       5,
+       10
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "http_clients",
+     "dst": "public_api",
+     "message": "REST calls",
+     "source": {
+      "path": "backend/src/public_api/routes/prospects/router.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/EnterpriseBillingContent.tsx",
+      "lines": [
+       34,
+       34
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/orchestrator/orchestrator.py",
+      "lines": [
+       237,
+       237
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/orchestrator/orchestrator.py",
+      "lines": [
+       626,
+       626
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       575,
+       575
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       505,
+       505
+      ]
+     }
+    },
+    {
+     "src": "agent_workers",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/rox_core/api/billing/contract_rates_service.py",
+      "lines": [
+       31,
+       31
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/agent_actions/dao.py",
+      "lines": [
+       266,
+       266
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "PurchasedActionsStatus lifecycle",
+   "entity": "PurchasedActionsStatus",
+   "states": [
+    {
+     "id": "PENDING",
+     "label": "PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       22,
+       22
+      ]
+     }
+    },
+    {
+     "id": "PAYMENT_PENDING",
+     "label": "PAYMENT_PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       25,
+       25
+      ]
+     }
+    },
+    {
+     "id": "CREDITED",
+     "label": "CREDITED",
+     "source": {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       26,
+       26
+      ]
+     }
+    },
+    {
+     "id": "FAILED",
+     "label": "FAILED",
+     "source": {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       27,
+       27
+      ]
+     }
+    },
+    {
+     "id": "EXPIRED",
+     "label": "EXPIRED",
+     "source": {
+      "path": "backend/src/rox_core/models/purchased_actions.py",
+      "lines": [
+       28,
+       28
+      ]
+     }
+    }
+   ],
+   "transitions": [
+    {
+     "src": "PENDING",
+     "dst": "FAILED",
+     "event": "business.py:5352",
+     "source": {
+      "path": "backend/src/rox_core/api/billing/business.py",
+      "lines": [
+       5352,
+       5352
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "title": "SubscriptionStatus lifecycle",
+   "entity": "SubscriptionStatus",
+   "states": [
+    {
+     "id": "PAYMENT_PENDING",
+     "label": "PAYMENT_PENDING",
+     "source": {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       41,
+       41
+      ]
+     }
+    },
+    {
+     "id": "ACTIVE",
+     "label": "ACTIVE",
+     "source": {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       42,
+       42
+      ]
+     }
+    },
+    {
+     "id": "PENDING_CANCEL",
+     "label": "PENDING_CANCEL",
+     "source": {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       43,
+       43
+      ]
+     }
+    },
+    {
+     "id": "CANCELED",
+     "label": "CANCELED",
+     "source": {
+      "path": "backend/src/rox_core/models/subscription.py",
+      "lines": [
+       44,
+       44
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  },
+  {
+   "title": "UserStatus lifecycle",
+   "entity": "UserStatus",
+   "states": [
+    {
+     "id": "UNDER_PROVISIONING",
+     "label": "UNDER_PROVISIONING",
+     "source": {
+      "path": "backend/src/rox_core/models/user.py",
+      "lines": [
+       52,
+       52
+      ]
+     }
+    },
+    {
+     "id": "PENDING_SETUP",
+     "label": "PENDING_SETUP",
+     "source": {
+      "path": "backend/src/rox_core/models/user.py",
+      "lines": [
+       55,
+       55
+      ]
+     }
+    },
+    {
+     "id": "PROVISIONED",
+     "label": "PROVISIONED",
+     "source": {
+      "path": "backend/src/rox_core/models/user.py",
+      "lines": [
+       56,
+       56
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Tenancy: orgs, users, auth & billing",

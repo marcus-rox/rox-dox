@@ -14860,8 +14860,264 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
- "states": [],
+ "sequences": [
+  {
+   "title": "Flow from web (Next.js 14)",
+   "participants": [
+    {
+     "id": "web",
+     "label": "web (Next.js 14)",
+     "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    },
+    {
+     "id": "interaction",
+     "label": "INTERACTION (Flask)",
+     "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+       156,
+       320
+      ]
+     }
+    },
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "agent_workers",
+     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "outreach_sched",
+     "label": "OUTREACH · WORKFLOWSCHEDULER",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       24,
+       25
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    },
+    {
+     "id": "twilio",
+     "label": "Twilio",
+     "source": {
+      "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+      "lines": [
+       98,
+       106
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "web",
+     "dst": "interaction",
+     "message": "REST calls",
+     "source": {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/outreach/OutreachPhoneReportsView.tsx",
+      "lines": [
+       7,
+       7
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "sqs",
+     "message": "enqueue tasks",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+      "lines": [
+       1922,
+       1922
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "postgres",
+     "message": "reads + writes",
+     "source": {
+      "path": "backend/src/rox_core/api/agents/outreach/dialer/business.py",
+      "lines": [
+       383,
+       383
+      ]
+     }
+    },
+    {
+     "src": "interaction",
+     "dst": "twilio",
+     "message": "API calls",
+     "source": {
+      "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+      "lines": [
+       11,
+       11
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "agent_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       606,
+       606
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       559,
+       559
+      ]
+     }
+    },
+    {
+     "src": "sqs",
+     "dst": "outreach_sched",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       581,
+       581
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "writes",
+     "source": {
+      "path": "backend/src/rox_core/api/entities/lead/unsynced_lead_to_contact_backfill_job.py",
+      "lines": [
+       508,
+       508
+      ]
+     }
+    },
+    {
+     "src": "outreach_sched",
+     "dst": "postgres",
+     "message": "reads",
+     "source": {
+      "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+      "lines": [
+       135,
+       135
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "states": [
+  {
+   "title": "PhoneNumberStatus lifecycle",
+   "entity": "PhoneNumberStatus",
+   "states": [
+    {
+     "id": "AVAILABLE",
+     "label": "AVAILABLE",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_phone_number.py",
+      "lines": [
+       20,
+       20
+      ]
+     }
+    },
+    {
+     "id": "PROVISIONED",
+     "label": "PROVISIONED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_phone_number.py",
+      "lines": [
+       21,
+       21
+      ]
+     }
+    },
+    {
+     "id": "FLAGGED",
+     "label": "FLAGGED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_phone_number.py",
+      "lines": [
+       22,
+       22
+      ]
+     }
+    },
+    {
+     "id": "RELEASED",
+     "label": "RELEASED",
+     "source": {
+      "path": "backend/src/rox_core/models/rox_phone_number.py",
+      "lines": [
+       23,
+       23
+      ]
+     }
+    }
+   ],
+   "transitions": []
+  }
+ ],
  "related": [
   {
    "label": "Sequences & outreach",
