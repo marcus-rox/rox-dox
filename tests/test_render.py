@@ -1055,3 +1055,27 @@ def test_page_block_diagram_renders_notes_and_cited_sources(
         )
         in figure
     )
+
+
+def test_svg_colours_are_theme_tokens(
+    page_data: dict[str, object],
+    git_repo: tuple[Path, str],
+    plantuml_jar: Path,
+) -> None:
+    repo, commit = git_repo
+    page = Page.model_validate(page_data)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables=extract_tables(repo, commit),
+        jar=plantuml_jar,
+    )
+    assert 'fill="var(--svg-ink, #1f2937)"' in document
+    assert 'fill="var(--svg-card, #ffffff)"' in document
+    assert 'fill="var(--svg-ink, #000)"' in document
+    assert "stroke:var(--svg-store-stroke, #3B6FD8)" in document
+    assert ':root[data-theme="dark"] {' in document
+    assert "  --svg-ink: #e6ebf2;\n" in document
+    assert "    --svg-ink: #e6ebf2;\n" in document
+    assert "  --paper: #171d26;" in document

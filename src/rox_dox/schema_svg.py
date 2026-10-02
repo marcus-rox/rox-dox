@@ -33,6 +33,7 @@ STORE_HEADER_COLOR = "#d97706"
 STORE_BACKGROUND = "#fffbeb"
 ROW_COLOR = "#f1f5f9"
 CARD_BORDER = "#cbd5e1"
+CARD_BACKGROUND = "#ffffff"
 MONOSPACE = "Menlo, Consolas, monospace"
 BOILERPLATE_COLUMNS = {
     "rox_org_id",
@@ -695,7 +696,7 @@ def _card_header(
     store: bool = False,
 ) -> str:
     header_color = STORE_HEADER_COLOR if store else HEADER_COLOR
-    background = STORE_BACKGROUND if store else "white"
+    background = STORE_BACKGROUND if store else CARD_BACKGROUND
     pieces = [
         f'<rect x="0" y="0" width="{item.width}" height="{item.header_height}" '
         f'fill="{header_color}" rx="6" ry="6"/>',
