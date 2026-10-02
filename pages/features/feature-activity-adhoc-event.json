@@ -3071,18 +3071,6 @@
    ],
    "rows": [
     [
-     "WEBHOOK (Flask)",
-     "service",
-     "—",
-     "Slack"
-    ],
-    [
-     "Temporal workflows",
-     "queue",
-     "—",
-     "—"
-    ],
-    [
      "SQS queues",
      "queue",
      "—",
@@ -3098,7 +3086,7 @@
      "SOR · BATCH · BACKFILL · INTEGRATION",
      "service(many)",
      "—",
-     "Slack"
+     "—"
     ],
     [
      "CRM + workspace APIs",
@@ -3291,34 +3279,6 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      156,
-      320
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
-     "lines": [
-      9,
-      9
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/__init__.py",
-     "lines": [
-      600,
-      600
-     ]
-    },
-    {
-     "path": "backend/src/notifications/service.py",
-     "lines": [
-      515,
-      515
-     ]
-    },
-    {
      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
      "lines": [
       7,
@@ -3409,31 +3369,7 @@
  "block": {
   "notes": [
    {
-    "text": "WEBHOOK (Flask) calls Slack through CRM + workspace APIs.",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
-      "lines": [
-       9,
-       9
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Temporal workflows enqueues tasks to SQS queues.",
-    "sources": [
-     {
-      "path": "backend/src/notifications/service.py",
-      "lines": [
-       515,
-       515
-      ]
-     }
-    ]
-   },
-   {
-    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT calls Slack through CRM + workspace APIs.",
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT makes API calls to CRM + workspace APIs (Slack).",
     "sources": [
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
@@ -3457,18 +3393,6 @@
     ]
    },
    {
-    "text": "SOR · BATCH · BACKFILL · INTEGRATION calls Slack through CRM + workspace APIs.",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
-      "lines": [
-       9,
-       9
-      ]
-     }
-    ]
-   },
-   {
     "text": "SOR · BATCH · BACKFILL · INTEGRATION enqueues tasks to SQS queues.",
     "sources": [
      {
@@ -3482,28 +3406,6 @@
    }
   ],
   "groups": [
-   {
-    "id": "column-http-services",
-    "label": "HTTP services",
-    "source": {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      156,
-      320
-     ]
-    }
-   },
-   {
-    "id": "column-workflows",
-    "label": "Workflows",
-    "source": {
-     "path": "backend/src/rox_core/__init__.py",
-     "lines": [
-      600,
-      600
-     ]
-    }
-   },
    {
     "id": "column-queues",
     "label": "Queues",
@@ -3539,36 +3441,6 @@
    }
   ],
   "nodes": [
-   {
-    "id": "webhook",
-    "label": "WEBHOOK (Flask)",
-    "source": {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      156,
-      320
-     ]
-    },
-    "kind": "component",
-    "group": "column-http-services",
-    "many": true,
-    "details": []
-   },
-   {
-    "id": "temporal",
-    "label": "Temporal workflows",
-    "source": {
-     "path": "backend/src/rox_core/__init__.py",
-     "lines": [
-      600,
-      600
-     ]
-    },
-    "kind": "component",
-    "group": "column-workflows",
-    "many": true,
-    "details": []
-   },
    {
     "id": "sqs",
     "label": "SQS queues",
@@ -3696,7 +3568,7 @@
    {
     "src": "agent_workers",
     "dst": "crm",
-    "label": "calls Slack",
+    "label": "API calls",
     "source": {
      "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
      "lines": [
@@ -3719,18 +3591,6 @@
    },
    {
     "src": "data_workers",
-    "dst": "crm",
-    "label": "calls Slack",
-    "source": {
-     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
-   },
-   {
-    "src": "data_workers",
     "dst": "sqs",
     "label": "enqueue tasks",
     "source": {
@@ -3740,34 +3600,11 @@
       119
      ]
     }
-   },
-   {
-    "src": "temporal",
-    "dst": "sqs",
-    "label": "enqueue tasks",
-    "source": {
-     "path": "backend/src/notifications/service.py",
-     "lines": [
-      515,
-      515
-     ]
-    }
-   },
-   {
-    "src": "webhook",
-    "dst": "crm",
-    "label": "calls Slack",
-    "source": {
-     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
-     "lines": [
-      9,
-      9
-     ]
-    }
    }
   ],
   "unreached_files": [
    ".agents/skills/rox-lists-migration/SKILL.md",
+   "backend/src/enrichment/pricing/provider_credit_usage.py",
    "backend/src/ext_integrations/slack_integration/agent_session_stop.py",
    "backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers/__init__.py",
    "backend/src/rox_core/api/enrichment/list_run_service.py"

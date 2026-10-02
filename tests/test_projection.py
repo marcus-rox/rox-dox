@@ -166,8 +166,12 @@ def _projection_fixture():
             api_group=None,
             endpoints=[],
             workers=[],
-            externals=[ExternalCall(service="Salesforce", module="salesforce", line=21)],
-            task_producers=[TaskProducer(task_type="TASK_A", path=helper_path, line=20)],
+            externals=[
+                ExternalCall(service="Salesforce", module="salesforce", line=21)
+            ],
+            task_producers=[
+                TaskProducer(task_type="TASK_A", path=helper_path, line=20)
+            ],
             workflow_starts=[22],
         ),
         worker_path: FileFacts(
@@ -245,15 +249,13 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
         "postgres",
         "crm",
     }
-    assert {
-        (edge.src, edge.dst, edge.label) for edge in diagram.edges
-    } == {
+    assert {(edge.src, edge.dst, edge.label) for edge in diagram.edges} == {
         ("web", "interaction", "REST calls"),
         ("provider_push", "webhook", "provider events"),
         ("interaction", "postgres", "reads + writes"),
         ("interaction", "sqs", "enqueue tasks"),
         ("interaction", "temporal", "start workflow"),
-        ("interaction", "crm", "calls Salesforce"),
+        ("interaction", "crm", "API calls"),
         ("sqs", "data_workers", "long-poll"),
     }
     for edge in diagram.edges:
@@ -265,15 +267,13 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
         for detail in node.details:
             assert detail.sources
     helper_edges = {
-        edge.label: edge
-        for edge in diagram.edges
-        if edge.source.path == helper_path
+        edge.label: edge for edge in diagram.edges if edge.source.path == helper_path
     }
     assert {
         "reads + writes",
         "enqueue tasks",
         "start workflow",
-        "calls Salesforce",
+        "API calls",
     } <= helper_edges.keys()
     details_by_node = {
         node.id: {detail.text for detail in node.details} for node in diagram.nodes
@@ -284,6 +284,7 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
     assert "IntegrationQueueType: 1 task types" in details_by_node["sqs"]
     assert "accounts" in details_by_node["postgres"]
     assert "Salesforce" in details_by_node["crm"]
+    assert any("Salesforce" in note.text for note in diagram.notes)
     assert diagram.unreached_files == ["backend/src/unreached.py"]
     assert 3 <= len(diagram.notes) <= 6
     assert all(note.sources for note in diagram.notes)
@@ -363,7 +364,126 @@ def test_provider_box_merging_keeps_component_count_within_budget() -> None:
     assert len(projection.diagram.edges) == 1
     assert projection.diagram.edges[0].src == "interaction"
     assert projection.diagram.edges[0].dst == "provider-apis"
-    assert projection.diagram.edges[0].label.startswith("calls Service")
+    assert projection.diagram.edges[0].label == "API calls"
+
+
+def test_shared_helper_is_owned_by_nearest_entry_component() -> None:
+    near_path = "backend/src/rox_core/api/accounts.py"
+    far_path = "backend/src/rox_core/api/webhook.py"
+    bridge_path = "backend/src/rox_core/services/bridge.py"
+    helper_path = "backend/src/rox_core/services/shared.py"
+    facts = {
+        near_path: FileFacts(
+            path=near_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="list_accounts",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        far_path: FileFacts(
+            path=far_path,
+            api_group="webhook",
+            endpoints=[
+                Endpoint(
+                    method="POST",
+                    path="/webhook",
+                    handler="receive_webhook",
+                    line=4,
+                    deploy_target="WEBHOOK",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        bridge_path: FileFacts(
+            path=bridge_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+        ),
+        helper_path: FileFacts(
+            path=helper_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+    }
+    projection = project_component_diagram(
+        [_file(path) for path in (near_path, far_path, bridge_path, helper_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={
+            near_path: {helper_path: 5},
+            far_path: {bridge_path: 6},
+            bridge_path: {helper_path: 7},
+        },
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={},
+    )
+
+    provider_edges = [
+        edge
+        for edge in projection.diagram.edges
+        if edge.dst == "crm" and edge.label == "API calls"
+    ]
+    assert len(provider_edges) == 1
+    assert provider_edges[0].src == "interaction"
+    assert provider_edges[0].source.path == helper_path
+
+
+def test_external_caller_seeds_an_unreached_scope_file() -> None:
+    target_path = "backend/src/rox_core/api/external_accounts.py"
+    caller_path = "backend/src/chat/routes/accounts.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        caller_path: FileFacts(
+            path=caller_path,
+            api_group="chat",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[ExternalCall(service="Twilio", module="twilio", line=9)],
+        ),
+    }
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={caller_path: [target_path]},
+    )
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("interaction", "crm", "API calls")
+    }
+    assert projection.diagram.edges[0].source.path == target_path
+    assert projection.diagram.unreached_files == []
 
 
 def test_edge_deduplication_merges_access_modes_and_uses_first_source() -> None:

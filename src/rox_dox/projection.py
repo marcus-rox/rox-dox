@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from rox_dox.components import FileFacts, TaskConsumer, TaskType, Worker, collect_task_facts
+from rox_dox.components import (
+    FileFacts,
+    TaskConsumer,
+    TaskType,
+    Worker,
+    collect_task_facts,
+)
 from rox_dox.features import FeatureEvidence, FeatureFile
 from rox_dox.model import BlockDiagram, Claim, CodeSource, Edge, Group, Node
 
@@ -140,20 +146,46 @@ def _entry_component_ids(
     return matches
 
 
-def _scope_import_closure(
-    start: str,
+def _reachable_component_candidates(
+    seeds: Collection[tuple[str, str, str, int]],
     scope_paths: set[str],
     imports: Mapping[str, Mapping[str, int]],
-) -> set[str]:
-    reached = {start}
-    pending = [start]
+) -> dict[str, set[tuple[int, str, str]]]:
+    reached_by_entry: dict[tuple[str, str], int] = {}
+    candidates: defaultdict[str, set[tuple[int, str, str]]] = defaultdict(set)
+    pending = deque(sorted(seeds))
     while pending:
-        current = pending.pop()
+        current, entry_path, component_id, distance = pending.popleft()
+        key = current, entry_path
+        if reached_by_entry.get(key, distance + 1) <= distance:
+            continue
+        reached_by_entry[key] = distance
+        candidates[current].add((distance, component_id, entry_path))
         for target in sorted(set(imports.get(current, {})) & scope_paths):
-            if target not in reached:
-                reached.add(target)
-                pending.append(target)
-    return reached
+            pending.append((target, entry_path, component_id, distance + 1))
+    return candidates
+
+
+def _nearest_component_owners(
+    candidates: Mapping[str, Collection[tuple[int, str, str]]],
+    catalog_order: Mapping[str, int],
+) -> dict[str, str]:
+    owners = {}
+    for path, records in candidates.items():
+        nearest_distance = min(distance for distance, _, _ in records)
+        entry_counts: defaultdict[str, set[str]] = defaultdict(set)
+        for distance, component_id, entry_path in records:
+            if distance == nearest_distance:
+                entry_counts[component_id].add(entry_path)
+        owners[path] = min(
+            entry_counts,
+            key=lambda component_id: (
+                -len(entry_counts[component_id]),
+                catalog_order.get(component_id, len(catalog_order)),
+                component_id,
+            ),
+        )
+    return owners
 
 
 def _add_detail(
@@ -224,11 +256,7 @@ def _deduplicate_edges(edges: Collection[Edge]) -> list[Edge]:
                 for mode in ("reads", "writes")
                 if mode in label
             }
-            label = (
-                "reads + writes"
-                if len(modes) == 2
-                else next(iter(modes))
-            )
+            label = "reads + writes" if len(modes) == 2 else next(iter(modes))
         elif all(label.startswith("calls ") for label in labels):
             services = sorted(
                 {
@@ -239,7 +267,9 @@ def _deduplicate_edges(edges: Collection[Edge]) -> list[Edge]:
             )
             label = f"calls {', '.join(services)}"
         else:
-            label = next(iter(labels)) if len(labels) == 1 else " / ".join(sorted(labels))
+            label = (
+                next(iter(labels)) if len(labels) == 1 else " / ".join(sorted(labels))
+            )
         result.append(
             Edge(
                 src=src,
@@ -326,8 +356,7 @@ def _fit_node_budget(
         worker_nodes = [
             node
             for node in nodes
-            if catalog_by_id.get(node.id, {}).get("column")
-            == "Background workers"
+            if catalog_by_id.get(node.id, {}).get("column") == "Background workers"
         ]
         if worker_nodes:
             worker_ids = {node.id for node in worker_nodes}
@@ -363,6 +392,7 @@ def _flow_notes(
     nodes: Collection[Node],
     edges: Collection[Edge],
     catalog_by_id: Mapping[str, Mapping[str, Any]],
+    services_by_node: Mapping[str, Collection[str]],
 ) -> list[Claim]:
     nodes_by_id = {node.id: node for node in nodes}
     column_indexes: dict[str, int] = {}
@@ -396,6 +426,10 @@ def _flow_notes(
                 phrases.append(f"long-polls {target_label}")
             elif label == "start workflow":
                 phrases.append(f"starts workflows on {target_label}")
+            elif label == "API calls":
+                services = sorted(services_by_node.get(edge.dst, ()))
+                service_text = f" ({', '.join(services)})" if services else ""
+                phrases.append(f"makes API calls to {target_label}{service_text}")
             elif label.startswith("calls "):
                 phrases.append(f"{label} through {target_label}")
             elif label in {"reads", "writes", "reads + writes"}:
@@ -473,6 +507,9 @@ def project_component_diagram(
         for path in scope_paths
     }
 
+    catalog_order = {
+        str(entry["id"]): index for index, entry in enumerate(component_catalog)
+    }
     entry_components_by_path = {
         path: _entry_component_ids(
             path,
@@ -485,13 +522,29 @@ def project_component_diagram(
         )
         for path, facts in facts_by_path.items()
     }
-    files_by_component: defaultdict[str, set[str]] = defaultdict(set)
-    for path, component_ids in entry_components_by_path.items():
-        for component_id in component_ids:
-            files_by_component[component_id].update(
-                _scope_import_closure(path, scope_paths, component_imports)
-            )
+    entry_components = {
+        path: min(
+            component_ids,
+            key=lambda component_id: (
+                catalog_order.get(component_id, len(catalog_order)),
+                component_id,
+            ),
+        )
+        for path, component_ids in entry_components_by_path.items()
+        if component_ids
+    }
+    owner_candidates = _reachable_component_candidates(
+        [
+            (path, path, component_id, 0)
+            for path, component_id in entry_components.items()
+        ],
+        scope_paths,
+        component_imports,
+    )
+    external_seeds = []
     for caller_path, targets in sorted(external_callers.items()):
+        if caller_path in scope_paths:
+            continue
         caller_facts = component_facts.get(caller_path)
         if caller_facts is None:
             continue
@@ -504,22 +557,40 @@ def project_component_diagram(
             consumers_by_executor,
             task_types,
         )
+        seedable_components = [
+            component_id
+            for component_id in caller_components
+            if catalog_by_id.get(component_id, {}).get("kind")
+            in {"service", "service(many)"}
+        ]
+        if not seedable_components:
+            continue
+        component_id = min(
+            seedable_components,
+            key=lambda candidate: (
+                catalog_order.get(candidate, len(catalog_order)),
+                candidate,
+            ),
+        )
         for target in sorted(set(targets) & scope_paths):
-            for component_id in caller_components:
-                files_by_component[component_id].update(
-                    _scope_import_closure(target, scope_paths, component_imports)
-                )
-    reached_paths = {
-        path for paths in files_by_component.values() for path in paths
-    }
-    unreached = sorted(scope_paths - reached_paths)
+            if target not in owner_candidates:
+                external_seeds.append((target, caller_path, component_id, 1))
+    external_candidates = _reachable_component_candidates(
+        external_seeds,
+        scope_paths,
+        component_imports,
+    )
+    for path, records in external_candidates.items():
+        owner_candidates.setdefault(path, set()).update(records)
+    owners_by_path = _nearest_component_owners(owner_candidates, catalog_order)
+    unreached = sorted(scope_paths - owners_by_path.keys())
 
     edge_sources: defaultdict[tuple[str, str, str], list[CodeSource]] = defaultdict(
         list
     )
-    component_table_sources: defaultdict[
-        tuple[str, str, str], list[CodeSource]
-    ] = defaultdict(list)
+    component_table_sources: defaultdict[tuple[str, str, str], list[CodeSource]] = (
+        defaultdict(list)
+    )
     component_tables: defaultdict[str, set[str]] = defaultdict(set)
     component_services: defaultdict[str, set[str]] = defaultdict(set)
     provider_services: defaultdict[str, set[str]] = defaultdict(set)
@@ -542,87 +613,72 @@ def project_component_diagram(
     postgres_id = "postgres" if "postgres" in catalog_by_id else None
 
     for path, facts in facts_by_path.items():
+        owner_id = owners_by_path.get(path)
         for endpoint in facts.endpoints:
-            component_id = (
-                target_components.get(endpoint.deploy_target)
-                if endpoint.deploy_target is not None
-                else None
-            )
-            if component_id is None:
-                candidates = _endpoint_component_ids(
-                    path,
-                    facts,
-                    catalog_by_id,
-                    target_components,
-                )
-                component_id = min(candidates) if candidates else None
-            if component_id is not None:
+            if owner_id is not None:
                 prefix = "/" + endpoint.path.strip("/").split("/", 1)[0]
                 if prefix == "/":
                     prefix = "/"
-                endpoint_groups[(component_id, prefix)][
-                    (path, endpoint.method, endpoint.path, endpoint.handler, endpoint.line)
+                endpoint_groups[(owner_id, prefix)][
+                    (
+                        path,
+                        endpoint.method,
+                        endpoint.path,
+                        endpoint.handler,
+                        endpoint.line,
+                    )
                 ] = _source(path, endpoint.line)
             if (
                 provider_push_id is not None
                 and webhook_id is not None
                 and endpoint.deploy_target == "WEBHOOK"
             ):
-                edge_sources[
-                    (provider_push_id, webhook_id, "provider events")
-                ].append(_source(path, endpoint.line))
-
-    for component_id, paths in files_by_component.items():
-        for path in sorted(paths):
-            facts = facts_by_path.get(path, component_facts.get(path))
-            if facts is None:
-                continue
-            for external in facts.externals:
-                provider_id = external_components.get(external.service)
-                if provider_id is None:
-                    continue
-                source = _source(path, external.line)
-                edge_sources[(component_id, provider_id, f"calls {external.service}")].append(
-                    source
+                edge_sources[(provider_push_id, webhook_id, "provider events")].append(
+                    _source(path, endpoint.line)
                 )
-                component_services[component_id].add(external.service)
-                provider_services[provider_id].add(external.service)
-            for line in facts.workflow_starts:
-                if temporal_id is not None and component_id != temporal_id:
-                    edge_sources[(component_id, temporal_id, "start workflow")].append(
-                        _source(path, line)
+
+        if owner_id is None:
+            continue
+        for external in facts.externals:
+            provider_id = external_components.get(external.service)
+            if provider_id is None:
+                continue
+            source = _source(path, external.line)
+            edge_sources[(owner_id, provider_id, "API calls")].append(source)
+            component_services[owner_id].add(external.service)
+            provider_services[provider_id].add(external.service)
+        for line in facts.workflow_starts:
+            if temporal_id is not None and owner_id != temporal_id:
+                edge_sources[(owner_id, temporal_id, "start workflow")].append(
+                    _source(path, line)
+                )
+        if owner_id == temporal_id:
+            for worker in facts.workers:
+                if worker.kind in {"temporal_workflow", "temporal_activity"}:
+                    _add_detail(
+                        details,
+                        temporal_id,
+                        worker.name,
+                        _source(path, worker.line),
                     )
-            if component_id == temporal_id:
-                for worker in facts.workers:
-                    if worker.kind in {"temporal_workflow", "temporal_activity"}:
-                        _add_detail(
-                            details,
-                            temporal_id,
-                            worker.name,
-                            _source(path, worker.line),
-                        )
-            for producer in facts.task_producers:
-                if sqs_id is None:
-                    continue
-                source = _source(producer.path, producer.line)
-                edge_sources[(component_id, sqs_id, "enqueue tasks")].append(source)
-                queue_task_names.add(producer.task_type)
-                queue_task_sources[producer.task_type].append(source)
-            for table, (write_line, read_line) in table_accesses.get(path, {}).items():
-                if table not in scope_table_names:
-                    continue
-                if write_line is not None:
-                    source = _source(path, write_line)
-                    component_table_sources[(component_id, table, "writes")].append(
-                        source
-                    )
-                    component_tables[component_id].add(table)
-                if read_line is not None:
-                    source = _source(path, read_line)
-                    component_table_sources[(component_id, table, "reads")].append(
-                        source
-                    )
-                    component_tables[component_id].add(table)
+        for producer in facts.task_producers:
+            if sqs_id is None:
+                continue
+            source = _source(producer.path, producer.line)
+            edge_sources[(owner_id, sqs_id, "enqueue tasks")].append(source)
+            queue_task_names.add(producer.task_type)
+            queue_task_sources[producer.task_type].append(source)
+        for table, (write_line, read_line) in table_accesses.get(path, {}).items():
+            if table not in scope_table_names:
+                continue
+            if write_line is not None:
+                source = _source(path, write_line)
+                component_table_sources[(owner_id, table, "writes")].append(source)
+                component_tables[owner_id].add(table)
+            if read_line is not None:
+                source = _source(path, read_line)
+                component_table_sources[(owner_id, table, "reads")].append(source)
+                component_tables[owner_id].add(table)
 
     scope_worker_paths = {
         path
@@ -721,7 +777,7 @@ def project_component_diagram(
                     [
                         source
                         for (src, dst, label), sources in edge_sources.items()
-                        if dst == provider_id and label == f"calls {service}"
+                        if dst == provider_id and label == "API calls"
                         for source in sources
                     ]
                 ),
@@ -735,31 +791,21 @@ def project_component_diagram(
                 route_evidence[evidence.tag][
                     "web" if evidence.path.startswith("web/") else "backend"
                 ].append(evidence)
-    web_id = next(
-        (
-            str(entry["id"])
-            for entry in component_catalog
-            if entry.get("match", {}).get("web_files")
-        ),
-        None,
-    )
     for groups in route_evidence.values():
         for web in groups.get("web", []):
             for backend in groups.get("backend", []):
-                backend_facts = facts_by_path.get(backend.path)
-                if backend_facts is None or web_id is None:
+                web_component_id = owners_by_path.get(web.path)
+                service_id = owners_by_path.get(backend.path)
+                if web_component_id is None or service_id is None:
                     continue
-                for service_id in _endpoint_component_ids(
-                    backend.path,
-                    backend_facts,
-                    catalog_by_id,
-                    target_components,
+                if (
+                    catalog_by_id.get(web_component_id, {}).get("kind") != "client"
+                    or catalog_by_id.get(service_id, {}).get("kind") != "service"
                 ):
-                    if catalog_by_id.get(service_id, {}).get("kind") != "service":
-                        continue
-                    edge_sources[(web_id, service_id, "REST calls")].append(
-                        _source(web.path, web.line)
-                    )
+                    continue
+                edge_sources[(web_component_id, service_id, "REST calls")].append(
+                    _source(web.path, web.line)
+                )
 
     for (component_id, table), modes in sorted(
         {
@@ -789,13 +835,13 @@ def project_component_diagram(
     )
     participating = {edge.src for edge in edges} | {edge.dst for edge in edges}
 
-    endpoint_details: defaultdict[str, defaultdict[str, list[CodeSource]]] = defaultdict(
-        lambda: defaultdict(list)
+    endpoint_details: defaultdict[str, defaultdict[str, list[CodeSource]]] = (
+        defaultdict(lambda: defaultdict(list))
     )
     for (component_id, prefix), records in endpoint_groups.items():
-        endpoint_details[component_id][
-            f"{prefix}: {len(records)} endpoints"
-        ].extend(records.values())
+        endpoint_details[component_id][f"{prefix}: {len(records)} endpoints"].extend(
+            records.values()
+        )
     for component_id, detail_map in endpoint_details.items():
         for text, sources in detail_map.items():
             details[component_id][text].extend(sources)
@@ -860,9 +906,11 @@ def project_component_diagram(
         for node_id, kind in semantic_kinds.items()
         if node_id in active_node_ids
     }
-    notes = _flow_notes(nodes, edges, catalog_by_id)
+    notes = _flow_notes(nodes, edges, catalog_by_id, service_map)
     groups = []
-    for column in dict.fromkeys(str(entry.get("column", "")) for entry in component_catalog):
+    for column in dict.fromkeys(
+        str(entry.get("column", "")) for entry in component_catalog
+    ):
         members = [node for node in nodes if node.group == f"column-{_slug(column)}"]
         if members:
             groups.append(
