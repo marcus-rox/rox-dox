@@ -553,8 +553,10 @@ def test_focused_block_figure_renders_notes_and_its_own_sources(
 
 def test_unreached_block_files_render_in_a_collapsed_list(
     page_data: dict[str, object],
+    git_repo: tuple[Path, str],
     plantuml_jar: Path,
 ) -> None:
+    repo, commit = git_repo
     payload = copy.deepcopy(page_data)
     payload["block"]["unreached_files"] = ["backend/src/helpers/unreached.py"]
     page = Page.model_validate(payload)
@@ -562,7 +564,7 @@ def test_unreached_block_files_render_in_a_collapsed_list(
         page,
         tree=build_tree([page]),
         repo_url=REPO_URL,
-        tables={},
+        tables=extract_tables(repo, commit),
         jar=plantuml_jar,
     )
 
@@ -1049,9 +1051,7 @@ def test_page_block_diagram_renders_notes_and_cited_sources(
 ) -> None:
     payload = copy.deepcopy(page_data)
     source = {"path": "pkg/a.py", "lines": [4, 5]}
-    payload["block"]["notes"] = [
-        {"text": "Runtime flow note.", "sources": [source]}
-    ]
+    payload["block"]["notes"] = [{"text": "Runtime flow note.", "sources": [source]}]
     payload["data"]["sql_tables"] = []
     payload["data"]["nosql"] = []
     page = Page.model_validate(payload)
@@ -1068,8 +1068,11 @@ def test_page_block_diagram_renders_notes_and_cited_sources(
     )[0]
     assert figure.index("block-scroll") < figure.index("Runtime flow note.")
     assert "block note 1" in figure
-    assert source_url(
-        page.block.notes[0].sources[0],
-        repo_url=REPO_URL,
-        commit=page.commit,
-    ) in figure
+    assert (
+        source_url(
+            page.block.notes[0].sources[0],
+            repo_url=REPO_URL,
+            commit=page.commit,
+        )
+        in figure
+    )

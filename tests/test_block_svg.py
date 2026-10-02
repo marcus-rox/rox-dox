@@ -6,7 +6,6 @@ from xml.etree import ElementTree
 
 from rox_dox.block_svg import (
     ARROW_COLOR,
-    LANE_STEP,
     QUEUE_FILL,
     QUEUE_NOTCH,
     QUEUE_STROKE,
@@ -314,71 +313,6 @@ def test_forward_skip_uses_a_clear_corridor(
     assert not route.via_channel
     assert route.points[2][1] == route.points[3][1]
     assert not blocker.y <= corridor_y <= blocker.y + blocker.height
-    assert block_layout_problems(page.block) == []
-
-
-def test_forward_skip_routes_below_lowest_card_when_corridors_overlap(
-    page_data: dict[str, object],
-) -> None:
-    payload = copy.deepcopy(page_data)
-    source = {"path": "pkg/a.py", "lines": [1, 2]}
-    payload["block"]["groups"] = [
-        {"id": group_id, "label": group_id.upper(), "source": source}
-        for group_id in ("first", "second", "third")
-    ]
-    payload["block"]["nodes"] = [
-        {
-            "id": node_id,
-            "label": node_id.upper(),
-            "source": source,
-            "group": group_id,
-            **(
-                {
-                    "details": [
-                        {"text": f"Detail line {index}", "sources": [source]}
-                        for index in range(7)
-                    ]
-                }
-                if node_id == "blocker"
-                else {}
-            ),
-        }
-        for node_id, group_id in (
-            ("first_node", "first"),
-            ("blocker", "second"),
-            ("third_node", "third"),
-        )
-    ]
-    payload["block"]["edges"] = [
-        {
-            "src": "first_node",
-            "dst": "third_node",
-            "label": "first skip",
-            "source": source,
-        },
-        {
-            "src": "first_node",
-            "dst": "third_node",
-            "label": "second skip",
-            "source": source,
-        },
-    ]
-    page = _page(payload)
-    _, cards, routes, _, height = _layout(page.block)
-    blocker = cards["blocker"]
-    lowest_card_bottom = max(card.y + card.height for card in cards.values())
-    first_corridor_y = routes[0].points[2][1]
-    fallback_corridor_y = routes[1].points[2][1]
-
-    assert blocker.y + blocker.height == lowest_card_bottom
-    assert not routes[0].via_channel
-    assert not routes[1].via_channel
-    assert first_corridor_y > lowest_card_bottom
-    assert fallback_corridor_y > first_corridor_y
-    assert fallback_corridor_y - first_corridor_y >= LANE_STEP
-    assert routes[0].points[2][1] == routes[0].points[3][1]
-    assert routes[1].points[2][1] == routes[1].points[3][1]
-    assert height > fallback_corridor_y
     assert block_layout_problems(page.block) == []
 
 

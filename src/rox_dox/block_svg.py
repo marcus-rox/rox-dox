@@ -3,8 +3,8 @@
 Top-level groups become columns, read left to right. Nested groups become
 labelled sections inside their column. Edges leave a card on its right side
 and enter the target on its left side, routed orthogonally through the gutters
-between columns. Forward skips use a clear corridor, extending below crossed
-columns when needed; same-column and backward edges use a shared channel below.
+between columns. Forward skips use a clear corridor where possible, with
+same-column, backward, and blocked skips using a shared channel below.
 """
 
 from __future__ import annotations
@@ -491,6 +491,7 @@ def _layout(
         (TOP_MARGIN + COLUMN_CAPTION_HEIGHT + column.height for column in columns),
         default=0,
     )
+    channel_top = columns_bottom + CHANNEL_OFFSET
     group_bounds = {
         group.id: (
             columns[index].x,
@@ -618,29 +619,7 @@ def _layout(
             corridor_y[id(edge)] = candidate
             chosen_corridors.append((exit_gutter, entry_gutter, candidate))
             break
-        if id(edge) not in corridor_y:
-            crossed_bottoms = [
-                card.y + card.height
-                for column in crossed_columns
-                for card in column.cards
-            ]
-            crossed_bottoms.extend(
-                section.y + section.height
-                for column in crossed_columns
-                for section in column.sections
-            )
-            candidate = max(crossed_bottoms, default=columns_bottom) + LANE_STEP
-            while any(
-                max(exit_gutter, other_exit) <= min(entry_gutter, other_entry)
-                and abs(candidate - other_y) < LANE_STEP
-                for other_exit, other_entry, other_y in chosen_corridors
-            ):
-                candidate += LANE_STEP
-            corridor_y[id(edge)] = candidate
-            chosen_corridors.append((exit_gutter, entry_gutter, candidate))
 
-    corridor_bottom = max(corridor_y.values(), default=columns_bottom)
-    channel_top = corridor_bottom + CHANNEL_OFFSET
     channel_edges = [
         edge
         for edge in edges
@@ -697,7 +676,7 @@ def _layout(
 
     channel_bottom = channel_top + max(len(channel_edges) - 1, 0) * CHANNEL_STEP
     height = (
-        (channel_bottom if channel_edges else corridor_bottom)
+        (channel_bottom if channel_edges else columns_bottom)
         + CHANNEL_OFFSET
         + LEGEND_HEIGHT
     )

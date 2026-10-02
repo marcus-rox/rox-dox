@@ -796,28 +796,22 @@
    ],
    "rows": [
     [
-     "SOR · BATCH · BACKFILL · INTEGRATION",
-     "service(many)",
-     "webhook_config",
-     "Salesforce"
-    ],
-    [
-     "PostgreSQL",
-     "store",
-     "webhook_config",
-     "—"
-    ],
-    [
-     "CRM + workspace APIs",
-     "external",
-     "—",
-     "Salesforce"
-    ],
-    [
      "Calendar Integration (library)",
      "Library code",
      "webhook_config",
      "Google APIs"
+    ],
+    [
+     "Tasks (library)",
+     "Library code",
+     "webhook_config",
+     "Salesforce"
+    ],
+    [
+     "Models (library)",
+     "Library code",
+     "webhook_config",
+     "—"
     ]
    ],
    "sources": [
@@ -826,41 +820,6 @@
      "lines": [
       23,
       102
-     ]
-    },
-    {
-     "path": "backend/src/util/listener_utils.py",
-     "lines": [
-      14,
-      26
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      490,
-      490
-     ]
-    },
-    {
-     "path": "backend/docker-compose-infra.yaml",
-     "lines": [
-      10,
-      11
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      300,
-      303
      ]
     },
     {
@@ -911,6 +870,34 @@
       10,
       10
      ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      490,
+      490
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/tasks/services.py",
+     "lines": [
+      8,
+      8
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/webhook_config.py",
+     "lines": [
+      23,
+      23
+     ]
     }
    ],
    "links": []
@@ -931,170 +918,14 @@
   ]
  },
  "block": {
-  "notes": [
-   {
-    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers read PostgreSQL and make API calls to CRM + workspace APIs (Salesforce), and also enqueue follow-up SQS tasks.",
-    "sources": [
-     {
-      "path": "backend/src/rox_core/api/tasks/services.py",
-      "lines": [
-       8,
-       8
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/tasks/services.py",
-      "lines": [
-       144,
-       144
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/tasks/services.py",
-      "lines": [
-       490,
-       490
-      ]
-     }
-    ]
-   }
-  ],
-  "groups": [
-   {
-    "id": "column-background-workers",
-    "label": "Background workers",
-    "source": {
-     "path": "backend/src/util/listener_utils.py",
-     "lines": [
-      14,
-      26
-     ]
-    }
-   },
-   {
-    "id": "column-stores",
-    "label": "Stores",
-    "source": {
-     "path": "backend/docker-compose-infra.yaml",
-     "lines": [
-      10,
-      11
-     ]
-    }
-   },
-   {
-    "id": "column-provider-apis",
-    "label": "Provider APIs",
-    "source": {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      300,
-      303
-     ]
-    }
-   }
-  ],
-  "nodes": [
-   {
-    "id": "data_workers",
-    "label": "SOR · BATCH · BACKFILL · INTEGRATION",
-    "source": {
-     "path": "backend/src/util/listener_utils.py",
-     "lines": [
-      14,
-      26
-     ]
-    },
-    "kind": "component",
-    "group": "column-background-workers",
-    "many": true,
-    "details": []
-   },
-   {
-    "id": "postgres",
-    "label": "PostgreSQL",
-    "source": {
-     "path": "backend/docker-compose-infra.yaml",
-     "lines": [
-      10,
-      11
-     ]
-    },
-    "kind": "store",
-    "group": "column-stores",
-    "many": false,
-    "details": [
-     {
-      "text": "webhook_config",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/tasks/services.py",
-        "lines": [
-         490,
-         490
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
-    "id": "crm",
-    "label": "CRM + workspace APIs",
-    "source": {
-     "path": "backend/src/rox_core/api/register_namespaces.py",
-     "lines": [
-      300,
-      303
-     ]
-    },
-    "kind": "external",
-    "group": "column-provider-apis",
-    "many": false,
-    "details": [
-     {
-      "text": "Salesforce",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/tasks/services.py",
-        "lines": [
-         8,
-         8
-        ]
-       }
-      ]
-     }
-    ]
-   }
-  ],
-  "edges": [
-   {
-    "src": "data_workers",
-    "dst": "crm",
-    "label": "API calls",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      8,
-      8
-     ]
-    }
-   },
-   {
-    "src": "data_workers",
-    "dst": "postgres",
-    "label": "reads",
-    "source": {
-     "path": "backend/src/rox_core/api/tasks/services.py",
-     "lines": [
-      490,
-      490
-     ]
-    }
-   }
-  ],
+  "notes": [],
+  "groups": [],
+  "nodes": [],
+  "edges": [],
   "unreached_files": [
-   "backend/src/ext_integrations/calendar_integration/google_calendar.py"
+   "backend/src/ext_integrations/calendar_integration/google_calendar.py",
+   "backend/src/rox_core/api/tasks/services.py",
+   "backend/src/rox_core/models/webhook_config.py"
   ]
  },
  "block_figures": [],

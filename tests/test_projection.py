@@ -12,6 +12,7 @@ from rox_dox.model import CodeSource, Edge, Node
 from rox_dox.projection import (
     _deduplicate_edges,
     _flow_notes,
+    _prune_early_edges,
     project_component_diagram,
 )
 
@@ -253,7 +254,7 @@ def _projection_fixture():
     return projection, helper_path
 
 
-def test_flow_notes_group_edges_by_box_and_move_queue_poll_to_worker() -> None:
+def test_flow_notes_group_by_column_and_move_queue_poll_to_worker() -> None:
     catalog = [
         _entry("http_clients", "HTTP clients", "client", "Callers", "component", {}),
         _entry(
@@ -368,14 +369,13 @@ def test_flow_notes_group_edges_by_box_and_move_queue_poll_to_worker() -> None:
         nodes,
         edges,
         catalog_by_id,
-        {"crm": ["Salesforce"]},
-        backward_edges,
+        backward_edges=backward_edges,
     )
 
     assert [note.text for note in notes] == [
         "HTTP clients make REST calls to INTERACTION (Flask).",
         "INTERACTION (Flask) reads + writes PostgreSQL, enqueues SQS tasks, starts "
-        "Temporal workflows and makes API calls to CRM + workspace APIs (Salesforce).",
+        "Temporal workflows and makes API calls to CRM + workspace APIs.",
         "Temporal workflows enqueue SQS tasks.",
         "INTEGRATION workers long-poll SQS and read + write PostgreSQL, and also "
         "enqueue follow-up SQS tasks and start Temporal workflows.",
@@ -395,7 +395,7 @@ def test_flow_notes_group_edges_by_box_and_move_queue_poll_to_worker() -> None:
     assert not any("SQS queues long-poll" in note.text for note in notes)
 
 
-def test_flow_notes_merge_after_five_and_keep_all_sources() -> None:
+def test_flow_notes_group_boxes_by_column_and_keep_all_sources() -> None:
     catalog = [
         _entry(
             f"service_{index}",
@@ -428,14 +428,13 @@ def test_flow_notes_merge_after_five_and_keep_all_sources() -> None:
         for index in range(7)
     ]
 
-    notes = _flow_notes(nodes, edges, catalog_by_id, {})
+    notes = _flow_notes(nodes, edges, catalog_by_id)
 
-    assert len(notes) == 6
-    assert [note.text for note in notes[:5]] == [
-        f"Service {index} reads PostgreSQL." for index in range(5)
-    ]
-    assert notes[-1].text == "Service 5 and Service 6 also read PostgreSQL."
-    assert {source.lines for source in notes[-1].sources} == {(6, 6), (7, 7)}
+    assert len(notes) == 1
+    assert notes[0].text == "HTTP services read PostgreSQL."
+    assert {source.lines for source in notes[0].sources} == {
+        (index + 1, index + 1) for index in range(7)
+    }
 
 
 def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> None:
@@ -493,7 +492,8 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
     assert "TASK_B" not in " ".join(details_by_node["sqs"])
     assert "accounts" in details_by_node["postgres"]
     assert "Salesforce" in details_by_node["crm"]
-    assert any("Salesforce" in note.text for note in diagram.notes)
+    assert any("CRM + workspace APIs" in note.text for note in diagram.notes)
+    assert not any("Salesforce" in note.text for note in diagram.notes)
     assert diagram.unreached_files == ["backend/src/unreached.py"]
     assert 3 <= len(diagram.notes) <= 6
     assert all(note.sources for note in diagram.notes)
@@ -653,6 +653,7 @@ def test_shared_helper_is_owned_by_nearest_entry_component() -> None:
 
 def test_external_caller_seeds_an_unreached_scope_file() -> None:
     target_path = "backend/src/rox_core/api/external_accounts.py"
+    entry_path = "backend/src/rox_core/api/accounts.py"
     caller_path = "backend/src/chat/routes/accounts.py"
     facts = {
         target_path: FileFacts(
@@ -677,6 +678,69 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
             workers=[],
             externals=[ExternalCall(service="Twilio", module="twilio", line=9)],
         ),
+        entry_path: FileFacts(
+            path=entry_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=4,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+    }
+    projection = project_component_diagram(
+        [_file(entry_path), _file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={caller_path: [target_path]},
+    )
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("http_clients", "interaction", "REST calls"),
+        ("interaction", "crm", "API calls"),
+    }
+    assert (
+        next(edge for edge in projection.diagram.edges if edge.dst == "crm").source.path
+        == target_path
+    )
+    assert projection.diagram.unreached_files == []
+
+
+def test_external_seed_without_an_in_scope_entry_does_not_create_a_box() -> None:
+    target_path = "backend/src/rox_core/api/external_accounts.py"
+    caller_path = "backend/src/chat/routes/accounts.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        caller_path: FileFacts(
+            path=caller_path,
+            api_group="chat",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
     }
     projection = project_component_diagram(
         [_file(target_path)],
@@ -688,11 +752,103 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
         external_callers={caller_path: [target_path]},
     )
 
-    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
-        ("interaction", "crm", "API calls")
+    assert projection.diagram.nodes == []
+    assert projection.diagram.edges == []
+    assert projection.diagram.unreached_files == [target_path]
+
+
+def test_ineligible_nearest_seed_falls_back_to_nearest_eligible_owner() -> None:
+    entry_path = "backend/src/rox_core/api/accounts.py"
+    bridge_paths = [
+        "backend/src/rox_core/services/bridge_one.py",
+        "backend/src/rox_core/services/bridge_two.py",
+    ]
+    helper_path = "backend/src/rox_core/services/shared.py"
+    external_target = "backend/src/rox_core/api/external_accounts.py"
+    caller_path = "backend/src/chat/routes/accounts.py"
+    catalog = [
+        *_runtime_catalog(),
+        _entry(
+            "chat",
+            "CHAT (FastAPI)",
+            "service",
+            "HTTP services",
+            "component",
+            {"deploy_targets": ["CHAT"]},
+        ),
+    ]
+    facts = {
+        entry_path: FileFacts(
+            path=entry_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        **{
+            path: FileFacts(
+                path=path,
+                api_group=None,
+                endpoints=[],
+                workers=[],
+                externals=[],
+            )
+            for path in [*bridge_paths, external_target]
+        },
+        helper_path: FileFacts(
+            path=helper_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        caller_path: FileFacts(
+            path=caller_path,
+            api_group="chat",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="get_accounts",
+                    line=3,
+                    deploy_target="CHAT",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
     }
-    assert projection.diagram.edges[0].source.path == target_path
-    assert projection.diagram.unreached_files == []
+    projection = project_component_diagram(
+        [
+            _file(path)
+            for path in [entry_path, *bridge_paths, helper_path, external_target]
+        ],
+        component_catalog=catalog,
+        component_facts=facts,
+        component_imports={
+            entry_path: {bridge_paths[0]: 5},
+            bridge_paths[0]: {bridge_paths[1]: 6},
+            bridge_paths[1]: {helper_path: 7},
+            external_target: {helper_path: 8},
+        },
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={caller_path: [external_target]},
+    )
+
+    provider_edge = next(edge for edge in projection.diagram.edges if edge.dst == "crm")
+    assert provider_edge.src == "interaction"
+    assert provider_edge.source.path == helper_path
+    assert "chat" not in {node.id for node in projection.diagram.nodes}
+    assert projection.diagram.unreached_files == [external_target]
 
 
 def test_backward_edges_become_cited_notes_and_unconnected_box_disappears() -> None:
@@ -884,3 +1040,324 @@ def test_edge_deduplication_merges_access_modes_and_uses_first_source() -> None:
     assert len(edges) == 1
     assert edges[0].label == "reads + writes"
     assert edges[0].source == first_source
+
+
+def test_pruning_drops_early_provider_edge_redundant_with_worker_edge() -> None:
+    catalog = {entry["id"]: entry for entry in _runtime_catalog()}
+    interaction_edge = Edge(
+        src="interaction",
+        dst="crm",
+        label="API calls",
+        source=CodeSource(path="interaction.py", lines=(1, 1)),
+    )
+    worker_edge = Edge(
+        src="data_workers",
+        dst="crm",
+        label="API calls",
+        source=CodeSource(path="worker.py", lines=(2, 2)),
+    )
+
+    kept, pruned = _prune_early_edges(
+        [interaction_edge, worker_edge],
+        catalog,
+        {("interaction", "crm"): 1, ("data_workers", "crm"): 1},
+    )
+
+    assert kept == [worker_edge]
+    assert pruned == [interaction_edge]
+
+
+def test_pruning_keeps_best_cited_early_store_edge_then_catalog_order() -> None:
+    entries = [
+        _entry(
+            "interaction", "INTERACTION", "service", "HTTP services", "component", {}
+        ),
+        _entry("temporal", "Temporal", "queue", "Workflows", "component", {}),
+        _entry("webhook", "WEBHOOK", "service", "HTTP services", "component", {}),
+        _entry("postgres", "PostgreSQL", "store", "Stores", "store", {}),
+    ]
+    catalog = {entry["id"]: entry for entry in entries}
+    edges = [
+        Edge(
+            src=component_id,
+            dst="postgres",
+            label="reads",
+            source=CodeSource(path=f"{component_id}.py", lines=(1, 1)),
+        )
+        for component_id in ("interaction", "webhook", "temporal")
+    ]
+
+    kept, pruned = _prune_early_edges(
+        edges,
+        catalog,
+        {
+            ("interaction", "postgres"): 2,
+            ("webhook", "postgres"): 4,
+            ("temporal", "postgres"): 4,
+        },
+    )
+
+    assert [(edge.src, edge.dst) for edge in kept] == [("temporal", "postgres")]
+    assert {edge.src for edge in pruned} == {"interaction", "webhook"}
+
+
+def test_pruning_drops_fewest_cited_early_skip_edge_to_meet_edge_budget() -> None:
+    entries = [
+        _entry("caller_a", "Caller A", "client", "Callers", "component", {}),
+        _entry("caller_b", "Caller B", "client", "Callers", "component", {}),
+        _entry("http_a", "HTTP A", "service", "HTTP services", "component", {}),
+        _entry("http_b", "HTTP B", "service", "HTTP services", "component", {}),
+        _entry("temporal", "Temporal", "queue", "Workflows", "component", {}),
+        _entry("sqs", "SQS", "queue", "Queues", "queue", {}),
+        _entry("crm", "CRM", "external", "Provider APIs", "external", {}),
+    ]
+    catalog = {entry["id"]: entry for entry in entries}
+    pairs = [
+        ("caller_a", "http_a"),
+        ("caller_a", "http_b"),
+        ("caller_b", "http_b"),
+        ("caller_a", "temporal"),
+        ("caller_b", "temporal"),
+        ("caller_a", "sqs"),
+        ("caller_b", "sqs"),
+        ("caller_a", "crm"),
+        ("caller_b", "crm"),
+        ("http_a", "crm"),
+        ("http_b", "crm"),
+        ("temporal", "sqs"),
+    ]
+    edges = [
+        Edge(
+            src=src,
+            dst=dst,
+            label="flow",
+            source=CodeSource(path=f"{src}.py", lines=(index + 1, index + 1)),
+        )
+        for index, (src, dst) in enumerate(pairs)
+    ]
+    source_counts = {pair: 2 for pair in pairs}
+    source_counts[("caller_b", "temporal")] = 1
+    source_counts[("caller_b", "sqs")] = 3
+
+    kept, pruned = _prune_early_edges(edges, catalog, source_counts)
+
+    assert len(kept) == 11
+    assert [(edge.src, edge.dst) for edge in pruned] == [("caller_b", "temporal")]
+
+
+def test_flow_notes_include_pruned_edge_facts_and_all_citations() -> None:
+    interaction = _entry(
+        "interaction",
+        "INTERACTION (Flask)",
+        "service",
+        "HTTP services",
+        "component",
+        {},
+    )
+    webhook = _entry(
+        "webhook", "WEBHOOK (Flask)", "service", "HTTP services", "component", {}
+    )
+    postgres = _entry("postgres", "PostgreSQL", "store", "Stores", "store", {})
+    catalog = {entry["id"]: entry for entry in (interaction, webhook, postgres)}
+    drawn_source = CodeSource(path="webhook.py", lines=(5, 5))
+    pruned_source = CodeSource(path="interaction.py", lines=(2, 2))
+    additional_source = CodeSource(path="interaction.py", lines=(3, 3))
+    nodes = [
+        Node(
+            id=component_id,
+            label=catalog[component_id]["label"],
+            source=CodeSource(path=f"{component_id}.py", lines=(1, 1)),
+            group="column-http-services",
+        )
+        for component_id in ("interaction", "webhook")
+    ]
+    drawn = Edge(
+        src="webhook",
+        dst="postgres",
+        label="reads",
+        source=drawn_source,
+    )
+    pruned = Edge(
+        src="interaction",
+        dst="postgres",
+        label="reads",
+        source=pruned_source,
+    )
+
+    notes = _flow_notes(
+        nodes,
+        [drawn],
+        catalog,
+        pruned_edges=[pruned],
+        sources_by_pair={
+            ("interaction", "postgres"): [pruned_source, additional_source],
+            ("webhook", "postgres"): [drawn_source],
+        },
+    )
+
+    assert [note.text for note in notes] == ["HTTP services read PostgreSQL."]
+    assert {source.path for source in notes[0].sources} == {
+        "interaction.py",
+        "webhook.py",
+    }
+    assert {source.lines[0] for source in notes[0].sources} == {2, 3, 5}
+
+
+def test_flow_notes_show_common_actions_and_per_box_extras() -> None:
+    entries = [
+        _entry(
+            "interaction",
+            "INTERACTION (Flask)",
+            "service",
+            "HTTP services",
+            "component",
+            {},
+        ),
+        _entry(
+            "webhook",
+            "WEBHOOK (Flask)",
+            "service",
+            "HTTP services",
+            "component",
+            {},
+        ),
+        _entry("postgres", "PostgreSQL", "store", "Stores", "store", {}),
+        _entry("sqs", "SQS queues", "queue", "Queues", "queue", {}),
+    ]
+    catalog = {entry["id"]: entry for entry in entries}
+    nodes = [
+        Node(
+            id=component_id,
+            label=catalog[component_id]["label"],
+            source=CodeSource(path=f"{component_id}.py", lines=(1, 1)),
+            group="column-http-services",
+        )
+        for component_id in ("webhook", "interaction")
+    ]
+    edges = [
+        Edge(
+            src=component_id,
+            dst="postgres",
+            label="reads",
+            source=CodeSource(path=f"{component_id}.py", lines=(2, 2)),
+        )
+        for component_id in ("interaction", "webhook")
+    ]
+    edges.append(
+        Edge(
+            src="webhook",
+            dst="sqs",
+            label="enqueue tasks",
+            source=CodeSource(path="webhook.py", lines=(3, 3)),
+        )
+    )
+
+    notes = _flow_notes(nodes, edges, catalog)
+
+    assert [note.text for note in notes] == [
+        "WEBHOOK (Flask) and INTERACTION (Flask) read PostgreSQL; "
+        "WEBHOOK (Flask) also enqueues SQS tasks."
+    ]
+
+
+def test_flow_notes_append_shared_backward_actions_to_common_worker_claim() -> None:
+    entries = [
+        _entry(
+            "agent_workers",
+            "AGENT",
+            "service(many)",
+            "Background workers",
+            "component",
+            {},
+        ),
+        _entry(
+            "data_workers",
+            "SOR · BATCH",
+            "service(many)",
+            "Background workers",
+            "component",
+            {},
+        ),
+        _entry("sqs", "SQS queues", "queue", "Queues", "queue", {}),
+        _entry("postgres", "PostgreSQL", "store", "Stores", "store", {}),
+        _entry(
+            "crm",
+            "CRM + workspace APIs",
+            "external",
+            "Provider APIs",
+            "external",
+            {},
+        ),
+        _entry(
+            "temporal",
+            "Temporal workflows",
+            "queue",
+            "Workflows",
+            "component",
+            {},
+        ),
+    ]
+    catalog = {entry["id"]: entry for entry in entries}
+    nodes = [
+        Node(
+            id=entry["id"],
+            label=entry["label"],
+            source=CodeSource(path=f"{entry['id']}.py", lines=(1, 1)),
+            group=f"column-{entry['column'].lower().replace(' ', '-')}",
+        )
+        for entry in entries
+    ]
+    edges = []
+    line = 2
+    for worker_id in ("agent_workers", "data_workers"):
+        for target_id, label in (
+            ("sqs", "long-poll"),
+            ("postgres", "reads + writes"),
+            ("crm", "API calls"),
+        ):
+            edges.append(
+                Edge(
+                    src=worker_id if target_id != "sqs" else "sqs",
+                    dst=target_id if target_id != "sqs" else worker_id,
+                    label=label,
+                    source=CodeSource(
+                        path=f"{worker_id}.py",
+                        lines=(line, line),
+                    ),
+                )
+            )
+            line += 1
+    backward_edges = [
+        Edge(
+            src=worker_id,
+            dst="sqs",
+            label="enqueue tasks",
+            source=CodeSource(
+                path=f"{worker_id}.py",
+                lines=(line, line),
+            ),
+        )
+        for worker_id in ("agent_workers", "data_workers")
+    ]
+    backward_edges.append(
+        Edge(
+            src="data_workers",
+            dst="temporal",
+            label="start workflow",
+            source=CodeSource(path="data_workers.py", lines=(line + 1, line + 1)),
+        )
+    )
+
+    notes = _flow_notes(
+        nodes,
+        edges,
+        catalog,
+        backward_edges=backward_edges,
+    )
+
+    assert [note.text for note in notes] == [
+        "AGENT workers and SOR · BATCH workers long-poll SQS, read + write "
+        "PostgreSQL and make API calls to CRM + workspace APIs, and also enqueue "
+        "follow-up SQS tasks; and also SOR · BATCH workers start Temporal workflows."
+    ]
+    assert len(notes[0].sources) == 9

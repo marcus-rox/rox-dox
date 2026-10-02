@@ -4,6 +4,7 @@ import re
 from collections import defaultdict, deque
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from math import ceil
 from typing import Any
 
 from rox_dox.components import (
@@ -18,6 +19,7 @@ from rox_dox.model import BlockDiagram, Claim, CodeSource, Edge, Group, Node
 
 MAX_FLOW_NOTES = 6
 TEMPORAL_WORKFLOW_DETAIL_LIMIT = 2
+EARLY_COLUMNS = {"Callers", "HTTP services", "Workflows"}
 
 
 @dataclass(frozen=True)
@@ -32,7 +34,7 @@ class ComponentProjection:
 class _FlowFact:
     action: str
     backward: bool
-    source: CodeSource
+    sources: tuple[CodeSource, ...]
 
 
 def _source(path: str, line: int) -> CodeSource:
@@ -56,7 +58,6 @@ def _flow_action(
     label: str,
     target_label: str,
     target_id: str,
-    services_by_node: Mapping[str, Collection[str]],
 ) -> str | None:
     if label == "REST calls":
         return f"make REST calls to {target_label}"
@@ -73,9 +74,7 @@ def _flow_action(
             return "start Temporal workflows"
         return f"start workflows on {target_label}"
     if label == "API calls":
-        services = sorted(services_by_node.get(target_id, ()))
-        service_text = f" ({', '.join(services)})" if services else ""
-        return f"make API calls to {target_label}{service_text}"
+        return f"make API calls to {target_label}"
     if label.startswith("calls "):
         return f"{label} through {target_label}"
     if label == "reads + writes":
@@ -128,29 +127,13 @@ def _flow_action_order(action: str) -> tuple[int, str]:
     return 5, action
 
 
-def _flow_note_text(
-    label: str,
-    facts: Collection[_FlowFact],
-    *,
-    plural: bool,
-) -> str:
-    forward = sorted(
-        {fact.action for fact in facts if not fact.backward},
-        key=_flow_action_order,
+def _flow_action_text(actions: Collection[str], *, plural: bool) -> str:
+    return _join_flow_phrases(
+        [
+            _singular_flow_action(action, plural=plural)
+            for action in sorted(actions, key=_flow_action_order)
+        ]
     )
-    backward = sorted(
-        {fact.action for fact in facts if fact.backward},
-        key=_flow_action_order,
-    )
-    forward_text = _join_flow_phrases(
-        [_singular_flow_action(action, plural=plural) for action in forward]
-    )
-    backward_text = _join_flow_phrases(backward)
-    if forward and backward:
-        return f"{label} {forward_text}, and also {backward_text}."
-    if backward:
-        return f"{label} also {backward_text}."
-    return f"{label} {forward_text}."
 
 
 def _slug(value: str) -> str:
@@ -299,6 +282,30 @@ def _nearest_component_owners(
     return owners
 
 
+def _requires_scope_entry(entry: Mapping[str, Any]) -> bool:
+    return entry.get("kind") in {"service", "service(many)"} or bool(
+        entry.get("match", {}).get("worker_kinds")
+    )
+
+
+def _eligible_owner_candidates(
+    candidates: Mapping[str, Collection[tuple[int, str, str]]],
+    catalog_by_id: Mapping[str, Mapping[str, Any]],
+    entry_components: Collection[str],
+) -> dict[str, set[tuple[int, str, str]]]:
+    eligible_components = set(entry_components)
+    eligible_components.update(
+        component_id
+        for component_id, entry in catalog_by_id.items()
+        if not _requires_scope_entry(entry)
+    )
+    return {
+        path: {record for record in records if record[1] in eligible_components}
+        for path, records in candidates.items()
+        if any(record[1] in eligible_components for record in records)
+    }
+
+
 def _add_detail(
     details: defaultdict[str, defaultdict[str, list[CodeSource]]],
     node_id: str,
@@ -369,6 +376,103 @@ def _deduplicate_edges(edges: Collection[Edge]) -> list[Edge]:
             )
         )
     return result
+
+
+def _prune_early_edges(
+    edges: Collection[Edge],
+    catalog_by_id: Mapping[str, Mapping[str, Any]],
+    source_counts: Mapping[tuple[str, str], int],
+) -> tuple[list[Edge], list[Edge]]:
+    catalog_order = {
+        component_id: index for index, component_id in enumerate(catalog_by_id)
+    }
+    column_order = {}
+    for entry in catalog_by_id.values():
+        column = str(entry.get("column", ""))
+        column_order.setdefault(column, len(column_order))
+
+    kept = list(edges)
+    pruned: list[Edge] = []
+
+    worker_providers = {
+        edge.dst
+        for edge in kept
+        if catalog_by_id.get(edge.src, {}).get("column") == "Background workers"
+    }
+    for edge in kept[:]:
+        if (
+            catalog_by_id.get(edge.src, {}).get("column") in EARLY_COLUMNS
+            and catalog_by_id.get(edge.dst, {}).get("column") == "Provider APIs"
+            and edge.dst in worker_providers
+        ):
+            kept.remove(edge)
+            pruned.append(edge)
+
+    early_store_edges: defaultdict[str, list[Edge]] = defaultdict(list)
+    for edge in kept:
+        if (
+            catalog_by_id.get(edge.src, {}).get("column") in EARLY_COLUMNS
+            and catalog_by_id.get(edge.dst, {}).get("kind") == "store"
+        ):
+            early_store_edges[edge.dst].append(edge)
+    for store_edges in early_store_edges.values():
+        if len(store_edges) < 2:
+            continue
+        winner = min(
+            store_edges,
+            key=lambda edge: (
+                -source_counts.get((edge.src, edge.dst), 1),
+                catalog_order.get(edge.src, len(catalog_order)),
+                edge.src,
+                edge.label,
+            ),
+        )
+        for edge in store_edges:
+            if edge != winner:
+                kept.remove(edge)
+                pruned.append(edge)
+
+    while True:
+        active_nodes = {edge.src for edge in kept} | {edge.dst for edge in kept}
+        if len(kept) <= ceil(1.5 * len(active_nodes)):
+            break
+        active_columns = {
+            str(catalog_by_id.get(node_id, {}).get("column", ""))
+            for node_id in active_nodes
+        }
+        skip_edges = []
+        for edge in kept:
+            source_column = str(catalog_by_id.get(edge.src, {}).get("column", ""))
+            target_column = str(catalog_by_id.get(edge.dst, {}).get("column", ""))
+            source_index = column_order.get(source_column, 0)
+            target_index = column_order.get(target_column, 0)
+            if (
+                source_column not in EARLY_COLUMNS
+                or target_index <= source_index + 1
+                or not any(
+                    column in active_columns and source_index < index < target_index
+                    for column, index in column_order.items()
+                )
+            ):
+                continue
+            skip_edges.append(edge)
+        if not skip_edges:
+            break
+        dropped = min(
+            skip_edges,
+            key=lambda edge: (
+                source_counts.get((edge.src, edge.dst), 1),
+                catalog_order.get(edge.src, len(catalog_order)),
+                catalog_order.get(edge.dst, len(catalog_order)),
+                edge.src,
+                edge.dst,
+                edge.label,
+            ),
+        )
+        kept.remove(dropped)
+        pruned.append(dropped)
+
+    return kept, pruned
 
 
 def _merge_node_group(
@@ -482,26 +586,28 @@ def _flow_notes(
     nodes: Collection[Node],
     edges: Collection[Edge],
     catalog_by_id: Mapping[str, Mapping[str, Any]],
-    services_by_node: Mapping[str, Collection[str]],
     backward_edges: Collection[Edge] = (),
+    pruned_edges: Collection[Edge] = (),
+    sources_by_pair: Mapping[tuple[str, str], Collection[CodeSource]] | None = None,
 ) -> list[Claim]:
     nodes_by_id = {node.id: node for node in nodes}
+    sources_by_pair = sources_by_pair or {}
     columns = {}
-    catalog_order = {}
-    for index, (component_id, entry) in enumerate(catalog_by_id.items()):
+    for entry in catalog_by_id.values():
         column = str(entry.get("column", ""))
         columns.setdefault(column, len(columns))
-        catalog_order[component_id] = index
-    node_order = {node.id: index for index, node in enumerate(nodes)}
-    component_order = {}
-    for component_id, entry in catalog_by_id.items():
-        component_order[component_id] = (
-            columns.get(str(entry.get("column", "")), len(columns)),
-            node_order.get(component_id, len(nodes) + catalog_order[component_id]),
-        )
 
     facts_by_component: defaultdict[str, list[_FlowFact]] = defaultdict(list)
-    for edge in edges:
+    flow_edges = [(edge, False) for edge in edges]
+    flow_edges.extend((edge, False) for edge in pruned_edges)
+    flow_edges.extend((edge, True) for edge in backward_edges)
+    for edge, backward in flow_edges:
+        edge_sources = tuple(
+            _unique_sources(
+                sources_by_pair.get((edge.src, edge.dst), [edge.source])
+                or [edge.source]
+            )
+        )
         if edge.label == "long-poll" and edge.src == "sqs":
             owner_id = edge.dst
             queue_node = nodes_by_id.get(edge.src)
@@ -515,7 +621,7 @@ def _flow_notes(
                 _FlowFact(
                     action=f"long-poll {queue_label}",
                     backward=False,
-                    source=edge.source,
+                    sources=edge_sources,
                 )
             )
             continue
@@ -527,50 +633,41 @@ def _flow_notes(
             else str(target_entry.get("label", edge.dst))
         )
         for label in edge.label.split(" / "):
-            action = _flow_action(
-                label,
-                target_label,
-                edge.dst,
-                services_by_node,
-            )
-            if action is not None:
-                facts_by_component[edge.src].append(
-                    _FlowFact(action=action, backward=False, source=edge.source)
-                )
-
-    for edge in backward_edges:
-        target_entry = catalog_by_id.get(edge.dst, {})
-        target_node = nodes_by_id.get(edge.dst)
-        target_label = (
-            target_node.label
-            if target_node is not None
-            else str(target_entry.get("label", edge.dst))
-        )
-        for label in edge.label.split(" / "):
-            if label == "enqueue tasks":
+            if backward and label == "enqueue tasks":
                 action = "enqueue follow-up SQS tasks"
-            elif label == "start workflow":
+            elif backward and label == "start workflow":
                 action = "start Temporal workflows"
             else:
-                action = _flow_action(
-                    label,
-                    target_label,
-                    edge.dst,
-                    services_by_node,
-                )
-            if action is not None:
+                action = _flow_action(label, target_label, edge.dst)
+            if action:
                 facts_by_component[edge.src].append(
-                    _FlowFact(action=action, backward=True, source=edge.source)
+                    _FlowFact(
+                        action=action,
+                        backward=backward,
+                        sources=edge_sources,
+                    )
                 )
 
+    node_order = {node.id: index for index, node in enumerate(nodes)}
+    catalog_order = {
+        component_id: index for index, component_id in enumerate(catalog_by_id)
+    }
     component_ids = sorted(
         facts_by_component,
-        key=lambda component_id: component_order.get(
-            component_id, (len(columns), len(nodes))
+        key=lambda component_id: (
+            columns.get(
+                str(catalog_by_id.get(component_id, {}).get("column", "")),
+                len(columns),
+            ),
+            node_order.get(
+                component_id,
+                len(node_order) + catalog_order.get(component_id, len(catalog_order)),
+            ),
         ),
     )
     labels_by_component = {}
     plural_by_component = {}
+    components_by_column: defaultdict[str, list[str]] = defaultdict(list)
     for component_id in component_ids:
         entry = catalog_by_id.get(component_id, {})
         node = nodes_by_id.get(component_id)
@@ -583,81 +680,156 @@ def _flow_notes(
         plural_by_component[component_id] = entry.get(
             "kind"
         ) == "service(many)" or label.casefold().endswith(
-            ("clients", "workers", "workflows")
+            ("callers", "clients", "services", "workers", "workflows")
         )
+        components_by_column[str(entry.get("column", ""))].append(component_id)
 
-    if len(component_ids) <= MAX_FLOW_NOTES:
-        return [
+    notes = []
+    for column, column_components in sorted(
+        components_by_column.items(),
+        key=lambda item: columns.get(item[0], len(columns)),
+    ):
+        forward_by_component = {
+            component_id: {
+                fact.action
+                for fact in facts_by_component[component_id]
+                if not fact.backward
+            }
+            for component_id in column_components
+        }
+        backward_by_component = {
+            component_id: {
+                fact.action
+                for fact in facts_by_component[component_id]
+                if fact.backward
+            }
+            for component_id in column_components
+        }
+        action_sets = [
+            frozenset(
+                (fact.backward, fact.action)
+                for fact in facts_by_component[component_id]
+            )
+            for component_id in column_components
+        ]
+        same_actions = all(action_set == action_sets[0] for action_set in action_sets)
+        if same_actions:
+            plural = (
+                len(column_components) > 1 or plural_by_component[column_components[0]]
+            )
+            subject = (
+                labels_by_component[column_components[0]]
+                if len(column_components) == 1
+                else column
+            )
+            forward_actions = forward_by_component[column_components[0]]
+            backward_actions = backward_by_component[column_components[0]]
+            if forward_actions:
+                text = f"{subject} {_flow_action_text(forward_actions, plural=plural)}"
+                if backward_actions:
+                    text += (
+                        ", and also "
+                        f"{_flow_action_text(backward_actions, plural=plural)}"
+                    )
+                text += "."
+            else:
+                text = (
+                    f"{subject} also "
+                    f"{_flow_action_text(backward_actions, plural=plural)}."
+                )
+        else:
+            common_forward = set.intersection(
+                *(set(actions) for actions in forward_by_component.values())
+            )
+            common_backward = set.intersection(
+                *(set(actions) for actions in backward_by_component.values())
+            )
+            forward_clauses = []
+            if common_forward:
+                common_subject = _join_flow_phrases(
+                    [
+                        labels_by_component[component_id]
+                        for component_id in column_components
+                    ]
+                )
+                forward_clauses.append(
+                    f"{common_subject} "
+                    f"{_flow_action_text(common_forward, plural=len(column_components) > 1)}"
+                )
+            else:
+                for component_id in column_components:
+                    actions = forward_by_component[component_id]
+                    if actions:
+                        forward_clauses.append(
+                            f"{labels_by_component[component_id]} "
+                            f"{_flow_action_text(actions, plural=plural_by_component[component_id])}"
+                        )
+            if common_forward:
+                for component_id in column_components:
+                    actions = forward_by_component[component_id] - common_forward
+                    if actions:
+                        forward_clauses.append(
+                            f"{labels_by_component[component_id]} also "
+                            f"{_flow_action_text(actions, plural=plural_by_component[component_id])}"
+                        )
+            text = "; ".join(forward_clauses)
+            if common_backward:
+                if common_forward and len(forward_clauses) == 1:
+                    text += (
+                        ", and also "
+                        f"{_flow_action_text(common_backward, plural=len(column_components) > 1)}"
+                    )
+                elif text:
+                    subject = _join_flow_phrases(
+                        [
+                            labels_by_component[component_id]
+                            for component_id in column_components
+                        ]
+                    )
+                    text += (
+                        f"; and also {subject} "
+                        f"{_flow_action_text(common_backward, plural=len(column_components) > 1)}"
+                    )
+                else:
+                    subject = _join_flow_phrases(
+                        [
+                            labels_by_component[component_id]
+                            for component_id in column_components
+                        ]
+                    )
+                    text = (
+                        f"{subject} also "
+                        f"{_flow_action_text(common_backward, plural=len(column_components) > 1)}"
+                    )
+            for component_id in column_components:
+                actions = backward_by_component[component_id] - common_backward
+                if actions:
+                    subject = labels_by_component[component_id]
+                    phrase = _flow_action_text(
+                        actions,
+                        plural=plural_by_component[component_id],
+                    )
+                    text += (
+                        f"; and also {subject} {phrase}"
+                        if text
+                        else f"{subject} also {phrase}"
+                    )
+            text += "."
+
+        notes.append(
             Claim(
-                text=_flow_note_text(
-                    labels_by_component[component_id],
-                    facts_by_component[component_id],
-                    plural=plural_by_component[component_id],
-                ),
+                text=text,
                 sources=_unique_sources(
-                    fact.source for fact in facts_by_component[component_id]
+                    source
+                    for component_id in column_components
+                    for fact in facts_by_component[component_id]
+                    for source in fact.sources
                 ),
             )
-            for component_id in component_ids
-        ]
-
-    claims = [
-        Claim(
-            text=_flow_note_text(
-                labels_by_component[component_id],
-                facts_by_component[component_id],
-                plural=plural_by_component[component_id],
-            ),
-            sources=_unique_sources(
-                fact.source for fact in facts_by_component[component_id]
-            ),
         )
-        for component_id in component_ids[: MAX_FLOW_NOTES - 1]
-    ]
-    trailing_components = component_ids[MAX_FLOW_NOTES - 1 :]
-    trailing_facts: defaultdict[tuple[bool, str], defaultdict[str, list[_FlowFact]]] = (
-        defaultdict(lambda: defaultdict(list))
-    )
-    for component_id in trailing_components:
-        for fact in facts_by_component[component_id]:
-            trailing_facts[(fact.backward, fact.action)][component_id].append(fact)
 
-    trailing_actions = sorted(
-        trailing_facts,
-        key=lambda action_key: (
-            min(
-                component_order.get(component_id, (len(columns), len(nodes)))
-                for component_id in trailing_facts[action_key]
-            ),
-            _flow_action_order(action_key[1]),
-            action_key[0],
-        ),
-    )
-    clauses = []
-    for backward, action in trailing_actions:
-        action_components = [
-            component_id
-            for component_id in trailing_components
-            if component_id in trailing_facts[(backward, action)]
-        ]
-        labels = [
-            labels_by_component[component_id] for component_id in action_components
-        ]
-        plural = len(labels) > 1 or plural_by_component[action_components[0]]
-        phrase = _singular_flow_action(action, plural=plural)
-        subject = _join_flow_phrases(labels)
-        clauses.append(f"{subject} also {phrase}")
-    return [
-        *claims,
-        Claim(
-            text=f"{'; '.join(clauses)}.",
-            sources=_unique_sources(
-                fact.source
-                for component_id in trailing_components
-                for fact in facts_by_component[component_id]
-            ),
-        ),
-    ]
+    assert len(notes) <= MAX_FLOW_NOTES
+    return notes
 
 
 def project_component_diagram(
@@ -784,6 +956,11 @@ def project_component_diagram(
     )
     for path, records in external_candidates.items():
         owner_candidates.setdefault(path, set()).update(records)
+    owner_candidates = _eligible_owner_candidates(
+        owner_candidates,
+        catalog_by_id,
+        entry_components.values(),
+    )
     owners_by_path = _nearest_component_owners(owner_candidates, catalog_order)
     unreached = sorted(scope_paths - owners_by_path.keys())
 
@@ -1037,6 +1214,14 @@ def project_component_diagram(
             for source in component_table_sources[(component_id, table, mode)]
         )
 
+    sources_by_pair: defaultdict[tuple[str, str], list[CodeSource]] = defaultdict(list)
+    for (src, dst, _), sources in edge_sources.items():
+        sources_by_pair[(src, dst)].extend(sources)
+    sources_by_pair = defaultdict(
+        list,
+        {pair: _unique_sources(sources) for pair, sources in sources_by_pair.items()},
+    )
+    source_counts = {pair: len(sources) for pair, sources in sources_by_pair.items()}
     edges = _deduplicate_edges(
         [
             Edge(src=src, dst=dst, label=label, source=_first_source(sources))
@@ -1057,7 +1242,11 @@ def project_component_diagram(
             backward_edges.append(edge)
         else:
             figure_edges.append(edge)
-    edges = figure_edges
+    edges, pruned_edges = _prune_early_edges(
+        figure_edges,
+        catalog_by_id,
+        source_counts,
+    )
     participating = {edge.src for edge in edges} | {edge.dst for edge in edges}
 
     endpoint_details: defaultdict[str, defaultdict[str, list[CodeSource]]] = (
@@ -1104,6 +1293,14 @@ def project_component_diagram(
         )
         semantic_kinds[node_id] = str(entry.get("kind", "component"))
 
+    notes = _flow_notes(
+        nodes,
+        edges,
+        catalog_by_id,
+        backward_edges=backward_edges,
+        pruned_edges=pruned_edges,
+        sources_by_pair=sources_by_pair,
+    )
     nodes, edges, node_map, semantic_kinds = _fit_node_budget(
         nodes,
         edges,
@@ -1137,13 +1334,6 @@ def project_component_diagram(
         for node_id, kind in semantic_kinds.items()
         if node_id in active_node_ids
     }
-    notes = _flow_notes(
-        nodes,
-        edges,
-        catalog_by_id,
-        service_map,
-        backward_edges,
-    )
     groups = []
     for column in dict.fromkeys(
         str(entry.get("column", "")) for entry in component_catalog
