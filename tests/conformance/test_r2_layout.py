@@ -16,9 +16,8 @@ SECTION_IDS = [
     "block",
     "schema",
     "sequences",
-    "states",
 ]
-DIAGRAM_SECTION_IDS = ("block", "schema", "sequences", "states")
+DIAGRAM_SECTION_IDS = ("block", "schema", "sequences")
 EMPTY_MESSAGE = "Nothing to show for this module."
 
 
@@ -74,13 +73,6 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
         document,
         "sequences",
     )
-    assert (
-        "state machine &#x27;message lifecycle&#x27; state queued"
-        in _section_fragment(
-            document,
-            "states",
-        )
-    )
     sidebar = re.search(r'<div id="sidebar">(.*?)</div>', document, re.DOTALL)
     assert sidebar is not None
     sidebar_html = sidebar.group(1)
@@ -101,7 +93,6 @@ def test_complete_page_has_ordered_sections_and_inline_linked_diagrams(
         "block",
         "schema",
         "sequences",
-        "states",
     ]
 
     lowered = document.lower()
@@ -129,7 +120,6 @@ def test_empty_sections_remain_with_explanatory_message(
     payload["data"]["sql_tables"] = []
     payload["data"]["nosql"] = []
     payload["sequences"] = []
-    payload["states"] = []
     payload["related"] = []
     page = Page.model_validate(payload)
 
@@ -142,5 +132,5 @@ def test_empty_sections_remain_with_explanatory_message(
     )
 
     assert re.findall(r'<section id="([^"]+)">', document) == SECTION_IDS
-    for section_id in ("block", "schema", "sequences", "states", "related"):
+    for section_id in ("block", "schema", "sequences", "related"):
         assert EMPTY_MESSAGE in _section_fragment(document, section_id)

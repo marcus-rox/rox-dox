@@ -5,6 +5,10 @@ description: Author source-cited state diagrams from persisted or enumerated sta
 
 # state-diagram
 
+**Deprecated (Marcus, 2026-10-02):** state diagrams are no longer rendered; every page keeps
+`states: []`. The page model, `rox-dox states` and this procedure stay so the section can be
+revived later.
+
 Only model entities with a persisted or enumerated state. Derive states and transitions from
 the code's enums and transition tables, not from reading the happy path.
 

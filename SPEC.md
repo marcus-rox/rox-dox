@@ -47,8 +47,8 @@ Replaced by `R-5`: pages follow features, not folders.
 
 Every page SHALL present, in order: a collapsible section with links to related modules and
 systems, a TLDR in the recap format (Summary, Key Points, Table, Interesting Notes), a UML
-block diagram, a static SVG schema diagram of its SQL and NoSQL data, UML sequence diagrams
-for its happy paths, and UML state diagrams for its stateful entities; the root schema SHALL
+block diagram, a static SVG schema diagram of its SQL and NoSQL data, and UML sequence
+diagrams for its happy paths; the root schema SHALL
 show one card per domain with key tables, while submodule schemas SHALL show every in-scope
 table and column; and each page SHALL show a table of contents of those sections at the top of
 the left panel, above the navigation tree.
@@ -59,7 +59,7 @@ the left panel, above the navigation tree.
 - THEN every section above is present in that order, Related is collapsible, the table of contents sits above the navigation tree, and every diagram renders
 
 #### Scenario: nothing to show
-- GIVEN a module that owns no data or has no stateful entity
+- GIVEN a module that owns no data or has no happy path to draw
 - WHEN its page opens
 - THEN that section is present and says so, rather than being omitted
 
