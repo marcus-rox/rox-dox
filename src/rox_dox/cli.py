@@ -21,6 +21,14 @@ from rox_dox.features import (
     is_excluded_path,
     is_feature_path,
 )
+from rox_dox.lint import (
+    LintInputError,
+    format_finding,
+    lint_pages,
+    load_component_ids,
+    load_pages,
+    summary_line,
+)
 from rox_dox.model import Page
 from rox_dox.plantuml import DiagramError
 from rox_dox.relations import RelationCandidate, find_relation_candidates
@@ -79,6 +87,16 @@ def _parser() -> argparse.ArgumentParser:
     relations.add_argument("--repo", type=Path, required=True)
     relations.add_argument("--commit", required=True)
     relations.add_argument("--tables", type=_parse_tables, required=True)
+
+    lint_diagrams = commands.add_parser("lint-diagrams")
+    lint_diagrams.add_argument("pages_dir", type=Path)
+    lint_diagrams.add_argument(
+        "--page",
+        action="extend",
+        nargs="+",
+        dest="page_ids",
+    )
+    lint_diagrams.add_argument("--json", action="store_true")
 
     rebuild = commands.add_parser("rebuild")
     rebuild.add_argument("--repo", type=Path, required=True)
@@ -268,9 +286,7 @@ def _build_folder_pages(
         if domain_page is None:
             continue
         for feature in feature_map.features:
-            feature_id = (
-                f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
-            )
+            feature_id = f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
             feature_page = tree.pages.get(feature_id)
             if feature_page is None:
                 continue
@@ -540,6 +556,52 @@ def _print_relation_candidates(
     return 0
 
 
+def _lint_diagrams(args: argparse.Namespace) -> int:
+    pages_dir: Path = args.pages_dir
+    if not pages_dir.is_dir():
+        print(f"{pages_dir}: pages directory not found", file=sys.stderr)
+        return 2
+    try:
+        component_ids = load_component_ids(pages_dir)
+        pages = load_pages(pages_dir)
+    except LintInputError as error:
+        print(error, file=sys.stderr)
+        return 2
+
+    if args.page_ids:
+        requested_ids = set(args.page_ids)
+        known_ids = {page.id for page in pages}
+        unknown_ids = sorted(requested_ids - known_ids)
+        if unknown_ids:
+            print(
+                f"unknown page id(s): {', '.join(unknown_ids)}",
+                file=sys.stderr,
+            )
+            return 2
+        pages = [page for page in pages if page.id in requested_ids]
+
+    findings = lint_pages(pages, component_ids)
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "pages": len(pages),
+                    "errors": sum(finding.severity == "error" for finding in findings),
+                    "warnings": sum(
+                        finding.severity == "warning" for finding in findings
+                    ),
+                    "findings": [finding.to_dict() for finding in findings],
+                },
+                ensure_ascii=False,
+            )
+        )
+    else:
+        for finding in findings:
+            print(format_finding(finding))
+        print(summary_line(findings, len(pages)))
+    return int(any(finding.severity == "error" for finding in findings))
+
+
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -572,6 +634,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":
         return _rebuild(args)
+    if args.command == "lint-diagrams":
+        return _lint_diagrams(args)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")

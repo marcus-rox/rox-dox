@@ -97,5 +97,9 @@ Record each confirmed relationship as:
 
 ## Checks before reporting
 
+- Run `uv run rox-dox lint-diagrams pages --page <id>` and fix every error: it flags
+  `same_file` relations (S1), duplicate relations (S2), and relation endpoints that are not
+  on the page (S3).
 - Every authored domain member and table-view SQL table exists at the pinned commit.
-- Each key table and relation endpoint is on the page and source-cited.
+- Judge which tables belong on the page and that each relation is source-cited by the
+  strongest evidence found.

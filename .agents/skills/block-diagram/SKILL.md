@@ -47,32 +47,27 @@ only the part the subject uses. Zooming in adds bullets and figures, not new kin
 Postgres box listing the main tables; all providers it calls are one box unless the flow
 treats them differently. Split a box only when the two halves take different arrows.
 
-## 3. Budget
+## 3. Budget, layout and arrows: run the lint
 
-- 5–12 boxes per figure; hard limit 15. Over budget means the abstraction is wrong: merge
-  by role, or move a sub-flow into its own figure.
-- At most ~1.5 arrows per box. One arrow per step, not one per call site.
-- One overview figure (Figure 1) per page, then at most 3 focused figures, one per flow,
-  each obeying the same budget.
+Run `uv run rox-dox lint-diagrams pages --page <id>` and fix every error. It checks the
+mechanical rules for every block figure on the page: box count (B1, 5–12 boxes, hard limit
+15), component vocabulary (B2), arrow density (B3, at most ~1.5 arrows per box), backward
+arrows (B4), non-adjacent arrows (B5, the same layout problems `rox-dox build` warns on),
+empty and duplicate arrow labels (B6), and the overview's flow-note count (B7). Over budget
+means the abstraction is wrong: merge by role, or move a sub-flow into its own figure.
 
-## 4. Layout
+## 4. Judge what the lint can't
 
-- Columns read left to right in flow order: callers → services → async channels → workers
-  → stores → outside systems. Leave a column out when the subject has none.
-- Every arrow points right. A step that goes "back" (a worker calling a service) is drawn
-  as a separate figure, or the target is placed further right.
-- An outside system that both pushes in and is called out appears twice: once on the left
-  as the caller ("Google push"), once on the right as the API ("Google APIs").
-- A dotted group marks the system boundary when there are callers or outside systems.
-- `rox-dox build` warns on every non-adjacent arrow and fails when a figure has more than 5
-  layout problems.
+- Right level of abstraction: boxes are runtime components (§2), one overview figure
+  (Figure 1) per page, then at most 3 focused figures, one per flow, columns in flow order
+  (callers → services → async channels → workers → stores → outside systems).
+- Retell the flow: read the rendered figure at 100% zoom. Can a newcomer retell the
+  numbered flow from it alone? If not, redo it, whatever the lint says.
 
 ## 5. Check before shipping
 
-- Read the rendered figure at 100% zoom: can a newcomer retell the numbered flow from it
-  alone? If not, redo it, whatever the validator says.
-- Count boxes and arrows against the budget.
-- Every box, bullet and arrow has a citation at the pinned commit.
+- `rox-dox lint-diagrams pages --page <id>` reports 0 errors, and both judgment items in §4
+  hold.
 
 ## Reusing diagrams from rox-core docs
 
