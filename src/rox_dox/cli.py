@@ -32,6 +32,7 @@ from rox_dox.rebuild import (
 from rox_dox.render import render_folder_page, render_page, render_uncovered_page
 from rox_dox.repo_tree import list_entries, list_tree_paths
 from rox_dox.schema import Table, extract_tables
+from rox_dox.states import DEFAULT_PREFIXES, find_states
 from rox_dox.sources import page_problems
 from rox_dox.tree import build_tree, tree_problems
 
@@ -85,6 +86,12 @@ def _parser() -> argparse.ArgumentParser:
     rebuild.add_argument("--commit")
     rebuild.add_argument("--out", type=Path)
     rebuild.add_argument("--open-pr", action="store_true")
+
+    states = commands.add_parser("states")
+    states.add_argument("--repo", type=Path, required=True)
+    states.add_argument("--commit", required=True)
+    states.add_argument("--prefix", action="append", dest="prefixes")
+    states.add_argument("--json", action="store_true")
     return parser
 
 
@@ -268,9 +275,7 @@ def _build_folder_pages(
         if domain_page is None:
             continue
         for feature in feature_map.features:
-            feature_id = (
-                f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
-            )
+            feature_id = f"feature-{feature_map.domain}-{feature.id.replace('_', '-')}"
             feature_page = tree.pages.get(feature_id)
             if feature_page is None:
                 continue
@@ -540,6 +545,21 @@ def _print_relation_candidates(
     return 0
 
 
+def _print_states(
+    repo: Path, commit: str, prefixes: Sequence[str] | None, as_json: bool
+) -> int:
+    if not repo.is_dir():
+        print(f"{repo}: repository not found", file=sys.stderr)
+        return 2
+    try:
+        report = find_states(repo, commit, prefixes or DEFAULT_PREFIXES)
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
+        return 2
+    print(json.dumps(report.to_dict(), indent=2) if as_json else report.to_text())
+    return 1 if report.parse_errors else 0
+
+
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -572,6 +592,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":
         return _rebuild(args)
+    if args.command == "states":
+        return _print_states(args.repo, args.commit, args.prefixes, args.json)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")
