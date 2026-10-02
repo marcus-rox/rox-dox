@@ -47,6 +47,7 @@ from rox_dox.rebuild import (
 from rox_dox.render import render_folder_page, render_page, render_uncovered_page
 from rox_dox.repo_tree import list_entries, list_tree_paths
 from rox_dox.schema import Table, extract_tables
+from rox_dox.setup import run_setup
 from rox_dox.sources import page_problems
 from rox_dox.states import DEFAULT_PREFIXES, find_states
 from rox_dox.tree import build_tree, tree_problems
@@ -115,12 +116,16 @@ def _parser() -> argparse.ArgumentParser:
     rebuild.add_argument("--commit")
     rebuild.add_argument("--out", type=Path)
     rebuild.add_argument("--open-pr", action="store_true")
-
     states = commands.add_parser("states")
     states.add_argument("--repo", type=Path, required=True)
     states.add_argument("--commit", required=True)
     states.add_argument("--prefix", action="append", dest="prefixes")
     states.add_argument("--json", action="store_true")
+
+    setup = commands.add_parser("setup")
+    setup.add_argument("--workdir", type=Path, required=True)
+    setup.add_argument("--rox-core", type=Path)
+    setup.add_argument("--json", action="store_true")
     return parser
 
 
@@ -639,6 +644,47 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _setup_input_problem(args: argparse.Namespace) -> str | None:
+    if not os.environ.get(TOKEN_ENV):
+        return f"{TOKEN_ENV} is required"
+    if args.workdir.exists() and not args.workdir.is_dir():
+        return f"--workdir {args.workdir} exists and is not a directory"
+    if args.rox_core is not None and not args.rox_core.is_dir():
+        return f"--rox-core {args.rox_core} is not a directory"
+    return None
+
+
+def _setup(args: argparse.Namespace) -> int:
+    problem = _setup_input_problem(args)
+    if problem is not None:
+        print(problem, file=sys.stderr)
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "error": {"step": "input", "message": problem},
+                    },
+                    indent=2,
+                )
+            )
+        return 2
+    result = run_setup(
+        args.workdir,
+        rox_core=args.rox_core,
+        token=os.environ[TOKEN_ENV],
+        command_runner=subprocess.run,
+    )
+    if args.json:
+        print(json.dumps(result.to_json(), indent=2))
+    else:
+        for step in result.steps:
+            print(f"{step.step}: {step.action} — {step.detail}")
+        if result.error is not None:
+            print(f"error in {result.error['step']}: {result.error['message']}")
+    return 0 if result.error is None else 1
+
+
 def _rebuild(args: argparse.Namespace) -> int:
     project_root = Path(__file__).resolve().parents[2]
     publisher = None
@@ -691,12 +737,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":
         return _rebuild(args)
+<<<<<<< HEAD
     if args.command == "lint-diagrams":
         return _lint_diagrams(args)
     if args.command == "outline":
         return _outline(args)
     if args.command == "states":
         return _print_states(args.repo, args.commit, args.prefixes, args.json)
+    if args.command == "setup":
+        return _setup(args)
     pages_dir: Path = args.pages_dir
     if not pages_dir.is_dir():
         print(f"{pages_dir}: pages directory not found")
