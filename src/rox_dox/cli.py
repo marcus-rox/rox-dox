@@ -32,8 +32,8 @@ from rox_dox.rebuild import (
 from rox_dox.render import render_folder_page, render_page, render_uncovered_page
 from rox_dox.repo_tree import list_entries, list_tree_paths
 from rox_dox.schema import Table, extract_tables
-from rox_dox.states import DEFAULT_PREFIXES, find_states
 from rox_dox.sources import page_problems
+from rox_dox.states import DEFAULT_PREFIXES, find_states
 from rox_dox.tree import build_tree, tree_problems
 
 
