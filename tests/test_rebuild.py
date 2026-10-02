@@ -5,12 +5,20 @@ import stat
 import subprocess
 from collections.abc import Mapping
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 import rox_dox.cli as cli
-from rox_dox.rebuild import GitHubPublisher, TOKEN_ENV, resolve_commit, run_rebuild
+import rox_dox.rebuild as rebuild
+from rox_dox.rebuild import (
+    GitHubPublisher,
+    PullRequest,
+    TOKEN_ENV,
+    resolve_commit,
+    run_rebuild,
+)
 
 COMMIT = "a" * 40
 
@@ -152,6 +160,48 @@ def test_cli_registers_rebuild_command(
     assert arguments["requested_commit"] == COMMIT
     assert arguments["output_dir"] == output_dir
     assert arguments["open_pr"] is False
+    assert arguments["merge"] is False
+
+
+def test_cli_accepts_merge_only_with_open_pr(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_rebuild_mock = Mock(return_value=0)
+    monkeypatch.setattr(cli, "run_rebuild", run_rebuild_mock)
+
+    exit_code = cli.main(
+        [
+            "rebuild",
+            "--repo",
+            str(tmp_path / "rox-core"),
+            "--open-pr",
+            "--merge",
+        ]
+    )
+
+    assert exit_code == 0
+    arguments = run_rebuild_mock.call_args.kwargs
+    assert arguments["open_pr"] is True
+    assert arguments["merge"] is True
+
+
+def test_cli_rejects_merge_without_open_pr(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as error:
+        cli.main(
+            [
+                "rebuild",
+                "--repo",
+                str(tmp_path / "rox-core"),
+                "--merge",
+            ]
+        )
+
+    assert error.value.code == 2
+    assert "--merge requires --open-pr" in capsys.readouterr().err
 
 
 def test_rebuild_skips_steps_depending_on_failed_root_page(
@@ -166,6 +216,7 @@ def test_rebuild_skips_steps_depending_on_failed_root_page(
         requested_commit=COMMIT,
         output_dir=output_dir,
         open_pr=False,
+        merge=False,
         project_root=project_root,
         command_runner=runner,
         clock=_fixed_clock,
@@ -223,3 +274,39 @@ def test_publisher_push_uses_temporary_askpass_and_isolated_git_config(
     assert token not in runner.askpass_content
     assert runner.askpass_path is not None
     assert not runner.askpass_path.exists()
+
+
+def test_github_publisher_merges_pull_request_through_api(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    token = "merge-test-token"
+    request_calls: list[tuple[rebuild.Request, int]] = []
+
+    def fake_urlopen(request: rebuild.Request, *, timeout: int) -> BytesIO:
+        request_calls.append((request, timeout))
+        return BytesIO(json.dumps({"merged": True, "sha": "b" * 40}).encode("utf-8"))
+
+    monkeypatch.setattr(rebuild, "urlopen", fake_urlopen)
+    publisher = GitHubPublisher(
+        tmp_path,
+        token=token,
+        unix_timestamp=123,
+        command_runner=Mock(),
+    )
+
+    merge_sha = publisher.merge(
+        PullRequest(
+            number=123,
+            url="https://github.com/marcus-rox/rox-dox/pull/123",
+        )
+    )
+
+    request, timeout = request_calls[0]
+    assert merge_sha == "b" * 40
+    assert request.full_url == f"{rebuild.PUBLISH_API}/123/merge"
+    assert request.method == "PUT"
+    assert json.loads(request.data or b"{}") == {"merge_method": "merge"}
+    assert request.get_header("Authorization") == f"Bearer {token}"
+    assert request.get_header("Accept") == "application/vnd.github+json"
+    assert timeout == 30

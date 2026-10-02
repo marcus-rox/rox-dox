@@ -116,6 +116,7 @@ def _parser() -> argparse.ArgumentParser:
     rebuild.add_argument("--commit")
     rebuild.add_argument("--out", type=Path)
     rebuild.add_argument("--open-pr", action="store_true")
+    rebuild.add_argument("--merge", action="store_true")
     states = commands.add_parser("states")
     states.add_argument("--repo", type=Path, required=True)
     states.add_argument("--commit", required=True)
@@ -700,6 +701,7 @@ def _rebuild(args: argparse.Namespace) -> int:
         requested_commit=args.commit,
         output_dir=args.out,
         open_pr=args.open_pr,
+        merge=args.merge,
         project_root=project_root,
         command_runner=subprocess.run,
         clock=_utc_now,
@@ -732,7 +734,10 @@ def _outline(args: argparse.Namespace) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.command == "rebuild" and args.merge and not args.open_pr:
+        parser.error("--merge requires --open-pr")
     if args.command == "relations":
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":

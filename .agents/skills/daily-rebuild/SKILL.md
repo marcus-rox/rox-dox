@@ -1,12 +1,12 @@
 ---
 name: daily-rebuild
-description: Rebuild every rox-dox page at the latest rox-core main and open one rox-dox PR from a new branch, or open none and name every failing page. Use when a scheduled run starts, when the user says "rebuild the site", "regenerate the docs", or "run the daily rebuild", and when a rebuild failed and needs repair.
+description: Rebuild every rox-dox page at the latest rox-core main and merge one rox-dox PR into main, or open none and name every failing page. Use when a scheduled run starts, when the user says "rebuild the site", "regenerate the docs", or "run the daily rebuild", and when a rebuild failed and needs repair.
 ---
 
 # Daily rebuild
 
 One run pins one rox-core commit, regenerates every page from it, builds the site, and either
-opens one PR or opens none. Never publish a page whose citations fail.
+opens and merges one PR or opens none. Never publish a page whose citations fail.
 
 ## Setup
 
@@ -28,16 +28,18 @@ exit 1 → report the failing step's `error.message` and stop; exit 2 → bad in
 ## Run
 
 ```bash
-uv run rox-dox rebuild --repo <rox-core> --out <site dir> --open-pr
+uv run rox-dox rebuild --repo <rox-core> --out <site dir> --open-pr --merge
 ```
 
 The command fetches rox-core `origin/main`, writes its SHA to `pages/authoring/COMMIT`, runs
 every authoring step, builds the site, checks that every page names that SHA, and writes
-`rebuild-report.json` into the site directory.
+`rebuild-report.json` into the site directory. After opening the PR, it merges the PR into
+`main` through the GitHub API and records the merge SHA.
 
-- Exit 0 with a PR URL: done. Report the URL.
+- Exit 0 with a merged PR: done. Report the PR URL and merge SHA.
 - Exit 0 with "no changes": done. Report that no PR was needed.
-- Exit 1: go to Repair.
+- Exit 1 during generation: go to Repair. Exit 1 during merge: report the PR URL and merge
+  failure.
 
 ## Repair
 
@@ -61,5 +63,5 @@ message; open no PR. Never weaken a check, skip a step, or pin an older commit t
 
 ## Report
 
-End with: the rox-core SHA, the PR URL or "no PR", the failing pages if any, each repair made to
-the root script with the citation it now uses, and the run time.
+End with: the rox-core SHA, the merged PR URL and merge SHA or "no PR", the failing pages if
+any, each repair made to the root script with the citation it now uses, and the run time.

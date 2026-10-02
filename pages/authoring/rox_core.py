@@ -1597,8 +1597,8 @@ data = {
             "query join: list member is a lead",
             "symbolic",
             S(
-                "backend/src/rox_customer/real_time/models/entity/lead.py",
-                "RoxListMember.entity_id == cls.rox_lead_id,",
+                "backend/src/rox_core/api/prospect_lists/service.py",
+                "RoxListMember.entity_id == model.rox_lead_id,",
             ),
         ),
         R(

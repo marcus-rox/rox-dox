@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
-from rox_dox.rebuild import run_rebuild
+from rox_dox.rebuild import PullRequest, run_rebuild
 
 
 class SyntheticRunner:
@@ -77,18 +77,38 @@ class SyntheticRunner:
 
 
 class FakePublisher:
-    def __init__(self, has_changes: bool) -> None:
+    def __init__(
+        self,
+        has_changes: bool,
+        *,
+        merge_error: str | None = None,
+    ) -> None:
         self.changes = has_changes
+        self.merge_error = merge_error
+        self.merge_sha = "b" * 40
         self.publish_reports: list[dict[str, object]] = []
+        self.merge_calls: list[PullRequest] = []
+        self.events: list[str] = []
         self.change_checks = 0
 
     def has_changes(self) -> bool:
         self.change_checks += 1
         return self.changes
 
-    def publish(self, report: Mapping[str, object]) -> str:
+    def publish(self, report: Mapping[str, object]) -> PullRequest:
         self.publish_reports.append(dict(report))
-        return "https://github.com/marcus-rox/rox-dox/pull/123"
+        self.events.append("publish")
+        return PullRequest(
+            number=123,
+            url="https://github.com/marcus-rox/rox-dox/pull/123",
+        )
+
+    def merge(self, pull_request: PullRequest) -> str:
+        self.events.append("merge")
+        self.merge_calls.append(pull_request)
+        if self.merge_error is not None:
+            raise RuntimeError(self.merge_error)
+        return self.merge_sha
 
 
 def _fixed_clock() -> datetime:
@@ -118,6 +138,7 @@ def _run(
     pages: list[dict[str, object]],
     publisher: FakePublisher,
     build_error: str | None = None,
+    merge: bool = False,
 ) -> int:
     runner = SyntheticRunner(project_root, commit, pages, build_error)
     return run_rebuild(
@@ -125,6 +146,7 @@ def _run(
         requested_commit=commit,
         output_dir=output_dir,
         open_pr=True,
+        merge=merge,
         project_root=project_root,
         command_runner=runner,
         clock=_fixed_clock,
@@ -159,6 +181,7 @@ def test_R8_success_publishes_once_and_every_page_uses_run_commit(
     )
     assert exit_code == 0
     assert len(publisher.publish_reports) == 1
+    assert publisher.merge_calls == []
     assert publisher.publish_reports[0]["commit"] == commit
     assert generated_pages
     assert all(
@@ -171,6 +194,76 @@ def test_R8_success_publishes_once_and_every_page_uses_run_commit(
         ]
         == "published"
     )
+
+
+def test_R8_success_merges_after_publishing_when_requested(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    site_pages: list[dict[str, object]],
+) -> None:
+    repo, commit = git_repo
+    project_root = _project_root(tmp_path / "docs")
+    output_dir = tmp_path / "site"
+    publisher = FakePublisher(has_changes=True)
+
+    exit_code = _run(
+        project_root,
+        repo,
+        commit,
+        output_dir,
+        site_pages,
+        publisher,
+        merge=True,
+    )
+
+    publication = json.loads((output_dir / "rebuild-report.json").read_text())[
+        "publication"
+    ]
+    assert exit_code == 0
+    assert publisher.events == ["publish", "merge"]
+    assert publisher.merge_calls == [
+        PullRequest(
+            number=123,
+            url="https://github.com/marcus-rox/rox-dox/pull/123",
+        )
+    ]
+    assert publication == {
+        "status": "published",
+        "url": "https://github.com/marcus-rox/rox-dox/pull/123",
+        "merge_sha": "b" * 40,
+        "merged": True,
+    }
+
+
+def test_R8_merge_failure_fails_run_and_keeps_pull_request_url(
+    tmp_path: Path,
+    git_repo: tuple[Path, str],
+    site_pages: list[dict[str, object]],
+) -> None:
+    repo, commit = git_repo
+    project_root = _project_root(tmp_path / "docs")
+    output_dir = tmp_path / "site"
+    publisher = FakePublisher(has_changes=True, merge_error="merge conflict")
+
+    exit_code = _run(
+        project_root,
+        repo,
+        commit,
+        output_dir,
+        site_pages,
+        publisher,
+        merge=True,
+    )
+
+    report = json.loads((output_dir / "rebuild-report.json").read_text())
+    assert exit_code == 1
+    assert report["success"] is False
+    assert publisher.events == ["publish", "merge"]
+    assert report["publication"] == {
+        "status": "failure",
+        "url": "https://github.com/marcus-rox/rox-dox/pull/123",
+        "message": "merge conflict",
+    }
 
 
 def test_R8_page_build_failure_is_reported_without_publishing(

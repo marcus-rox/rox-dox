@@ -6,6 +6,7 @@ import re
 import subprocess
 import tempfile
 from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal, Protocol
@@ -49,10 +50,18 @@ CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 Clock = Callable[[], datetime]
 
 
+@dataclass(frozen=True)
+class PullRequest:
+    number: int
+    url: str
+
+
 class Publisher(Protocol):
     def has_changes(self) -> bool: ...
 
-    def publish(self, report: Mapping[str, object]) -> str: ...
+    def publish(self, report: Mapping[str, object]) -> PullRequest: ...
+
+    def merge(self, pull_request: PullRequest) -> str: ...
 
 
 def _command_output(result: subprocess.CompletedProcess[str]) -> str:
@@ -434,7 +443,7 @@ class GitHubPublisher:
             if askpass_path is not None:
                 askpass_path.unlink(missing_ok=True)
 
-    def publish(self, report: Mapping[str, object]) -> str:
+    def publish(self, report: Mapping[str, object]) -> PullRequest:
         if not self.token:
             raise RuntimeError(f"{TOKEN_ENV} is required to open a pull request")
         commit = report.get("commit")
@@ -449,46 +458,88 @@ class GitHubPublisher:
         self._push_branch(branch)
         return self._open_pull_request(branch, short_commit, report)
 
+    def merge(self, pull_request: PullRequest) -> str:
+        payload = self._github_request(
+            f"{PUBLISH_API}/{pull_request.number}/merge",
+            method="PUT",
+            payload={"merge_method": "merge"},
+            action="pull request merge",
+        )
+        if payload.get("merged") is not True:
+            message = payload.get("message")
+            detail = f": {message}" if isinstance(message, str) and message else ""
+            raise RuntimeError(
+                f"GitHub did not merge pull request #{pull_request.number}{detail}"
+            )
+        sha = payload.get("sha")
+        if not isinstance(sha, str) or not sha:
+            raise RuntimeError("GitHub merge response did not include a merge SHA")
+        return sha
+
     def _open_pull_request(
         self,
         branch: str,
         short_commit: str,
         report: Mapping[str, object],
-    ) -> str:
-        body = json.dumps(
-            {
+    ) -> PullRequest:
+        payload = self._github_request(
+            PUBLISH_API,
+            method="POST",
+            payload={
                 "title": f"Daily docs rebuild at {short_commit}",
                 "head": branch,
                 "base": "main",
                 "body": report_markdown(report),
-            }
-        ).encode("utf-8")
+            },
+            action="pull request creation",
+        )
+        url = payload.get("html_url")
+        number = payload.get("number")
+        if not isinstance(url, str) or not url:
+            raise RuntimeError("GitHub pull request response did not include html_url")
+        if not isinstance(number, int) or isinstance(number, bool) or number < 1:
+            raise RuntimeError(
+                "GitHub pull request response did not include a valid number"
+            )
+        return PullRequest(number=number, url=url)
+
+    def _github_request(
+        self,
+        url: str,
+        *,
+        method: str,
+        payload: Mapping[str, object],
+        action: str,
+    ) -> dict[str, object]:
+        if not self.token:
+            raise RuntimeError(f"{TOKEN_ENV} is required for {action}")
         request = Request(
-            PUBLISH_API,
-            data=body,
+            url,
+            data=json.dumps(payload).encode("utf-8"),
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
                 "Content-Type": "application/json",
                 "X-GitHub-Api-Version": "2022-11-28",
             },
-            method="POST",
+            method=method,
         )
         try:
             with urlopen(request, timeout=30) as response:
-                payload = json.loads(response.read().decode("utf-8"))
+                response_payload = json.loads(response.read().decode("utf-8"))
         except HTTPError as error:
             raise RuntimeError(
-                f"GitHub pull request creation failed with HTTP {error.code}"
+                f"GitHub {action} failed with HTTP {error.code}"
             ) from None
         except (URLError, TimeoutError) as error:
+            raise RuntimeError(f"GitHub {action} failed: {error}") from None
+        except json.JSONDecodeError as error:
             raise RuntimeError(
-                f"GitHub pull request creation failed: {error}"
+                f"GitHub {action} returned invalid JSON: {error}"
             ) from None
-        url = payload.get("html_url") if isinstance(payload, dict) else None
-        if not isinstance(url, str) or not url:
-            raise RuntimeError("GitHub pull request response did not include html_url")
-        return url
+        if not isinstance(response_payload, dict):
+            raise RuntimeError(f"GitHub {action} response was not an object")
+        return response_payload
 
 
 def _write_report(path: Path, report: Mapping[str, object]) -> None:
@@ -505,6 +556,7 @@ def run_rebuild(
     requested_commit: str | None,
     output_dir: Path | None,
     open_pr: bool,
+    merge: bool,
     project_root: Path,
     command_runner: CommandRunner,
     clock: Clock,
@@ -984,6 +1036,7 @@ def run_rebuild(
         return 1
 
     if open_pr:
+        pull_request_url: str | None = None
         if publisher is None:
             publication_error = RuntimeError(
                 "pull-request publishing was requested without a publisher"
@@ -991,12 +1044,22 @@ def run_rebuild(
         else:
             try:
                 if publisher.has_changes():
-                    pull_request_url = publisher.publish(report)
-                    report["publication"] = {
+                    pull_request = publisher.publish(report)
+                    pull_request_url = pull_request.url
+                    publication: dict[str, object] = {
                         "status": "published",
-                        "url": pull_request_url,
+                        "url": pull_request.url,
                     }
-                    print(f"Pull request: {pull_request_url}")
+                    if merge:
+                        publication["merge_sha"] = publisher.merge(pull_request)
+                        publication["merged"] = True
+                        print(
+                            f"Merged pull request: {pull_request.url} "
+                            f"({publication['merge_sha']})"
+                        )
+                    else:
+                        print(f"Pull request: {pull_request.url}")
+                    report["publication"] = publication
                 else:
                     report["publication"] = {"status": "no_changes"}
                     print("no changes")
@@ -1005,10 +1068,13 @@ def run_rebuild(
                 publication_error = error
         if publication_error is not None:
             report["success"] = False
-            report["publication"] = {
+            publication_failure: dict[str, object] = {
                 "status": "failure",
                 "message": str(publication_error),
             }
+            if pull_request_url is not None:
+                publication_failure["url"] = pull_request_url
+            report["publication"] = publication_failure
             print(f"Publishing failed: {publication_error}")
     report["finished_at"] = _iso_utc(clock())
     try:
@@ -1016,7 +1082,7 @@ def run_rebuild(
     except OSError as error:
         print(f"could not update rebuild report {report_path}: {error}")
         if report["publication"].get("status") == "published":
-            print("The pull request was created, but the final report update failed.")
+            print("The pull request was published, but the final report update failed.")
         return 1
 
     print(
