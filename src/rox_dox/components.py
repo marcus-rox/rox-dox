@@ -912,21 +912,33 @@ def _extract_file_facts(
         "backend/src/rox_core/__init__.py",
         "backend/src/util/listener_utils.py",
     }
-    needed_paths = set(requested) | (config_paths & tree.keys())
-    python_paths = sorted(path for path in needed_paths if path.endswith(".py"))
-    sources = _git_blobs(repo, [(path, tree[path]) for path in python_paths])
+    base_paths = set(requested) | (config_paths & tree.keys())
+    base_sources = _git_blobs(
+        repo,
+        [(path, tree[path]) for path in sorted(base_paths) if path.endswith(".py")],
+    )
+    blueprint_path = "backend/src/rox_core/__init__.py"
+    blueprint_tree = (
+        ast.parse(base_sources[blueprint_path], filename=blueprint_path)
+        if blueprint_path in base_sources
+        else ast.Module(body=[], type_ignores=[])
+    )
+    webhook_blueprint_paths = _webhook_blueprint_paths(blueprint_tree)
+    webhook_paths = sorted(
+        path
+        for path in webhook_blueprint_paths & tree.keys()
+        if path.endswith(".py") and path not in base_sources
+    )
+    sources = {
+        **base_sources,
+        **_git_blobs(repo, [(path, tree[path]) for path in webhook_paths]),
+    }
     prefixes = _cached_namespace_prefixes(repo.resolve(), commit)
     namespace_path = "backend/src/rox_core/api/register_namespaces.py"
-    blueprint_path = "backend/src/rox_core/__init__.py"
     queue_config_path = "backend/src/util/listener_utils.py"
     namespace_tree = (
         ast.parse(sources[namespace_path], filename=namespace_path)
         if namespace_path in sources
-        else ast.Module(body=[], type_ignores=[])
-    )
-    blueprint_tree = (
-        ast.parse(sources[blueprint_path], filename=blueprint_path)
-        if blueprint_path in sources
         else ast.Module(body=[], type_ignores=[])
     )
     queue_config_tree = (
@@ -934,11 +946,25 @@ def _extract_file_facts(
         if queue_config_path in sources
         else ast.Module(body=[], type_ignores=[])
     )
+    registrations: defaultdict[str, set[tuple[str, str]]] = defaultdict(set)
+    for name, targets in _namespace_registration_targets(namespace_tree).items():
+        registrations[name].update(targets)
+    for path in webhook_paths:
+        try:
+            webhook_tree = ast.parse(sources[path], filename=path)
+        except SyntaxError:
+            continue
+        for namespace, registered_paths in _registered_paths(webhook_tree).items():
+            registrations[namespace].update(
+                (prefix, "WEBHOOK") for prefix in registered_paths
+            )
     inputs = _FileFactsInputs(
         sources=sources,
         prefixes=prefixes,
-        registrations=_namespace_registration_targets(namespace_tree),
-        webhook_blueprint_paths=_webhook_blueprint_paths(blueprint_tree),
+        registrations={
+            name: frozenset(targets) for name, targets in registrations.items()
+        },
+        webhook_blueprint_paths=webhook_blueprint_paths,
         queue_deploy_targets=_queue_deploy_targets(queue_config_tree),
     )
     dumps = parallel_map(

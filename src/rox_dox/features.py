@@ -425,6 +425,18 @@ def _model_constructor(
     return class_name in class_tables or class_name in class_aliases
 
 
+def _scope_nodes(statements: Sequence[ast.stmt]) -> list[ast.AST]:
+    nodes = []
+    pending = list(reversed(statements))
+    while pending:
+        node = pending.pop()
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        nodes.append(node)
+        pending.extend(reversed(list(ast.iter_child_nodes(node))))
+    return nodes
+
+
 def _table_accesses(
     tree: ast.Module,
     class_tables: Mapping[str, list[str]],
@@ -433,9 +445,213 @@ def _table_accesses(
 ) -> dict[str, tuple[int | None, int | None]]:
     writes: defaultdict[str, list[int]] = defaultdict(list)
     reads: defaultdict[str, list[int]] = defaultdict(list)
+    model_aliases = {name: list(tables) for name, tables in class_aliases.items()}
+    module_assignments = [
+        node for node in tree.body if isinstance(node, (ast.Assign, ast.AnnAssign))
+    ]
+    while True:
+        changed = False
+        for assignment in module_assignments:
+            targets = (
+                assignment.targets
+                if isinstance(assignment, ast.Assign)
+                else [assignment.target]
+            )
+            value = assignment.value
+            if value is None or any(
+                isinstance(node, ast.Call) for node in ast.walk(value)
+            ):
+                continue
+            tables = _table_references(
+                value,
+                class_tables,
+                model_aliases,
+                module_aliases,
+            )
+            if not tables:
+                continue
+            for target in targets:
+                names = {
+                    node.id
+                    for node in ast.walk(target)
+                    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+                }
+                for name in names:
+                    combined = set(model_aliases.get(name, ())) | tables
+                    if combined != set(model_aliases.get(name, ())):
+                        model_aliases[name] = sorted(combined)
+                        changed = True
+        if not changed:
+            break
+
+    functions = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    return_tables_by_name: defaultdict[str, list[set[str]]] = defaultdict(list)
+    for function in functions:
+        tables = (
+            _table_references(
+                function.returns,
+                class_tables,
+                model_aliases,
+                module_aliases,
+            )
+            if function.returns is not None
+            else set()
+        )
+        for node in _scope_nodes(function.body):
+            if isinstance(node, ast.Return) and node.value is not None:
+                tables.update(
+                    _table_references(
+                        node.value,
+                        class_tables,
+                        model_aliases,
+                        module_aliases,
+                    )
+                )
+        return_tables_by_name[function.name].append(tables)
+    function_returns = {
+        name: variants[0]
+        for name, variants in return_tables_by_name.items()
+        if all(variant == variants[0] for variant in variants)
+    }
+
+    module_nodes = _scope_nodes(tree.body)
+    scoped_calls = [
+        (node, model_aliases) for node in module_nodes if isinstance(node, ast.Call)
+    ]
+    scoped_attributes = [(node, model_aliases) for node in module_nodes]
+    for function in functions:
+        function_aliases = {
+            name: list(tables) for name, tables in model_aliases.items()
+        }
+        positional = [*function.args.posonlyargs, *function.args.args]
+        default_offset = len(positional) - len(function.args.defaults)
+        arguments = [
+            (
+                argument,
+                function.args.defaults[index - default_offset]
+                if index >= default_offset
+                else None,
+            )
+            for index, argument in enumerate(positional)
+        ]
+        arguments.extend(
+            zip(function.args.kwonlyargs, function.args.kw_defaults, strict=True)
+        )
+        arguments.extend(
+            (argument, None)
+            for argument in (function.args.vararg, function.args.kwarg)
+            if argument is not None
+        )
+        for argument, default in arguments:
+            tables = (
+                _table_references(
+                    argument.annotation,
+                    class_tables,
+                    function_aliases,
+                    module_aliases,
+                )
+                if argument.annotation is not None
+                else set()
+            )
+            if default is not None:
+                tables.update(
+                    _table_references(
+                        default,
+                        class_tables,
+                        function_aliases,
+                        module_aliases,
+                    )
+                )
+            if tables:
+                function_aliases[argument.arg] = sorted(
+                    set(function_aliases.get(argument.arg, ())) | tables
+                )
+
+        function_nodes = _scope_nodes(function.body)
+        while True:
+            changed = False
+            for node in function_nodes:
+                if isinstance(node, ast.Assign):
+                    targets = node.targets
+                    value = node.value
+                    tables = _table_references(
+                        value,
+                        class_tables,
+                        function_aliases,
+                        module_aliases,
+                    )
+                    if isinstance(value, ast.Call):
+                        tables.update(function_returns.get(_call_name(value.func), ()))
+                elif isinstance(node, ast.AnnAssign):
+                    targets = [node.target]
+                    tables = (
+                        _table_references(
+                            node.annotation,
+                            class_tables,
+                            function_aliases,
+                            module_aliases,
+                        )
+                        if node.annotation is not None
+                        else set()
+                    )
+                    if node.value is not None:
+                        tables.update(
+                            _table_references(
+                                node.value,
+                                class_tables,
+                                function_aliases,
+                                module_aliases,
+                            )
+                        )
+                        if isinstance(node.value, ast.Call):
+                            tables.update(
+                                function_returns.get(
+                                    _call_name(node.value.func),
+                                    (),
+                                )
+                            )
+                elif isinstance(node, (ast.For, ast.AsyncFor)):
+                    targets = [node.target]
+                    value = node.iter
+                    tables = _table_references(
+                        value,
+                        class_tables,
+                        function_aliases,
+                        module_aliases,
+                    )
+                    if isinstance(value, ast.Call):
+                        tables.update(function_returns.get(_call_name(value.func), ()))
+                else:
+                    continue
+                if not tables:
+                    continue
+                for target in targets:
+                    names = {
+                        target_node.id
+                        for target_node in ast.walk(target)
+                        if isinstance(target_node, ast.Name)
+                        and isinstance(target_node.ctx, ast.Store)
+                    }
+                    for name in names:
+                        combined = set(function_aliases.get(name, ())) | tables
+                        if combined != set(function_aliases.get(name, ())):
+                            function_aliases[name] = sorted(combined)
+                            changed = True
+            if not changed:
+                break
+        scoped_calls.extend(
+            (node, function_aliases)
+            for node in function_nodes
+            if isinstance(node, ast.Call)
+        )
+        scoped_attributes.extend((node, function_aliases) for node in function_nodes)
+
     query_calls_used_for_writes = set()
-    calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
-    for call in calls:
+    for call, aliases in scoped_calls:
         if _call_name(call.func) not in _CHAINED_WRITE_CALLS or not isinstance(
             call.func, ast.Attribute
         ):
@@ -448,20 +664,20 @@ def _table_accesses(
                 writes_for_query = _table_references(
                     expression,
                     class_tables,
-                    class_aliases,
+                    aliases,
                     module_aliases,
                 )
                 for table in writes_for_query:
                     writes[table].append(call.lineno)
 
-    for call in calls:
+    for call, aliases in scoped_calls:
         name = _call_name(call.func)
         if name in _BULK_WRITE_CALLS | _WRITE_CALLS:
             if call.args:
                 for table in _table_references(
                     call.args[0],
                     class_tables,
-                    class_aliases,
+                    aliases,
                     module_aliases,
                 ):
                     writes[table].append(call.lineno)
@@ -473,7 +689,7 @@ def _table_accesses(
             for table in _table_references(
                 expression,
                 class_tables,
-                class_aliases,
+                aliases,
                 module_aliases,
             ):
                 reads[table].append(call.lineno)
@@ -484,7 +700,7 @@ def _table_accesses(
             for table in _table_references(
                 call.func.value,
                 class_tables,
-                class_aliases,
+                aliases,
                 module_aliases,
             ):
                 reads[table].append(call.lineno)
@@ -492,23 +708,23 @@ def _table_accesses(
         if _model_constructor(
             call.func,
             class_tables,
-            class_aliases,
+            aliases,
             module_aliases,
         ):
             for table in _table_references(
                 call.func,
                 class_tables,
-                class_aliases,
+                aliases,
                 module_aliases,
             ):
                 writes[table].append(call.lineno)
 
-    for node in ast.walk(tree):
+    for node, aliases in scoped_attributes:
         if isinstance(node, ast.Attribute) and node.attr == "query":
             for table in _table_references(
                 node.value,
                 class_tables,
-                class_aliases,
+                aliases,
                 module_aliases,
             ):
                 reads[table].append(node.lineno)

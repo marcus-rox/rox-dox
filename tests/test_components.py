@@ -388,6 +388,45 @@ def test_webhook_blueprint_routes_are_extracted_with_methods(
     ]
 
 
+def test_webhook_blueprint_registration_maps_namespace_deploy_target(
+    tmp_path: Path,
+) -> None:
+    endpoint_path = "backend/src/rox_core/api/msteams_agent/endpoints.py"
+    sources = {
+        "backend/src/rox_core/__init__.py": (
+            'if deploy_target_for_blueprints == "WEBHOOK":\n'
+            "    from rox_core.api.msteams_agent.webhook_bp import "
+            "msteams_webhook_bp\n"
+            "    app.register_blueprint(msteams_webhook_bp)\n"
+        ),
+        "backend/src/rox_core/api/msteams_agent/webhook_bp.py": (
+            "from flask import Blueprint\n"
+            "from flask_restx import Api\n"
+            "from .endpoints import msteams_agent_ns\n"
+            '\nwebhook_bp = Blueprint("msteams", __name__, url_prefix="/webhooks")\n'
+            "api = Api(webhook_bp)\n"
+            'api.add_namespace(msteams_agent_ns, path="/msteams_agent")\n'
+        ),
+        endpoint_path: (
+            "from flask_restx import Namespace\n"
+            'msteams_agent_ns = Namespace("msteams_agent")\n'
+            '\n@msteams_agent_ns.route("/events")\n'
+            "class Events:\n"
+            "    def post(self):\n"
+            '        return "ok"\n'
+        ),
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+
+    endpoints = extract_file_facts(repo, commit, [endpoint_path])[
+        endpoint_path
+    ].endpoints
+
+    assert [(endpoint.path, endpoint.deploy_target) for endpoint in endpoints] == [
+        ("/msteams_agent/events", "WEBHOOK")
+    ]
+
+
 def test_enum_member_queue_class_maps_to_configured_deploy_target(
     tmp_path: Path,
 ) -> None:

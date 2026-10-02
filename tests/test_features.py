@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from rox_dox import cache as cache_module
 from rox_dox import features as feature_module
 from rox_dox.features import (
     FeatureMap,
@@ -663,6 +664,52 @@ def test_table_access_classifier_recognizes_read_and_write_patterns(
     )
 
     assert accesses == {"users": expected}
+
+
+def test_table_access_classifier_resolves_dynamic_model_aliases() -> None:
+    tree = ast.parse(
+        "UserModel = type[User]\n"
+        "def get_model() -> type[User]:\n"
+        "    return User\n"
+        "def read(model: UserModel = User):\n"
+        "    return session.execute(select(model))\n"
+        "def write():\n"
+        "    model = get_model()\n"
+        "    session.bulk_update_mappings(model, [])\n"
+    )
+
+    accesses = feature_module._table_accesses(tree, {"User": ["users"]}, {}, {})
+
+    assert accesses == {"users": (8, 5)}
+
+
+def test_parse_graph_cache_is_partitioned_by_extractor_version(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(cache_module, "CACHE_ROOT", tmp_path / "cache")
+    version = cache_module.CACHE_VERSION
+    parse_versions = []
+
+    def parse_graph(*args: object) -> tuple[dict, int]:
+        parse_versions.append(cache_module.CACHE_VERSION)
+        return {}, 0
+
+    monkeypatch.setattr(feature_module, "_parse_graph", parse_graph)
+    snapshot = feature_module._Snapshot(files={}, all_paths=set())
+
+    feature_module._cached_parse_graph(
+        tmp_path, "cache-version-test", snapshot, {}, set()
+    )
+    feature_module._cached_parse_graph(
+        tmp_path, "cache-version-test", snapshot, {}, set()
+    )
+    monkeypatch.setattr(cache_module, "CACHE_VERSION", version + 1)
+    feature_module._cached_parse_graph(
+        tmp_path, "cache-version-test", snapshot, {}, set()
+    )
+
+    assert parse_versions == [version, version + 1]
 
 
 def test_unclassified_model_method_remains_uses_evidence() -> None:

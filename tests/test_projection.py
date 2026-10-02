@@ -737,10 +737,15 @@ def test_external_sibling_caller_qualifies_and_seeds_its_scope_file() -> None:
         external_callers={caller_path: [target_path]},
     )
 
-    assert [(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges] == [
-        ("interaction", "crm", "API calls")
-    ]
-    assert {node.id for node in projection.diagram.nodes} == {"interaction", "crm"}
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("http_clients", "interaction", "REST calls"),
+        ("interaction", "crm", "API calls"),
+    }
+    assert {node.id for node in projection.diagram.nodes} == {
+        "http_clients",
+        "interaction",
+        "crm",
+    }
     assert (
         next(edge for edge in projection.diagram.edges if edge.dst == "crm").source.path
         == target_path
@@ -824,8 +829,8 @@ def test_external_worker_caller_outside_sibling_directory_seeds_worker_pool() ->
         component_catalog=catalog,
         component_facts=facts,
         component_imports={},
-        table_accesses={},
-        scope_tables=set(),
+        table_accesses={target_path: {"calendar_event": (None, 8)}},
+        scope_tables={"calendar_event"},
         external_callers={
             caller_path: [target_path],
             endpoint_caller: [target_path],
@@ -835,10 +840,454 @@ def test_external_worker_caller_outside_sibling_directory_seeds_worker_pool() ->
 
     assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
         ("data_workers", "crm", "API calls"),
+        ("data_workers", "postgres", "reads"),
         ("sqs", "data_workers", "long-poll"),
     }
     assert target_path not in projection.diagram.unreached_files
     assert "webhook" not in {node.id for node in projection.diagram.nodes}
+
+
+def test_in_scope_entry_ownership_precedes_external_endpoint_and_worker_seeds() -> None:
+    entry_path = "backend/src/rox_core/api/accounts/routes.py"
+    target_path = "backend/src/rox_core/services/accounts.py"
+    sibling_endpoint = "backend/src/rox_core/api/accounts/admin_routes.py"
+    worker_paths = [
+        f"backend/src/tasks/executors/accounts_sync_{index}.py" for index in range(3)
+    ]
+    task_types_path = "backend/src/tasks/task_types.py"
+    facts = {
+        entry_path: FileFacts(
+            path=entry_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="list_accounts",
+                    line=3,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=8)],
+        ),
+        sibling_endpoint: FileFacts(
+            path=sibling_endpoint,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/admin/accounts",
+                    handler="list_admin_accounts",
+                    line=3,
+                    deploy_target="WEBHOOK",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+    }
+    task_types = []
+    external_callers = {sibling_endpoint: [target_path]}
+    for index, worker_path in enumerate(worker_paths):
+        name = f"AccountsSyncExecutor{index}"
+        task_name = f"ACCOUNTS_SYNC_{index}"
+        facts[worker_path] = FileFacts(
+            path=worker_path,
+            api_group=None,
+            endpoints=[],
+            workers=[Worker(name=name, kind="task_executor", line=9)],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type=task_name,
+                    executor=name,
+                    path=worker_path,
+                    line=28,
+                )
+            ],
+        )
+        task_types.append(
+            TaskType(
+                name=task_name,
+                queue_type="IntegrationQueueType.DEFAULT",
+                queue_class="IntegrationQueueType",
+                deploy_target="INTEGRATION",
+                path=task_types_path,
+                line=40 + index,
+            )
+        )
+        external_callers[worker_path] = [target_path]
+    facts[task_types_path] = FileFacts(
+        path=task_types_path,
+        api_group=None,
+        endpoints=[],
+        workers=[],
+        externals=[],
+        task_types=task_types,
+    )
+
+    projection = project_component_diagram(
+        [_file(entry_path), _file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={entry_path: {target_path: 5}},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers=external_callers,
+    )
+
+    assert ("interaction", "crm", "API calls") in {
+        (edge.src, edge.dst, edge.label) for edge in projection.diagram.edges
+    }
+    assert "data_workers" not in {node.id for node in projection.diagram.nodes}
+    assert "webhook" not in {node.id for node in projection.diagram.nodes}
+
+
+def test_worker_task_counts_and_long_poll_edges_use_only_owned_executors() -> None:
+    target_path = "backend/src/feature/calendar/service.py"
+    worker_a = "backend/src/tasks/executors/calendar_feature.py"
+    worker_b = "backend/src/tasks/executors/unrelated.py"
+    duplicate_worker = "backend/src/tasks/executors/unregistered_calendar.py"
+    registry_path = "backend/src/tasks/executor_registry.py"
+    task_types_path = "backend/src/tasks/task_types.py"
+    catalog = _runtime_catalog()
+    catalog.append(
+        _entry(
+            "agent_workers",
+            "ASYNC_AGENT",
+            "service(many)",
+            "Background workers",
+            "component",
+            {
+                "deploy_targets": ["ASYNC_AGENT"],
+                "queue_type_classes": ["AsyncAgentQueueType"],
+            },
+        )
+    )
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="UNSCOPED_TASK",
+                    executor="UnownedExecutor",
+                    path=target_path,
+                    line=10,
+                )
+            ],
+            task_producers=[
+                TaskProducer(
+                    task_type="UNSCOPED_TASK",
+                    path=target_path,
+                    line=11,
+                )
+            ],
+        ),
+        worker_a: FileFacts(
+            path=worker_a,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(name="CalendarFeatureExecutor", kind="task_executor", line=3)
+            ],
+            externals=[],
+        ),
+        worker_b: FileFacts(
+            path=worker_b,
+            api_group=None,
+            endpoints=[],
+            workers=[Worker(name="UnrelatedExecutor", kind="task_executor", line=3)],
+            externals=[],
+        ),
+        duplicate_worker: FileFacts(
+            path=duplicate_worker,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(name="CalendarFeatureExecutor", kind="task_executor", line=3)
+            ],
+            externals=[],
+        ),
+        registry_path: FileFacts(
+            path=registry_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="CALENDAR_FEATURE_TASK",
+                    executor="CalendarFeatureExecutor",
+                    path=registry_path,
+                    line=7,
+                ),
+                TaskConsumer(
+                    task_type="UNRELATED_TASK",
+                    executor="UnrelatedExecutor",
+                    path=registry_path,
+                    line=8,
+                ),
+            ],
+        ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="CALENDAR_FEATURE_TASK",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=20,
+                ),
+                TaskType(
+                    name="UNRELATED_TASK",
+                    queue_type="AsyncAgentQueueType.DEFAULT",
+                    queue_class="AsyncAgentQueueType",
+                    deploy_target="ASYNC_AGENT",
+                    path=task_types_path,
+                    line=21,
+                ),
+                TaskType(
+                    name="UNSCOPED_TASK",
+                    queue_type="AsyncAgentQueueType.DEFAULT",
+                    queue_class="AsyncAgentQueueType",
+                    deploy_target="ASYNC_AGENT",
+                    path=task_types_path,
+                    line=22,
+                ),
+            ],
+        ),
+    }
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=catalog,
+        component_facts=facts,
+        component_imports={
+            registry_path: {worker_a: 1, worker_b: 2},
+        },
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={worker_a: [target_path]},
+    )
+    details = {
+        node.id: {detail.text for detail in node.details}
+        for node in projection.diagram.nodes
+    }
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("sqs", "data_workers", "long-poll")
+    }
+    assert "INTEGRATION · 1 task types" in details["data_workers"]
+    assert "IntegrationQueueType · 1 task types" in details["sqs"]
+    assert not any(
+        detail.startswith("AsyncAgentQueueType") for detail in details["sqs"]
+    )
+    assert "agent_workers" not in details
+    assert all("ASYNC_AGENT" not in text for text in details["sqs"])
+
+
+def test_nearest_worker_caller_owns_task_scope_before_distant_caller() -> None:
+    target_path = "backend/src/feature/calendar/service.py"
+    direct_worker = "backend/src/tasks/executors/calendar_direct.py"
+    distant_worker = "backend/src/tasks/executors/calendar_distant.py"
+    registry_path = "backend/src/tasks/executor_registry.py"
+    task_types_path = "backend/src/tasks/task_types.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+        ),
+        direct_worker: FileFacts(
+            path=direct_worker,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(name="DirectCalendarExecutor", kind="task_executor", line=3)
+            ],
+            externals=[],
+        ),
+        distant_worker: FileFacts(
+            path=distant_worker,
+            api_group=None,
+            endpoints=[],
+            workers=[
+                Worker(name="DistantCalendarExecutor", kind="task_executor", line=3)
+            ],
+            externals=[],
+        ),
+        registry_path: FileFacts(
+            path=registry_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="DIRECT_CALENDAR_TASK",
+                    executor="DirectCalendarExecutor",
+                    path=registry_path,
+                    line=7,
+                ),
+                TaskConsumer(
+                    task_type="DISTANT_CALENDAR_TASK",
+                    executor="DistantCalendarExecutor",
+                    path=registry_path,
+                    line=8,
+                ),
+            ],
+        ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="DIRECT_CALENDAR_TASK",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=20,
+                ),
+                TaskType(
+                    name="DISTANT_CALENDAR_TASK",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=21,
+                ),
+            ],
+        ),
+    }
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={
+            registry_path: {direct_worker: 1, distant_worker: 2},
+        },
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={
+            direct_worker: [target_path],
+            distant_worker: [target_path],
+        },
+        external_caller_hops={direct_worker: 1, distant_worker: 2},
+    )
+    details = {
+        node.id: {detail.text for detail in node.details}
+        for node in projection.diagram.nodes
+    }
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("sqs", "data_workers", "long-poll")
+    }
+    assert "INTEGRATION · 1 task types" in details["data_workers"]
+    assert "IntegrationQueueType · 1 task types" in details["sqs"]
+
+
+def test_endpoints_and_executors_in_one_file_map_to_service_and_pool() -> None:
+    path = "backend/src/rox_core/api/integrations/mixed.py"
+    task_types_path = "backend/src/tasks/task_types.py"
+    catalog = _runtime_catalog()
+    data_workers = next(entry for entry in catalog if entry["id"] == "data_workers")
+    interaction = next(entry for entry in catalog if entry["id"] == "interaction")
+    interaction["match"]["path_prefixes"] = ["backend/src/rox_core/api/"]
+    sqs = next(entry for entry in catalog if entry["id"] == "sqs")
+    catalog = [
+        *catalog[:3],
+        sqs,
+        data_workers,
+        *(entry for entry in catalog[3:] if entry["id"] not in {"data_workers", "sqs"}),
+    ]
+    facts = {
+        path: FileFacts(
+            path=path,
+            api_group="integrations",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/mixed",
+                    handler="get_mixed",
+                    line=4,
+                    deploy_target="INTEGRATION",
+                )
+            ],
+            workers=[Worker(name="MixedExecutor", kind="task_executor", line=10)],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="MIXED_TASK",
+                    executor="MixedExecutor",
+                    path=path,
+                    line=12,
+                )
+            ],
+        ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="MIXED_TASK",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=20,
+                )
+            ],
+        ),
+    }
+
+    projection = project_component_diagram(
+        [_file(path)],
+        component_catalog=catalog,
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={},
+    )
+    details = {
+        node.id: {detail.text for detail in node.details}
+        for node in projection.diagram.nodes
+    }
+
+    assert "/mixed: 1 endpoints" in details["interaction"]
+    assert not any("endpoints" in text for text in details["data_workers"])
+    assert "INTEGRATION · 1 task types" in details["data_workers"]
+    assert ("sqs", "data_workers", "long-poll") in {
+        (edge.src, edge.dst, edge.label) for edge in projection.diagram.edges
+    }
 
 
 def test_external_temporal_caller_outside_sibling_directory_seeds_temporal() -> None:
@@ -884,12 +1333,12 @@ def test_external_temporal_caller_outside_sibling_directory_seeds_temporal() -> 
     ]
 
 
-def test_external_endpoint_from_other_directory_does_not_seed_when_sibling_exists() -> (
-    None
-):
+def test_sibling_endpoint_ownership_precedes_remote_endpoint_and_worker_seed() -> None:
     target_path = "backend/src/rox_core/api/integrations/business.py"
     sibling_caller = "backend/src/rox_core/api/integrations/routes.py"
     remote_caller = "backend/src/chat/routes/accounts.py"
+    worker_caller = "backend/src/tasks/executors/accounts_sync.py"
+    task_types_path = "backend/src/tasks/task_types.py"
     facts = {
         target_path: FileFacts(
             path=target_path,
@@ -928,6 +1377,38 @@ def test_external_endpoint_from_other_directory_does_not_seed_when_sibling_exist
             workers=[],
             externals=[],
         ),
+        worker_caller: FileFacts(
+            path=worker_caller,
+            api_group=None,
+            endpoints=[],
+            workers=[Worker(name="AccountsSyncExecutor", kind="task_executor", line=9)],
+            externals=[],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="ACCOUNTS_SYNC",
+                    executor="AccountsSyncExecutor",
+                    path=worker_caller,
+                    line=28,
+                )
+            ],
+        ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="ACCOUNTS_SYNC",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=40,
+                )
+            ],
+        ),
     }
     catalog = _runtime_catalog()
     catalog = [
@@ -945,6 +1426,7 @@ def test_external_endpoint_from_other_directory_does_not_seed_when_sibling_exist
         external_callers={
             sibling_caller: [target_path],
             remote_caller: [target_path],
+            worker_caller: [target_path],
         },
         external_caller_hops={sibling_caller: 3, remote_caller: 1},
     )
@@ -1118,28 +1600,29 @@ def test_ineligible_nearest_seed_falls_back_to_nearest_eligible_owner() -> None:
     assert projection.diagram.unreached_files == [external_target]
 
 
-def test_backward_edges_become_cited_notes_and_unconnected_box_disappears() -> None:
+def test_backward_edges_become_cited_notes_and_keep_queue_consumer_edge() -> None:
     worker_path = "backend/src/tasks/pool.py"
     api_path = "backend/src/rox_core/api/accounts.py"
+    task_types_path = "backend/src/tasks/task_types.py"
     facts = {
         worker_path: FileFacts(
             path=worker_path,
             api_group=None,
-            endpoints=[
-                Endpoint(
-                    method="POST",
-                    path="/tasks",
-                    handler="enqueue",
-                    line=3,
-                    deploy_target="INTEGRATION",
-                )
-            ],
-            workers=[],
+            endpoints=[],
+            workers=[Worker(name="PoolExecutor", kind="task_executor", line=8)],
             externals=[],
             task_producers=[
                 TaskProducer(task_type="TASK_A", path=worker_path, line=20)
             ],
             workflow_starts=[21],
+            task_consumers=[
+                TaskConsumer(
+                    task_type="TASK_A",
+                    executor="PoolExecutor",
+                    path=worker_path,
+                    line=22,
+                )
+            ],
         ),
         api_path: FileFacts(
             path=api_path,
@@ -1156,6 +1639,23 @@ def test_backward_edges_become_cited_notes_and_unconnected_box_disappears() -> N
             workers=[],
             externals=[ExternalCall(service="Salesforce", module="salesforce", line=5)],
         ),
+        task_types_path: FileFacts(
+            path=task_types_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+            task_types=[
+                TaskType(
+                    name="TASK_A",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=15,
+                )
+            ],
+        ),
     }
     projection = project_component_diagram(
         [_file(worker_path), _file(api_path)],
@@ -1170,19 +1670,28 @@ def test_backward_edges_become_cited_notes_and_unconnected_box_disappears() -> N
     assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
         ("http_clients", "interaction", "REST calls"),
         ("interaction", "crm", "API calls"),
+        ("sqs", "data_workers", "long-poll"),
     }
-    assert "data_workers" not in {node.id for node in projection.diagram.nodes}
+    assert "data_workers" in {node.id for node in projection.diagram.nodes}
     note = next(
-        note
-        for note in projection.diagram.notes
-        if "INTEGRATION workers also" in note.text
+        (
+            note
+            for note in projection.diagram.notes
+            if "INTEGRATION workers long-poll SQS" in note.text
+        ),
+        None,
     )
+    assert note is not None, [claim.text for claim in projection.diagram.notes]
     assert 3 <= len(projection.diagram.notes) <= 6
     assert (
         note.text
-        == "INTEGRATION workers also enqueue follow-up SQS tasks and start Temporal workflows."
+        == "INTEGRATION workers long-poll SQS, and also enqueue follow-up SQS tasks and start Temporal workflows."
     )
-    assert {source.lines for source in note.sources} == {(20, 20), (21, 21)}
+    assert {source.lines for source in note.sources} == {
+        (20, 20),
+        (21, 21),
+        (22, 22),
+    }
 
 
 def test_http_clients_edge_uses_first_service_endpoint_without_route_evidence() -> None:
@@ -1234,6 +1743,58 @@ def test_http_clients_edge_uses_first_service_endpoint_without_route_evidence() 
         note.text == "HTTP clients make REST calls to INTERACTION (Flask)."
         for note in projection.diagram.notes
     )
+
+
+def test_external_endpoint_caller_details_belong_to_service_component() -> None:
+    target_path = "backend/src/rox_core/services/accounts.py"
+    caller_path = "backend/src/rox_core/api/accounts/routes.py"
+    facts = {
+        target_path: FileFacts(
+            path=target_path,
+            api_group=None,
+            endpoints=[],
+            workers=[],
+            externals=[],
+        ),
+        caller_path: FileFacts(
+            path=caller_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="POST",
+                    path="/msteams_agent",
+                    handler="receive_msteams_agent",
+                    line=18,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+        ),
+    }
+
+    projection = project_component_diagram(
+        [_file(target_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={caller_path: [target_path]},
+        external_caller_hops={caller_path: 1},
+    )
+    details = {
+        node.id: {detail.text for detail in node.details}
+        for node in projection.diagram.nodes
+    }
+
+    assert (
+        "http_clients",
+        "interaction",
+        "REST calls",
+    ) in {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges}
+    assert "/msteams_agent: 1 endpoints" in details["interaction"]
+    assert "data_workers" not in details
 
 
 def test_temporal_workflow_details_show_two_names_then_remainder() -> None:
