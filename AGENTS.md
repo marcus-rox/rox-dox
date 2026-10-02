@@ -16,4 +16,5 @@ Always-on pointers to repository skills. Load a skill when its trigger fires.
 - `schema-diagram`: `.agents/skills/schema-diagram/SKILL.md`
 - `state-diagram`: `.agents/skills/state-diagram/SKILL.md`
 - `rox-dox lint-diagrams pages [--page <id> ...] [--json]`: block and schema diagram rules; exit 1 on errors.
+- `rox-dox states --repo R --commit C [--prefix P ...] [--json]`: state enums with their members, columns, sets and transitions (source of truth for state diagrams).
 - `pages/authoring/rox_core.py` regenerates the root page JSON at `pages/rox-core.json`.
