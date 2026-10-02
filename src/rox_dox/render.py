@@ -136,61 +136,80 @@ body {
 }
 .page-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  grid-template-areas: "nav main";
+  grid-template-columns: 280px 1.25rem minmax(0, 1fr);
+  grid-template-areas: "nav handle main";
   align-items: start;
-  gap: 1rem;
+  gap: 0.5rem;
   max-width: 1600px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
 #toggle-left:checked ~ .page-shell {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: 0 1.25rem minmax(0, 1fr);
 }
 #toggle-left:checked ~ .page-shell #sidebar {
   display: none;
 }
-.panel-controls {
+.panel-handle {
+  grid-area: handle;
+  align-self: stretch;
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  justify-content: center;
+  align-items: flex-start;
+  width: 1.25rem;
+  cursor: pointer;
 }
-.panel-toggle-button {
+.panel-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+  transition: background 0.15s;
+}
+.panel-handle:hover::before {
+  background: var(--focus);
+}
+.panel-handle-grip {
+  position: sticky;
+  top: calc(50vh - 1.1rem);
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 1.25rem;
+  height: 2.2rem;
   border: 1px solid var(--border-input);
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--surface);
   color: var(--muted);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
-.panel-toggle-button:hover {
-  background: var(--surface-hover);
+.panel-handle-grip svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s;
+}
+.panel-handle:hover .panel-handle-grip {
   color: var(--text);
+  border-color: var(--focus);
 }
-.panel-toggle-button svg {
-  width: 18px;
-  height: 18px;
+#toggle-left:checked ~ .page-shell .panel-handle-grip svg {
+  transform: rotate(180deg);
 }
-.panel-toggle-button .expanded, .panel-toggle-button .collapsed {
-  display: inline-flex;
-}
-.panel-toggle-button .collapsed,
-#toggle-left:checked ~ .page-shell .panel-toggle-left .expanded {
-  display: none;
-}
-#toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed {
-  display: inline-flex;
-}
-#toggle-left:focus-visible ~ .page-shell .panel-toggle-left {
+#toggle-left:focus-visible ~ .page-shell .panel-handle-grip {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+.panel-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 .theme-switch {
   display: inline-flex;
@@ -632,6 +651,9 @@ blockquote {
   #sidebar {
     position: static;
     max-height: none;
+  }
+  .panel-handle {
+    display: none;
   }
   .page-header, section {
     padding: 1rem;
@@ -1442,16 +1464,10 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
     )
 
 
-PANEL_ICON_OPEN = (
-    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"'
-    ' aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>'
-    '<path d="M7.5 3.5v13"/></svg>'
-)
-PANEL_ICON_CLOSED = (
-    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"'
-    ' aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>'
-    '<path d="M7.5 3.5v13"/><path d="M2.5 6a2.5 2.5 0 0 1 2.5-2.5h2.5v13H5A2.5 2.5 0'
-    ' 0 1 2.5 14z" fill="currentColor" stroke="none"/></svg>'
+PANEL_CHEVRON = (
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"'
+    ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M12.5 5l-5 5 5 5"/></svg>'
 )
 THEME_CHOICES = (
     (
@@ -1499,16 +1515,15 @@ def _theme_switch_html() -> str:
     return f'<div class="theme-switch" role="group" aria-label="Theme">{buttons}</div>'
 
 
-def _panel_controls_html() -> str:
+def _panel_handle_html() -> str:
     return (
-        '<div class="panel-controls">'
-        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left"'
-        ' title="Toggle side panel">'
-        f'<span class="expanded">{PANEL_ICON_OPEN}</span>'
-        f'<span class="collapsed">{PANEL_ICON_CLOSED}</span></label>'
-        f"{_theme_switch_html()}"
-        "</div>"
+        '<label class="panel-handle" for="toggle-left" title="Toggle side panel">'
+        f'<span class="panel-handle-grip">{PANEL_CHEVRON}</span></label>'
     )
+
+
+def _panel_controls_html() -> str:
+    return f'<div class="panel-controls">{_theme_switch_html()}</div>'
 
 
 def _document_shell(
@@ -1549,7 +1564,7 @@ def _document_shell(
         f"<title>{_escape(title)}</title>"
         f"<style>{PAGE_CSS}</style><script>{THEME_SCRIPT}</script></head>"
         f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
-        f'<div class="page-shell"><div id="sidebar">{sidebar}</div>'
+        f'<div class="page-shell"><div id="sidebar">{sidebar}</div>{_panel_handle_html()}'
         f'<main class="page-main">{_panel_controls_html()}{main_content}</main>'
         "</div></body></html>"
     )
