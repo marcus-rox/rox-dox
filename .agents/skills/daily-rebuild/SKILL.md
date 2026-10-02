@@ -10,12 +10,20 @@ opens one PR or opens none. Never publish a page whose citations fail.
 
 ## Setup
 
-1. rox-dox checkout: clone `https://github.com/marcus-rox/rox-dox.git` with
-   `GIT_ASKPASS` reading `MARCUS_ROX_DOX_GITHUB_TOKEN` (never print it, never put it in a URL),
-   check out `main`, run `uv sync`.
-2. rox-core checkout: any clone of `Rox-AI/rox-core` with an `origin` remote. The run reads it
-   only through git objects, so its working tree may be dirty or on any branch.
-3. PlantUML jar: `scripts/fetch_plantuml.sh` if `tools/plantuml.jar` is missing.
+```bash
+uv run rox-dox setup --workdir <W> [--rox-core <existing rox-core clone>] --json
+```
+
+Needs `MARCUS_ROX_DOX_GITHUB_TOKEN` in the environment; never print it, never put it in a URL.
+Any existing rox-dox checkout can run setup the first time. It is safe to re-run. It:
+
+- clones or fetches rox-dox into `<W>/rox-dox` and runs `uv sync` there;
+- reuses `--rox-core` or `<W>/rox-core` when it has an origin remote, else clones
+  `Rox-AI/rox-core`, then fetches `origin main`;
+- fetches the PlantUML jar into `tools/plantuml.jar` if missing.
+
+Reading the result: exit 0 → run from `<W>/rox-dox` with `--repo` set to the JSON's `rox_core`;
+exit 1 → report the failing step's `error.message` and stop; exit 2 → bad input.
 
 ## Run
 

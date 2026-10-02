@@ -15,3 +15,4 @@ Always-on pointers to repository skills. Load a skill when its trigger fires.
 - `schema-diagram`: `.agents/skills/schema-diagram/SKILL.md`
 - `state-diagram`: `.agents/skills/state-diagram/SKILL.md`
 - `pages/authoring/rox_core.py` regenerates the root page JSON at `pages/rox-core.json`.
+- `rox-dox setup --workdir W [--rox-core R] [--json]`: idempotent checkout of rox-dox, rox-core and PlantUML for a run; used by `daily-rebuild`.
