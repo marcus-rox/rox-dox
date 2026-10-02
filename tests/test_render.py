@@ -207,21 +207,25 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
     assert 'id="context"' not in document
     assert document.index(left_toggle) < document.index(page_shell)
     assert '<main class="page-main"><div class="panel-controls">' in document
-    assert 'for="toggle-left" title="Toggle side panel">' in document
-    assert '<span class="expanded"><svg' in document
+    assert (
+        '</div><label class="panel-handle" for="toggle-left" title="Toggle side panel">'
+        '<span class="panel-handle-grip"><svg'
+    ) in document
+    assert document.index('class="panel-handle"') < document.index(
+        '<main class="page-main">'
+    )
     assert 'for="toggle-right"' not in document
-    assert '<span class="collapsed"><svg' in document
     assert '<div class="theme-switch" role="group" aria-label="Theme">' in document
     for choice in ("light", "dark", "system"):
         assert f'data-theme-choice="{choice}"' in document
     assert (
         ".page-shell {\n"
         "  display: grid;\n"
-        "  grid-template-columns: 280px minmax(0, 1fr);"
+        "  grid-template-columns: 280px 1.25rem minmax(0, 1fr);"
     ) in document
     assert (
         "#toggle-left:checked ~ .page-shell {\n"
-        "  grid-template-columns: 0 minmax(0, 1fr);\n}"
+        "  grid-template-columns: 0 1.25rem minmax(0, 1fr);\n}"
     ) in document
     assert "@media (max-width: 1100px)" in document
     assert (
