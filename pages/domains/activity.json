@@ -9534,37 +9534,6 @@
  "block": {
   "notes": [
    {
-    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers also enqueue follow-up SQS tasks.",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/slack_integration/service.py",
-      "lines": [
-       305,
-       305
-      ]
-     }
-    ]
-   },
-   {
-    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers also enqueue follow-up SQS tasks and start Temporal workflows.",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/alertable_state_notifications.py",
-      "lines": [
-       86,
-       86
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
-      "lines": [
-       427,
-       427
-      ]
-     }
-    ]
-   },
-   {
     "text": "Provider push sends provider events to WEBHOOK (Flask).",
     "sources": [
      {
@@ -9589,20 +9558,93 @@
     ]
    },
    {
-    "text": "INTERACTION (Flask) makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack).",
+    "text": "INTERACTION (Flask) reads + writes PostgreSQL, enqueues SQS tasks, starts Temporal workflows and makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack).",
     "sources": [
+     {
+      "path": "backend/src/ext_integrations/data_providers/hubspot_enrichment/hubspot_enrichment_shim.py",
+      "lines": [
+       177,
+       177
+      ]
+     },
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_message_service.py",
       "lines": [
        5,
        5
       ]
+     },
+     {
+      "path": "backend/src/notifications/service.py",
+      "lines": [
+       515,
+       515
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
+      "lines": [
+       1166,
+       1166
+      ]
      }
     ]
    },
    {
-    "text": "Additional flows include: INTERACTION (Flask) reads + writes PostgreSQL; INTERACTION (Flask) enqueues tasks to SQS queues; INTERACTION (Flask) starts workflows on Temporal workflows; WEBHOOK (Flask) makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); WEBHOOK (Flask) reads PostgreSQL; WEBHOOK (Flask) enqueues tasks to SQS queues; Temporal workflows reads PostgreSQL; Temporal workflows enqueues tasks to SQS queues; SQS queues long-polls AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT; SQS queues long-polls SOR · BATCH · BACKFILL · INTEGRATION; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT reads + writes PostgreSQL; SOR · BATCH · BACKFILL · INTEGRATION makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); SOR · BATCH · BACKFILL · INTEGRATION reads + writes PostgreSQL.",
+    "text": "WEBHOOK (Flask) reads PostgreSQL, enqueues SQS tasks and makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack).",
     "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/event_handler.py",
+      "lines": [
+       77,
+       77
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/event_handler.py",
+      "lines": [
+       176,
+       176
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/slack_agent/slack_app_home.py",
+      "lines": [
+       10,
+       10
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Temporal workflows read PostgreSQL and enqueue SQS tasks.",
+    "sources": [
+     {
+      "path": "backend/src/temporal/activities/calendar_sync/enqueue_pmb.py",
+      "lines": [
+       44,
+       44
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/calendar_sync/list_orgwide_integrations.py",
+      "lines": [
+       61,
+       61
+      ]
+     }
+    ]
+   },
+   {
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers also long-poll SQS; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers also read + write PostgreSQL; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers also enqueue follow-up SQS tasks; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers also make API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); SOR · BATCH · BACKFILL · INTEGRATION workers also start Temporal workflows.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/alertable_state_notifications.py",
+      "lines": [
+       86,
+       86
+      ]
+     },
      {
       "path": "backend/src/ext_integrations/alertable_state_notifications.py",
       "lines": [
@@ -9618,10 +9660,10 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/data_providers/hubspot_enrichment/hubspot_enrichment_shim.py",
+      "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
       "lines": [
-       177,
-       177
+       427,
+       427
       ]
      },
      {
@@ -9639,38 +9681,10 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/slack_integration/event_handler.py",
+      "path": "backend/src/ext_integrations/slack_integration/service.py",
       "lines": [
-       77,
-       77
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/event_handler.py",
-      "lines": [
-       176,
-       176
-      ]
-     },
-     {
-      "path": "backend/src/notifications/service.py",
-      "lines": [
-       515,
-       515
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/webhooks_business.py",
-      "lines": [
-       1166,
-       1166
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/slack_agent/slack_app_home.py",
-      "lines": [
-       10,
-       10
+       305,
+       305
       ]
      },
      {
@@ -9685,20 +9699,6 @@
       "lines": [
        589,
        589
-      ]
-     },
-     {
-      "path": "backend/src/temporal/activities/calendar_sync/enqueue_pmb.py",
-      "lines": [
-       44,
-       44
-      ]
-     },
-     {
-      "path": "backend/src/temporal/activities/calendar_sync/list_orgwide_integrations.py",
-      "lines": [
-       61,
-       61
       ]
      }
     ]

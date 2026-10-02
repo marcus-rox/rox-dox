@@ -8,8 +8,12 @@ from rox_dox.components import (
     Worker,
 )
 from rox_dox.features import FeatureEvidence, FeatureFile
-from rox_dox.model import CodeSource, Edge
-from rox_dox.projection import _deduplicate_edges, project_component_diagram
+from rox_dox.model import CodeSource, Edge, Node
+from rox_dox.projection import (
+    _deduplicate_edges,
+    _flow_notes,
+    project_component_diagram,
+)
 
 
 def _entry(
@@ -247,6 +251,191 @@ def _projection_fixture():
         external_callers={},
     )
     return projection, helper_path
+
+
+def test_flow_notes_group_edges_by_box_and_move_queue_poll_to_worker() -> None:
+    catalog = [
+        _entry("http_clients", "HTTP clients", "client", "Callers", "component", {}),
+        _entry(
+            "interaction",
+            "INTERACTION (Flask)",
+            "service",
+            "HTTP services",
+            "component",
+            {},
+        ),
+        _entry(
+            "temporal",
+            "Temporal workflows",
+            "queue",
+            "Workflows",
+            "component",
+            {},
+        ),
+        _entry("sqs", "SQS queues", "queue", "Queues", "queue", {}),
+        _entry(
+            "data_workers",
+            "INTEGRATION workers",
+            "service(many)",
+            "Background workers",
+            "component",
+            {},
+        ),
+        _entry("postgres", "PostgreSQL", "store", "Stores", "store", {}),
+        _entry(
+            "crm", "CRM + workspace APIs", "external", "Provider APIs", "external", {}
+        ),
+    ]
+    catalog_by_id = {entry["id"]: entry for entry in catalog}
+    source_by_line = {
+        line: CodeSource(path="runtime.py", lines=(line, line)) for line in range(1, 11)
+    }
+    nodes = [
+        Node(
+            id=entry["id"],
+            label=entry["label"],
+            source=source_by_line[index + 1],
+            group=f"column-{entry['column'].lower().replace(' ', '-')}",
+        )
+        for index, entry in enumerate(catalog)
+    ]
+    edges = [
+        Edge(
+            src="http_clients",
+            dst="interaction",
+            label="REST calls",
+            source=source_by_line[1],
+        ),
+        Edge(
+            src="interaction",
+            dst="postgres",
+            label="reads + writes",
+            source=source_by_line[2],
+        ),
+        Edge(
+            src="interaction",
+            dst="sqs",
+            label="enqueue tasks",
+            source=source_by_line[3],
+        ),
+        Edge(
+            src="interaction",
+            dst="temporal",
+            label="start workflow",
+            source=source_by_line[4],
+        ),
+        Edge(
+            src="interaction",
+            dst="crm",
+            label="API calls",
+            source=source_by_line[5],
+        ),
+        Edge(
+            src="sqs",
+            dst="data_workers",
+            label="long-poll",
+            source=source_by_line[6],
+        ),
+        Edge(
+            src="data_workers",
+            dst="postgres",
+            label="reads + writes",
+            source=source_by_line[7],
+        ),
+        Edge(
+            src="temporal",
+            dst="sqs",
+            label="enqueue tasks",
+            source=source_by_line[8],
+        ),
+    ]
+    backward_edges = [
+        Edge(
+            src="data_workers",
+            dst="temporal",
+            label="start workflow",
+            source=source_by_line[9],
+        ),
+        Edge(
+            src="data_workers",
+            dst="sqs",
+            label="enqueue tasks",
+            source=source_by_line[10],
+        ),
+    ]
+
+    notes = _flow_notes(
+        nodes,
+        edges,
+        catalog_by_id,
+        {"crm": ["Salesforce"]},
+        backward_edges,
+    )
+
+    assert [note.text for note in notes] == [
+        "HTTP clients make REST calls to INTERACTION (Flask).",
+        "INTERACTION (Flask) reads + writes PostgreSQL, enqueues SQS tasks, starts "
+        "Temporal workflows and makes API calls to CRM + workspace APIs (Salesforce).",
+        "Temporal workflows enqueue SQS tasks.",
+        "INTEGRATION workers long-poll SQS and read + write PostgreSQL, and also "
+        "enqueue follow-up SQS tasks and start Temporal workflows.",
+    ]
+    assert {source.lines for source in notes[1].sources} == {
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+    }
+    assert {source.lines for source in notes[3].sources} == {
+        (6, 6),
+        (7, 7),
+        (9, 9),
+        (10, 10),
+    }
+    assert not any("SQS queues long-poll" in note.text for note in notes)
+
+
+def test_flow_notes_merge_after_five_and_keep_all_sources() -> None:
+    catalog = [
+        _entry(
+            f"service_{index}",
+            f"Service {index}",
+            "service",
+            "HTTP services",
+            "component",
+            {},
+        )
+        for index in range(7)
+    ]
+    catalog.append(_entry("postgres", "PostgreSQL", "store", "Stores", "store", {}))
+    catalog_by_id = {entry["id"]: entry for entry in catalog}
+    nodes = [
+        Node(
+            id=entry["id"],
+            label=entry["label"],
+            source=CodeSource(path="services.py", lines=(1, 1)),
+            group=f"column-{entry['column'].lower().replace(' ', '-')}",
+        )
+        for entry in catalog
+    ]
+    edges = [
+        Edge(
+            src=f"service_{index}",
+            dst="postgres",
+            label="reads",
+            source=CodeSource(path="services.py", lines=(index + 1, index + 1)),
+        )
+        for index in range(7)
+    ]
+
+    notes = _flow_notes(nodes, edges, catalog_by_id, {})
+
+    assert len(notes) == 6
+    assert [note.text for note in notes[:5]] == [
+        f"Service {index} reads PostgreSQL." for index in range(5)
+    ]
+    assert notes[-1].text == "Service 5 and Service 6 also read PostgreSQL."
+    assert {source.lines for source in notes[-1].sources} == {(6, 6), (7, 7)}
 
 
 def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> None:
