@@ -207,9 +207,13 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
     assert 'id="context"' not in document
     assert document.index(left_toggle) < document.index(page_shell)
     assert '<main class="page-main"><div class="panel-controls">' in document
-    assert 'for="toggle-left"><span class="expanded">◀ Panel</span>' in document
+    assert 'for="toggle-left" title="Toggle side panel">' in document
+    assert '<span class="expanded"><svg' in document
     assert 'for="toggle-right"' not in document
-    assert '<span class="collapsed">▶ Panel</span>' in document
+    assert '<span class="collapsed"><svg' in document
+    assert '<div class="theme-switch" role="group" aria-label="Theme">' in document
+    for choice in ("light", "dark", "system"):
+        assert f'data-theme-choice="{choice}"' in document
     assert (
         ".page-shell {\n"
         "  display: grid;\n"
@@ -225,7 +229,8 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
         "    grid-template-columns: minmax(0, 1fr);\n  }"
     ) in document
     assert "toggle-right" not in document
-    assert "<script" not in document
+    assert "<script src" not in document
+    assert document.count("<script>") == 1
 
 
 def test_schema_sources_include_authored_relations(
@@ -421,8 +426,8 @@ def test_page_text_is_html_escaped(
         jar=plantuml_jar,
     )
 
-    assert "<script>" not in document
-    assert "&lt;script&gt;" in document
+    assert "<script>alert" not in document
+    assert "&lt;script&gt;alert" in document
     assert "Claim &lt;img src=x&gt;" in document
 
 
