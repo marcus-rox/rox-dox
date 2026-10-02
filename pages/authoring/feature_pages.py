@@ -1,14 +1,55 @@
 import argparse
 import json
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import rox_core_domains
-from rox_dox.components import extract_file_facts
+from rox_dox.components import FileFacts, extract_file_facts
 from rox_dox.feature_pages import feature_pages
-from rox_dox.features import FeatureMap, _cached_parse_graph, _snapshot
-from rox_dox.schema import extract_tables
+from rox_dox.features import FeatureMap, _cached_parse_graph, _snapshot, parallel_map
+from rox_dox.schema import Table, extract_tables
 
 DEFAULT_REPO = Path("/home/ubuntu/repos/rox-core")
+
+
+@dataclass(frozen=True)
+class _PageInputs:
+    feature_maps: Sequence[FeatureMap]
+    root_id: str
+    domain_titles: Mapping[str, str]
+    names: Mapping[str, Mapping[str, str]]
+    tables_by_commit: Mapping[str, Mapping[str, Table]]
+    components_by_commit: Mapping[str, Mapping[str, FileFacts]]
+    imports_by_commit: Mapping[str, Mapping[str, Mapping[str, int]]]
+    table_accesses_by_commit: Mapping[
+        str, Mapping[str, Mapping[str, tuple[int | None, int | None]]]
+    ]
+    primary_features: Mapping[str, tuple[str, str]]
+    table_domains: Mapping[str, str]
+    component_catalog: Sequence[Mapping[str, Any]]
+
+
+def _domain_page_dumps(inputs: _PageInputs, map_index: int) -> list[dict]:
+    feature_map = inputs.feature_maps[map_index]
+    return [
+        page.model_dump(exclude_none=True)
+        for page in feature_pages(
+            feature_map,
+            root_id=inputs.root_id,
+            domain_title=inputs.domain_titles[feature_map.domain],
+            names=inputs.names.get(feature_map.domain, {}),
+            tables=inputs.tables_by_commit[feature_map.commit],
+            component_facts=inputs.components_by_commit[feature_map.commit],
+            component_imports=inputs.imports_by_commit[feature_map.commit],
+            table_accesses=inputs.table_accesses_by_commit[feature_map.commit],
+            primary_features=inputs.primary_features,
+            domain_titles=inputs.domain_titles,
+            table_domains=inputs.table_domains,
+            component_catalog=inputs.component_catalog,
+        )
+    ]
 
 
 def main() -> None:
@@ -53,7 +94,6 @@ def main() -> None:
     components_by_commit = {}
     imports_by_commit = {}
     table_accesses_by_commit = {}
-    generated = []
     for feature_map in selected_maps:
         if feature_map.commit not in tables_by_commit:
             tables_by_commit[feature_map.commit] = extract_tables(
@@ -107,23 +147,30 @@ def main() -> None:
                 ):
                     primary_features[file.path] = (display_name, page_id)
 
-    for feature_map in selected_maps:
-        generated.extend(
-            feature_pages(
-                feature_map,
-                root_id=root_page["id"],
-                domain_title=domain_titles[feature_map.domain],
-                names=names.get(feature_map.domain, {}),
-                tables=tables_by_commit[feature_map.commit],
-                component_facts=components_by_commit[feature_map.commit],
-                component_imports=imports_by_commit[feature_map.commit],
-                table_accesses=table_accesses_by_commit[feature_map.commit],
-                primary_features=primary_features,
-                domain_titles=domain_titles,
-                table_domains=table_domains,
-                component_catalog=component_catalog,
-            )
+    inputs = _PageInputs(
+        feature_maps=selected_maps,
+        root_id=root_page["id"],
+        domain_titles=domain_titles,
+        names=names,
+        tables_by_commit=tables_by_commit,
+        components_by_commit=components_by_commit,
+        imports_by_commit=imports_by_commit,
+        table_accesses_by_commit=table_accesses_by_commit,
+        primary_features=primary_features,
+        table_domains=table_domains,
+        component_catalog=component_catalog,
+    )
+    generated = [
+        page
+        for domain_pages in parallel_map(
+            _domain_page_dumps,
+            inputs,
+            range(len(selected_maps)),
+            desc="Generating domain pages",
+            unit="domain",
         )
+        for page in domain_pages
+    ]
 
     output_dirs = {
         "domain": pages_dir / "domains",
@@ -131,17 +178,17 @@ def main() -> None:
     }
     expected = {directory: set() for directory in output_dirs.values()}
     for page in generated:
-        directory = output_dirs[page.kind]
+        directory = output_dirs[page["kind"]]
         output_path = directory / (
-            f"{page.id.removeprefix('domain-')}.json"
-            if page.kind == "domain"
-            else f"{page.id}.json"
+            f"{page['id'].removeprefix('domain-')}.json"
+            if page["kind"] == "domain"
+            else f"{page['id']}.json"
         )
         expected[directory].add(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(
             json.dumps(
-                page.model_dump(exclude_none=True),
+                page,
                 ensure_ascii=False,
                 indent=1,
             )
