@@ -5,6 +5,7 @@ import hashlib
 import json
 from collections import defaultdict
 from collections.abc import Collection, Mapping
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Literal
@@ -12,7 +13,13 @@ from typing import Literal
 from pydantic import Field
 
 from rox_dox.cache import get_or_compute
-from rox_dox.features import _git_blobs, _git_tree
+from rox_dox.features import (
+    PARALLEL_FILE_CHUNKSIZE,
+    PARALLEL_MIN_FILES,
+    _git_blobs,
+    _git_tree,
+    parallel_map,
+)
 from rox_dox.model import Model
 
 
@@ -366,13 +373,13 @@ def _queue_deploy_targets(tree: ast.Module) -> dict[str, str]:
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        if not any(
-            "QUEUE_CONFIGS" in _assignment_names(target) for target in targets
-        ):
+        if not any("QUEUE_CONFIGS" in _assignment_names(target) for target in targets):
             continue
         if not isinstance(node.value, ast.Dict):
             continue
-        for deploy_target, config in zip(node.value.keys, node.value.values, strict=True):
+        for deploy_target, config in zip(
+            node.value.keys, node.value.values, strict=True
+        ):
             target_name = _constant_string(deploy_target)
             if (
                 target_name is None
@@ -502,10 +509,7 @@ def _blueprint_endpoints(
             method_names = (
                 [
                     value
-                    for value in (
-                        _constant_string(item)
-                        for item in methods.elts
-                    )
+                    for value in (_constant_string(item) for item in methods.elts)
                     if value is not None
                 ]
                 if isinstance(methods, (ast.List, ast.Tuple))
@@ -874,6 +878,26 @@ def _file_facts(
     )
 
 
+@dataclass(frozen=True)
+class _FileFactsInputs:
+    sources: dict[str, str]
+    prefixes: dict[str, frozenset[str]]
+    registrations: dict[str, frozenset[tuple[str, str]]]
+    webhook_blueprint_paths: frozenset[str]
+    queue_deploy_targets: dict[str, str]
+
+
+def _file_facts_dump(inputs: _FileFactsInputs, path: str) -> dict:
+    return _file_facts(
+        path,
+        inputs.sources.get(path, ""),
+        inputs.prefixes,
+        inputs.registrations,
+        inputs.webhook_blueprint_paths,
+        inputs.queue_deploy_targets,
+    ).model_dump()
+
+
 def _extract_file_facts(
     repo: Path,
     commit: str,
@@ -910,19 +934,25 @@ def _extract_file_facts(
         if queue_config_path in sources
         else ast.Module(body=[], type_ignores=[])
     )
-    registrations = _namespace_registration_targets(namespace_tree)
-    webhook_blueprint_paths = _webhook_blueprint_paths(blueprint_tree)
-    queue_deploy_targets = _queue_deploy_targets(queue_config_tree)
+    inputs = _FileFactsInputs(
+        sources=sources,
+        prefixes=prefixes,
+        registrations=_namespace_registration_targets(namespace_tree),
+        webhook_blueprint_paths=_webhook_blueprint_paths(blueprint_tree),
+        queue_deploy_targets=_queue_deploy_targets(queue_config_tree),
+    )
+    dumps = parallel_map(
+        _file_facts_dump,
+        inputs,
+        requested,
+        min_items=PARALLEL_MIN_FILES,
+        chunksize=PARALLEL_FILE_CHUNKSIZE,
+        desc="Extracting file facts",
+        unit="file",
+    )
     return {
-        path: _file_facts(
-            path,
-            sources.get(path, ""),
-            prefixes,
-            registrations,
-            webhook_blueprint_paths,
-            queue_deploy_targets,
-        )
-        for path in requested
+        path: FileFacts.model_validate(dump)
+        for path, dump in zip(requested, dumps, strict=True)
     }
 
 

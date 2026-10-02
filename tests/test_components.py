@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from rox_dox import cache, components, features
 from rox_dox.components import collect_task_facts, extract_file_facts
 
 
@@ -346,9 +347,9 @@ def test_namespace_registration_records_webhook_deploy_target(
         ["backend/src/rox_core/api/webhook/endpoints.py"],
     )["backend/src/rox_core/api/webhook/endpoints.py"].endpoints
 
-    assert [
-        (endpoint.path, endpoint.deploy_target) for endpoint in endpoints
-    ] == [("/webhooks/events", "WEBHOOK")]
+    assert [(endpoint.path, endpoint.deploy_target) for endpoint in endpoints] == [
+        ("/webhooks/events", "WEBHOOK")
+    ]
 
 
 def test_webhook_blueprint_routes_are_extracted_with_methods(
@@ -454,3 +455,29 @@ def test_temporal_workflow_start_calls_are_recorded(
     )["backend/src/rox_core/workers/start_workflow.py"]
 
     assert facts.workflow_starts == [2, 3]
+
+
+def test_parallel_and_serial_file_facts_are_equal(tmp_path: Path, monkeypatch) -> None:
+    sources = {
+        f"backend/src/workers/module_{index:02d}.py": (
+            "from temporalio import workflow\n"
+            "\n"
+            "@workflow.defn\n"
+            f"class Workflow{index}:\n"
+            "    async def run(self):\n"
+            "        await client.start_workflow(Workflow)\n"
+        )
+        for index in range(60)
+    }
+    repo, commit = _commit_sources(tmp_path, sources)
+    paths = sorted(sources)
+
+    monkeypatch.setattr(cache, "CACHE_ROOT", tmp_path / "parallel-cache")
+    parallel = extract_file_facts(repo, commit, paths)
+    monkeypatch.setattr(cache, "CACHE_ROOT", tmp_path / "serial-cache")
+    monkeypatch.setattr(components, "PARALLEL_MIN_FILES", len(paths))
+    serial = extract_file_facts(repo, commit, paths)
+
+    assert len(paths) > features.PARALLEL_MIN_FILES
+    assert parallel == serial
+    assert all(facts.workers for facts in parallel.values())

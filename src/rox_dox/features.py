@@ -4,13 +4,17 @@ import ast
 import hashlib
 import json
 import math
+import multiprocessing
+import os
 import re
 import subprocess
 from collections import Counter, defaultdict
-from collections.abc import Collection, Mapping
+from collections.abc import Callable, Collection, Mapping, Sequence
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
+from functools import partial
 from pathlib import Path, PurePosixPath
-from typing import Literal
+from typing import Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 from tqdm import tqdm
@@ -21,6 +25,14 @@ from rox_dox.schema import Table, extract_tables
 
 
 DomainReason = Literal["tables", "calls", "called_by"]
+# Below this many files a process pool's start-up costs more than it saves.
+PARALLEL_MIN_FILES = 50
+PARALLEL_FILE_CHUNKSIZE = 64
+_FORK_CONTEXT = multiprocessing.get_context("fork")
+_worker_shared: object = None
+SharedT = TypeVar("SharedT")
+ItemT = TypeVar("ItemT")
+ResultT = TypeVar("ResultT")
 
 
 class FeatureEvidence(BaseModel):
@@ -268,6 +280,48 @@ def _git_blobs(repo: Path, objects: list[tuple[str, str]]) -> dict[str, str]:
     return contents
 
 
+def _set_worker_shared(shared: object) -> None:
+    global _worker_shared
+    _worker_shared = shared
+
+
+def _call_with_worker_shared(
+    function: Callable[[object, ItemT], ResultT], item: ItemT
+) -> ResultT:
+    return function(_worker_shared, item)
+
+
+def parallel_map(
+    function: Callable[[SharedT, ItemT], ResultT],
+    shared: SharedT,
+    items: Sequence[ItemT],
+    *,
+    min_items: int = 1,
+    chunksize: int = 1,
+    desc: str,
+    unit: str,
+) -> list[ResultT]:
+    """Return [function(shared, item) for item in items], in forked workers past min_items.
+
+    shared reaches the workers through fork, so it is never pickled; items and results
+    are, so keep them plain data. function must be defined at module level.
+    """
+    if len(items) <= min_items:
+        return [function(shared, item) for item in tqdm(items, desc=desc, unit=unit)]
+    with ProcessPoolExecutor(
+        max_workers=os.cpu_count(),
+        mp_context=_FORK_CONTEXT,
+        initializer=_set_worker_shared,
+        initargs=(shared,),
+    ) as executor:
+        results = executor.map(
+            partial(_call_with_worker_shared, function),
+            items,
+            chunksize=chunksize,
+        )
+        return list(tqdm(results, total=len(items), desc=desc, unit=unit))
+
+
 def _snapshot_from_git(repo: Path, commit: str) -> _Snapshot:
     tree = _git_tree(repo, commit)
     selected = []
@@ -475,6 +529,13 @@ def _reexport_only(tree: ast.Module) -> bool:
     )
 
 
+def _parse_source(files: Mapping[str, str], path: str) -> ast.Module | None:
+    try:
+        return ast.parse(files[path], filename=path)
+    except SyntaxError:
+        return None
+
+
 def _parse_graph(
     snapshot: _Snapshot,
     tables: Mapping[str, Table],
@@ -490,10 +551,17 @@ def _parse_graph(
     module_to_path = {}
     parsed: dict[str, _GraphFile] = {}
     unparseable = 0
-    for path in tqdm(paths, desc="Parsing backend files", unit="file"):
-        try:
-            tree = ast.parse(snapshot.files[path], filename=path)
-        except SyntaxError:
+    trees = parallel_map(
+        _parse_source,
+        snapshot.files,
+        paths,
+        min_items=PARALLEL_MIN_FILES,
+        chunksize=PARALLEL_FILE_CHUNKSIZE,
+        desc="Parsing backend files",
+        unit="file",
+    )
+    for path, tree in zip(paths, trees, strict=True):
+        if tree is None:
             unparseable += 1
             continue
         module = _module_name(path)
@@ -1264,26 +1332,60 @@ def build_feature_maps(
     snapshot, tables, graph, parse_counts, domains, domain_reasons = (
         _prepare_feature_maps(repo, commit, domain_tables)
     )
+    inputs = _FeatureMapInputs(
+        repo=repo,
+        commit=commit,
+        domain_tables=domain_tables,
+        snapshot=snapshot,
+        tables=tables,
+        graph=graph,
+        parse_counts=parse_counts,
+        domains=domains,
+        domain_reasons=domain_reasons,
+        threshold=threshold,
+    )
+    domain_ids = sorted(domain_tables)
+    dumps = parallel_map(
+        _feature_map_dump,
+        inputs,
+        domain_ids,
+        desc="Building domain feature maps",
+        unit="domain",
+    )
     return {
-        domain: _build_feature_map(
-            repo,
-            commit,
-            domain_tables,
-            snapshot,
-            tables,
-            graph,
-            parse_counts,
-            domains,
-            domain_reasons,
-            domain,
-            threshold=threshold,
-        )
-        for domain in tqdm(
-            sorted(domain_tables),
-            desc="Building domain feature maps",
-            unit="domain",
-        )
+        domain: FeatureMap.model_validate(dump)
+        for domain, dump in zip(domain_ids, dumps, strict=True)
     }
+
+
+@dataclass(frozen=True)
+class _FeatureMapInputs:
+    repo: Path
+    commit: str
+    domain_tables: Mapping[str, Collection[str]]
+    snapshot: _Snapshot
+    tables: dict[str, Table]
+    graph: dict[str, _GraphFile]
+    parse_counts: int
+    domains: dict[str, list[str]]
+    domain_reasons: dict[str, DomainReason]
+    threshold: float
+
+
+def _feature_map_dump(inputs: _FeatureMapInputs, domain: str) -> dict:
+    return _build_feature_map(
+        inputs.repo,
+        inputs.commit,
+        inputs.domain_tables,
+        inputs.snapshot,
+        inputs.tables,
+        inputs.graph,
+        inputs.parse_counts,
+        inputs.domains,
+        inputs.domain_reasons,
+        domain,
+        threshold=inputs.threshold,
+    ).model_dump()
 
 
 def build_feature_map(
