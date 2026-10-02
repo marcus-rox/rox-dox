@@ -69,7 +69,8 @@ timed_lint() {
     if [[ $lint_status -le 1 && -n $output ]]; then
         summary=${output##*$'\n'}
     else
-        summary="lint unavailable"
+        printf '%s\n' "$output" >&2
+        summary="lint failed (exit ${lint_status})"
     fi
     printf 'lint: %s\n' "$summary"
     printf 'diagram lint: %ss\n' "$((SECONDS - started))"
