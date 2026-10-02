@@ -4,17 +4,7 @@ from pathlib import Path
 import pytest
 
 from rox_dox.block_svg import block_layout_problems
-from rox_dox.components import (
-    Endpoint,
-    ExternalCall,
-    FileFacts,
-    TaskConsumer,
-    TaskProducer,
-    TaskType,
-    Worker,
-)
 from rox_dox.feature_pages import (
-    _domain_block,
     _domain_data,
     _table_relations,
     feature_pages,
@@ -62,923 +52,36 @@ def test_generated_feature_pages_pass_block_layout() -> None:
         assert not problems, f"{page_file}: {problems}"
 
 
-def _runtime_feature_fixture(
-    api_table_count: int = 2,
-    endpoint_count: int = 2,
-    worker_count: int = 1,
-    web_directory: str = "web/apps/integrations/src",
-    long_endpoint_path: str | None = None,
-    worker_path: str = "backend/src/workers/integration/sync.py",
-    worker_name: str = "SyncWorker",
-) -> tuple[FeatureMap, dict[str, Table], dict[str, FileFacts]]:
-    web_path = f"{web_directory}/IntegrationPage.tsx"
-    api_path = "backend/src/api/integrations/endpoints.py"
-    api_helper_path = "backend/src/services/api_helper.py"
-    worker_helper_path = "backend/src/services/worker_helper.py"
-    library_path = "backend/src/services/library.py"
-    unused_path = "backend/src/helpers/unneeded.py"
-    api_tables = [f"api_table_{index:02}" for index in range(api_table_count)]
-    all_tables = [
-        *api_tables,
-        "api_helper_table",
-        "worker_table",
-        "library_table",
-    ]
-    web_evidence = [
-        FeatureEvidence(kind="route", tag="integrations", path=web_path, line=4),
-        FeatureEvidence(kind="route", tag="integrations", path=api_path, line=8),
-    ]
-    api_evidence = [
-        FeatureEvidence(
-            kind="call",
-            path=api_path,
-            line=15,
-            to=api_helper_path,
-        ),
-        FeatureEvidence(
-            kind="call",
-            path=api_path,
-            line=16,
-            to=worker_path,
-        ),
-        *[
-            FeatureEvidence(
-                kind="table",
-                path=api_path,
-                line=20 + index,
-                table=table_name,
-            )
-            for index, table_name in enumerate(api_tables)
-        ],
-    ]
-    files = [
-        FeatureFile(
-            path=web_path,
-            primary=True,
-            reason="route",
-            evidence=web_evidence,
-        ),
-        FeatureFile(
-            path=api_path,
-            primary=True,
-            reason="tables",
-            evidence=api_evidence,
-        ),
-        FeatureFile(
-            path=api_helper_path,
-            primary=True,
-            reason="tables",
-            evidence=[
-                FeatureEvidence(
-                    kind="table",
-                    path=api_helper_path,
-                    line=2,
-                    table="api_helper_table",
-                )
-            ],
-        ),
-        FeatureFile(
-            path=worker_path,
-            primary=True,
-            reason="tables",
-            evidence=[
-                FeatureEvidence(
-                    kind="call",
-                    path=worker_path,
-                    line=12,
-                    to=worker_helper_path,
-                ),
-                FeatureEvidence(
-                    kind="table",
-                    path=worker_path,
-                    line=13,
-                    table="worker_table",
-                ),
-            ],
-        ),
-        FeatureFile(
-            path=worker_helper_path,
-            primary=True,
-            reason="calls",
-            evidence=[
-                FeatureEvidence(
-                    kind="table",
-                    path=worker_helper_path,
-                    line=2,
-                    table="worker_table",
-                )
-            ],
-        ),
-        FeatureFile(
-            path=library_path,
-            primary=True,
-            reason="tables",
-            evidence=[
-                FeatureEvidence(
-                    kind="table",
-                    path=library_path,
-                    line=2,
-                    table="library_table",
-                )
-            ],
-        ),
-        FeatureFile(
-            path=unused_path,
-            primary=True,
-            reason="calls",
-            evidence=[],
-        ),
-    ]
-    feature = Feature(id="integration", tables=all_tables, files=files, table_links=[])
-    feature_map = FeatureMap(
-        commit="a" * 40,
-        domain="activity",
-        threshold=0.25,
-        tables=all_tables,
-        features=[feature],
-        uncovered=[],
-        unmapped_tags=[],
-        counts=FeatureCounts(
-            domain_files=len(files),
-            primary_placed=len(files),
-            shared=0,
-            uncovered=0,
-            web=1,
-            deployment=0,
-            skills=0,
-            unparseable=0,
-        ),
-    )
-    tables = {
-        table_name: Table(
-            name=table_name,
-            class_name=table_name.title().replace("_", ""),
-            columns=[Column(name="id", type="Integer", primary_key=True)],
-            source=CodeSource(
-                path=f"backend/src/models/{table_name}.py",
-                lines=(1, 1),
-            ),
-        )
-        for table_name in all_tables
-    }
-    tables["integration"] = tables[api_tables[0]]
-    facts = {
-        web_path: FileFacts(
-            path=web_path,
-            api_group=None,
-            endpoints=[],
-            workers=[],
-            externals=[],
-        ),
-        api_path: FileFacts(
-            path=api_path,
-            api_group="integrations",
-            endpoints=[
-                Endpoint(
-                    method="GET",
-                    path=(
-                        long_endpoint_path
-                        if index == 0 and long_endpoint_path is not None
-                        else (
-                            "/integrations/health"
-                            if index == 0
-                            else f"/integrations/events/{index}"
-                        )
-                    ),
-                    handler="IntegrationEndpoint",
-                    line=10 + index,
-                )
-                for index in range(endpoint_count)
-            ],
-            workers=[],
-            externals=[],
-        ),
-        api_helper_path: FileFacts(
-            path=api_helper_path,
-            api_group=None,
-            endpoints=[],
-            workers=[],
-            externals=[ExternalCall(service="Slack", module="slack_sdk", line=4)],
-        ),
-        worker_path: FileFacts(
-            path=worker_path,
-            api_group=None,
-            endpoints=[],
-            workers=[
-                Worker(
-                    name=(
-                        f"{worker_name}{index}"
-                        if worker_count > 1 and not worker_name.endswith("TaskExecutor")
-                        else (
-                            worker_name
-                            if index == 0 or worker_count == 1
-                            else f"ZOther{index}TaskExecutor"
-                        )
-                    ),
-                    kind="task_executor",
-                    line=5 + index,
-                )
-                for index in range(worker_count)
-            ],
-            externals=[],
-        ),
-        worker_helper_path: FileFacts(
-            path=worker_helper_path,
-            api_group=None,
-            endpoints=[],
-            workers=[],
-            externals=[
-                ExternalCall(
-                    service="Google APIs",
-                    module="google.oauth2",
-                    line=3,
-                )
-            ],
-        ),
-        library_path: FileFacts(
-            path=library_path,
-            api_group=None,
-            endpoints=[],
-            workers=[],
-            externals=[ExternalCall(service="Stripe", module="stripe", line=5)],
-        ),
-    }
-    return feature_map, tables, facts
 
 
-def _feature_page_from_runtime_fixture(
-    api_table_count: int = 2,
-    endpoint_count: int = 2,
-    worker_count: int = 1,
-    web_directory: str = "web/apps/integrations/src",
-    long_endpoint_path: str | None = None,
-    worker_path: str = "backend/src/workers/integration/sync.py",
-    worker_name: str = "SyncWorker",
-    component_imports: dict[str, dict[str, int]] | None = None,
-    primary_features: dict[str, tuple[str, str]] | None = None,
-    table_accesses: dict[str, dict[str, tuple[int | None, int | None]]] | None = None,
-) -> Page:
-    feature_map, tables, facts = _runtime_feature_fixture(
-        api_table_count,
-        endpoint_count,
-        worker_count,
-        web_directory,
-        long_endpoint_path,
-        worker_path,
-        worker_name,
-    )
-    pages = feature_pages(
-        feature_map,
-        root_id="rox-core",
-        domain_title="Activity",
-        names={"integration": "Integration connections & sync"},
-        tables=tables,
-        component_facts=facts,
-        component_imports=component_imports,
-        table_accesses=table_accesses,
-        primary_features=primary_features,
-    )
-    return next(page for page in pages if page.kind == "feature")
 
 
-def test_feature_block_models_runtime_components_and_web_api_route() -> None:
-    page = _feature_page_from_runtime_fixture()
-    nodes = {node.id: node for node in page.block.nodes}
-    api_node = next(node for node in nodes.values() if node.label == "Integrations API")
-    worker_node = next(
-        node for node in nodes.values() if node.label == "Integration workers"
-    )
-    web_node = next(node for node in nodes.values() if node.label == "Web app")
-    external_nodes = {
-        node.label: node for node in nodes.values() if node.kind == "external"
-    }
-
-    assert block_layout_problems(page.block) == []
-    assert [group.label for group in page.block.groups if group.parent is None] == [
-        "Web app",
-        "Entry points",
-        "Data & services",
-    ]
-    assert any(
-        edge.src == web_node.id and edge.dst == api_node.id and edge.label == "HTTP"
-        for edge in page.block.edges
-    )
-    assert any(
-        edge.src == api_node.id
-        and edge.dst == external_nodes["Slack"].id
-        and edge.label == "calls Slack"
-        for edge in page.block.edges
-    )
-    assert any(
-        edge.src == worker_node.id and edge.dst == external_nodes["Google APIs"].id
-        for edge in page.block.edges
-    )
-    assert not any("(library)" in node.label for node in page.block.nodes)
-    assert not any(node.label == "Stripe" for node in external_nodes.values())
-    assert page.tldr.table.columns == [
-        "Component",
-        "Kind",
-        "Tables used",
-        "Outside services",
-    ]
-    assert any(row[0] == "Services (library)" for row in page.tldr.table.rows)
-    assert page.tldr.summary[0].text == (
-        "Owns 2 HTTP endpoints in 1 API groups: Integrations."
-    )
-    assert page.tldr.summary[1].text == (
-        "Runs 1 background workers and workflows: SyncWorker."
-    )
-    assert [group.layer for group in page.membership] == [
-        "Web screens",
-        "HTTP routes",
-        "Background workers",
-        "Business logic",
-    ]
-    assert all(row.sources for group in page.membership for row in group.rows)
-    assert not any(node.label == "Helpers (library)" for node in page.block.nodes)
 
 
-def test_callers_join_entries_link_to_their_feature_and_cite_the_import() -> None:
-    feature_map, tables, facts = _runtime_feature_fixture(
-        endpoint_count=0,
-        worker_count=0,
-    )
-    caller_path = "backend/src/tasks/executors/endpoints.py"
-    member_path = "backend/src/services/api_helper.py"
-    decoy_path = "backend/src/other/decoy.py"
-    facts[caller_path] = FileFacts(
-        path=caller_path,
-        api_group="integrations",
-        endpoints=[
-            Endpoint(
-                method="GET",
-                path="/integrations/callback",
-                handler="CallbackEndpoint",
-                line=20,
-            )
-        ],
-        workers=[
-            Worker(
-                name="SyncTaskExecutor",
-                kind="task_executor",
-                line=24,
-            )
-        ],
-        externals=[
-            ExternalCall(service="Salesforce", module="simple_salesforce", line=25)
-        ],
-    )
-    facts[decoy_path] = FileFacts(
-        path=decoy_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[ExternalCall(service="Twilio", module="twilio", line=2)],
-    )
-    caller_import_line = 30
-    caller_owner = ("CRM integrations", "feature-crm-integrations")
-    imports = {
-        caller_path: {
-            member_path: caller_import_line,
-            decoy_path: 31,
-        }
-    }
-    owners = {caller_path: caller_owner}
-    pages = feature_pages(
-        feature_map,
-        root_id="rox-core",
-        domain_title="Activity",
-        names={"integration": "Integration connections & sync"},
-        tables=tables,
-        component_facts=facts,
-        component_imports=imports,
-        primary_features=owners,
-    )
-    page = next(page for page in pages if page.kind == "feature")
-    nodes = {node.label: node for node in page.block.nodes}
-    api_node = nodes["Integrations API"]
-    worker_node = nodes["Sync workers"]
-    api_call = next(
-        detail for detail in api_node.details if detail.text.startswith("Calls into")
-    )
-    worker_call = next(
-        detail for detail in worker_node.details if detail.text.startswith("Calls into")
-    )
-
-    assert api_node.link == caller_owner[1]
-    assert worker_node.link == caller_owner[1]
-    assert not any("(library)" in node.label for node in page.block.nodes)
-    assert api_call.text == "Calls into this feature from CRM integrations"
-    assert api_call.sources[0].path == caller_path
-    assert api_call.sources[0].lines == (caller_import_line, caller_import_line)
-    assert worker_call.sources[0].lines == (caller_import_line, caller_import_line)
-    reached = next(
-        claim for claim in page.tldr.summary if claim.text.startswith("Reached from")
-    )
-    assert reached.text == (
-        "Reached from 1 HTTP endpoints and 1 workers in other features: "
-        "Integrations, Sync workers."
-    )
-    assert block_layout_problems(page.block) == []
-
-    external_labels = {
-        node.label for node in page.block.nodes if node.kind == "external"
-    }
-    assert external_labels == {"Slack"}
-    slack = nodes["Slack"]
-    slack_edge = next(
-        edge
-        for edge in page.block.edges
-        if edge.src == api_node.id and edge.dst == slack.id
-    )
-    assert slack_edge.source.path == member_path
-    assert slack_edge.source.lines == (4, 4)
-    helper_store = nodes["api_helper_table"]
-    table_edge = next(
-        edge
-        for edge in page.block.edges
-        if edge.src == api_node.id and edge.dst == helper_store.id
-    )
-    assert table_edge.source.path == member_path
-    assert table_edge.source.lines == (2, 2)
-    assert not any(
-        edge.dst == nodes["worker_table"].id
-        and edge.src in {api_node.id, worker_node.id}
-        for edge in page.block.edges
-    )
-    domain_page = pages[0]
-    assert "Reached from" in domain_page.tldr.table.columns
-    assert domain_page.tldr.table.rows[0][1:4] == ["0", "0", "2"]
-    assert any(
-        source.path == caller_path
-        and source.lines == (caller_import_line, caller_import_line)
-        for source in domain_page.tldr.table.sources
-    )
 
 
-@pytest.mark.parametrize(
-    ("worker_path", "worker_name", "worker_count", "expected"),
-    [
-        (
-            "backend/src/tasks/executors/sync.py",
-            "SyncTaskExecutor",
-            2,
-            "Sync + 1 more workers",
-        ),
-        (
-            "backend/src/rox_core/slack_integration/workers/sync.py",
-            "SyncTaskExecutor",
-            1,
-            "Slack Integration workers",
-        ),
-    ],
-)
-def test_worker_labels_use_specific_directories_or_generic_fallback(
-    worker_path: str,
-    worker_name: str,
-    worker_count: int,
-    expected: str,
-) -> None:
-    page = _feature_page_from_runtime_fixture(
-        worker_path=worker_path,
-        worker_name=worker_name,
-        worker_count=worker_count,
-    )
-    worker_node = next(
-        node for node in page.block.nodes if node.group == "group-background-workers"
-    )
-    table_row = next(
-        row
-        for row in page.tldr.table.rows
-        if row[1] == "Background workers / workflows"
-    )
-
-    assert worker_node.label == expected
-    assert table_row[0] == expected
 
 
-def test_library_nodes_require_unreached_task_producers() -> None:
-    feature_map, tables, facts = _runtime_feature_fixture(
-        endpoint_count=0,
-        worker_count=0,
-    )
-    library_path = "backend/src/services/library.py"
-    task_types_path = "backend/src/tasks/types.py"
-    facts[library_path].task_producers = [
-        TaskProducer(task_type="TASK_A", path=library_path, line=7)
-    ]
-    facts[task_types_path] = FileFacts(
-        path=task_types_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[],
-        task_types=[
-            TaskType(
-                name="TASK_A",
-                queue_type="NotificationQueueType.SYNC",
-                path=task_types_path,
-                line=12,
-            )
-        ],
-    )
-    without_entries = _feature_page_from_runtime_fixture_with_facts(
-        feature_map,
-        tables,
-        facts,
-        component_imports={},
-        primary_features={},
-        table_accesses={},
-    )
-    with_entries = _feature_page_from_runtime_fixture()
-
-    assert any("(library)" in node.label for node in without_entries.block.nodes)
-    assert not any("(library)" in node.label for node in with_entries.block.nodes)
-    assert block_layout_problems(without_entries.block) == []
-    assert block_layout_problems(with_entries.block) == []
 
 
-def test_api_and_worker_details_show_five_then_a_cited_more_row() -> None:
-    page = _feature_page_from_runtime_fixture(endpoint_count=8, worker_count=7)
-    api_node = next(
-        node for node in page.block.nodes if node.label == "Integrations API"
-    )
-    worker_node = next(
-        node for node in page.block.nodes if node.label == "Integration workers"
-    )
-
-    assert [detail.text for detail in api_node.details] == [
-        "GET /integrations/events/1",
-        "GET /integrations/events/2",
-        "GET /integrations/events/3",
-        "GET /integrations/events/4",
-        "GET /integrations/events/5",
-        "+3 more endpoints",
-    ]
-    assert api_node.details[-1].sources[0].lines == (16, 16)
-    assert [detail.text for detail in worker_node.details] == [
-        "SyncWorker0",
-        "SyncWorker1",
-        "SyncWorker2",
-        "SyncWorker3",
-        "SyncWorker4",
-        "+2 more workers",
-    ]
-    assert worker_node.details[-1].sources[0].lines == (10, 10)
 
 
-def test_web_directory_details_fit_the_block_claim_limit() -> None:
-    web_directory = "web/" + "/".join(f"screen-{index}" for index in range(20))
-    page = _feature_page_from_runtime_fixture(web_directory=web_directory)
-    web_node = next(node for node in page.block.nodes if node.label == "Web app")
-
-    assert len(web_node.details[0].text) <= 90
-    assert web_node.details[0].text.startswith("…/")
-    assert web_node.details[0].sources
 
 
-def test_long_endpoint_details_keep_their_method_and_citation() -> None:
-    long_endpoint_path = "/integrations/" + "/".join(
-        f"segment-{index}" for index in range(12)
-    )
-    page = _feature_page_from_runtime_fixture(
-        long_endpoint_path=long_endpoint_path,
-    )
-    api_node = next(
-        node for node in page.block.nodes if node.label == "Integrations API"
-    )
-    detail = next(
-        detail for detail in api_node.details if detail.sources[0].lines == (10, 10)
-    )
-
-    assert len(detail.text) <= 90
-    assert detail.text.startswith("GET /integrations/")
-    assert "…" in detail.text
 
 
-def test_feature_block_aggregates_store_over_twelve_component_table_edges() -> None:
-    page = _feature_page_from_runtime_fixture(api_table_count=13)
-    database = next(
-        node for node in page.block.nodes if node.label.startswith("Database (")
-    )
-
-    assert database.label == "Database (16 tables)"
-    assert [detail.text for detail in database.details] == [
-        "api_table_00",
-        "api_table_01",
-        "api_table_02",
-        "api_table_03",
-        "api_table_04",
-        "+11 more tables",
-    ]
-    assert block_layout_problems(page.block) == []
 
 
-def test_feature_entry_reach_does_not_enter_another_entry_files() -> None:
-    page = _feature_page_from_runtime_fixture()
-    nodes = {node.id: node for node in page.block.nodes}
-    api_node = next(node for node in nodes.values() if node.label == "Integrations API")
-    worker_node = next(
-        node for node in nodes.values() if node.label == "Integration workers"
-    )
-    worker_table = next(node for node in nodes.values() if node.label == "worker_table")
-    google = next(node for node in nodes.values() if node.label == "Google APIs")
-
-    assert not any(
-        edge.src == api_node.id and edge.dst == worker_table.id
-        for edge in page.block.edges
-    )
-    assert not any(
-        edge.src == api_node.id and edge.dst == google.id for edge in page.block.edges
-    )
-    assert any(
-        edge.src == worker_node.id and edge.dst == google.id
-        for edge in page.block.edges
-    )
 
 
-def test_domain_block_flows_features_to_stores_without_feature_edges() -> None:
-    feature_map, tables, facts = _runtime_feature_fixture()
-
-    block, figures = _domain_block(feature_map, {}, tables, facts, {})
-
-    assert block_layout_problems(block) == []
-    assert figures == []
-    feature_ids = {node.id for node in block.nodes if node.id.startswith("feature-")}
-    assert not any(
-        edge.src in feature_ids and edge.dst in feature_ids for edge in block.edges
-    )
-    assert any(edge.label == "uses" for edge in block.edges)
-    assert all(
-        edge.src in feature_ids
-        or edge.dst.startswith("external-service-")
-        or edge.dst.startswith("store-feature-")
-        for edge in block.edges
-    )
-    assert {node.label for node in block.nodes if node.kind == "external"} == {
-        "Google APIs",
-        "Slack",
-        "Stripe",
-    }
-    assert all(
-        detail.sources
-        for node in block.nodes
-        if node.id in feature_ids
-        for detail in node.details
-    )
 
 
-def test_domain_queue_figure_shows_producer_queue_consumer_flow() -> None:
-    feature_map, tables, facts = _runtime_feature_fixture()
-    api_path = "backend/src/api/integrations/endpoints.py"
-    task_types_path = "backend/src/tasks/types.py"
-    registry_path = "backend/src/tasks/executor_registry.py"
-    facts[api_path].task_producers = [
-        TaskProducer(task_type="TASK_A", path=api_path, line=30)
-    ]
-    facts[task_types_path] = FileFacts(
-        path=task_types_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[],
-        task_types=[
-            TaskType(
-                name="TASK_A",
-                queue_type="NotificationQueueType.SYNC",
-                path=task_types_path,
-                line=12,
-            )
-        ],
-    )
-    facts[registry_path] = FileFacts(
-        path=registry_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[],
-        task_consumers=[
-            TaskConsumer(
-                task_type="TASK_A",
-                executor="SyncWorker",
-                path=registry_path,
-                line=20,
-            )
-        ],
-    )
-
-    _domain_diagram, figures = _domain_block(feature_map, {}, tables, facts, {})
-
-    assert [figure.title for figure in figures] == ["Work handed between features"]
-    flow = figures[0].block
-    assert block_layout_problems(flow) == []
-    queue = next(node for node in flow.nodes if node.kind == "queue")
-    producer = next(node for node in flow.nodes if node.group == "group-flow-producers")
-    consumer = next(node for node in flow.nodes if node.group == "group-flow-consumers")
-    assert producer.label == consumer.label
-    assert producer.link == consumer.link
-    assert [(edge.src, edge.dst) for edge in flow.edges] == [
-        (producer.id, queue.id),
-        (queue.id, consumer.id),
-    ]
-    assert [edge.label for edge in flow.edges] == [
-        "enqueues TASK_A",
-        "consumed by",
-    ]
 
 
-def test_feature_task_queue_reaches_external_consumer_only_through_member_imports() -> (
-    None
-):
-    feature_map, tables, facts = _runtime_feature_fixture(
-        worker_path="backend/src/notifications/workers/member.py"
-    )
-    api_path = "backend/src/api/integrations/endpoints.py"
-    task_types_path = "backend/src/tasks/types.py"
-    registry_path = "backend/src/tasks/executor_registry.py"
-    caller_path = "backend/src/notifications/workers/consumer.py"
-    outside_path = "backend/src/notifications/helpers.py"
-    facts[api_path].task_producers = [
-        TaskProducer(task_type="TASK_A", path=api_path, line=30)
-    ]
-    facts[task_types_path] = FileFacts(
-        path=task_types_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[],
-        task_types=[
-            TaskType(
-                name="TASK_A",
-                queue_type="NotificationQueueType.SYNC",
-                path=task_types_path,
-                line=12,
-            )
-        ],
-    )
-    facts[registry_path] = FileFacts(
-        path=registry_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[],
-        task_consumers=[
-            TaskConsumer(
-                task_type="TASK_A",
-                executor="SyncWorker",
-                path=registry_path,
-                line=20,
-            ),
-            TaskConsumer(
-                task_type="TASK_A",
-                executor="NotificationTaskExecutor",
-                path=registry_path,
-                line=21,
-            ),
-        ],
-    )
-    facts[caller_path] = FileFacts(
-        path=caller_path,
-        api_group=None,
-        endpoints=[],
-        workers=[
-            Worker(
-                name="NotificationTaskExecutor",
-                kind="task_executor",
-                line=8,
-            )
-        ],
-        externals=[
-            ExternalCall(service="Salesforce", module="simple_salesforce", line=9)
-        ],
-    )
-    facts[outside_path] = FileFacts(
-        path=outside_path,
-        api_group=None,
-        endpoints=[],
-        workers=[],
-        externals=[ExternalCall(service="AWS", module="boto3", line=4)],
-    )
-
-    page = _feature_page_from_runtime_fixture_with_facts(
-        feature_map,
-        tables,
-        facts,
-        component_imports={
-            caller_path: {
-                api_path: 7,
-                outside_path: 6,
-            }
-        },
-        primary_features={
-            caller_path: ("Notifications", "feature-activity-notifications")
-        },
-        table_accesses={api_path: {"api_table_00": (31, 29)}},
-    )
-    nodes = {node.id: node for node in page.block.nodes}
-    api_node = next(node for node in nodes.values() if node.label == "Integrations API")
-    queue = next(node for node in nodes.values() if node.kind == "queue")
-    external_worker = next(
-        node for node in nodes.values() if node.link == "feature-activity-notifications"
-    )
-    store = next(node for node in nodes.values() if node.label == "api_table_00")
-
-    assert block_layout_problems(page.block) == []
-    assert [group.label for group in page.block.groups if group.parent is None] == [
-        "Web app",
-        "Entry points",
-        "Task queues",
-        "Queue workers",
-        "Data & services",
-    ]
-    assert any(
-        edge.src == api_node.id
-        and edge.dst == queue.id
-        and edge.label == "enqueues TASK_A"
-        for edge in page.block.edges
-    )
-    assert any(
-        edge.src == queue.id
-        and edge.dst == external_worker.id
-        and edge.label == "consumed by"
-        for edge in page.block.edges
-    )
-    read_edge = next(
-        edge
-        for edge in page.block.edges
-        if edge.src == external_worker.id and edge.dst == store.id
-    )
-    assert read_edge.label == "reads & writes"
-    assert read_edge.source.path == api_path
-    assert read_edge.source.lines == (31, 31)
-    assert external_worker.details[-1].text == (
-        "Calls into this feature from Notifications"
-    )
-    assert all(node.label not in {"Salesforce", "AWS"} for node in page.block.nodes)
 
 
-def _feature_page_from_runtime_fixture_with_facts(
-    feature_map: FeatureMap,
-    tables: dict[str, Table],
-    facts: dict[str, FileFacts],
-    *,
-    component_imports: dict[str, dict[str, int]],
-    primary_features: dict[str, tuple[str, str]],
-    table_accesses: dict[str, dict[str, tuple[int | None, int | None]]],
-) -> Page:
-    pages = feature_pages(
-        feature_map,
-        root_id="rox-core",
-        domain_title="Activity",
-        names={"integration": "Integration connections & sync"},
-        tables=tables,
-        component_facts=facts,
-        component_imports=component_imports,
-        table_accesses=table_accesses,
-        primary_features=primary_features,
-    )
-    return next(page for page in pages if page.kind == "feature")
 
 
-def test_feature_table_edges_use_access_modes_and_source_priority() -> None:
-    api_path = "backend/src/api/integrations/endpoints.py"
-    helper_path = "backend/src/services/api_helper.py"
-    page = _feature_page_from_runtime_fixture(
-        table_accesses={
-            api_path: {
-                "api_table_00": (31, 29),
-                "api_table_01": (None, 30),
-            }
-        }
-    )
-    api_node = next(
-        node for node in page.block.nodes if node.label == "Integrations API"
-    )
-    edges_by_table = {
-        next(node.label for node in page.block.nodes if node.id == edge.dst): edge
-        for edge in page.block.edges
-        if edge.src == api_node.id
-        and any(
-            node.id == edge.dst and node.kind == "store" for node in page.block.nodes
-        )
-    }
-
-    assert edges_by_table["api_table_00"].label == "reads & writes"
-    assert edges_by_table["api_table_00"].source.path == api_path
-    assert edges_by_table["api_table_00"].source.lines == (31, 31)
-    assert edges_by_table["api_table_01"].label == "reads"
-    assert edges_by_table["api_table_01"].source.lines == (30, 30)
-    uses_edge = next(
-        edge
-        for edge in page.block.edges
-        if edge.src == api_node.id
-        and edge.dst
-        == next(
-            node.id for node in page.block.nodes if node.label == "api_helper_table"
-        )
-    )
-    assert uses_edge.label == "uses"
-    assert uses_edge.source.path == helper_path
 
 
 def test_empty_feature_and_domain_use_key_table_definition_path() -> None:
@@ -1237,3 +340,85 @@ def test_domain_tldr_lists_cited_links_to_other_domains() -> None:
     assert link_table.rows == [["alpha", "person", "People", "ID column name"]]
     assert link_table.links[0].page == "domain-people"
     assert ("TLDR Links to other domains table", source) in page_sources(domain_page)
+
+
+def test_domain_tldr_preserves_cross_feature_import_summary() -> None:
+    alpha_path = "backend/src/services/alpha.py"
+    beta_path = "backend/src/services/beta.py"
+    tables = {
+        name: Table(
+            name=name,
+            class_name=name.capitalize(),
+            columns=[Column(name="id", type="Integer", primary_key=True)],
+            source=CodeSource(path=f"backend/src/models/{name}.py", lines=(1, 1)),
+        )
+        for name in ("alpha", "beta")
+    }
+    alpha_file = FeatureFile(
+        path=alpha_path,
+        primary=True,
+        reason="tables",
+        evidence=[
+            FeatureEvidence(
+                kind="call",
+                path=alpha_path,
+                line=20,
+                to=beta_path,
+            )
+        ],
+    )
+    beta_file = FeatureFile(
+        path=beta_path,
+        primary=True,
+        reason="tables",
+        evidence=[],
+    )
+    feature_map = FeatureMap(
+        commit="a" * 40,
+        domain="test",
+        threshold=0.25,
+        tables=["alpha", "beta"],
+        features=[
+            Feature(
+                id="alpha",
+                tables=["alpha"],
+                files=[alpha_file],
+                table_links=[],
+            ),
+            Feature(
+                id="beta",
+                tables=["beta"],
+                files=[beta_file],
+                table_links=[],
+            ),
+        ],
+        uncovered=[],
+        unmapped_tags=[],
+        counts=FeatureCounts(
+            domain_files=2,
+            primary_placed=2,
+            shared=0,
+            uncovered=0,
+            web=0,
+            deployment=0,
+            skills=0,
+            unparseable=0,
+        ),
+    )
+
+    domain_page = feature_pages(
+        feature_map,
+        root_id="rox-core",
+        domain_title="Test",
+        names={},
+        tables=tables,
+    )[0]
+
+    assert any(
+        "alpha imports code from beta (1 imports)" in note.text.lower()
+        for note in domain_page.tldr.notes
+    )
+    assert any(
+        note.sources[0].path == alpha_path and note.sources[0].lines == (20, 20)
+        for note in domain_page.tldr.notes
+    )

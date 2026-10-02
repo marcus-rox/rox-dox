@@ -807,6 +807,20 @@ def _block_section(page: Page, *, repo_url: str) -> str:
             if page.block.notes
             else ""
         )
+        unreached_files = ""
+        if page.block.unreached_files:
+            items = "".join(
+                f"<li>{_escape(path)}</li>" for path in page.block.unreached_files
+            )
+            unreached_files = (
+                '<details class="unreached-files">'
+                "<summary>"
+                f"Files not reached by a component "
+                f"({len(page.block.unreached_files)})"
+                "</summary>"
+                f"<ul>{items}</ul>"
+                "</details>"
+            )
         cards.append(
             '<article class="diagram-card zoom-figure" id="block-figure">'
             '<div class="figure-bar"><h3>Figure 1. System overview</h3>'
@@ -815,6 +829,7 @@ def _block_section(page: Page, *, repo_url: str) -> str:
             f'<div class="diagram block-scroll">'
             f"{block_svg(page.block, page=page, repo_url=repo_url)}</div>"
             f"{notes}"
+            f"{unreached_files}"
             f"{_sources_details(elements, page=page, repo_url=repo_url)}"
             "</article>"
         )

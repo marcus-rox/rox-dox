@@ -126,6 +126,7 @@ class BlockDiagram(Model):
     groups: list[Group] = Field(default_factory=list)
     nodes: list[Node]
     edges: list[Edge]
+    unreached_files: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_structure(self) -> BlockDiagram:

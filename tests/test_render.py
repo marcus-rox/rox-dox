@@ -551,6 +551,28 @@ def test_focused_block_figure_renders_notes_and_its_own_sources(
         )
 
 
+def test_unreached_block_files_render_in_a_collapsed_list(
+    page_data: dict[str, object],
+    plantuml_jar: Path,
+) -> None:
+    payload = copy.deepcopy(page_data)
+    payload["block"]["unreached_files"] = ["backend/src/helpers/unreached.py"]
+    page = Page.model_validate(payload)
+    document = render_page(
+        page,
+        tree=build_tree([page]),
+        repo_url=REPO_URL,
+        tables={},
+        jar=plantuml_jar,
+    )
+
+    assert (
+        '<details class="unreached-files">'
+        "<summary>Files not reached by a component (1)</summary>"
+        "<ul><li>backend/src/helpers/unreached.py</li></ul></details>"
+    ) in document
+
+
 def test_same_title_diagrams_only_list_their_own_sources(
     page_data: dict[str, object],
     git_repo: tuple[Path, str],

@@ -193,14 +193,14 @@
    ],
    "rows": [
     [
-     "Activity API",
-     "HTTP API",
+     "INTERACTION (Flask)",
+     "service",
      "rox_activity",
      "—"
     ],
     [
-     "rox_activity",
-     "Database",
+     "PostgreSQL",
+     "store",
      "rox_activity",
      "—"
     ]
@@ -214,31 +214,10 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
+     "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      31,
-      31
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
-     "lines": [
-      92,
-      92
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
-     "lines": [
-      6,
-      6
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
-     "lines": [
-      13,
-      13
+      156,
+      320
      ]
     },
     {
@@ -246,6 +225,13 @@
      "lines": [
       28,
       28
+     ]
+    },
+    {
+     "path": "backend/docker-compose-infra.yaml",
+     "lines": [
+      10,
+      11
      ]
     }
    ],
@@ -267,172 +253,94 @@
   ]
  },
  "block": {
+  "notes": [
+   {
+    "text": "INTERACTION (Flask) reads + writes PostgreSQL.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/activity/business.py",
+      "lines": [
+       28,
+       28
+      ]
+     }
+    ]
+   }
+  ],
   "groups": [
    {
-    "id": "column-entry-points",
-    "label": "Entry points",
+    "id": "column-http-services",
+    "label": "HTTP services",
     "source": {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
+     "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      31,
-      31
+      156,
+      320
      ]
     }
    },
    {
-    "id": "group-http-api",
-    "label": "HTTP API",
+    "id": "column-stores",
+    "label": "Stores",
     "source": {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
+     "path": "backend/docker-compose-infra.yaml",
      "lines": [
-      31,
-      31
-     ]
-    },
-    "parent": "column-entry-points"
-   },
-   {
-    "id": "column-data-services",
-    "label": "Data & services",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
-     "lines": [
-      31,
-      96
+      10,
+      11
      ]
     }
-   },
-   {
-    "id": "group-database",
-    "label": "Database",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
-     "lines": [
-      31,
-      96
-     ]
-    },
-    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "api-activity",
-    "label": "Activity API",
+    "id": "interaction",
+    "label": "INTERACTION (Flask)",
     "source": {
-     "path": "backend/src/rox_core/api/activity/endpoints.py",
+     "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      31,
-      31
+      156,
+      320
      ]
     },
-    "link": "feature-gov-permission",
     "kind": "component",
-    "group": "group-http-api",
+    "group": "column-http-services",
+    "many": true,
+    "details": []
+   },
+   {
+    "id": "postgres",
+    "label": "PostgreSQL",
+    "source": {
+     "path": "backend/docker-compose-infra.yaml",
+     "lines": [
+      10,
+      11
+     ]
+    },
+    "kind": "store",
+    "group": "column-stores",
     "many": false,
     "details": [
      {
-      "text": "GET /activity",
+      "text": "rox_activity",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
+        "path": "backend/src/rox_core/api/activity/business.py",
         "lines": [
-         31,
-         31
-        ]
-       }
-      ]
-     },
-     {
-      "text": "POST /activity",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         31,
-         31
-        ]
-       }
-      ]
-     },
-     {
-      "text": "DELETE /activity/<string:activity_id>",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         92,
-         92
-        ]
-       }
-      ]
-     },
-     {
-      "text": "GET /activity/<string:activity_id>",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         92,
-         92
-        ]
-       }
-      ]
-     },
-     {
-      "text": "PUT /activity/<string:activity_id>",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         92,
-         92
-        ]
-       }
-      ]
-     },
-     {
-      "text": "Calls into this feature from Permission",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         6,
-         6
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/activity/endpoints.py",
-        "lines": [
-         13,
-         13
+         28,
+         28
         ]
        }
       ]
      }
     ]
-   },
-   {
-    "id": "store-rox-activity",
-    "label": "rox_activity",
-    "source": {
-     "path": "backend/src/rox_customer/real_time/models/rox_activity.py",
-     "lines": [
-      31,
-      96
-     ]
-    },
-    "kind": "store",
-    "group": "group-database",
-    "many": false,
-    "details": []
    }
   ],
   "edges": [
    {
-    "src": "api-activity",
-    "dst": "store-rox-activity",
-    "label": "reads & writes",
+    "src": "interaction",
+    "dst": "postgres",
+    "label": "reads + writes",
     "source": {
      "path": "backend/src/rox_core/api/activity/business.py",
      "lines": [
@@ -441,7 +349,8 @@
      ]
     }
    }
-  ]
+  ],
+  "unreached_files": []
  },
  "block_figures": [],
  "data": {

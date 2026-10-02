@@ -18,8 +18,8 @@ fi
 
 project_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 repo=/home/ubuntu/repos/rox-core
-site_dir=/home/ubuntu/scratch/site_v2
-shots_dir=/home/ubuntu/scratch/shots_v2
+site_dir=/home/ubuntu/scratch/site_gen
+shots_dir=/home/ubuntu/scratch/shots_gen
 plantuml_jar=/home/ubuntu/rox-docs-t2/tools/plantuml.jar
 
 cd "$project_root"
