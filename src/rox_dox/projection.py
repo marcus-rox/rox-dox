@@ -5,6 +5,7 @@ from collections import defaultdict, deque
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from math import ceil
+from pathlib import PurePosixPath
 from typing import Any
 
 from rox_dox.components import (
@@ -292,8 +293,10 @@ def _eligible_owner_candidates(
     candidates: Mapping[str, Collection[tuple[int, str, str]]],
     catalog_by_id: Mapping[str, Mapping[str, Any]],
     entry_components: Collection[str],
+    external_entry_components: Collection[str] = (),
 ) -> dict[str, set[tuple[int, str, str]]]:
     eligible_components = set(entry_components)
+    eligible_components.update(external_entry_components)
     eligible_components.update(
         component_id
         for component_id, entry in catalog_by_id.items()
@@ -916,20 +919,21 @@ def project_component_diagram(
         component_imports,
     )
     external_seeds = []
+    external_entry_components = set()
+    scope_directories = {PurePosixPath(path).parent for path in scope_paths}
     for caller_path, targets in sorted(external_callers.items()):
         if caller_path in scope_paths:
+            continue
+        if PurePosixPath(caller_path).parent not in scope_directories:
             continue
         caller_facts = component_facts.get(caller_path)
         if caller_facts is None:
             continue
-        caller_components = _entry_component_ids(
+        caller_components = _endpoint_component_ids(
             caller_path,
             caller_facts,
             catalog_by_id,
             target_components,
-            queue_class_components,
-            consumers_by_executor,
-            task_types,
         )
         seedable_components = [
             component_id
@@ -946,6 +950,7 @@ def project_component_diagram(
                 candidate,
             ),
         )
+        external_entry_components.add(component_id)
         for target in sorted(set(targets) & scope_paths):
             if target not in owner_candidates:
                 external_seeds.append((target, caller_path, component_id, 1))
@@ -960,6 +965,7 @@ def project_component_diagram(
         owner_candidates,
         catalog_by_id,
         entry_components.values(),
+        external_entry_components,
     )
     owners_by_path = _nearest_component_owners(owner_candidates, catalog_order)
     unreached = sorted(scope_paths - owners_by_path.keys())

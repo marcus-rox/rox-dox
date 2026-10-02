@@ -651,10 +651,9 @@ def test_shared_helper_is_owned_by_nearest_entry_component() -> None:
     assert provider_edges[0].source.path == helper_path
 
 
-def test_external_caller_seeds_an_unreached_scope_file() -> None:
-    target_path = "backend/src/rox_core/api/external_accounts.py"
-    entry_path = "backend/src/rox_core/api/accounts.py"
-    caller_path = "backend/src/chat/routes/accounts.py"
+def test_external_sibling_caller_qualifies_and_seeds_its_scope_file() -> None:
+    target_path = "backend/src/rox_core/api/integrations/business.py"
+    caller_path = "backend/src/rox_core/api/integrations/routes.py"
     facts = {
         target_path: FileFacts(
             path=target_path,
@@ -665,28 +664,13 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
         ),
         caller_path: FileFacts(
             path=caller_path,
-            api_group="chat",
+            api_group="integrations",
             endpoints=[
                 Endpoint(
                     method="GET",
-                    path="/accounts",
-                    handler="get_accounts",
+                    path="/integrations",
+                    handler="get_integrations",
                     line=3,
-                    deploy_target="INTERACTION",
-                )
-            ],
-            workers=[],
-            externals=[ExternalCall(service="Twilio", module="twilio", line=9)],
-        ),
-        entry_path: FileFacts(
-            path=entry_path,
-            api_group="accounts",
-            endpoints=[
-                Endpoint(
-                    method="GET",
-                    path="/accounts",
-                    handler="get_accounts",
-                    line=4,
                     deploy_target="INTERACTION",
                 )
             ],
@@ -695,7 +679,7 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
         ),
     }
     projection = project_component_diagram(
-        [_file(entry_path), _file(target_path)],
+        [_file(target_path)],
         component_catalog=_runtime_catalog(),
         component_facts=facts,
         component_imports={},
@@ -704,10 +688,10 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
         external_callers={caller_path: [target_path]},
     )
 
-    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
-        ("http_clients", "interaction", "REST calls"),
-        ("interaction", "crm", "API calls"),
-    }
+    assert [(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges] == [
+        ("interaction", "crm", "API calls")
+    ]
+    assert {node.id for node in projection.diagram.nodes} == {"interaction", "crm"}
     assert (
         next(edge for edge in projection.diagram.edges if edge.dst == "crm").source.path
         == target_path
@@ -715,8 +699,8 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
     assert projection.diagram.unreached_files == []
 
 
-def test_external_seed_without_an_in_scope_entry_does_not_create_a_box() -> None:
-    target_path = "backend/src/rox_core/api/external_accounts.py"
+def test_external_caller_from_distant_package_does_not_qualify_service() -> None:
+    target_path = "backend/src/rox_core/api/integrations/business.py"
     caller_path = "backend/src/chat/routes/accounts.py"
     facts = {
         target_path: FileFacts(
