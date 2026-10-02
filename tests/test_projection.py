@@ -34,6 +34,7 @@ def _entry(
 def _runtime_catalog() -> list[dict]:
     return [
         _entry("web", "web app", "client", "Callers", "component", {"web_files": True}),
+        _entry("http_clients", "HTTP clients", "client", "Callers", "component", {}),
         _entry(
             "provider_push",
             "Provider push",
@@ -186,7 +187,13 @@ def _projection_fixture():
                     executor="SyncExecutor",
                     path=worker_path,
                     line=30,
-                )
+                ),
+                TaskConsumer(
+                    task_type="TASK_B",
+                    executor="SyncExecutor",
+                    path=worker_path,
+                    line=31,
+                ),
             ],
         ),
         temporal_path: FileFacts(
@@ -216,7 +223,15 @@ def _projection_fixture():
                     deploy_target="INTEGRATION",
                     path=task_types_path,
                     line=40,
-                )
+                ),
+                TaskType(
+                    name="TASK_B",
+                    queue_type="IntegrationQueueType.DEFAULT",
+                    queue_class="IntegrationQueueType",
+                    deploy_target="INTEGRATION",
+                    path=task_types_path,
+                    line=41,
+                ),
             ],
         ),
     }
@@ -258,6 +273,7 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
         ("interaction", "crm", "API calls"),
         ("sqs", "data_workers", "long-poll"),
     }
+    assert not any(edge.src == "http_clients" for edge in diagram.edges)
     for edge in diagram.edges:
         assert edge.source.lines
     for group in diagram.groups:
@@ -279,9 +295,13 @@ def test_component_projection_attributes_helpers_and_cites_runtime_flow() -> Non
         node.id: {detail.text for detail in node.details} for node in diagram.nodes
     }
     assert "/accounts: 1 endpoints" in details_by_node["interaction"]
-    assert "INTEGRATION: TASK_A" in details_by_node["data_workers"]
+    assert "INTEGRATION · 2 task types" in details_by_node["data_workers"]
+    assert "TASK_A" not in " ".join(details_by_node["data_workers"])
+    assert "TASK_B" not in " ".join(details_by_node["data_workers"])
     assert "AccountsWorkflow" in details_by_node["temporal"]
-    assert "IntegrationQueueType: 1 task types" in details_by_node["sqs"]
+    assert "IntegrationQueueType · 2 task types" in details_by_node["sqs"]
+    assert "TASK_A" not in " ".join(details_by_node["sqs"])
+    assert "TASK_B" not in " ".join(details_by_node["sqs"])
     assert "accounts" in details_by_node["postgres"]
     assert "Salesforce" in details_by_node["crm"]
     assert any("Salesforce" in note.text for note in diagram.notes)
@@ -484,6 +504,182 @@ def test_external_caller_seeds_an_unreached_scope_file() -> None:
     }
     assert projection.diagram.edges[0].source.path == target_path
     assert projection.diagram.unreached_files == []
+
+
+def test_backward_edges_become_cited_notes_and_unconnected_box_disappears() -> None:
+    worker_path = "backend/src/tasks/pool.py"
+    api_path = "backend/src/rox_core/api/accounts.py"
+    facts = {
+        worker_path: FileFacts(
+            path=worker_path,
+            api_group=None,
+            endpoints=[
+                Endpoint(
+                    method="POST",
+                    path="/tasks",
+                    handler="enqueue",
+                    line=3,
+                    deploy_target="INTEGRATION",
+                )
+            ],
+            workers=[],
+            externals=[],
+            task_producers=[
+                TaskProducer(task_type="TASK_A", path=worker_path, line=20)
+            ],
+            workflow_starts=[21],
+        ),
+        api_path: FileFacts(
+            path=api_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="list_accounts",
+                    line=4,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[ExternalCall(service="Salesforce", module="salesforce", line=5)],
+        ),
+    }
+    projection = project_component_diagram(
+        [_file(worker_path), _file(api_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={},
+    )
+
+    assert {(edge.src, edge.dst, edge.label) for edge in projection.diagram.edges} == {
+        ("http_clients", "interaction", "REST calls"),
+        ("interaction", "crm", "API calls"),
+    }
+    assert "data_workers" not in {node.id for node in projection.diagram.nodes}
+    note = next(
+        note
+        for note in projection.diagram.notes
+        if "INTEGRATION workers also" in note.text
+    )
+    assert 3 <= len(projection.diagram.notes) <= 6
+    assert (
+        note.text
+        == "INTEGRATION workers also enqueue follow-up SQS tasks and start Temporal workflows."
+    )
+    assert {source.lines for source in note.sources} == {(20, 20), (21, 21)}
+
+
+def test_http_clients_edge_uses_first_service_endpoint_without_route_evidence() -> None:
+    api_path = "backend/src/rox_core/api/accounts.py"
+    facts = {
+        api_path: FileFacts(
+            path=api_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="POST",
+                    path="/accounts/new",
+                    handler="create_account",
+                    line=30,
+                    deploy_target="INTERACTION",
+                ),
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="list_accounts",
+                    line=10,
+                    deploy_target="INTERACTION",
+                ),
+            ],
+            workers=[],
+            externals=[],
+        )
+    }
+    projection = project_component_diagram(
+        [_file(api_path)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={},
+    )
+
+    assert len(projection.diagram.edges) == 1
+    edge = projection.diagram.edges[0]
+    assert (edge.src, edge.dst, edge.label) == (
+        "http_clients",
+        "interaction",
+        "REST calls",
+    )
+    assert edge.source.path == api_path
+    assert edge.source.lines == (10, 10)
+    assert any(
+        note.text == "HTTP clients make REST calls to INTERACTION (Flask)."
+        for note in projection.diagram.notes
+    )
+
+
+def test_temporal_workflow_details_show_two_names_then_remainder() -> None:
+    api_path = "backend/src/rox_core/api/accounts.py"
+    workflow_paths = [
+        f"backend/src/rox_core/workflows/workflow_{index}.py" for index in range(4)
+    ]
+    facts = {
+        api_path: FileFacts(
+            path=api_path,
+            api_group="accounts",
+            endpoints=[
+                Endpoint(
+                    method="GET",
+                    path="/accounts",
+                    handler="list_accounts",
+                    line=6,
+                    deploy_target="INTERACTION",
+                )
+            ],
+            workers=[],
+            externals=[],
+            workflow_starts=[8],
+        ),
+        **{
+            path: FileFacts(
+                path=path,
+                api_group=None,
+                endpoints=[],
+                workers=[
+                    Worker(
+                        name=f"Workflow{index}",
+                        kind="temporal_workflow",
+                        line=index + 1,
+                    )
+                ],
+                externals=[],
+            )
+            for index, path in enumerate(workflow_paths)
+        },
+    }
+    projection = project_component_diagram(
+        [_file(api_path), *(_file(path) for path in workflow_paths)],
+        component_catalog=_runtime_catalog(),
+        component_facts=facts,
+        component_imports={},
+        table_accesses={},
+        scope_tables=set(),
+        external_callers={},
+    )
+
+    temporal = next(node for node in projection.diagram.nodes if node.id == "temporal")
+    assert [detail.text for detail in temporal.details] == [
+        "Workflow0",
+        "Workflow1",
+        "+2 more",
+    ]
+    assert temporal.details[-1].sources
 
 
 def test_edge_deduplication_merges_access_modes_and_uses_first_source() -> None:

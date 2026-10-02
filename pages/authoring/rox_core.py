@@ -2757,6 +2757,14 @@ component_catalog = [
         "match": {"web_files": True},
     },
     {
+        "id": "http_clients",
+        "root_id": "web",
+        "label": "HTTP clients",
+        "kind": "client",
+        "column": "Callers",
+        "match": {},
+    },
+    {
         "id": "provider_push",
         "label": "Provider push",
         "kind": "external",
@@ -2844,9 +2852,7 @@ component_catalog = [
         "root_id": "data_workers",
         "kind": "service(many)",
         "column": "Background workers",
-        "match": {
-            "deploy_targets": ["SOR", "BATCH", "BACKFILL", "INTEGRATION"]
-        },
+        "match": {"deploy_targets": ["SOR", "BATCH", "BACKFILL", "INTEGRATION"]},
     },
     {
         "id": "outreach_sched",

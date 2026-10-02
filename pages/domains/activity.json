@@ -9534,6 +9534,37 @@
  "block": {
   "notes": [
    {
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers also enqueue follow-up SQS tasks.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/service.py",
+      "lines": [
+       305,
+       305
+      ]
+     }
+    ]
+   },
+   {
+    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers also enqueue follow-up SQS tasks and start Temporal workflows.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/alertable_state_notifications.py",
+      "lines": [
+       86,
+       86
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+      "lines": [
+       427,
+       427
+      ]
+     }
+    ]
+   },
+   {
     "text": "Provider push sends provider events to WEBHOOK (Flask).",
     "sources": [
      {
@@ -9570,39 +9601,8 @@
     ]
    },
    {
-    "text": "INTERACTION (Flask) reads + writes PostgreSQL.",
+    "text": "Additional flows include: INTERACTION (Flask) reads + writes PostgreSQL; INTERACTION (Flask) enqueues tasks to SQS queues; INTERACTION (Flask) starts workflows on Temporal workflows; WEBHOOK (Flask) makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); WEBHOOK (Flask) reads PostgreSQL; WEBHOOK (Flask) enqueues tasks to SQS queues; Temporal workflows reads PostgreSQL; Temporal workflows enqueues tasks to SQS queues; SQS queues long-polls AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT; SQS queues long-polls SOR · BATCH · BACKFILL · INTEGRATION; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT reads + writes PostgreSQL; SOR · BATCH · BACKFILL · INTEGRATION makes API calls to CRM + workspace APIs (Google APIs, Microsoft identity, Salesforce, Slack); SOR · BATCH · BACKFILL · INTEGRATION reads + writes PostgreSQL.",
     "sources": [
-     {
-      "path": "backend/src/ext_integrations/data_providers/hubspot_enrichment/hubspot_enrichment_shim.py",
-      "lines": [
-       177,
-       177
-      ]
-     }
-    ]
-   },
-   {
-    "text": "INTERACTION (Flask) enqueues tasks to SQS queues.",
-    "sources": [
-     {
-      "path": "backend/src/notifications/service.py",
-      "lines": [
-       515,
-       515
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Additional flows from AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT, INTERACTION (Flask), SOR · BATCH · BACKFILL · INTEGRATION, SQS queues, Temporal workflows, WEBHOOK (Flask) (15 edges).",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/alertable_state_notifications.py",
-      "lines": [
-       86,
-       86
-      ]
-     },
      {
       "path": "backend/src/ext_integrations/alertable_state_notifications.py",
       "lines": [
@@ -9618,10 +9618,10 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
+      "path": "backend/src/ext_integrations/data_providers/hubspot_enrichment/hubspot_enrichment_shim.py",
       "lines": [
-       427,
-       427
+       177,
+       177
       ]
      },
      {
@@ -9653,10 +9653,10 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/slack_integration/service.py",
+      "path": "backend/src/notifications/service.py",
       "lines": [
-       305,
-       305
+       515,
+       515
       ]
      },
      {
@@ -9896,19 +9896,7 @@
       ]
      },
      {
-      "text": "OrgwideCalendarBackfillWorkflow",
-      "sources": [
-       {
-        "path": "backend/src/temporal/workflows/orgwide_calendar_backfill.py",
-        "lines": [
-         163,
-         163
-        ]
-       }
-      ]
-     },
-     {
-      "text": "+11 more",
+      "text": "+12 more",
       "sources": [
        {
         "path": "backend/src/temporal/activities/calendar_sync/enqueue_chunk.py",
@@ -9981,6 +9969,13 @@
         ]
        },
        {
+        "path": "backend/src/temporal/workflows/orgwide_calendar_backfill.py",
+        "lines": [
+         163,
+         163
+        ]
+       },
+       {
         "path": "backend/src/temporal/workflows/orgwide_email_backfill.py",
         "lines": [
          150,
@@ -10006,7 +10001,7 @@
     "many": true,
     "details": [
      {
-      "text": "AsyncAgentQueueType: 20 task types",
+      "text": "AsyncAgentQueueType · 20 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
@@ -10018,7 +10013,7 @@
       ]
      },
      {
-      "text": "BackfillQueueType: 5 task types",
+      "text": "BackfillQueueType · 5 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
@@ -10030,7 +10025,7 @@
       ]
      },
      {
-      "text": "BatchQueueTypeV2: 10 task types",
+      "text": "BatchQueueTypeV2 · 10 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
@@ -10091,13 +10086,13 @@
     "many": true,
     "details": [
      {
-      "text": "ASYNC_AGENT: MS_TEAMS_BOT_CONVERSATION_UPDATE_TASK +7 more",
+      "text": "ASYNC_AGENT · 8 task types",
       "sources": [
        {
-        "path": "backend/src/tasks/executor_registry.py",
+        "path": "backend/src/tasks/types.py",
         "lines": [
-         589,
-         589
+         2185,
+         2185
         ]
        }
       ]
@@ -10119,37 +10114,37 @@
     "many": true,
     "details": [
      {
-      "text": "BACKFILL: MS_TEAMS_ORGANIZER_BACKFILL_TASK, SLACK_CHANNEL_BACKFILL_TASK",
+      "text": "BACKFILL · 2 task types",
       "sources": [
        {
-        "path": "backend/src/tasks/executor_registry.py",
+        "path": "backend/src/tasks/types.py",
         "lines": [
-         635,
-         635
+         2481,
+         2481
         ]
        }
       ]
      },
      {
-      "text": "INTEGRATION: CALENDAR_EVENT_ENRICHMENT_TASK, CALENDAR_EXTRACTION_COORDINATOR_TASK +23 more",
+      "text": "INTEGRATION · 25 task types",
       "sources": [
        {
-        "path": "backend/src/tasks/executor_registry.py",
+        "path": "backend/src/tasks/types.py",
         "lines": [
-         497,
-         497
+         1630,
+         1630
         ]
        }
       ]
      },
      {
-      "text": "SOR: ORGANIZATION_DATA_CLEANUP_COORDINATOR_TASK, ORGANIZATION_DATA_CLEANUP_TASK +2 more",
+      "text": "SOR · 4 task types",
       "sources": [
        {
-        "path": "backend/src/tasks/executor_registry.py",
+        "path": "backend/src/tasks/types.py",
         "lines": [
-         556,
-         556
+         1987,
+         1987
         ]
        }
       ]
@@ -10596,18 +10591,6 @@
     }
    },
    {
-    "src": "agent_workers",
-    "dst": "sqs",
-    "label": "enqueue tasks",
-    "source": {
-     "path": "backend/src/ext_integrations/slack_integration/service.py",
-     "lines": [
-      305,
-      305
-     ]
-    }
-   },
-   {
     "src": "chat",
     "dst": "postgres",
     "label": "reads",
@@ -10640,30 +10623,6 @@
      "lines": [
       451,
       451
-     ]
-    }
-   },
-   {
-    "src": "data_workers",
-    "dst": "sqs",
-    "label": "enqueue tasks",
-    "source": {
-     "path": "backend/src/ext_integrations/alertable_state_notifications.py",
-     "lines": [
-      86,
-      86
-     ]
-    }
-   },
-   {
-    "src": "data_workers",
-    "dst": "temporal",
-    "label": "start workflow",
-    "source": {
-     "path": "backend/src/ext_integrations/integration/admin_integration_fanout.py",
-     "lines": [
-      427,
-      427
      ]
     }
    },

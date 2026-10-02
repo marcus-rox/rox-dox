@@ -16,6 +16,9 @@ from rox_dox.components import (
 from rox_dox.features import FeatureEvidence, FeatureFile
 from rox_dox.model import BlockDiagram, Claim, CodeSource, Edge, Group, Node
 
+MAX_FLOW_NOTES = 6
+TEMPORAL_WORKFLOW_DETAIL_LIMIT = 2
+
 
 @dataclass(frozen=True)
 class ComponentProjection:
@@ -221,27 +224,6 @@ def _detail_claims(
     ]
 
 
-def _task_target_detail(target: str, task_names: list[str]) -> str:
-    prefix = f"{target}: "
-    listed_names = task_names[:3]
-    while listed_names:
-        omitted_count = len(task_names) - len(listed_names)
-        suffix = f" +{omitted_count} more" if omitted_count else ""
-        text = f"{prefix}{', '.join(listed_names)}{suffix}"
-        if len(text) <= 90:
-            return text
-        listed_names.pop()
-    omitted_count = len(task_names) - 1
-    suffix = f" +{omitted_count} more" if omitted_count else ""
-    available = max(1, 90 - len(prefix) - len(suffix))
-    first_name = task_names[0]
-    if len(first_name) > available:
-        first_name = (
-            f"{first_name[: available - 1]}…" if available > 1 else first_name[:1]
-        )
-    return f"{prefix}{first_name}{suffix}"[:90]
-
-
 def _deduplicate_edges(edges: Collection[Edge]) -> list[Edge]:
     grouped: defaultdict[tuple[str, str], list[Edge]] = defaultdict(list)
     for edge in edges:
@@ -393,14 +375,13 @@ def _flow_notes(
     edges: Collection[Edge],
     catalog_by_id: Mapping[str, Mapping[str, Any]],
     services_by_node: Mapping[str, Collection[str]],
+    backward_edges: Collection[Edge] = (),
 ) -> list[Claim]:
     nodes_by_id = {node.id: node for node in nodes}
     column_indexes: dict[str, int] = {}
-    for index, entry in enumerate(catalog_by_id.values()):
-        column_indexes.setdefault(
-            f"column-{_slug(str(entry.get('column', '')))}",
-            index,
-        )
+    for entry in catalog_by_id.values():
+        group = f"column-{_slug(str(entry.get('column', '')))}"
+        column_indexes.setdefault(group, len(column_indexes))
     claims = []
     ordered_edges = sorted(
         edges,
@@ -411,13 +392,74 @@ def _flow_notes(
             edge.label,
         ),
     )
+    backward_by_component: defaultdict[str, list[Edge]] = defaultdict(list)
+    for edge in backward_edges:
+        backward_by_component[edge.src].append(edge)
+    backward_claims = []
+    for component_id, component_edges in sorted(
+        backward_by_component.items(),
+        key=lambda item: (
+            column_indexes.get(
+                f"column-{_slug(str(catalog_by_id.get(item[0], {}).get('column', '')))}",
+                0,
+            ),
+            item[0],
+        ),
+    ):
+        component = catalog_by_id.get(component_id, {})
+        source_node = nodes_by_id.get(component_id)
+        source_label = (
+            source_node.label
+            if source_node is not None
+            else str(component.get("label", component_id))
+        )
+        if component.get("kind") == "service(many)" and not source_label.endswith(
+            "workers"
+        ):
+            source_label = f"{source_label} workers"
+        phrases = []
+        for edge in sorted(component_edges, key=lambda item: (item.dst, item.label)):
+            target = catalog_by_id.get(edge.dst, {})
+            target_node = nodes_by_id.get(edge.dst)
+            target_label = (
+                target_node.label
+                if target_node is not None
+                else str(target.get("label", edge.dst))
+            )
+            if edge.label == "enqueue tasks":
+                phrases.append("enqueue follow-up SQS tasks")
+            elif edge.label == "start workflow":
+                phrases.append("start Temporal workflows")
+            elif edge.label == "REST calls":
+                phrases.append(f"make REST calls to {target_label}")
+            elif edge.label == "API calls":
+                phrases.append(f"make API calls to {target_label}")
+            elif edge.label == "provider events":
+                phrases.append(f"send provider events to {target_label}")
+            elif edge.label == "long-poll":
+                phrases.append(f"long-poll {target_label}")
+            elif edge.label == "reads":
+                phrases.append(f"read {target_label}")
+            elif edge.label == "writes":
+                phrases.append(f"write {target_label}")
+            elif edge.label == "reads + writes":
+                phrases.append(f"read and write {target_label}")
+            else:
+                phrases.append(f"{edge.label} {target_label}")
+        backward_claims.append(
+            Claim(
+                text=f"{source_label} also {' and '.join(dict.fromkeys(phrases))}.",
+                sources=_unique_sources(edge.source for edge in component_edges),
+            )
+        )
     for edge in ordered_edges:
         source_node = nodes_by_id[edge.src]
         target_label = nodes_by_id[edge.dst].label
         phrases = []
         for label in edge.label.split(" / "):
             if label == "REST calls":
-                phrases.append(f"makes REST calls to {target_label}")
+                verb = "make" if edge.src == "http_clients" else "makes"
+                phrases.append(f"{verb} REST calls to {target_label}")
             elif label == "provider events":
                 phrases.append(f"sends provider events to {target_label}")
             elif label == "enqueue tasks":
@@ -441,19 +483,20 @@ def _flow_notes(
                     sources=[edge.source],
                 )
             )
-    if len(claims) <= 6:
+    claims = [*backward_claims, *claims]
+    if len(claims) <= MAX_FLOW_NOTES:
         return claims
-    remaining_edges = ordered_edges[5:]
-    remaining_sources = _unique_sources(edge.source for edge in remaining_edges)
-    remaining_nodes = sorted({nodes_by_id[edge.src].label for edge in remaining_edges})
+    trailing_claims = claims[MAX_FLOW_NOTES - 1 :]
     return [
-        *claims[:5],
+        *claims[: MAX_FLOW_NOTES - 1],
         Claim(
             text=(
-                f"Additional flows from {', '.join(remaining_nodes)} "
-                f"({len(remaining_edges)} edges)."
+                "Additional flows include: "
+                f"{'; '.join(claim.text.rstrip('.') for claim in trailing_claims)}."
             ),
-            sources=remaining_sources,
+            sources=_unique_sources(
+                source for claim in trailing_claims for source in claim.sources
+            ),
         ),
     ]
 
@@ -601,12 +644,11 @@ def project_component_diagram(
         tuple[str, str], dict[tuple[str, str, str, str, int], CodeSource]
     ] = defaultdict(dict)
     task_names_by_component: defaultdict[str, set[str]] = defaultdict(set)
-    task_sources_by_component: defaultdict[str, defaultdict[str, list[CodeSource]]] = (
-        defaultdict(lambda: defaultdict(list))
-    )
     queue_task_names: set[str] = set()
     queue_task_sources: defaultdict[str, list[CodeSource]] = defaultdict(list)
+    service_endpoint_sources: defaultdict[str, list[CodeSource]] = defaultdict(list)
     webhook_id = target_components.get("WEBHOOK")
+    http_clients_id = "http_clients" if "http_clients" in catalog_by_id else None
     provider_push_id = "provider_push" if "provider_push" in catalog_by_id else None
     temporal_id = "temporal" if "temporal" in catalog_by_id else None
     sqs_id = "sqs" if "sqs" in catalog_by_id else None
@@ -628,6 +670,10 @@ def project_component_diagram(
                         endpoint.line,
                     )
                 ] = _source(path, endpoint.line)
+                if catalog_by_id.get(owner_id, {}).get("kind") == "service":
+                    service_endpoint_sources[owner_id].append(
+                        _source(path, endpoint.line)
+                    )
             if (
                 provider_push_id is not None
                 and webhook_id is not None
@@ -707,9 +753,6 @@ def project_component_diagram(
         queue_task_names.add(task.name)
         queue_task_sources[task.name].append(source)
         task_names_by_component[component_id].add(task.name)
-        task_sources_by_component[component_id][
-            task.deploy_target or task.queue_class or "Unmapped"
-        ].extend([_source(task.path, task.line), source])
         edge_sources[(sqs_id, component_id, "long-poll")].append(source)
 
     if sqs_id is not None:
@@ -717,11 +760,8 @@ def project_component_diagram(
         queue_names_by_label: defaultdict[str, set[str]] = defaultdict(set)
         for task_name in sorted(queue_task_names):
             task = task_types.get(task_name)
-            label = (
-                task.queue_class or task.queue_type
-                if task is not None
-                else f"Unmapped: {task_name}"
-            )
+            label = task.queue_class if task is not None else None
+            label = label or "Unmapped"
             sources = (
                 [_source(task.path, task.line)]
                 if task is not None
@@ -733,7 +773,7 @@ def project_component_diagram(
             _add_detail(
                 details,
                 sqs_id,
-                f"{label}: {len(names)} task types",
+                f"{label} · {len(names)} task types",
                 _first_source(sqs_details[label]),
             )
 
@@ -749,22 +789,25 @@ def project_component_diagram(
             component_tables[postgres_id].add(table)
             _add_detail(details, postgres_id, table, _first_source(sources))
     for component_id, task_names in task_names_by_component.items():
-        for target, _sources in sorted(task_sources_by_component[component_id].items()):
-            task_names_for_target = sorted(
-                {
-                    task.name
-                    for task in task_facts.task_types
-                    if task.name in task_names
-                    and (task.deploy_target or task.queue_class or "Unmapped") == target
-                }
-            )
-            if not task_names_for_target:
+        tasks_by_target: defaultdict[str, dict[str, TaskType]] = defaultdict(dict)
+        for task in task_facts.task_types:
+            if task.name not in task_names:
                 continue
+            target = task.deploy_target or task.queue_class or "Unmapped"
+            tasks_by_target[target][task.name] = task
+        for target, tasks_by_name in sorted(tasks_by_target.items()):
+            target_tasks = sorted(
+                tasks_by_name.values(),
+                key=lambda task: (task.path, task.line, task.name),
+            )
+            if not target_tasks:
+                continue
+            first_task = target_tasks[0]
             _add_detail(
                 details,
                 component_id,
-                _task_target_detail(target, task_names_for_target),
-                _first_source(task_sources_by_component[component_id][target]),
+                f"{target} · {len(tasks_by_name)} task types",
+                _source(first_task.path, first_task.line),
             )
 
     for provider_id, services in provider_services.items():
@@ -791,6 +834,7 @@ def project_component_diagram(
                 route_evidence[evidence.tag][
                     "web" if evidence.path.startswith("web/") else "backend"
                 ].append(evidence)
+    route_service_ids = set()
     for groups in route_evidence.values():
         for web in groups.get("web", []):
             for backend in groups.get("backend", []):
@@ -803,9 +847,17 @@ def project_component_diagram(
                     or catalog_by_id.get(service_id, {}).get("kind") != "service"
                 ):
                     continue
+                route_service_ids.add(service_id)
                 edge_sources[(web_component_id, service_id, "REST calls")].append(
                     _source(web.path, web.line)
                 )
+    if http_clients_id is not None:
+        for service_id, sources in sorted(service_endpoint_sources.items()):
+            if service_id == webhook_id or service_id in route_service_ids:
+                continue
+            edge_sources[(http_clients_id, service_id, "REST calls")].append(
+                _first_source(sources)
+            )
 
     for (component_id, table), modes in sorted(
         {
@@ -833,6 +885,20 @@ def project_component_diagram(
             if sources and src != dst
         ]
     )
+    column_order = {}
+    for entry in component_catalog:
+        column = str(entry.get("column", ""))
+        column_order.setdefault(column, len(column_order))
+    backward_edges = []
+    figure_edges = []
+    for edge in edges:
+        source_column = str(catalog_by_id.get(edge.src, {}).get("column", ""))
+        target_column = str(catalog_by_id.get(edge.dst, {}).get("column", ""))
+        if column_order.get(target_column, 0) < column_order.get(source_column, 0):
+            backward_edges.append(edge)
+        else:
+            figure_edges.append(edge)
+    edges = figure_edges
     participating = {edge.src for edge in edges} | {edge.dst for edge in edges}
 
     endpoint_details: defaultdict[str, defaultdict[str, list[CodeSource]]] = (
@@ -854,7 +920,13 @@ def project_component_diagram(
         group_id = f"column-{_slug(column)}"
         node_details = _detail_claims(
             details.get(node_id, {}),
-            limit=4 if node_id == postgres_id else 3,
+            limit=(
+                TEMPORAL_WORKFLOW_DETAIL_LIMIT
+                if node_id == temporal_id
+                else 4
+                if node_id == postgres_id
+                else 3
+            ),
         )
         incident_sources = [
             edge.source for edge in edges if edge.src == node_id or edge.dst == node_id
@@ -906,7 +978,13 @@ def project_component_diagram(
         for node_id, kind in semantic_kinds.items()
         if node_id in active_node_ids
     }
-    notes = _flow_notes(nodes, edges, catalog_by_id, service_map)
+    notes = _flow_notes(
+        nodes,
+        edges,
+        catalog_by_id,
+        service_map,
+        backward_edges,
+    )
     groups = []
     for column in dict.fromkeys(
         str(entry.get("column", "")) for entry in component_catalog

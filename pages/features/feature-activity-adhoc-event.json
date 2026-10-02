@@ -3071,22 +3071,10 @@
    ],
    "rows": [
     [
-     "SQS queues",
-     "queue",
-     "—",
-     "—"
-    ],
-    [
      "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
      "service(many)",
      "—",
      "Slack"
-    ],
-    [
-     "SOR · BATCH · BACKFILL · INTEGRATION",
-     "service(many)",
-     "—",
-     "—"
     ],
     [
      "CRM + workspace APIs",
@@ -3279,55 +3267,6 @@
      ]
     },
     {
-     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
-     "lines": [
-      7,
-      14
-     ]
-    },
-    {
-     "path": "backend/src/tasks/types.py",
-     "lines": [
-      2780,
-      2780
-     ]
-    },
-    {
-     "path": "backend/src/tasks/types.py",
-     "lines": [
-      2717,
-      2717
-     ]
-    },
-    {
-     "path": "backend/src/tasks/types.py",
-     "lines": [
-      2446,
-      2446
-     ]
-    },
-    {
-     "path": "backend/src/tasks/types.py",
-     "lines": [
-      2913,
-      2913
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/slack_integration/service.py",
-     "lines": [
-      305,
-      305
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
-     "lines": [
-      119,
-      119
-     ]
-    },
-    {
      "path": "backend/src/util/listener_utils.py",
      "lines": [
       14,
@@ -3369,19 +3308,7 @@
  "block": {
   "notes": [
    {
-    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT makes API calls to CRM + workspace APIs (Slack).",
-    "sources": [
-     {
-      "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
-      "lines": [
-       3,
-       3
-      ]
-     }
-    ]
-   },
-   {
-    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT enqueues tasks to SQS queues.",
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers also enqueue follow-up SQS tasks.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/slack_integration/service.py",
@@ -3393,7 +3320,7 @@
     ]
    },
    {
-    "text": "SOR · BATCH · BACKFILL · INTEGRATION enqueues tasks to SQS queues.",
+    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers also enqueue follow-up SQS tasks.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
@@ -3403,20 +3330,21 @@
       ]
      }
     ]
+   },
+   {
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT makes API calls to CRM + workspace APIs (Slack).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/mention_agent/handle_app_mention.py",
+      "lines": [
+       3,
+       3
+      ]
+     }
+    ]
    }
   ],
   "groups": [
-   {
-    "id": "column-queues",
-    "label": "Queues",
-    "source": {
-     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
-     "lines": [
-      7,
-      14
-     ]
-    }
-   },
    {
     "id": "column-background-workers",
     "label": "Background workers",
@@ -3442,87 +3370,8 @@
   ],
   "nodes": [
    {
-    "id": "sqs",
-    "label": "SQS queues",
-    "source": {
-     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
-     "lines": [
-      7,
-      14
-     ]
-    },
-    "kind": "queue",
-    "group": "column-queues",
-    "many": true,
-    "details": [
-     {
-      "text": "AsyncAgentQueueType: 1 task types",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2780,
-         2780
-        ]
-       }
-      ]
-     },
-     {
-      "text": "BackfillQueueType: 2 task types",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2717,
-         2717
-        ]
-       }
-      ]
-     },
-     {
-      "text": "IntegrationQueueType: 1 task types",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2446,
-         2446
-        ]
-       }
-      ]
-     },
-     {
-      "text": "+1 more",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2913,
-         2913
-        ]
-       }
-      ]
-     }
-    ]
-   },
-   {
     "id": "agent_workers",
     "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
-    "source": {
-     "path": "backend/src/util/listener_utils.py",
-     "lines": [
-      14,
-      26
-     ]
-    },
-    "kind": "component",
-    "group": "column-background-workers",
-    "many": true,
-    "details": []
-   },
-   {
-    "id": "data_workers",
-    "label": "SOR · BATCH · BACKFILL · INTEGRATION",
     "source": {
      "path": "backend/src/util/listener_utils.py",
      "lines": [
@@ -3574,30 +3423,6 @@
      "lines": [
       3,
       3
-     ]
-    }
-   },
-   {
-    "src": "agent_workers",
-    "dst": "sqs",
-    "label": "enqueue tasks",
-    "source": {
-     "path": "backend/src/ext_integrations/slack_integration/service.py",
-     "lines": [
-      305,
-      305
-     ]
-    }
-   },
-   {
-    "src": "data_workers",
-    "dst": "sqs",
-    "label": "enqueue tasks",
-    "source": {
-     "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
-     "lines": [
-      119,
-      119
      ]
     }
    }

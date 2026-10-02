@@ -26,11 +26,8 @@ from rox_dox.model import (
     Claim,
     CodeSource,
     DataModel,
-    Edge,
-    Group,
     MembershipGroup,
     MembershipRow,
-    Node,
     Page,
     Related,
     Relation,
@@ -696,10 +693,7 @@ def _feature_block(
         component_imports=component_imports,
         table_accesses=table_accesses,
         scope_tables=feature.tables,
-        external_callers={
-            caller.path: caller.targets
-            for caller in callers
-        },
+        external_callers={caller.path: caller.targets for caller in callers},
     )
     return _FeatureBlock(
         diagram=projection.diagram,
