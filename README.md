@@ -25,23 +25,20 @@ uv run rox-dox rebuild \
 xdg-open site/rox-core.html
 ```
 
-Use `--open-pr` only after a successful rebuild to publish changed `pages/` and
-`features/` JSON artifacts as a pull request.
+Use `--open-pr --merge` after a successful rebuild to publish changed `pages/` and
+`features/` JSON artifacts and merge the pull request into `main`. Use `--open-pr` without
+`--merge` only when the pull request should remain open for review.
 
 ## View the site locally
 
-From the repository root, ensure `tools/plantuml.jar` exists; fetch it with
-`./scripts/fetch_plantuml.sh` if needed. Then build the offline site:
+Prerequisites: Java, `uv`, and a local rox-core clone with read access. From the rox-dox
+checkout, run:
 
 ```sh
-uv run rox-dox build pages \
-  --repo /path/to/rox-core \
-  --repo-url https://github.com/Rox-AI/rox-core \
-  --out site
+scripts/serve_local.sh --rox-core /path/to/rox-core
 ```
 
-The root page is `site/rox-core.html` (there is no top-level `site/index.html`):
-
-```sh
-xdg-open site/rox-core.html
-```
+The script builds into `site/` and serves `http://localhost:8000/rox-core.html`. Pages on
+rox-dox `main` are updated daily by the Devin automation, so rerun the script to pick up the
+latest pages. You can also open `file://<rox-dox-checkout>/site/rox-core.html` without a
+server.
