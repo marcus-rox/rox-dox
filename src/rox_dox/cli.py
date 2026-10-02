@@ -737,7 +737,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _print_relation_candidates(args.repo, args.commit, args.tables)
     if args.command == "rebuild":
         return _rebuild(args)
-<<<<<<< HEAD
     if args.command == "lint-diagrams":
         return _lint_diagrams(args)
     if args.command == "outline":
