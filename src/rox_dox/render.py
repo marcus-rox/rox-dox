@@ -71,6 +71,7 @@ PAGE_CSS = """\
   --surface: #171d26;
   --surface-2: #1d2531;
   --surface-hover: #222b38;
+  --paper: #171d26;
   --text: #e6ebf2;
   --text-2: #d5dce6;
   --text-3: #c3ccd8;
@@ -98,6 +99,7 @@ PAGE_CSS = """\
     --surface: #171d26;
     --surface-2: #1d2531;
     --surface-hover: #222b38;
+    --paper: #171d26;
     --text: #e6ebf2;
     --text-2: #d5dce6;
     --text-3: #c3ccd8;
@@ -662,6 +664,90 @@ blockquote {
     padding: 0.5rem;
   }
 }"""
+
+SVG_DARK_TOKENS = {
+    "ink": "#e6ebf2",
+    "muted": "#97a3b4",
+    "faint": "#7f8b9c",
+    "arrow": "#c3ccd8",
+    "divider": "#3a4556",
+    "card": "#1d2531",
+    "store-fill": "#16263f",
+    "store-stroke": "#7eb0ff",
+    "queue-fill": "#12301d",
+    "queue-stroke": "#4ade80",
+    "external-fill": "#2a1f3d",
+    "external-stroke": "#b58cf0",
+    "schema-header": "#2a3443",
+    "schema-row": "#2a3443",
+    "schema-store": "#2a2416",
+    "pk": "#f0a04b",
+    "fk": "#60a5fa",
+    "blob": "#f3b25a",
+    "shadow": "#000000",
+    "lifeline": "#4b5666",
+}
+BLOCK_SVG_PALETTE = {
+    "#1f2937": "ink",
+    "#6b7280": "muted",
+    "#374151": "arrow",
+    "#d1d5db": "divider",
+    "#ffffff": "card",
+    "#eff6ff": "store-fill",
+    "#1e40af": "store-stroke",
+    "#f0fdf4": "queue-fill",
+    "#166534": "queue-stroke",
+    "#9ca3af": "faint",
+}
+SCHEMA_SVG_PALETTE = {
+    "#111827": "ink",
+    "#6b7280": "muted",
+    "#9ca3af": "faint",
+    "#1f2937": "schema-header",
+    "#f1f5f9": "schema-row",
+    "#cbd5e1": "divider",
+    "#ffffff": "card",
+    "#fffbeb": "schema-store",
+    "#b45309": "pk",
+    "#92400e": "pk",
+    "#2563eb": "fk",
+    "#d97706": "blob",
+    "#0f172a": "shadow",
+}
+PLANTUML_SVG_PALETTE = {
+    "#000": "ink",
+    "#000000": "ink",
+    "#333": "arrow",
+    "#333333": "arrow",
+    "#00f": "store-stroke",
+    "#e8f0fe": "store-fill",
+    "#3b6fd8": "store-stroke",
+    "#9aa4b2": "lifeline",
+    "#fff4e5": "schema-store",
+    "#e08a1e": "pk",
+    "#f3e8fd": "external-fill",
+    "#8b4fd1": "external-stroke",
+    "#e7f6ec": "queue-fill",
+    "#2f9e5b": "queue-stroke",
+}
+SVG_COLOR_ATTRIBUTE_PATTERN = re.compile(
+    r'(fill|stroke|flood-color)(="|:)(#[0-9a-fA-F]{3,6})\b'
+)
+
+
+def _svg_token_css(indent: str) -> str:
+    return "".join(
+        f"{indent}--svg-{name}: {value};\n" for name, value in SVG_DARK_TOKENS.items()
+    )
+
+
+PAGE_CSS = re.sub(
+    r"^( *)--blob: #f3b25a;\n",
+    lambda match: match.group() + _svg_token_css(match.group(1)),
+    PAGE_CSS,
+    flags=re.MULTILINE,
+)
+
 SECTION_LINKS = (
     ("related", "Related"),
     ("tldr", "TLDR"),
@@ -780,8 +866,7 @@ def _tldr_html(page: Page, *, repo_url: str) -> str:
         ),
     ]
     table_sections = "".join(
-        f"<h3>{_escape(title)}</h3>"
-        f"{_table_html(page, table, repo_url=repo_url)}"
+        f"<h3>{_escape(title)}</h3>{_table_html(page, table, repo_url=repo_url)}"
         for title, table in tables
     )
     return (
@@ -870,6 +955,17 @@ def _sources_details(
     )
 
 
+def _theme_svg(svg: str, palette: dict[str, str]) -> str:
+    def substitute(match: re.Match[str]) -> str:
+        attribute, separator, color = match.groups()
+        token = palette.get(color.lower())
+        if token is None:
+            return match.group()
+        return f"{attribute}{separator}var(--svg-{token}, {color})"
+
+    return SVG_COLOR_ATTRIBUTE_PATTERN.sub(substitute, svg)
+
+
 def _inline_svg(svg: str) -> str:
     for namespace_attribute in SVG_NAMESPACE_ATTRIBUTES:
         svg = svg.replace(namespace_attribute, "")
@@ -908,7 +1004,7 @@ def _encode_url_schemes(value: str) -> str:
 def _diagram_markup(source: str, *, jar: Path) -> str:
     return (
         f'<div class="diagram block-scroll">'
-        f"{_inline_svg(render_svg(source, jar))}</div>"
+        f"{_theme_svg(_inline_svg(render_svg(source, jar)), PLANTUML_SVG_PALETTE)}</div>"
     )
 
 
@@ -979,7 +1075,7 @@ def _block_section(page: Page, *, repo_url: str) -> str:
             '<a class="expand" href="#block-figure">Expand full screen</a>'
             '<a class="collapse" href="#block">Close</a></div>'
             f'<div class="diagram block-scroll">'
-            f"{block_svg(page.block, page=page, repo_url=repo_url)}</div>"
+            f"{_theme_svg(block_svg(page.block, page=page, repo_url=repo_url), BLOCK_SVG_PALETTE)}</div>"
             f"{notes}"
             f"{unreached_files}"
             f"{_sources_details(elements, page=page, repo_url=repo_url)}"
@@ -1007,7 +1103,7 @@ def _block_section(page: Page, *, repo_url: str) -> str:
             '<a class="collapse" href="#block">Close</a></div>'
             f"{notes}"
             f'<div class="diagram block-scroll">'
-            f"{block_svg(figure.block, page=page, repo_url=repo_url)}</div>"
+            f"{_theme_svg(block_svg(figure.block, page=page, repo_url=repo_url), BLOCK_SVG_PALETTE)}</div>"
             f"{_sources_details(elements, page=page, repo_url=repo_url)}"
             "</article>"
         )
@@ -1123,7 +1219,7 @@ def _schema_section(
         '<a class="expand" href="#fig-schema">Expand full screen</a>'
         '<a class="collapse" href="#schema">Close</a></div>'
         f"{_schema_legend(page)}"
-        f'<div class="diagram block-scroll">{_inline_svg(diagram)}</div>'
+        f'<div class="diagram block-scroll">{_theme_svg(_inline_svg(diagram), SCHEMA_SVG_PALETTE)}</div>'
         f"{_sources_details(_schema_sources(page, tables), page=page, repo_url=repo_url)}"
         "</article>"
     )
