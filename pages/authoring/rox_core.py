@@ -1279,10 +1279,6 @@ def M(src: str, dst: str, message: str, source: dict) -> dict:
     return {"src": src, "dst": dst, "message": message, "source": source}
 
 
-def T(src: str, dst: str, event: str, source: dict) -> dict:
-    return {"src": src, "dst": dst, "event": event, "source": source}
-
-
 sequences = [
     {
         "title": "Background task over SQS",
@@ -1365,111 +1361,6 @@ sequences = [
             M("temporal", "worker", "finalize_public_api_job(uri)", s_record_success),
             M("worker", "pg", "status -> completed, outcome_ref", s_finalize),
             M("client", "pub", "GET job (poll)", s_job_get),
-        ],
-    },
-]
-
-states = [
-    {
-        "title": "task_run lifecycle",
-        "entity": "task_run.current_state",
-        "states": [
-            {"id": n, "label": n, "source": TS(n)}
-            for n in [
-                "CREATED",
-                "QUEUED",
-                "RUNNING",
-                "COMPLETED",
-                "FAILED",
-                "STOPPED",
-                "SKIPPED",
-            ]
-        ],
-        "transitions": [
-            T("CREATED", "QUEUED", "allowed", s_vst_created),
-            T("CREATED", "STOPPED", "allowed", s_vst_created),
-            T("CREATED", "SKIPPED", "allowed", s_vst_created),
-            T("QUEUED", "RUNNING", "TaskHandler starts", s_running),
-            T("QUEUED", "FAILED", "executor setup fails", s_setup_failed),
-            T("QUEUED", "STOPPED", "allowed", s_vst_queued),
-            T("QUEUED", "SKIPPED", "allowed", s_vst_queued),
-            T("RUNNING", "COMPLETED", "executor returns", s_completed),
-            T("RUNNING", "FAILED", "executor raises", s_th_failed),
-            T(
-                "RUNNING",
-                "STOPPED",
-                "no agent actions left / stop requested",
-                s_th_stopped,
-            ),
-            T("RUNNING", "SKIPPED", "SkippedTaskTransition", s_th_skipped),
-            T("RUNNING", "QUEUED", "listener finds it stuck, resets", s_reset),
-            T("FAILED", "QUEUED", "listener retries", s_reset),
-            T("FAILED", "STOPPED", "allowed", s_vst_failed),
-            T("COMPLETED", "STOPPED", "allowed", s_vst_completed),
-        ],
-    },
-    {
-        "title": "api_jobs lifecycle",
-        "entity": "api_jobs.status",
-        "states": [
-            {"id": "queued", "label": "queued", "source": JS("QUEUED")},
-            {"id": "processing", "label": "processing", "source": JS("PROCESSING")},
-            {"id": "completed", "label": "completed", "source": JS("COMPLETED")},
-            {"id": "failed", "label": "failed", "source": JS("FAILED")},
-        ],
-        "transitions": [
-            T("queued", "processing", "activity claims job for this run", s_claim_life),
-            T(
-                "processing",
-                "completed",
-                "finalize with accepted result URI",
-                s_finalize,
-            ),
-            T(
-                "processing",
-                "failed",
-                "execution or persistence failed",
-                s_record_failure,
-            ),
-            T(
-                "queued",
-                "failed",
-                "failure recorded on unclaimed job",
-                s_unclaimed_fail,
-            ),
-        ],
-    },
-    {
-        "title": "Chat Redis stream lifecycle",
-        "entity": "Redis stream chat:conversation:{id}:stream:{stream_id}",
-        "states": [
-            {"id": "initialized", "label": "INITIALIZED", "source": s_rs_init},
-            {
-                "id": "running",
-                "label": "RUNNING (messages + heartbeats)",
-                "source": s_rs_append,
-            },
-            {"id": "completed", "label": "COMPLETED", "source": s_rs_expire},
-            {"id": "canceled", "label": "CANCELED", "source": s_rs_cancel},
-            {"id": "timed_out", "label": "TIMED_OUT", "source": s_rs_timeout},
-        ],
-        "transitions": [
-            T("initialized", "running", "producer appends first event", s_gen),
-            T("running", "running", "heartbeat", s_rs_heartbeat),
-            T(
-                "running",
-                "completed",
-                "producer finishes: expire_stream",
-                s_expire_call,
-            ),
-            T("running", "canceled", "cancel_stream (user cancel)", s_rs_cancel),
-            T("running", "timed_out", "heartbeat fails", s_rs_timeout),
-            T(
-                "initialized",
-                "canceled",
-                "reserve or pre-spawn hook fails",
-                s_start_fail,
-            ),
         ],
     },
 ]
@@ -2743,7 +2634,7 @@ page = {
     "block_figures": block_figures,
     "data": data,
     "sequences": sequences,
-    "states": states,
+    "states": [],
     "related": related,
 }
 

@@ -142,7 +142,7 @@ def test_plantuml_diagram_wrappers_support_intrinsic_scrolling(
         jar=plantuml_jar,
     )
 
-    expected_diagrams = len(page.sequences) + len(page.states)
+    expected_diagrams = len(page.sequences)
     assert document.count('<div class="diagram block-scroll">') == expected_diagrams
     assert ".block-scroll svg {\n  max-width: none;\n}" in document
     assert (
@@ -162,7 +162,6 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
     repo, commit = git_repo
     payload = copy.deepcopy(page_data)
     payload["sequences"].append(copy.deepcopy(payload["sequences"][0]))
-    payload["states"].append(copy.deepcopy(payload["states"][0]))
     page = Page.model_validate(payload)
     document = render_page(
         page,
@@ -189,8 +188,6 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
         "fig-schema",
         "fig-sequences-1",
         "fig-sequences-2",
-        "fig-states-1",
-        "fig-states-2",
     ]
     assert expand_targets == diagram_ids
     assert close_targets == [
@@ -198,11 +195,9 @@ def test_diagram_cards_expand_to_their_own_ids_and_panel_controls_are_css_only(
         "schema",
         "sequences",
         "sequences",
-        "states",
-        "states",
     ]
     assert document.count('<div class="diagram block-scroll">') == (
-        2 + len(page.sequences) + len(page.states)
+        2 + len(page.sequences)
     )
 
     left_toggle = '<input class="panel-toggle" id="toggle-left" type="checkbox">'
@@ -592,11 +587,6 @@ def test_same_title_diagrams_only_list_their_own_sources(
     second_sequence["participants"][1]["source"]["lines"] = [3, 4]
     second_sequence["steps"][0]["source"]["lines"] = [5, 6]
     payload["sequences"].append(second_sequence)
-    second_state_machine = copy.deepcopy(payload["states"][0])
-    second_state_machine["states"][0]["source"]["lines"] = [2, 3]
-    second_state_machine["states"][1]["source"]["lines"] = [3, 4]
-    second_state_machine["transitions"][0]["source"]["lines"] = [5, 6]
-    payload["states"].append(second_state_machine)
     page = Page.model_validate(payload)
     document = render_page(
         page,
@@ -611,11 +601,6 @@ def test_same_title_diagrams_only_list_their_own_sources(
         re.search(r'<section id="sequences">.*?</section>', document, re.DOTALL)[0],
         re.DOTALL,
     )
-    state_cards = re.findall(
-        r'<article class="diagram-card zoom-figure" id="[^"]+">(.*?)</article>',
-        re.search(r'<section id="states">.*?</section>', document, re.DOTALL)[0],
-        re.DOTALL,
-    )
     first_sequence_url = source_url(
         page.sequences[0].participants[0].source,
         repo_url=REPO_URL,
@@ -626,26 +611,11 @@ def test_same_title_diagrams_only_list_their_own_sources(
         repo_url=REPO_URL,
         commit=commit,
     )
-    first_state_url = source_url(
-        page.states[0].states[0].source,
-        repo_url=REPO_URL,
-        commit=commit,
-    )
-    second_state_url = source_url(
-        page.states[1].states[0].source,
-        repo_url=REPO_URL,
-        commit=commit,
-    )
     assert len(sequence_cards) == 2
     assert first_sequence_url in sequence_cards[0]
     assert second_sequence_url not in sequence_cards[0]
     assert second_sequence_url in sequence_cards[1]
     assert first_sequence_url not in sequence_cards[1]
-    assert len(state_cards) == 2
-    assert first_state_url in state_cards[0]
-    assert second_state_url not in state_cards[0]
-    assert second_state_url in state_cards[1]
-    assert first_state_url not in state_cards[1]
 
 
 def test_block_sources_table_includes_group_and_detail_citations(

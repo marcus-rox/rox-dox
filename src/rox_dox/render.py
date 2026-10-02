@@ -12,7 +12,6 @@ from rox_dox.block_svg import block_svg
 from rox_dox.diagrams import (
     emit_diagram_warnings,
     sequence_plantuml,
-    state_plantuml,
 )
 from rox_dox.links import page_href, source_url
 from rox_dox.model import (
@@ -21,7 +20,6 @@ from rox_dox.model import (
     Related,
     Sequence as SequenceDiagram,
     Source,
-    StateMachine,
     SummaryTable,
     page_sources,
 )
@@ -515,7 +513,6 @@ SECTION_LINKS = (
     ("block", "Block diagram"),
     ("schema", "Schema"),
     ("sequences", "Sequence diagrams"),
-    ("states", "State diagrams"),
 )
 EMPTY_MESSAGE = "Nothing to show for this module."
 SVG_NAMESPACE_ATTRIBUTES = (
@@ -1020,45 +1017,6 @@ def _sequence_section(page: Page, *, repo_url: str, jar: Path) -> str:
     return _section("sequences", "Sequence diagrams", cards)
 
 
-def _state_elements(state_machine: StateMachine) -> list[tuple[str, Source]]:
-    elements = [
-        (f"state machine '{state_machine.title}' state {state.id}", state.source)
-        for state in state_machine.states
-    ]
-    elements.extend(
-        (
-            f"state machine '{state_machine.title}' transition "
-            f"{transition.src}->{transition.dst}",
-            transition.source,
-        )
-        for transition in state_machine.transitions
-    )
-    return elements
-
-
-def _state_section(page: Page, *, repo_url: str, jar: Path) -> str:
-    if not page.states:
-        return _section(
-            "states",
-            "State diagrams",
-            f'<p class="empty">{EMPTY_MESSAGE}</p>',
-        )
-    cards = "".join(
-        _diagram_card(
-            state_machine.title,
-            state_plantuml(page, state_machine, repo_url=repo_url),
-            _state_elements(state_machine),
-            diagram_id=f"fig-states-{number}",
-            section_id="states",
-            page=page,
-            repo_url=repo_url,
-            jar=jar,
-        )
-        for number, state_machine in enumerate(page.states, start=1)
-    )
-    return _section("states", "State diagrams", cards)
-
-
 def _related_item(
     related: Related,
     *,
@@ -1428,7 +1386,6 @@ def render_page(
             _block_section(page, repo_url=repo_url),
             _schema_section(page, repo_url=repo_url, tables=tables),
             _sequence_section(page, repo_url=repo_url, jar=jar),
-            _state_section(page, repo_url=repo_url, jar=jar),
         ]
     )
     main_content = _breadcrumbs_html(tree, page) + page_header + sections
