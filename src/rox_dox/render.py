@@ -36,10 +36,88 @@ NO_ENTRIES: Mapping[str, Sequence[RepoEntry]] = MappingProxyType({})
 PAGE_CSS = """\
 :root {
   color-scheme: light;
-  color: #182230;
-  background: #f4f6f9;
+  --bg: #f4f6f9;
+  --surface: #fff;
+  --surface-2: #f7f8fa;
+  --surface-hover: #f0f3f7;
+  --paper: #fff;
+  --text: #182230;
+  --text-2: #26323f;
+  --text-3: #344054;
+  --muted: #667085;
+  --muted-2: #475467;
+  --faint: #7a8594;
+  --icon: #8a94a6;
+  --boilerplate: #9ca3af;
+  --border: #e2e7ee;
+  --border-input: #d0d5dd;
+  --link: #2458a6;
+  --link-hover: #173d78;
+  --accent: #145bc4;
+  --current-bg: #e3ecfb;
+  --current-fg: #0f3f8c;
+  --focus: #3b6fd8;
+  --pk: #b45309;
+  --fk: #2563eb;
+  --blob: #d97706;
+  color: var(--text);
+  background: var(--bg);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-synthesis: none;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f141b;
+  --surface: #171d26;
+  --surface-2: #1d2531;
+  --surface-hover: #222b38;
+  --text: #e6ebf2;
+  --text-2: #d5dce6;
+  --text-3: #c3ccd8;
+  --muted: #97a3b4;
+  --muted-2: #aab4c3;
+  --faint: #7f8b9c;
+  --icon: #7f8b9c;
+  --boilerplate: #6b7686;
+  --border: #2a3443;
+  --border-input: #3a4556;
+  --link: #7eb0ff;
+  --link-hover: #a9c9ff;
+  --accent: #7eb0ff;
+  --current-bg: #1f3354;
+  --current-fg: #cfe0ff;
+  --focus: #7eb0ff;
+  --pk: #f0a04b;
+  --fk: #60a5fa;
+  --blob: #f3b25a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f141b;
+    --surface: #171d26;
+    --surface-2: #1d2531;
+    --surface-hover: #222b38;
+    --text: #e6ebf2;
+    --text-2: #d5dce6;
+    --text-3: #c3ccd8;
+    --muted: #97a3b4;
+    --muted-2: #aab4c3;
+    --faint: #7f8b9c;
+    --icon: #7f8b9c;
+    --boilerplate: #6b7686;
+    --border: #2a3443;
+    --border-input: #3a4556;
+    --link: #7eb0ff;
+    --link-hover: #a9c9ff;
+    --accent: #7eb0ff;
+    --current-bg: #1f3354;
+    --current-fg: #cfe0ff;
+    --focus: #7eb0ff;
+    --pk: #f0a04b;
+    --fk: #60a5fa;
+    --blob: #f3b25a;
+  }
 }
 * {
   box-sizing: border-box;
@@ -75,29 +153,84 @@ body {
 .panel-controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 .panel-toggle-button {
   display: inline-flex;
-  padding: 0.3rem 0.65rem;
-  border: 1px solid #d0d5dd;
-  border-radius: 999px;
-  background: #fff;
-  color: #344054;
-  line-height: 1.35;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
   cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.panel-toggle-button .collapsed {
+.panel-toggle-button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.panel-toggle-button svg {
+  width: 18px;
+  height: 18px;
+}
+.panel-toggle-button .expanded, .panel-toggle-button .collapsed {
+  display: inline-flex;
+}
+.panel-toggle-button .collapsed,
+#toggle-left:checked ~ .page-shell .panel-toggle-left .expanded {
   display: none;
 }
-#toggle-left:checked ~ .page-shell .panel-toggle-left .expanded,
 #toggle-left:checked ~ .page-shell .panel-toggle-left .collapsed {
-  display: inline;
+  display: inline-flex;
 }
 #toggle-left:focus-visible ~ .page-shell .panel-toggle-left {
-  outline: 2px solid #3b6fd8;
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+.theme-switch {
+  display: inline-flex;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid var(--border-input);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.theme-switch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.theme-switch button:hover {
+  color: var(--text);
+}
+.theme-switch button svg {
+  width: 16px;
+  height: 16px;
+}
+:root:not([data-theme]) .theme-switch [data-theme-choice="system"],
+:root[data-theme="light"] .theme-switch [data-theme-choice="light"],
+:root[data-theme="dark"] .theme-switch [data-theme-choice="dark"] {
+  background: var(--current-bg);
+  color: var(--current-fg);
+}
+.theme-switch button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
 }
 #sidebar {
   grid-area: nav;
@@ -110,9 +243,9 @@ body {
 }
 #toc, #feature-tree, #site-nav {
   padding: 1rem;
-  border: 1px solid #e2e7ee;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--surface);
 }
 #toc {
   flex: 0 0 auto;
@@ -134,7 +267,7 @@ body {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #667085;
+  color: var(--muted);
 }
 .page-tree, .page-tree ul {
   margin: 0;
@@ -147,7 +280,7 @@ body {
 .page-tree ul {
   margin-left: 11px;
   padding-left: 6px;
-  border-left: 1px solid #e6e9ef;
+  border-left: 1px solid var(--border);
 }
 .page-tree summary {
   list-style: none;
@@ -163,7 +296,7 @@ body {
   height: 22px;
   padding: 0 6px 0 2px;
   border-radius: 4px;
-  color: #26323f;
+  color: var(--text-2);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -172,21 +305,21 @@ body {
   text-overflow: ellipsis;
 }
 .page-tree .row:hover {
-  background: #f0f3f7;
+  background: var(--surface-hover);
 }
 .page-tree .row.current {
-  background: #e3ecfb;
-  color: #0f3f8c;
+  background: var(--current-bg);
+  color: var(--current-fg);
   font-weight: 600;
 }
 .page-tree .row.pending, .page-tree .row.file {
-  color: #7a8594;
+  color: var(--faint);
 }
 .page-tree .chevron, .page-tree .chevron-spacer {
   flex: 0 0 14px;
   width: 14px;
   height: 14px;
-  color: #7a8594;
+  color: var(--faint);
   transition: transform 0.1s;
 }
 .page-tree details[open] > summary .chevron {
@@ -196,22 +329,22 @@ body {
   flex: 0 0 15px;
   width: 15px;
   height: 15px;
-  color: #8a94a6;
+  color: var(--icon);
 }
 .repo-tree .row {
   display: flex;
   align-items: center;
   gap: 4px;
   min-height: 22px;
-  color: #26323f;
+  color: var(--text-2);
   text-decoration: none;
 }
 .page-tree .row.page .icon {
-  color: #145bc4;
+  color: var(--accent);
 }
 .breadcrumbs {
   margin: 0.25rem 0 1rem;
-  color: #667085;
+  color: var(--muted);
 }
 .breadcrumbs a {
   margin-right: 0.4rem;
@@ -219,9 +352,9 @@ body {
 .page-header {
   margin-bottom: 1.5rem;
   padding: 1.5rem 1.75rem;
-  border: 1px solid #e2e7ee;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--surface);
 }
 h1, h2, h3 {
   line-height: 1.25;
@@ -232,7 +365,7 @@ h1, h2, h3 {
 }
 .page-meta {
   margin: 0.5rem 0 0;
-  color: #667085;
+  color: var(--muted);
   overflow-wrap: anywhere;
 }
 .page-children {
@@ -246,9 +379,9 @@ h1, h2, h3 {
 section {
   margin: 1rem 0;
   padding: 1.5rem 1.75rem;
-  border: 1px solid #e2e7ee;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--surface);
 }
 section h2 {
   margin: 0 0 1rem;
@@ -265,12 +398,12 @@ p, li, th, td, summary, code {
   overflow-wrap: anywhere;
 }
 a {
-  color: #2458a6;
+  color: var(--link);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
 }
 a:hover {
-  color: #173d78;
+  color: var(--link-hover);
 }
 .toc, .claim-list, .related-list {
   margin: 0.5rem 0;
@@ -329,12 +462,12 @@ table {
 }
 th, td {
   padding: 0.65rem 0.75rem;
-  border: 1px solid #e2e7ee;
+  border: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
 th {
-  background: #f7f8fa;
+  background: var(--surface-2);
   font-weight: 600;
 }
 .diagram-card {
@@ -347,9 +480,9 @@ th {
   max-width: 100%;
   overflow-x: auto;
   padding: 0.75rem;
-  border: 1px solid #e8ecf2;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--paper);
 }
 .figure-bar {
   display: flex;
@@ -370,7 +503,7 @@ th {
   margin: 0;
   padding: 1rem 1.5rem;
   overflow: auto;
-  background: #fff;
+  background: var(--bg);
 }
 .zoom-figure:target .diagram {
   border: 0;
@@ -384,7 +517,7 @@ th {
 }
 .schema-legend {
   margin: 0 0 0.75rem;
-  color: #475467;
+  color: var(--muted-2);
   font-size: 0.85rem;
 }
 .schema-legend-list {
@@ -401,15 +534,15 @@ th {
   gap: 0.4rem;
 }
 .schema-pk {
-  color: #b45309;
+  color: var(--pk);
   font-weight: 700;
 }
 .schema-fk {
-  color: #2563eb;
+  color: var(--fk);
   font-weight: 600;
 }
 .schema-boilerplate {
-  color: #9ca3af;
+  color: var(--boilerplate);
 }
 .schema-line {
   display: inline-block;
@@ -420,14 +553,14 @@ th {
   border-top-style: solid;
 }
 .schema-line-enforced {
-  color: #2563eb;
+  color: var(--fk);
 }
 .schema-line-symbolic {
-  color: #9ca3af;
+  color: var(--boilerplate);
   border-top-style: dashed;
 }
 .schema-line-blob {
-  color: #d97706;
+  color: var(--blob);
   border-top-style: dotted;
 }
 .schema-table-list {
@@ -445,21 +578,21 @@ th {
 }
 .sources {
   margin-top: 0.75rem;
-  color: #475467;
+  color: var(--muted-2);
 }
 .sources summary {
   cursor: pointer;
   font-weight: 600;
 }
 .empty {
-  color: #667085;
+  color: var(--muted);
   font-style: italic;
 }
 blockquote {
   margin: 0.75rem 0;
   padding-left: 1rem;
-  border-left: 3px solid #e2e7ee;
-  color: #475467;
+  border-left: 3px solid var(--border);
+  color: var(--muted-2);
 }
 .related-list li {
   overflow-wrap: anywhere;
@@ -480,7 +613,7 @@ blockquote {
 }
 #related summary h2::before {
   content: "▸ ";
-  color: #6b7686;
+  color: var(--faint);
 }
 #related details[open] summary h2::before {
   content: "▾ ";
@@ -1309,11 +1442,71 @@ def _page_header_html(tree: SiteTree, page: Page) -> str:
     )
 
 
+PANEL_ICON_OPEN = (
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"'
+    ' aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>'
+    '<path d="M7.5 3.5v13"/></svg>'
+)
+PANEL_ICON_CLOSED = (
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"'
+    ' aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/>'
+    '<path d="M7.5 3.5v13"/><path d="M2.5 6a2.5 2.5 0 0 1 2.5-2.5h2.5v13H5A2.5 2.5 0'
+    ' 0 1 2.5 14z" fill="currentColor" stroke="none"/></svg>'
+)
+THEME_CHOICES = (
+    (
+        "light",
+        "Light",
+        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"'
+        ' stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/>'
+        '<path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9'
+        'l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>',
+    ),
+    (
+        "dark",
+        "Dark",
+        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"'
+        ' stroke-linejoin="round" aria-hidden="true">'
+        '<path d="M16 12.2A6.5 6.5 0 0 1 7.8 4a6.5 6.5 0 1 0 8.2 8.2z"/></svg>',
+    ),
+    (
+        "system",
+        "System",
+        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"'
+        ' stroke-linecap="round" aria-hidden="true">'
+        '<rect x="2.5" y="3.5" width="15" height="10.5" rx="2"/>'
+        '<path d="M7 17h6M10 14v3"/></svg>',
+    ),
+)
+THEME_SCRIPT = (
+    "(function(){var k='rox-dox-theme',r=document.documentElement;"
+    "var t=localStorage.getItem(k);"
+    "if(t==='light'||t==='dark'){r.dataset.theme=t;}"
+    "document.addEventListener('click',function(e){"
+    "var b=e.target.closest('[data-theme-choice]');if(!b){return;}"
+    "var v=b.getAttribute('data-theme-choice');"
+    "if(v==='system'){delete r.dataset.theme;localStorage.removeItem(k);}"
+    "else{r.dataset.theme=v;localStorage.setItem(k,v);}});})();"
+)
+
+
+def _theme_switch_html() -> str:
+    buttons = "".join(
+        f'<button type="button" data-theme-choice="{choice}" title="{label} theme"'
+        f' aria-label="{label} theme">{icon}</button>'
+        for choice, label, icon in THEME_CHOICES
+    )
+    return f'<div class="theme-switch" role="group" aria-label="Theme">{buttons}</div>'
+
+
 def _panel_controls_html() -> str:
     return (
         '<div class="panel-controls">'
-        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left">'
-        '<span class="expanded">◀ Panel</span><span class="collapsed">▶ Panel</span></label>'
+        '<label class="panel-toggle-button panel-toggle-left" for="toggle-left"'
+        ' title="Toggle side panel">'
+        f'<span class="expanded">{PANEL_ICON_OPEN}</span>'
+        f'<span class="collapsed">{PANEL_ICON_CLOSED}</span></label>'
+        f"{_theme_switch_html()}"
         "</div>"
     )
 
@@ -1354,7 +1547,7 @@ def _document_shell(
         '<html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{_escape(title)}</title>"
-        f"<style>{PAGE_CSS}</style></head>"
+        f"<style>{PAGE_CSS}</style><script>{THEME_SCRIPT}</script></head>"
         f'<body><input class="panel-toggle" id="toggle-left" type="checkbox">'
         f'<div class="page-shell"><div id="sidebar">{sidebar}</div>'
         f'<main class="page-main">{_panel_controls_html()}{main_content}</main>'
