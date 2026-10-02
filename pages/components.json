@@ -1,0 +1,371 @@
+[
+  {
+    "id": "web",
+    "kind": "client",
+    "column": "Callers",
+    "match": {
+      "web_files": true
+    },
+    "label": "web (Next.js 14)",
+    "shape": "component",
+    "many": false,
+    "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+        3,
+        3
+      ]
+    }
+  },
+  {
+    "id": "http_clients",
+    "label": "HTTP clients",
+    "kind": "client",
+    "column": "Callers",
+    "match": {},
+    "shape": "component",
+    "many": false,
+    "source": {
+      "path": "web/AGENTS.md",
+      "lines": [
+        3,
+        3
+      ]
+    }
+  },
+  {
+    "id": "provider_push",
+    "label": "Provider push",
+    "kind": "external",
+    "shape": "external",
+    "many": false,
+    "column": "Callers",
+    "match": {
+      "implied_by": "WEBHOOK endpoint"
+    },
+    "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+        489,
+        516
+      ]
+    }
+  },
+  {
+    "id": "interaction",
+    "kind": "service",
+    "column": "HTTP services",
+    "match": {
+      "deploy_targets": [
+        "INTERACTION"
+      ],
+      "queue_type_classes": [
+        "InteractionQueueType"
+      ]
+    },
+    "label": "INTERACTION (Flask)",
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+        156,
+        320
+      ]
+    }
+  },
+  {
+    "id": "webhook",
+    "label": "WEBHOOK (Flask)",
+    "kind": "service",
+    "column": "HTTP services",
+    "match": {
+      "deploy_targets": [
+        "WEBHOOK"
+      ]
+    },
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+        156,
+        320
+      ]
+    },
+    "sources": [
+      {
+        "path": "backend/src/rox_core/api/register_namespaces.py",
+        "lines": [
+          156,
+          320
+        ]
+      },
+      {
+        "path": "backend/src/rox_core/api/register_namespaces.py",
+        "lines": [
+          407,
+          412
+        ]
+      },
+      {
+        "path": "backend/src/rox_core/__init__.py",
+        "lines": [
+          489,
+          516
+        ]
+      }
+    ]
+  },
+  {
+    "id": "chat",
+    "kind": "service",
+    "column": "HTTP services",
+    "match": {
+      "path_prefixes": [
+        "backend/src/chat/"
+      ]
+    },
+    "label": "CHAT (FastAPI)",
+    "shape": "component",
+    "many": false,
+    "source": {
+      "path": "backend/run_chat.py",
+      "lines": [
+        5,
+        17
+      ]
+    }
+  },
+  {
+    "id": "public_api",
+    "kind": "service",
+    "column": "HTTP services",
+    "match": {
+      "path_prefixes": [
+        "backend/src/public_api/"
+      ]
+    },
+    "label": "PUBLIC_API (FastAPI)",
+    "shape": "component",
+    "many": false,
+    "source": {
+      "path": "backend/run_public_api.py",
+      "lines": [
+        5,
+        10
+      ]
+    }
+  },
+  {
+    "id": "mcp",
+    "kind": "service",
+    "column": "HTTP services",
+    "match": {
+      "path_prefixes": [
+        "backend/src/external_mcp/"
+      ]
+    },
+    "label": "MCP server",
+    "shape": "component",
+    "many": false,
+    "source": {
+      "path": "backend/run_mcp.py",
+      "lines": [
+        16,
+        20
+      ]
+    }
+  },
+  {
+    "id": "temporal",
+    "label": "Temporal workflows",
+    "kind": "queue",
+    "column": "Workflows",
+    "match": {
+      "worker_kinds": [
+        "temporal_workflow",
+        "temporal_activity"
+      ],
+      "workflow_start_callers": true
+    },
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/rox_core/__init__.py",
+      "lines": [
+        600,
+        600
+      ]
+    }
+  },
+  {
+    "id": "sqs",
+    "label": "SQS queues",
+    "kind": "queue",
+    "column": "Queues",
+    "match": {
+      "task_producers_or_consumers": true
+    },
+    "shape": "queue",
+    "many": true,
+    "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+        7,
+        14
+      ]
+    }
+  },
+  {
+    "id": "agent_workers",
+    "kind": "service(many)",
+    "column": "Background workers",
+    "match": {
+      "deploy_targets": [
+        "AGENT",
+        "REALTIMEAGENT",
+        "EXTRACTIONAGENT",
+        "ASYNC_AGENT"
+      ]
+    },
+    "label": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+        14,
+        26
+      ]
+    }
+  },
+  {
+    "id": "data_workers",
+    "kind": "service(many)",
+    "column": "Background workers",
+    "match": {
+      "deploy_targets": [
+        "SOR",
+        "BATCH",
+        "BACKFILL",
+        "INTEGRATION"
+      ]
+    },
+    "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+        14,
+        26
+      ]
+    }
+  },
+  {
+    "id": "outreach_sched",
+    "kind": "service(many)",
+    "column": "Background workers",
+    "match": {
+      "deploy_targets": [
+        "OUTREACH",
+        "WORKFLOWSCHEDULER"
+      ]
+    },
+    "label": "OUTREACH · WORKFLOWSCHEDULER",
+    "shape": "component",
+    "many": true,
+    "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+        24,
+        25
+      ]
+    }
+  },
+  {
+    "id": "postgres",
+    "label": "PostgreSQL",
+    "kind": "store",
+    "column": "Stores & provider APIs",
+    "match": {
+      "table_access": true
+    },
+    "shape": "store",
+    "many": false,
+    "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+        10,
+        11
+      ]
+    }
+  },
+  {
+    "id": "llm",
+    "kind": "external",
+    "column": "Stores & provider APIs",
+    "match": {
+      "external_services": [
+        "OpenAI",
+        "Anthropic",
+        "LiteLLM"
+      ]
+    },
+    "label": "LLM providers",
+    "shape": "external",
+    "many": false,
+    "source": {
+      "path": "backend/src/agent_framework/model/rox_anthropic_model.py",
+      "lines": [
+        99,
+        99
+      ]
+    }
+  },
+  {
+    "id": "crm",
+    "kind": "external",
+    "column": "Stores & provider APIs",
+    "match": {
+      "external_services": [
+        "Salesforce",
+        "HubSpot",
+        "Google APIs",
+        "Slack",
+        "Microsoft identity"
+      ]
+    },
+    "label": "CRM + workspace APIs",
+    "shape": "external",
+    "many": false,
+    "source": {
+      "path": "backend/src/rox_core/api/register_namespaces.py",
+      "lines": [
+        300,
+        303
+      ]
+    }
+  },
+  {
+    "id": "twilio",
+    "kind": "external",
+    "column": "Stores & provider APIs",
+    "match": {
+      "external_services": [
+        "Twilio"
+      ]
+    },
+    "label": "Twilio",
+    "shape": "external",
+    "many": false,
+    "source": {
+      "path": "backend/src/ext_integrations/twilio_integration/twilio_shim.py",
+      "lines": [
+        98,
+        106
+      ]
+    }
+  }
+]

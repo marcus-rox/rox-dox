@@ -73,6 +73,29 @@ def tree_problems(pages: list[Page]) -> list[str]:
                 problems.append(
                     f"related '{related.label}': link to missing page '{related.page}'"
                 )
+        for domain in page.data.domains:
+            if domain.page is not None and domain.page not in page_ids:
+                problems.append(
+                    f"schema domain '{domain.id}': link to missing page '{domain.page}'"
+                )
+            elif domain.page is not None:
+                expected_kind = {"root": "domain", "domain": "feature"}.get(page.kind)
+                target_kind = pages_by_id[domain.page].kind
+                if expected_kind is not None and target_kind != expected_kind:
+                    problems.append(
+                        f"schema domain '{domain.id}': page '{domain.page}' has "
+                        f"kind '{target_kind or 'unspecified'}'; expected "
+                        f"'{expected_kind}'"
+                    )
+        for table in [
+            page.tldr.table,
+            *(page.tldr.additional_tables or []),
+        ]:
+            for link in table.links:
+                if link.page not in page_ids:
+                    problems.append(
+                        f"TLDR table: link to missing page '{link.page}'"
+                    )
 
     for page in pages:
         if page.parent is None:

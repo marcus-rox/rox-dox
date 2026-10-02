@@ -32,3 +32,22 @@ def list_entries(repo: Path, commit: str, directory: str) -> list[RepoEntry]:
             RepoEntry(path=path, is_dir=object_type in DIRECTORY_OBJECT_TYPES)
         )
     return entries
+
+
+def list_tree_paths(repo: Path, commit: str) -> list[str]:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "ls-tree",
+            "-r",
+            "-z",
+            "--name-only",
+            "--full-tree",
+            commit,
+        ],
+        check=True,
+        capture_output=True,
+    )
+    return [path.decode() for path in result.stdout.split(b"\0") if path]

@@ -9,6 +9,7 @@ from rox_dox.block_svg import (
     QUEUE_FILL,
     QUEUE_NOTCH,
     QUEUE_STROKE,
+    _layout,
     block_layout_problems,
     block_svg,
 )
@@ -210,7 +211,7 @@ def test_block_svg_has_explicit_dimensions_and_is_not_width_constrained(
     )
 
 
-def test_skipped_column_edges_use_dashed_channel_styling(
+def test_forward_skip_with_clear_corridor_uses_solid_styling(
     page_data: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(page_data)
@@ -246,9 +247,7 @@ def test_skipped_column_edges_use_dashed_channel_styling(
         },
     ]
     page = _page(payload)
-    assert block_layout_problems(page.block) == [
-        "first_node -> third_node (columns 0 -> 2; expected 0 -> 1)"
-    ]
+    assert block_layout_problems(page.block) == []
     root = ElementTree.fromstring(_block_svg(page))
     edge_paths = [
         element
@@ -258,9 +257,139 @@ def test_skipped_column_edges_use_dashed_channel_styling(
 
     assert [path.attrib["stroke"] for path in edge_paths] == [ARROW_COLOR] * 2
     assert "stroke-dasharray" not in edge_paths[0].attrib
-    assert edge_paths[1].attrib["stroke-dasharray"] == "4 3"
+    assert "stroke-dasharray" not in edge_paths[1].attrib
     assert all(path.attrib["stroke-width"] == "1.5" for path in edge_paths)
     assert [path.attrib["d"].count("L") for path in edge_paths] == [3, 5]
+
+
+def test_forward_skip_uses_a_clear_corridor(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id.upper(), "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    tall_details = [
+        {"text": f"Detail line {index}", "sources": [source]} for index in range(6)
+    ]
+    payload["block"]["nodes"] = [
+        {
+            "id": "first_node",
+            "label": "A",
+            "source": source,
+            "group": "first",
+            "details": tall_details,
+        },
+        {
+            "id": "blocker",
+            "label": "B",
+            "source": source,
+            "group": "second",
+        },
+        {
+            "id": "third_node",
+            "label": "C",
+            "source": source,
+            "group": "third",
+            "details": tall_details,
+        },
+    ]
+    payload["block"]["edges"] = [
+        {
+            "src": "first_node",
+            "dst": "third_node",
+            "label": "skips the short middle card",
+            "source": source,
+        }
+    ]
+    page = _page(payload)
+    _, cards, routes, _, _ = _layout(page.block)
+    route = routes[0]
+    blocker = cards["blocker"]
+    corridor_y = route.points[2][1]
+
+    assert not route.via_channel
+    assert route.points[2][1] == route.points[3][1]
+    assert not blocker.y <= corridor_y <= blocker.y + blocker.height
+    assert block_layout_problems(page.block) == []
+
+
+def test_backward_edge_keeps_the_shared_channel(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id.upper(), "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["nodes"] = [
+        {
+            "id": f"{group_id}_node",
+            "label": group_id.upper(),
+            "source": source,
+            "group": group_id,
+        }
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["edges"] = [
+        {
+            "src": "third_node",
+            "dst": "first_node",
+            "label": "backward",
+            "source": source,
+        }
+    ]
+    page = _page(payload)
+    _, _, routes, _, _ = _layout(page.block)
+
+    assert routes[0].via_channel
+    assert block_layout_problems(page.block) == [
+        "third_node -> first_node (columns 2 -> 0; expected 2 -> 3)"
+    ]
+
+
+def test_backward_and_same_column_edges_are_layout_problems(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [1, 2]}
+    payload["block"]["groups"] = [
+        {"id": group_id, "label": group_id.title(), "source": source}
+        for group_id in ("first", "second", "third")
+    ]
+    payload["block"]["nodes"] = [
+        {"id": node_id, "label": node_id, "source": source, "group": group_id}
+        for node_id, group_id in (
+            ("first_node", "first"),
+            ("second_node", "second"),
+            ("second_peer", "second"),
+            ("third_node", "third"),
+        )
+    ]
+    payload["block"]["edges"] = [
+        {
+            "src": "third_node",
+            "dst": "second_node",
+            "label": "backward",
+            "source": source,
+        },
+        {
+            "src": "second_node",
+            "dst": "second_peer",
+            "label": "same column",
+            "source": source,
+        },
+    ]
+
+    page = _page(payload)
+
+    assert block_layout_problems(page.block) == [
+        "third_node -> second_node (columns 2 -> 1; expected 2 -> 3)",
+        "second_node -> second_peer (columns 1 -> 1; expected 1 -> 2)",
+    ]
 
 
 def test_component_uses_a_white_uml_class_box(page_data: dict[str, object]) -> None:

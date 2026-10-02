@@ -43,6 +43,22 @@ def test_edge_endpoint_must_name_declared_node_or_group(
         Page.model_validate(page_data)
 
 
+def test_domain_page_requires_at_least_one_path(
+    page_data: dict[str, object],
+) -> None:
+    page_data.update(
+        {
+            "id": "domain",
+            "kind": "domain",
+            "parent": "rox-core",
+            "paths": [],
+        }
+    )
+
+    with pytest.raises(ValidationError):
+        Page.model_validate(page_data)
+
+
 def test_group_can_be_an_edge_endpoint(page_data: dict[str, object]) -> None:
     block = page_data["block"]
     assert isinstance(block, dict)
@@ -66,7 +82,7 @@ def test_group_can_be_an_edge_endpoint(page_data: dict[str, object]) -> None:
     assert page.block.edges[0].src == "backend"
 
 
-def test_queue_needs_a_producer_and_consumer_edge(
+def test_queue_with_one_flow_side_is_valid(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -75,9 +91,24 @@ def test_queue_needs_a_producer_and_consumer_edge(
     assert isinstance(nodes, list)
     nodes[1]["kind"] = "queue"
 
+    page = Page.model_validate(page_data)
+
+    assert page.block.nodes[1].kind == "queue"
+
+
+def test_queue_without_any_flow_side_is_invalid(
+    page_data: dict[str, object],
+) -> None:
+    block = page_data["block"]
+    assert isinstance(block, dict)
+    nodes = block["nodes"]
+    assert isinstance(nodes, list)
+    nodes[1]["kind"] = "queue"
+    block["edges"] = []
+
     with pytest.raises(
         ValidationError,
-        match="block diagram: queue 'store' needs a producer and a consumer edge",
+        match="block diagram: queue 'store' needs a producer or a consumer edge",
     ):
         Page.model_validate(page_data)
 
@@ -262,7 +293,7 @@ def test_block_figure_edges_must_reference_declared_node_or_group(
         Page.model_validate(payload)
 
 
-def test_node_details_are_limited_to_six(
+def test_node_details_are_limited_to_seven(
     page_data: dict[str, object],
 ) -> None:
     block = page_data["block"]
@@ -278,8 +309,15 @@ def test_node_details_are_limited_to_six(
         }
         for detail_number in range(1, 8)
     ]
+    Page.model_validate(page_data)
+    node["details"].append(
+        {
+            "text": "Detail 8",
+            "sources": [{"path": "pkg/a.py", "lines": [1, 3]}],
+        }
+    )
 
-    with pytest.raises(ValidationError, match="block node 'api' has 7 details"):
+    with pytest.raises(ValidationError, match="block node 'api' has 8 details"):
         Page.model_validate(page_data)
 
 
@@ -378,6 +416,31 @@ def test_page_sources_include_group_and_node_detail_citations(
         "block node api detail 1",
         page.block.nodes[0].details[0].sources[0],
     ) in sources
+
+
+def test_page_sources_include_membership_row_citations(
+    page_data: dict[str, object],
+) -> None:
+    source = {"path": "pkg/a.py", "lines": [2, 3]}
+    page_data["membership"] = [
+        {
+            "layer": "Web screens",
+            "rows": [
+                {
+                    "path": "web/src/page.tsx",
+                    "primary": True,
+                    "evidence": "route tag campaigns",
+                    "sources": [source],
+                }
+            ],
+        }
+    ]
+    page = Page.model_validate(page_data)
+
+    assert (
+        "membership Web screens file web/src/page.tsx",
+        page.membership[0].rows[0].sources[0],
+    ) in page_sources(page)
 
 
 def test_page_sources_include_focused_block_figure_elements(
@@ -674,3 +737,16 @@ def test_relation_source_is_enumerated_for_citation_checks(
         "relation sessions.user_id -> users.id",
         page.data.relations[0].source,
     ) in page_sources(page)
+
+
+def test_page_block_note_source_is_enumerated_for_citation_checks(
+    page_data: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(page_data)
+    source = {"path": "pkg/a.py", "lines": [4, 5]}
+    payload["block"]["notes"] = [
+        {"text": "Runtime flow note.", "sources": [source]}
+    ]
+    page = Page.model_validate(payload)
+
+    assert ("block note 1", page.block.notes[0].sources[0]) in page_sources(page)

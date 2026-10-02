@@ -1,39 +1,86 @@
 ---
 name: block-diagram
-description: Author and verify source-cited block diagrams for rox-core. Use when creating or revising a block figure, reviewing a diagram inherited from rox-core documentation, or checking its layout.
+description: Author and verify source-cited block diagrams for rox-core in system-design-interview style — a few fundamental runtime components, data flowing left to right. Use when creating or revising a block figure on any root, domain or feature page, reviewing a diagram inherited from rox-core documentation, or checking its layout.
 ---
 
 # block-diagram
 
-## Reuse diagrams only after verifying them
+A block diagram answers one question: **what are the running parts, and how does the data
+move between them?** It is the "high-level design" a system-design interview asks for, not
+an inventory of the code. Extracted facts (endpoints, executors, task types, queues, tables)
+are evidence for the boxes and arrows; they are never themselves the boxes.
 
-1. Find diagrams at the pinned commit with
-   `git grep -l -E '```mermaid|┌|@startuml' <sha> -- '*.md'`.
-2. Check every box, name and arrow against code; use `outline` for module structure and
-   `call-tree` for flows.
-3. Drop claims that cannot be verified from rox-core (for example, autoscaling thresholds)
-   and correct stale names.
-4. Reuse a diagram as a figure with a cited “Based on <doc>, corrected: …” note.
-5. Each root/folder Block section has one overview (Figure 1) plus focused per-flow figures,
-   selected with `minimal-cover` and numbered sequentially.
+## 1. Write the flow before drawing anything
 
-## Layout and visual language
+Write 3–6 numbered steps in plain words, input to output, for the page's subject:
 
-Columns read left to right. Aim for every arrow to go to the next column; a few non-adjacent arrows are acceptable when they stay traceable. `rox-dox build` warns on each one and fails when a figure has more than 5 layout problems. Above that, reorder columns, nest groups, use group endpoints, or split the figure.
+> 1. A user connects Google in the web app. 2. INTERACTION saves the integration and starts
+> the initial-sync workflow. 3. The workflow enqueues calendar extraction. 4. Integration
+> workers pull events from Google and write `calendar_event`.
 
-When one box talks to every box in a group, draw one arrow to the group, not one per box.
+Every step must be citable at the pinned commit. The diagram is these steps drawn left to
+right; each arrow carries its step's verb ("connect", "start sync", "enqueue", "write").
+If a step cannot be cited, drop it; do not draw it.
 
-Every queue or stream has at least one producer arrow in and one consumer arrow out. Arrows follow the data (producer → queue → consumer), even when the consumer polls.
+## 2. Pick the fundamental components
 
-A box that stands for many runtime instances (one per queue type, per user, per executor class) is drawn stacked (`many: true`), and its citation must show the plurality.
+A box is a **runtime component**: something that is deployed, runs, stores or is called.
 
-Shapes: rectangles for components, upright cylinders for stores, chevrons for queues and streams, dashed boxes for outside services, dashed outlines for groups.
+| Kind | rox-core examples | Shape |
+|---|---|---|
+| Client / caller | web app, iOS app, a provider pushing webhooks | rectangle (`component`) or dashed (`external`) |
+| Service | INTERACTION, CHAT, PUBLIC_API, WEBHOOK, MCP (deploy targets) | rectangle |
+| Async channel | SQS queues, Temporal, Redis stream | chevron (`queue`) |
+| Worker pool | INTEGRATION workers, AGENT workers, a Temporal worker | stacked rectangle (`many: true`) |
+| Store | Postgres, Redis, S3, KV | cylinder (`store`) |
+| Outside system | Google APIs, Microsoft Graph, Slack, Twilio, LLM providers | dashed box (`external`) |
+
+Never a box: a file, module, class, API namespace, task type, executor, table, or a single
+queue name. Those go in the bullets inside the box they belong to (at most 4 bullets), or in
+a table under the figure.
+
+**Same components at every level.** Domain and feature pages reuse the root page's
+components and names (INTERACTION, WEBHOOK, SQS, worker pools, Postgres, providers) and show
+only the part the subject uses. Zooming in adds bullets and figures, not new kinds of boxes.
+
+**Merge by role.** All queues the subject uses are one SQS box; all its tables are one
+Postgres box listing the main tables; all providers it calls are one box unless the flow
+treats them differently. Split a box only when the two halves take different arrows.
+
+## 3. Budget, layout and arrows: run the lint
+
+Run `uv run rox-dox lint-diagrams pages --page <id>` and fix every error. It checks the
+mechanical rules for every block figure on the page: box count (B1, 5–12 boxes, hard limit
+15), component vocabulary (B2), arrow density (B3, at most ~1.5 arrows per box), backward
+arrows (B4), non-adjacent arrows (B5, the same layout problems `rox-dox build` warns on),
+empty and duplicate arrow labels (B6), and the overview's flow-note count (B7). Over budget
+means the abstraction is wrong: merge by role, or move a sub-flow into its own figure.
+
+## 4. Judge what the lint can't
+
+- Right level of abstraction: boxes are runtime components (§2), one overview figure
+  (Figure 1) per page, then at most 3 focused figures, one per flow, columns in flow order
+  (callers → services → async channels → workers → stores → outside systems).
+- Retell the flow: read the rendered figure at 100% zoom. Can a newcomer retell the
+  numbered flow from it alone? If not, redo it, whatever the lint says.
+
+## 5. Check before shipping
+
+- `rox-dox lint-diagrams pages --page <id>` reports 0 errors, and both judgment items in §4
+  hold.
+
+## Reusing diagrams from rox-core docs
+
+Find them with `git grep -l -E '```mermaid|┌|@startuml' <sha> -- '*.md'`, check every box
+and arrow against code (`outline`, `call-tree`), drop what cannot be verified, and cite the
+figure as "Based on <doc>, corrected: …".
+
+## Visual language
 
 Block diagrams use white component rectangles with 1.5px `#1f2937` strokes, centered bold
 titles, dividers and bulleted details; stores are `#eff6ff` vertical cylinders with `#1e40af`
 strokes, and queues/streams are `#f0fdf4` chevrons with `#166534` strokes. Third parties use
 white dashed `#6b7280` boxes with an `«external»` stereotype; groups are transparent dashed
-`#9ca3af` UML boundaries. Use `component` for services, clients and workers, `store` for
-databases and caches, `queue` for queues and streams, and `external` for third parties. Keep
-cited edge labels on white rounded backgrounds, use solid `#374151` arrows for ordinary routes
-and dashed `4 3` arrows for long-channel routes, and include the shape legend.
+`#9ca3af` UML boundaries. Keep cited edge labels on white rounded backgrounds, use solid
+`#374151` arrows for ordinary routes and dashed `4 3` arrows for long-channel routes, and
+include the shape legend.
