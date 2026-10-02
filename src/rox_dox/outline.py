@@ -221,6 +221,10 @@ def read_commit(repo: Path, commit: str, paths: Sequence[str]) -> dict[str, str]
     return {path: blobs[path] for path, _object_id in selected}
 
 
+def _table_cell(text: str) -> str:
+    return text.replace("|", "\\|")
+
+
 def format_markdown(outlines: Sequence[FileOutline]) -> str:
     sections = []
     for outline in outlines:
@@ -236,7 +240,10 @@ def format_markdown(outlines: Sequence[FileOutline]) -> str:
                 [
                     "| Object/Function | What it does |",
                     "|---|---|",
-                    *(f"| `{row.name}` | {row.doc or '—'} |" for row in outline.rows),
+                    *(
+                        f"| `{row.name}` | {_table_cell(row.doc) or '—'} |"
+                        for row in outline.rows
+                    ),
                 ]
             )
         sections.append("\n".join(section))
