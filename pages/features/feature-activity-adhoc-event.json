@@ -2,14 +2,13 @@
  "id": "feature-activity-adhoc-event",
  "title": "Meeting recordings, Slack channels & notifications",
  "kind": "feature",
- "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "commit": "5851a399e8e9e2e2dfa76665a8021b0ea16bc7d7",
  "parent": "domain-activity",
  "paths": [
   ".agents/skills/rox-lists-migration/SKILL.md",
   "backend/src/enrichment/pricing/provider_credit_usage.py",
   "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
   "backend/src/ext_integrations/calendar_integration/adhoc_event_service.py",
-  "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
   "backend/src/ext_integrations/call_recorders/gong/service.py",
   "backend/src/ext_integrations/slack_integration/agent_session_stop.py",
   "backend/src/ext_integrations/slack_integration/channel_sync_service.py",
@@ -21,9 +20,10 @@
   "backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers/factory.py",
   "backend/src/ext_integrations/slack_integration/mention_agent/stream_processor.py",
   "backend/src/ext_integrations/slack_integration/service.py",
-  "backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py",
+  "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
   "backend/src/ext_integrations/slack_integration/slack_shim.py",
   "backend/src/ext_integrations/slack_integration/slack_table_service.py",
+  "backend/src/ext_integrations/slack_integration/user_channel_membership_service.py",
   "backend/src/rox_core/api/enrichment/list_run_service.py",
   "backend/src/rox_core/api/notifications/business.py",
   "backend/src/rox_core/models/public_adhoc_event.py",
@@ -57,6 +57,7 @@
   "backend/src/rox_core/rox_lists/export_service.py",
   "backend/src/rox_core/rox_lists/models.py",
   "backend/src/rox_core/rox_lists/module.py",
+  "backend/src/rox_core/rox_lists/opportunity_view_service.py",
   "backend/src/rox_core/rox_lists/repositories/column_mapping.py",
   "backend/src/rox_core/rox_lists/repositories/list.py",
   "backend/src/rox_core/rox_lists/repositories/view.py",
@@ -168,64 +169,15 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-     "primary": true,
-     "evidence": "imports backend/src/rox_core/models/public_attention_event_attendee.py; imports backend/src/rox_core/models/public_avoma_event_attendee.py; imports backend/src/rox_core/models/public_call_recorder_event_metadata.py; imports backend/src/rox_core/models/public_circleback_event_attendee.py; imports backend/src/rox_core/models/public_gong_event_attendee.py",
-     "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        19,
-        19
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        22,
-        22
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        23,
-        23
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        26,
-        26
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        29,
-        29
-       ]
-      }
-     ]
-    },
-    {
      "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/models/public_gong_event_metadata.py; uses gong_event_metadata",
+     "evidence": "imports backend/src/rox_core/models/public_gong_event_metadata.py; uses gong_event_metadata",
      "sources": [
       {
        "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
        "lines": [
         1,
         1
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/call_recorders/gong/service.py",
-       "lines": [
-        11,
-        11
        ]
       },
       {
@@ -273,15 +225,15 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/channel_sync_service.py",
        "lines": [
-        22,
-        22
+        23,
+        23
        ]
       },
       {
        "path": "backend/src/ext_integrations/slack_integration/channel_sync_service.py",
        "lines": [
-        23,
-        23
+        24,
+        24
        ]
       }
      ]
@@ -490,13 +442,6 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        17,
-        17
-       ]
-      },
-      {
-       "path": "backend/src/ext_integrations/slack_integration/service.py",
-       "lines": [
         18,
         18
        ]
@@ -504,8 +449,8 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        23,
-        23
+        19,
+        19
        ]
       },
       {
@@ -514,26 +459,40 @@
         24,
         24
        ]
+      },
+      {
+       "path": "backend/src/ext_integrations/slack_integration/service.py",
+       "lines": [
+        25,
+        25
+       ]
       }
      ]
     },
     {
-     "path": "backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py",
+     "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/slack_integration/slack_shim.py; imports backend/src/ext_integrations/slack_integration/slack_table_service.py",
+     "evidence": "imports backend/src/ext_integrations/slack_integration/service.py; imports backend/src/ext_integrations/slack_integration/slack_shim.py; imports backend/src/ext_integrations/slack_integration/slack_table_service.py",
      "sources": [
       {
-       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py",
+       "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
        "lines": [
-        14,
-        14
+        11,
+        11
        ]
       },
       {
-       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py",
+       "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
        "lines": [
-        15,
-        15
+        20,
+        20
+       ]
+      },
+      {
+       "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
+       "lines": [
+        24,
+        24
        ]
       }
      ]
@@ -553,8 +512,8 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/channel_sync_service.py",
        "lines": [
-        22,
-        22
+        23,
+        23
        ]
       },
       {
@@ -583,7 +542,7 @@
     {
      "path": "backend/src/ext_integrations/slack_integration/slack_table_service.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/slack_integration/agent_session_stop.py; imports backend/src/ext_integrations/slack_integration/channel_sync_service.py; imports backend/src/ext_integrations/slack_integration/service.py; imports backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py; imports backend/src/ext_integrations/slack_integration/slack_shim.py",
+     "evidence": "imports backend/src/ext_integrations/slack_integration/agent_session_stop.py; imports backend/src/ext_integrations/slack_integration/channel_sync_service.py; imports backend/src/ext_integrations/slack_integration/service.py; imports backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py; imports backend/src/ext_integrations/slack_integration/slack_shim.py",
      "sources": [
       {
        "path": "backend/src/ext_integrations/slack_integration/agent_session_stop.py",
@@ -595,29 +554,50 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/channel_sync_service.py",
        "lines": [
-        23,
-        23
+        24,
+        24
        ]
       },
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        18,
-        18
+        19,
+        19
        ]
       },
       {
-       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/backfill_logic.py",
+       "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
        "lines": [
-        15,
-        15
+        24,
+        24
        ]
       },
       {
        "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
        "lines": [
-        24,
-        24
+        31,
+        31
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/slack_integration/user_channel_membership_service.py",
+     "primary": true,
+     "evidence": "imports backend/src/ext_integrations/slack_integration/slack_shim.py; imports backend/src/ext_integrations/slack_integration/slack_table_service.py",
+     "sources": [
+      {
+       "path": "backend/src/ext_integrations/slack_integration/user_channel_membership_service.py",
+       "lines": [
+        10,
+        10
+       ]
+      },
+      {
+       "path": "backend/src/ext_integrations/slack_integration/user_channel_membership_service.py",
+       "lines": [
+        11,
+        11
        ]
       }
      ]
@@ -716,7 +696,7 @@
     {
      "path": "backend/src/rox_core/rox_lists/module.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/rox_lists/default_list_manager.py; imports backend/src/rox_core/rox_lists/export_service.py; imports backend/src/rox_core/rox_lists/repositories/column_mapping.py; imports backend/src/rox_core/rox_lists/repositories/list.py; imports backend/src/rox_core/rox_lists/repositories/view.py",
+     "evidence": "imports backend/src/rox_core/rox_lists/default_list_manager.py; imports backend/src/rox_core/rox_lists/export_service.py; imports backend/src/rox_core/rox_lists/opportunity_view_service.py; imports backend/src/rox_core/rox_lists/repositories/column_mapping.py; imports backend/src/rox_core/rox_lists/repositories/list.py",
      "sources": [
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
@@ -735,22 +715,50 @@
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        18,
-        18
+        17,
+        17
        ]
       },
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        22,
-        22
+        19,
+        19
        ]
       },
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        24,
-        24
+        23,
+        23
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/rox_lists/opportunity_view_service.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/rox_lists/module.py; imports backend/src/rox_core/rox_lists/repositories/list.py; imports backend/src/rox_core/schema_router.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/rox_lists/module.py",
+       "lines": [
+        17,
+        17
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/rox_lists/opportunity_view_service.py",
+       "lines": [
+        6,
+        6
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/rox_lists/opportunity_view_service.py",
+       "lines": [
+        7,
+        7
        ]
       }
      ]
@@ -763,8 +771,8 @@
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        18,
-        18
+        19,
+        19
        ]
       },
       {
@@ -793,7 +801,7 @@
     {
      "path": "backend/src/rox_core/rox_lists/repositories/list.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/rox_lists/default_list_manager.py; imports backend/src/rox_core/rox_lists/module.py; imports backend/src/rox_core/schema_router.py",
+     "evidence": "imports backend/src/rox_core/rox_lists/default_list_manager.py; imports backend/src/rox_core/rox_lists/module.py; imports backend/src/rox_core/rox_lists/opportunity_view_service.py; imports backend/src/rox_core/schema_router.py",
      "sources": [
       {
        "path": "backend/src/rox_core/rox_lists/default_list_manager.py",
@@ -805,8 +813,15 @@
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        22,
-        22
+        23,
+        23
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/rox_lists/opportunity_view_service.py",
+       "lines": [
+        6,
+        6
        ]
       },
       {
@@ -826,8 +841,8 @@
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        24,
-        24
+        25,
+        25
        ]
       },
       {
@@ -868,8 +883,8 @@
       {
        "path": "backend/src/rox_core/rox_lists/module.py",
        "lines": [
-        25,
-        25
+        26,
+        26
        ]
       },
       {
@@ -898,7 +913,7 @@
     {
      "path": "backend/src/rox_core/schema_router.py",
      "primary": true,
-     "evidence": "imports backend/src/enrichment/pricing/provider_credit_usage.py; imports backend/src/ext_integrations/calendar_integration/adhoc_event_service.py; imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/ext_integrations/slack_integration/slack_table_service.py; imports backend/src/rox_core/api/enrichment/list_run_service.py",
+     "evidence": "imports backend/src/enrichment/pricing/provider_credit_usage.py; imports backend/src/ext_integrations/calendar_integration/adhoc_event_service.py; imports backend/src/ext_integrations/slack_integration/slack_table_service.py; imports backend/src/rox_core/api/enrichment/list_run_service.py; imports backend/src/rox_core/api/notifications/business.py",
      "sources": [
       {
        "path": "backend/src/enrichment/pricing/provider_credit_usage.py",
@@ -915,13 +930,6 @@
        ]
       },
       {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        32,
-        32
-       ]
-      },
-      {
        "path": "backend/src/ext_integrations/slack_integration/slack_table_service.py",
        "lines": [
         35,
@@ -933,6 +941,13 @@
        "lines": [
         5,
         5
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/notifications/business.py",
+       "lines": [
+        19,
+        19
        ]
       }
      ]
@@ -1071,15 +1086,8 @@
     {
      "path": "backend/src/rox_core/models/public_attention_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses attention_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses attention_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        19,
-        19
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_attention_event_attendee.py",
        "lines": [
@@ -1127,15 +1135,8 @@
     {
      "path": "backend/src/rox_core/models/public_avoma_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses avoma_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses avoma_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        22,
-        22
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_avoma_event_attendee.py",
        "lines": [
@@ -1183,15 +1184,8 @@
     {
      "path": "backend/src/rox_core/models/public_call_recorder_event_metadata.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/models/public_attention_event_metadata.py; imports backend/src/rox_core/models/public_avoma_event_metadata.py; imports backend/src/rox_core/models/public_circleback_event_metadata.py; imports backend/src/rox_core/models/public_gong_event_metadata.py",
+     "evidence": "imports backend/src/rox_core/models/public_attention_event_metadata.py; imports backend/src/rox_core/models/public_avoma_event_metadata.py; imports backend/src/rox_core/models/public_circleback_event_metadata.py; imports backend/src/rox_core/models/public_gong_event_metadata.py; imports backend/src/rox_core/models/public_ms_teams_event_metadata.py",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        23,
-        23
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_attention_event_metadata.py",
        "lines": [
@@ -1219,21 +1213,21 @@
         6,
         6
        ]
+      },
+      {
+       "path": "backend/src/rox_core/models/public_ms_teams_event_metadata.py",
+       "lines": [
+        6,
+        6
+       ]
       }
      ]
     },
     {
      "path": "backend/src/rox_core/models/public_circleback_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses circleback_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses circleback_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        26,
-        26
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_circleback_event_attendee.py",
        "lines": [
@@ -1281,15 +1275,8 @@
     {
      "path": "backend/src/rox_core/models/public_gong_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses gong_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses gong_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        29,
-        29
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_gong_event_attendee.py",
        "lines": [
@@ -1344,15 +1331,8 @@
     {
      "path": "backend/src/rox_core/models/public_ms_teams_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses ms_teams_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses ms_teams_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        30,
-        30
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_ms_teams_event_attendee.py",
        "lines": [
@@ -1503,15 +1483,15 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        23,
-        23
+        24,
+        24
        ]
       },
       {
        "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
        "lines": [
-        34,
-        34
+        41,
+        41
        ]
       },
       {
@@ -1545,8 +1525,8 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        24,
-        24
+        25,
+        25
        ]
       },
       {
@@ -1692,8 +1672,8 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
        "lines": [
-        35,
-        35
+        42,
+        42
        ]
       },
       {
@@ -1750,15 +1730,8 @@
     {
      "path": "backend/src/rox_core/models/public_zoom_event_attendee.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/call_recorders/call_recorder_event_service.py; imports backend/src/rox_core/schema_router.py; uses zoom_event_attendee",
+     "evidence": "imports backend/src/rox_core/schema_router.py; uses zoom_event_attendee",
      "sources": [
-      {
-       "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-       "lines": [
-        31,
-        31
-       ]
-      },
       {
        "path": "backend/src/rox_core/models/public_zoom_event_attendee.py",
        "lines": [
@@ -1839,15 +1812,15 @@
       {
        "path": "backend/src/ext_integrations/slack_integration/service.py",
        "lines": [
-        27,
-        27
+        28,
+        28
        ]
       },
       {
        "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
        "lines": [
-        39,
-        39
+        46,
+        46
        ]
       },
       {
@@ -1919,7 +1892,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Reached from 1306 HTTP endpoints and 202 workers in other features: Account Research, Addusercompanyassociationpostprocessing + 130 more workers, Admin Mcp Permissions, Agent Actions, Agent State, Agents, Artifact, Auth0, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Circleback, Clay Enrichment, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Contract Hierarchy, Conversation, Conversation Ticket, Conversation/realtime, Crm Campaigns, Csv Upload, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Email Integration, Email Sync workflows, Enrichment, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Events, Governance, Graph Erd, Hubspot Enrichment, Insight Configs, Integration Health workflows, Integrations, Intelligence Api, Internal, Leads, Linkedin, Mcp, Meetings By Customers, Mention Agent workers, Mixrank Sync workflows, Notifications, Onboarding, Org Chart, Org Chart Staged People, Organization, Outbound Agent workflows, Outreach, People, Permission, Priorities, Prospect Lists, Prospecting, Registry, Research, Rql, Run, Runs, Salesforce Enrichment, Self Serve, Sequence, Sequence Build, Share workers, Slack Agent, Slack Ingest workers, Slack Integration workers, Task Executors workers, Tasks Integration, Testing, Thinkific, Tiptap, Traces, Transcripts V2, Unified Data, User, User Account Link Preferences, User Extra, User Profile Template, Webhook Integrations, Webhookwaiter + 1 more workflows, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
+    "text": "Reached from 1318 HTTP endpoints and 200 workers in other features: Account Research, Addusercompanyassociationpostprocessing + 132 more workers, Admin Mcp Permissions, Agent Actions, Agent State, Agents, Artifact, Auth0, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Circleback, Clay Enrichment, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Contract Hierarchy, Conversation, Conversation Ticket, Conversation/realtime, Crm Campaigns, Csv Upload, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Email Integration, Email Sync workflows, Enrichment, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Events, Governance, Graph Erd, Hubspot Enrichment, Insight Configs, Integration Health workflows, Integrations, Intelligence Api, Internal, Leads, Linkedin, Mcp, Meetings By Customers, Mention Agent workers, Mixrank Sync workflows, Notifications, Onboarding, Org Chart, Org Chart Staged People, Organization, Outbound Agent workflows, Outreach, People, Permission, Priorities, Prospect Lists, Prospecting, Research, Rql, Run, Runs, Salesforce Enrichment, Self Serve, Sequence, Sequence Build, Share workers, Slack Agent, Slack Ingest workers, Slack Integration workers, Task Executors workers, Tasks Integration, Testing, Thinkific, Tiptap, Traces, Transcripts V2, Unified Data, User, User Account Link Preferences, User Extra, User Profile Template, Webhook Integrations, Webhookwaiter + 1 more workflows, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/endpoints.py",
@@ -3478,22 +3451,22 @@
      {
       "path": "backend/src/workflow/router/triggers.py",
       "lines": [
-       171,
-       171
+       180,
+       180
       ]
      },
      {
       "path": "backend/src/workflow/router/triggers.py",
       "lines": [
-       115,
-       115
+       124,
+       124
       ]
      },
      {
       "path": "backend/src/workflow/router/triggers.py",
       "lines": [
-       141,
-       141
+       150,
+       150
       ]
      },
      {
@@ -6369,43 +6342,50 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       40,
-       40
+       44,
+       44
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       83,
-       83
+       106,
+       106
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       134,
-       134
+       157,
+       157
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       109,
-       109
+       132,
+       132
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       156,
-       156
+       87,
+       87
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       190,
-       190
+       179,
+       179
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
+      "lines": [
+       213,
+       213
       ]
      },
      {
@@ -6740,43 +6720,43 @@
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       742,
-       742
+       720,
+       720
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       839,
-       839
+       817,
+       817
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       808,
-       808
+       786,
+       786
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       779,
-       779
+       757,
+       757
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       891,
-       891
+       869,
+       869
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       868,
-       868
+       846,
+       846
       ]
      },
      {
@@ -6796,64 +6776,71 @@
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       349,
-       349
+       504,
+       504
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       526,
-       526
+       645,
+       645
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       667,
-       667
+       615,
+       615
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       637,
-       637
+       919,
+       919
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       941,
-       941
+       943,
+       943
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       965,
-       965
+       971,
+       971
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       475,
-       475
+       996,
+       996
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       991,
-       991
+       453,
+       453
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       408,
-       408
+       1022,
+       1022
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/organizations/endpoints.py",
+      "lines": [
+       386,
+       386
       ]
      },
      {
@@ -6866,22 +6853,22 @@
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       921,
-       921
+       899,
+       899
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       438,
-       438
+       416,
+       416
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       371,
-       371
+       349,
+       349
       ]
      },
      {
@@ -6908,15 +6895,15 @@
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       708,
-       708
+       686,
+       686
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       493,
-       493
+       471,
+       471
       ]
      },
      {
@@ -7286,239 +7273,204 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       160,
-       160
+       172,
+       172
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       235,
-       235
+       256,
+       256
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1167,
-       1167
+       1188,
+       1188
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1272,
-       1272
+       1293,
+       1293
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1230,
-       1230
+       1251,
+       1251
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       589,
-       589
+       610,
+       610
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1433,
-       1433
+       1454,
+       1454
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1464,
-       1464
+       1485,
+       1485
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1411,
-       1411
+       1432,
+       1432
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1386,
-       1386
+       1407,
+       1407
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1493,
-       1493
+       1742,
+       1742
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1531,
-       1531
+       1780,
+       1780
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1553,
-       1553
+       1802,
+       1802
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       551,
-       551
+       572,
+       572
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       660,
-       660
+       681,
+       681
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       503,
-       503
+       524,
+       524
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1353,
-       1353
+       1374,
+       1374
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1310,
-       1310
+       1331,
+       1331
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1314,
-       1314
+       1335,
+       1335
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       627,
-       627
+       648,
+       648
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       714,
-       714
+       1571,
+       1571
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       291,
-       291
+       1601,
+       1601
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       687,
-       687
+       1514,
+       1514
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       440,
-       440
+       1544,
+       1544
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       470,
-       470
+       1685,
+       1685
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       744,
-       744
+       1715,
+       1715
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       861,
-       861
+       1628,
+       1628
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1109,
-       1109
+       1658,
+       1658
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1139,
-       1139
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1013,
-       1013
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1043,
-       1043
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1077,
-       1077
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       912,
-       912
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       832,
-       832
+       735,
+       735
       ]
      },
      {
@@ -7531,50 +7483,141 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       361,
-       361
+       708,
+       708
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       388,
-       388
+       461,
+       461
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       212,
-       212
+       491,
+       491
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       943,
-       943
+       765,
+       765
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       965,
-       965
+       882,
+       882
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       784,
-       784
+       1130,
+       1130
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       806,
-       806
+       1160,
+       1160
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1034,
+       1034
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1064,
+       1064
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1098,
+       1098
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       933,
+       933
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       853,
+       853
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       333,
+       333
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       382,
+       382
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       409,
+       409
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       233,
+       233
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       964,
+       964
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       986,
+       986
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       805,
+       805
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       827,
+       827
       ]
      },
      {
@@ -7589,41 +7632,6 @@
       "lines": [
        52,
        52
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       28,
-       28
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       81,
-       81
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       40,
-       40
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       64,
-       64
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       73,
-       73
       ]
      },
      {
@@ -7713,43 +7721,43 @@
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       117,
-       117
+       118,
+       118
       ]
      },
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       101,
-       101
+       102,
+       102
       ]
      },
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       256,
-       256
+       263,
+       263
       ]
      },
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       187,
-       187
+       194,
+       194
       ]
      },
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       221,
-       221
+       228,
+       228
       ]
      },
      {
       "path": "backend/src/rox_core/api/rql/endpoints.py",
       "lines": [
-       156,
-       156
+       163,
+       163
       ]
      },
      {
@@ -7825,57 +7833,71 @@
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       101,
-       101
+       110,
+       110
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       56,
-       56
+       69,
+       69
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       285,
-       285
+       294,
+       294
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       335,
-       335
+       340,
+       340
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       235,
-       235
+       244,
+       244
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       129,
-       129
+       138,
+       138
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       183,
-       183
+       192,
+       192
       ]
      },
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       80,
-       80
+       369,
+       369
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
+      "lines": [
+       396,
+       396
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
+      "lines": [
+       89,
+       89
       ]
      },
      {
@@ -8056,36 +8078,36 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       521,
-       521
+       520,
+       520
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       546,
-       546
+       545,
+       545
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       603,
-       603
+       602,
+       602
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       633,
-       633
+       632,
+       632
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       836,
-       836
+       835,
+       835
       ]
      },
      {
@@ -8105,15 +8127,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       712,
-       712
+       711,
+       711
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       668,
-       668
+       667,
+       667
       ]
      },
      {
@@ -8147,43 +8169,43 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       1020,
-       1020
+       1019,
+       1019
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       981,
-       981
+       980,
+       980
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       1052,
-       1052
+       1051,
+       1051
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       1100,
-       1100
+       1099,
+       1099
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       758,
-       758
+       757,
+       757
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       916,
-       916
+       915,
+       915
       ]
      },
      {
@@ -8196,29 +8218,29 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       946,
-       946
+       945,
+       945
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       883,
-       883
+       882,
+       882
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       1135,
-       1135
+       1134,
+       1134
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       796,
-       796
+       795,
+       795
       ]
      },
      {
@@ -8252,29 +8274,29 @@
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3696,
-       3696
+       3687,
+       3687
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       712,
-       712
+       716,
+       716
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3737,
-       3737
+       3728,
+       3728
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3778,
-       3778
+       3769,
+       3769
       ]
      },
      {
@@ -8315,281 +8337,316 @@
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       112,
-       112
+       123,
+       123
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       633,
-       633
+       720,
+       720
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       355,
-       355
+       442,
+       442
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1446,
-       1446
+       1533,
+       1533
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       493,
-       493
+       580,
+       580
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       371,
-       371
+       458,
+       458
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       782,
-       782
+       869,
+       869
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       175,
-       175
+       262,
+       262
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1365,
-       1365
+       1452,
+       1452
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       805,
-       805
+       892,
+       892
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       465,
-       465
+       552,
+       552
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       541,
-       541
+       628,
+       628
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       847,
-       847
+       934,
+       934
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       303,
-       303
+       390,
+       390
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       223,
-       223
+       310,
+       310
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       928,
-       928
+       1015,
+       1015
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       610,
-       610
+       697,
+       697
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1484,
-       1484
+       1571,
+       1571
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1429,
-       1429
+       1516,
+       1516
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       428,
-       428
+       515,
+       515
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       443,
-       443
+       530,
+       530
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1003,
-       1003
+       1090,
+       1090
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       279,
-       279
+       366,
+       366
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       887,
-       887
+       974,
+       974
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       950,
-       950
+       1037,
+       1037
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1105,
-       1105
+       1192,
+       1192
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1540,
-       1540
+       1627,
+       1627
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1564,
-       1564
+       1651,
+       1651
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       653,
-       653
+       740,
+       740
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       131,
-       131
+       218,
+       218
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1594,
-       1594
+       1681,
+       1681
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1615,
-       1615
+       1702,
+       1702
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1044,
-       1044
+       1131,
+       1131
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1075,
-       1075
+       1162,
+       1162
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       984,
-       984
+       1071,
+       1071
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       967,
-       967
+       1054,
+       1054
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       572,
-       572
+       196,
+       196
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       670,
-       670
+       142,
+       142
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1132,
-       1132
+       169,
+       169
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1303,
-       1303
+       659,
+       659
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       757,
+       757
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       1219,
+       1219
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       1390,
+       1390
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       1423,
+       1423
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       1280,
+       1280
       ]
      },
      {
@@ -8602,29 +8659,15 @@
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1193,
-       1193
+       677,
+       677
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1249,
-       1249
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
-      "lines": [
-       590,
-       590
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
-      "lines": [
-       1512,
-       1512
+       1599,
+       1599
       ]
      },
      {
@@ -9400,8 +9443,8 @@
      {
       "path": "backend/src/workflow/router/triggers.py",
       "lines": [
-       51,
-       51
+       52,
+       52
       ]
      },
      {
@@ -9722,8 +9765,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       752,
-       752
+       759,
+       759
       ]
      },
      {
@@ -9764,8 +9807,8 @@
      {
       "path": "backend/src/tasks/executors/org_deletion.py",
       "lines": [
-       1979,
-       1979
+       1978,
+       1978
       ]
      },
      {
@@ -9918,15 +9961,15 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       836,
-       836
+       843,
+       843
       ]
      },
      {
       "path": "backend/src/tasks/executors/org_deletion.py",
       "lines": [
-       3451,
-       3451
+       3450,
+       3450
       ]
      },
      {
@@ -9974,8 +10017,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       642,
-       642
+       649,
+       649
       ]
      },
      {
@@ -9995,15 +10038,15 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       225,
-       225
+       232,
+       232
       ]
      },
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       719,
-       719
+       726,
+       726
       ]
      },
      {
@@ -10184,22 +10227,22 @@
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       156,
-       156
+       234,
+       234
       ]
      },
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       212,
-       212
+       297,
+       297
       ]
      },
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       267,
-       267
+       372,
+       372
       ]
      },
      {
@@ -10219,8 +10262,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       473,
-       473
+       480,
+       480
       ]
      },
      {
@@ -10317,8 +10360,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       583,
-       583
+       590,
+       590
       ]
      },
      {
@@ -10331,8 +10374,8 @@
      {
       "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
       "lines": [
-       2841,
-       2841
+       2713,
+       2713
       ]
      },
      {
@@ -10385,10 +10428,17 @@
       ]
      },
      {
+      "path": "backend/src/tasks/executors/salesforce_contact_update.py",
+      "lines": [
+       127,
+       127
+      ]
+     },
+     {
       "path": "backend/src/tasks/executors/salesforce_import.py",
       "lines": [
-       191,
-       191
+       194,
+       194
       ]
      },
      {
@@ -10396,6 +10446,13 @@
       "lines": [
        165,
        165
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_lead_update.py",
+      "lines": [
+       37,
+       37
       ]
      },
      {
@@ -10471,78 +10528,64 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1556,
-       1556
+       1538,
+       1538
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1457,
-       1457
+       1437,
+       1437
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1663,
-       1663
+       1643,
+       1643
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2954,
-       2954
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_backfill_executor.py",
-      "lines": [
-       27,
-       27
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_channel_event_executor.py",
-      "lines": [
-       27,
-       27
+       2930,
+       2930
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_channel_refresh_executor.py",
       "lines": [
-       363,
-       363
+       360,
+       360
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2030,
-       2030
+       2009,
+       2009
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_channel_refresh_executor.py",
       "lines": [
-       223,
-       223
+       217,
+       217
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_channel_refresh_executor.py",
       "lines": [
-       270,
-       270
+       268,
+       268
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       3149,
-       3149
+       3125,
+       3125
       ]
      },
      {
@@ -10550,20 +10593,6 @@
       "lines": [
        42,
        42
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
-      "lines": [
-       45,
-       45
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_membership_event_executor.py",
-      "lines": [
-       17,
-       17
       ]
      },
      {
@@ -10576,15 +10605,15 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_partition_processor_executor.py",
       "lines": [
-       122,
-       122
+       124,
+       124
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2885,
-       2885
+       2863,
+       2863
       ]
      },
      {
@@ -10625,8 +10654,8 @@
      {
       "path": "backend/src/tasks/executors/org_deletion.py",
       "lines": [
-       2105,
-       2105
+       2104,
+       2104
       ]
      },
      {
@@ -11143,22 +11172,22 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       22,
-       22
+       21,
+       21
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       38,
-       38
+       24,
+       24
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       42,
-       42
+       40,
+       40
       ]
      },
      {
@@ -11183,27 +11212,6 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/slack_integration/slack_channel_event_executor.py",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_channel_event_executor.py",
-      "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_channel_event_executor.py",
-      "lines": [
-       15,
-       15
-      ]
-     },
-     {
       "path": "backend/src/ext_integrations/slack_integration/slack_channel_refresh_executor.py",
       "lines": [
        7,
@@ -11213,8 +11221,8 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_channel_refresh_executor.py",
       "lines": [
-       11,
-       11
+       10,
+       10
       ]
      },
      {
@@ -11225,27 +11233,6 @@
       ]
      },
      {
-      "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_backfill_executor.py",
-      "lines": [
-       6,
-       6
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_backfill_executor.py",
-      "lines": [
-       10,
-       10
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_backfill_executor.py",
-      "lines": [
-       13,
-       13
-      ]
-     },
-     {
       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_partition_coordinator_executor.py",
       "lines": [
        6,
@@ -11276,43 +11263,8 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_ingest/workers/slack_partition_processor_executor.py",
       "lines": [
-       15,
-       15
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
-      "lines": [
-       8,
-       8
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
-      "lines": [
-       13,
-       13
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
-      "lines": [
-       16,
-       16
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_membership_event_executor.py",
-      "lines": [
-       2,
-       2
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/slack_integration/slack_membership_event_executor.py",
-      "lines": [
-       7,
-       7
+       14,
+       14
       ]
      },
      {
@@ -11479,15 +11431,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       8,
-       8
+       12,
+       12
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/linkedin/endpoints.py",
       "lines": [
-       19,
-       19
+       23,
+       23
       ]
      },
      {
@@ -11934,15 +11886,15 @@
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       22,
-       22
+       20,
+       20
       ]
      },
      {
       "path": "backend/src/rox_core/api/organizations/endpoints.py",
       "lines": [
-       27,
-       27
+       25,
+       25
       ]
      },
      {
@@ -12025,8 +11977,8 @@
      {
       "path": "backend/src/rox_core/api/salesforce_enrichment/endpoints.py",
       "lines": [
-       67,
-       67
+       21,
+       21
       ]
      },
      {
@@ -12039,22 +11991,22 @@
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       22,
-       22
+       23,
+       23
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       33,
-       33
+       26,
+       26
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       53,
-       53
+       36,
+       36
       ]
      },
      {
@@ -12074,22 +12026,22 @@
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       18,
-       18
+       8,
+       8
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       26,
-       26
+       23,
+       23
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       70,
-       70
+       31,
+       31
       ]
      },
      {
@@ -12718,13 +12670,6 @@
      {
       "path": "backend/src/tasks/executors/ms_teams_organizer_live_sync.py",
       "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/ms_teams_organizer_live_sync.py",
-      "lines": [
        2,
        2
       ]
@@ -12816,22 +12761,22 @@
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       31,
-       31
+       33,
+       33
       ]
      },
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       36,
-       36
+       38,
+       38
       ]
      },
      {
       "path": "backend/src/tasks/executors/orum_schema_sync.py",
       "lines": [
-       37,
-       37
+       39,
+       39
       ]
      },
      {
@@ -13073,6 +13018,27 @@
       ]
      },
      {
+      "path": "backend/src/tasks/executors/salesforce_contact_update.py",
+      "lines": [
+       30,
+       30
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_contact_update.py",
+      "lines": [
+       42,
+       42
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_contact_update.py",
+      "lines": [
+       52,
+       52
+      ]
+     },
+     {
       "path": "backend/src/tasks/executors/salesforce_import.py",
       "lines": [
        17,
@@ -13112,6 +13078,13 @@
       "lines": [
        22,
        22
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/salesforce_lead_update.py",
+      "lines": [
+       28,
+       28
       ]
      },
      {
@@ -13619,24 +13592,10 @@
       ]
      },
      {
-      "path": "backend/src/workflow/router/registry.py",
-      "lines": [
-       7,
-       7
-      ]
-     },
-     {
       "path": "backend/src/workflow/router/run.py",
       "lines": [
        12,
        12
-      ]
-     },
-     {
-      "path": "backend/src/workflow/router/triggers.py",
-      "lines": [
-       19,
-       19
       ]
      },
      {
@@ -13649,8 +13608,15 @@
      {
       "path": "backend/src/workflow/router/triggers.py",
       "lines": [
-       25,
-       25
+       21,
+       21
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/triggers.py",
+      "lines": [
+       26,
+       26
       ]
      },
      {
@@ -13663,13 +13629,25 @@
     ]
    },
    {
+    "text": "Runs 1 background workers and workflows: SlackManageBotMembershipChannelsTaskExecutor.",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/slack_join_channels_executor.py",
+      "lines": [
+       48,
+       48
+      ]
+     }
+    ]
+   },
+   {
     "text": "Calls outside services: Slack.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
       "lines": [
-       9,
-       9
+       10,
+       10
       ]
      },
      {
@@ -13682,15 +13660,15 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
       "lines": [
-       10,
-       10
+       11,
+       11
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
       "lines": [
-       11,
-       11
+       12,
+       12
       ]
      }
     ]
@@ -13881,23 +13859,11 @@
       ]
      }
     ]
-   },
-   {
-    "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
-    "sources": [
-     {
-      "path": ".agents/skills/rox-lists-migration/SKILL.md",
-      "lines": [
-       60,
-       60
-      ]
-     }
-    ]
    }
   ],
   "key_points": [
    {
-    "text": "Business logic: backend/src/ext_integrations/slack_integration (5), backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers (5), backend/src/rox_core/rox_lists (4).",
+    "text": "Business logic: backend/src/ext_integrations/slack_integration (7), backend/src/ext_integrations/slack_integration/mention_agent/stream_handlers (5), backend/src/rox_core/rox_lists (5).",
     "sources": [
      {
       "path": "backend/src/ext_integrations/slack_integration/agent_session_stop.py",
@@ -14002,14 +13968,14 @@
     [
      "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT",
      "service(many)",
-     "—",
+     "slack_channel",
      "Slack"
     ],
     [
      "SOR · BATCH · BACKFILL · INTEGRATION",
      "service(many)",
-     "adhoc_event, adhoc_event_attendee, attention_event_attendee, avoma_event_attendee, circleback_event_attendee, gong_event_attendee, ms_teams_event_attendee, notification_delivery, slack_channel, transcript_v2, zoom_event_attendee",
-     "Slack"
+     "adhoc_event, adhoc_event_attendee, notification_delivery, transcript_v2",
+     "—"
     ],
     [
      "CRM + workspace APIs",
@@ -14020,7 +13986,7 @@
     [
      "PostgreSQL",
      "store",
-     "adhoc_event, adhoc_event_attendee, attention_event_attendee, avoma_event_attendee, circleback_event_attendee, gong_event_attendee, ms_teams_event_attendee, notification_delivery, slack_channel, transcript_v2, zoom_event_attendee",
+     "adhoc_event, adhoc_event_attendee, notification_delivery, slack_channel, transcript_v2",
      "—"
     ]
    ],
@@ -14469,50 +14435,43 @@
     {
      "path": "backend/src/tasks/types.py",
      "lines": [
-      2662,
-      2662
+      2697,
+      2697
      ]
     },
     {
      "path": "backend/src/tasks/types.py",
      "lines": [
-      2710,
-      2710
+      2172,
+      2172
      ]
     },
     {
      "path": "backend/src/tasks/types.py",
      "lines": [
-      2137,
-      2137
+      1629,
+      1629
      ]
     },
     {
      "path": "backend/src/tasks/types.py",
      "lines": [
-      1624,
-      1624
-     ]
-    },
-    {
-     "path": "backend/src/tasks/types.py",
-     "lines": [
-      1987,
-      1987
+      1998,
+      1998
      ]
     },
     {
      "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      661,
-      661
+      675,
+      675
      ]
     },
     {
      "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      496,
-      496
+      505,
+      505
      ]
     },
     {
@@ -14530,10 +14489,10 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+     "path": "backend/src/ext_integrations/slack_integration/service.py",
      "lines": [
-      9,
-      9
+      568,
+      568
      ]
     },
     {
@@ -14565,10 +14524,10 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
+     "path": "backend/src/notifications/service.py",
      "lines": [
-      341,
-      341
+      84,
+      84
      ]
     },
     {
@@ -14576,20 +14535,6 @@
      "lines": [
       607,
       607
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/slack_integration/service.py",
-     "lines": [
-      565,
-      565
-     ]
-    },
-    {
-     "path": "backend/src/notifications/service.py",
-     "lines": [
-      84,
-      84
      ]
     }
    ],
@@ -14632,7 +14577,7 @@
     ]
    },
    {
-    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers long-poll SQS and make API calls to CRM + workspace APIs; SOR · BATCH · BACKFILL · INTEGRATION workers also read + write PostgreSQL; and also SOR · BATCH · BACKFILL · INTEGRATION workers enqueue follow-up SQS tasks.",
+    "text": "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers long-poll SQS; AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers also read PostgreSQL and make API calls to CRM + workspace APIs; SOR · BATCH · BACKFILL · INTEGRATION workers also read + write PostgreSQL; and also AGENT · REALTIMEAGENT · EXTRACTIONAGENT · ASYNC_AGENT workers and SOR · BATCH · BACKFILL · INTEGRATION workers enqueue follow-up SQS tasks.",
     "sources": [
      {
       "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
@@ -14679,15 +14624,29 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/service.py",
       "lines": [
-       305,
-       305
+       306,
+       306
       ]
      },
      {
-      "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+      "path": "backend/src/ext_integrations/slack_integration/service.py",
       "lines": [
-       9,
-       9
+       568,
+       568
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/service.py",
+      "lines": [
+       810,
+       810
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/slack_integration/service.py",
+      "lines": [
+       838,
+       838
       ]
      },
      {
@@ -14705,45 +14664,52 @@
       ]
      },
      {
-      "path": "backend/src/tasks/executor_registry.py",
+      "path": "backend/src/notifications/service.py",
       "lines": [
-       496,
-       496
+       515,
+       515
       ]
      },
      {
       "path": "backend/src/tasks/executor_registry.py",
       "lines": [
-       503,
-       503
+       505,
+       505
       ]
      },
      {
       "path": "backend/src/tasks/executor_registry.py",
       "lines": [
-       504,
-       504
+       512,
+       512
       ]
      },
      {
       "path": "backend/src/tasks/executor_registry.py",
       "lines": [
-       661,
-       661
+       513,
+       513
       ]
      },
      {
       "path": "backend/src/tasks/executor_registry.py",
       "lines": [
-       662,
-       662
+       675,
+       675
       ]
      },
      {
       "path": "backend/src/tasks/executor_registry.py",
       "lines": [
-       663,
-       663
+       676,
+       676
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       677,
+       677
       ]
      }
     ]
@@ -15130,25 +15096,13 @@
     "many": true,
     "details": [
      {
-      "text": "AsyncAgentQueueType · 8 task types",
+      "text": "AsyncAgentQueueType · 9 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         2662,
-         2662
-        ]
-       }
-      ]
-     },
-     {
-      "text": "BackfillQueueType · 3 task types",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2710,
-         2710
+         2697,
+         2697
         ]
        }
       ]
@@ -15159,27 +15113,32 @@
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         2137,
-         2137
+         2172,
+         2172
         ]
        }
       ]
      },
      {
-      "text": "+2 more",
+      "text": "IntegrationQueueType · 11 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         1624,
-         1624
+         1629,
+         1629
         ]
-       },
+       }
+      ]
+     },
+     {
+      "text": "+1 more",
+      "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         1987,
-         1987
+         1998,
+         1998
         ]
        }
       ]
@@ -15201,13 +15160,13 @@
     "many": true,
     "details": [
      {
-      "text": "ASYNC_AGENT · 8 task types",
+      "text": "ASYNC_AGENT · 9 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         2662,
-         2662
+         2697,
+         2697
         ]
        }
       ]
@@ -15229,49 +15188,37 @@
     "many": true,
     "details": [
      {
-      "text": "BACKFILL · 3 task types",
-      "sources": [
-       {
-        "path": "backend/src/tasks/types.py",
-        "lines": [
-         2710,
-         2710
-        ]
-       }
-      ]
-     },
-     {
       "text": "BATCH · 4 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         2137,
-         2137
+         2172,
+         2172
         ]
        }
       ]
      },
      {
-      "text": "INTEGRATION · 10 task types",
+      "text": "INTEGRATION · 11 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         1624,
-         1624
+         1629,
+         1629
         ]
        }
       ]
      },
      {
-      "text": "+1 more",
+      "text": "SOR · 2 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         1987,
-         1987
+         1998,
+         1998
         ]
        }
       ]
@@ -15345,58 +15292,37 @@
       ]
      },
      {
-      "text": "attention_event_attendee",
+      "text": "notification_delivery",
       "sources": [
        {
-        "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
+        "path": "backend/src/notifications/service.py",
         "lines": [
-         341,
-         341
+         84,
+         84
         ]
        }
       ]
      },
      {
-      "text": "avoma_event_attendee",
+      "text": "slack_channel",
       "sources": [
        {
-        "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
+        "path": "backend/src/ext_integrations/slack_integration/service.py",
         "lines": [
-         341,
-         341
+         568,
+         568
         ]
        }
       ]
      },
      {
-      "text": "+7 more",
+      "text": "+1 more",
       "sources": [
        {
         "path": "backend/src/ext_integrations/calendar_integration/adhoc_event_interface.py",
         "lines": [
          607,
          607
-        ]
-       },
-       {
-        "path": "backend/src/ext_integrations/call_recorders/call_recorder_event_service.py",
-        "lines": [
-         341,
-         341
-        ]
-       },
-       {
-        "path": "backend/src/ext_integrations/slack_integration/service.py",
-        "lines": [
-         565,
-         565
-        ]
-       },
-       {
-        "path": "backend/src/notifications/service.py",
-        "lines": [
-         84,
-         84
         ]
        }
       ]
@@ -15418,14 +15344,14 @@
     }
    },
    {
-    "src": "data_workers",
-    "dst": "crm",
-    "label": "API calls",
+    "src": "agent_workers",
+    "dst": "postgres",
+    "label": "reads",
     "source": {
-     "path": "backend/src/ext_integrations/slack_integration/slack_shim.py",
+     "path": "backend/src/ext_integrations/slack_integration/service.py",
      "lines": [
-      9,
-      9
+      568,
+      568
      ]
     }
    },
@@ -15472,8 +15398,8 @@
     "source": {
      "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      661,
-      661
+      675,
+      675
      ]
     }
    },
@@ -15484,8 +15410,8 @@
     "source": {
      "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      496,
-      496
+      505,
+      505
      ]
     }
    }

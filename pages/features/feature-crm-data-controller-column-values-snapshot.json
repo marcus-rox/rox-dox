@@ -2,7 +2,7 @@
  "id": "feature-crm-data-controller-column-values-snapshot",
  "title": "Data Controller Column Values Snapshot",
  "kind": "feature",
- "commit": "315a00b5b4ecbd6970b537c3e20b1d827ae3b845",
+ "commit": "5851a399e8e9e2e2dfa76665a8021b0ea16bc7d7",
  "parent": "domain-crm",
  "paths": [
   "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
@@ -171,32 +171,20 @@
    ],
    "rows": [
     [
-     "Data Controller Column Coordinator queue",
-     "Task queue",
+     "SQS queues",
+     "queue",
      "—",
      "—"
     ],
     [
-     "Data Controller workers",
-     "Queue worker",
+     "SOR · BATCH · BACKFILL · INTEGRATION",
+     "service(many)",
      "data_controller_column_values_snapshot",
      "—"
     ],
     [
-     "data_controller_column_values_snapshot",
-     "Database",
-     "data_controller_column_values_snapshot",
-     "—"
-    ],
-    [
-     "Column Values (library)",
-     "Library code",
-     "data_controller_column_values_snapshot",
-     "—"
-    ],
-    [
-     "Entity (library)",
-     "Library code",
+     "PostgreSQL",
+     "store",
      "data_controller_column_values_snapshot",
      "—"
     ]
@@ -210,52 +198,45 @@
      ]
     },
     {
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+     "lines": [
+      7,
+      14
+     ]
+    },
+    {
      "path": "backend/src/tasks/types.py",
      "lines": [
-      2899,
-      2899
+      2934,
+      2934
      ]
     },
     {
      "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      695,
-      695
+      709,
+      709
      ]
     },
     {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "path": "backend/src/util/listener_utils.py",
      "lines": [
-      46,
-      46
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
-     "lines": [
-      1,
-      1
+      14,
+      26
      ]
     },
     {
      "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
      "lines": [
-      1,
-      1
+      287,
+      287
      ]
     },
     {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "path": "backend/docker-compose-infra.yaml",
      "lines": [
-      18,
-      18
+      10,
+      11
      ]
     }
    ],
@@ -277,76 +258,85 @@
   ]
  },
  "block": {
+  "notes": [
+   {
+    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers long-poll SQS and write PostgreSQL.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+      "lines": [
+       287,
+       287
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       709,
+       709
+      ]
+     }
+    ]
+   }
+  ],
   "groups": [
    {
-    "id": "column-task-queues",
-    "label": "Task queues",
+    "id": "column-queues",
+    "label": "Queues",
     "source": {
-     "path": "backend/src/tasks/types.py",
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
      "lines": [
-      2899,
-      2899
+      7,
+      14
      ]
     }
    },
    {
-    "id": "column-queue-workers",
-    "label": "Queue workers",
+    "id": "column-background-workers",
+    "label": "Background workers",
     "source": {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "path": "backend/src/util/listener_utils.py",
      "lines": [
-      46,
-      46
+      14,
+      26
      ]
     }
    },
    {
-    "id": "column-data-services",
-    "label": "Data & services",
+    "id": "column-stores-provider-apis",
+    "label": "Stores & provider APIs",
     "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "path": "backend/docker-compose-infra.yaml",
      "lines": [
-      18,
-      46
+      10,
+      11
      ]
     }
-   },
-   {
-    "id": "group-database",
-    "label": "Database",
-    "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
-     "lines": [
-      18,
-      46
-     ]
-    },
-    "parent": "column-data-services"
    }
   ],
   "nodes": [
    {
-    "id": "queue-sorqueuetypev2-data-controller-column-coordinator",
-    "label": "Data Controller Column Coordinator queue",
+    "id": "sqs",
+    "label": "SQS queues",
     "source": {
-     "path": "backend/src/tasks/types.py",
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
      "lines": [
-      2899,
-      2899
+      7,
+      14
      ]
     },
     "kind": "queue",
-    "group": "column-task-queues",
-    "many": false,
+    "group": "column-queues",
+    "many": true,
     "details": [
      {
-      "text": "DATA_CONTROLLER_SINGLE_COLUMN_REFRESH_TASK",
+      "text": "SorQueueTypeV2 · 1 task types",
       "sources": [
        {
         "path": "backend/src/tasks/types.py",
         "lines": [
-         2899,
-         2899
+         2934,
+         2934
         ]
        }
       ]
@@ -354,40 +344,27 @@
     ]
    },
    {
-    "id": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
-    "label": "Data Controller workers",
+    "id": "data_workers",
+    "label": "SOR · BATCH · BACKFILL · INTEGRATION",
     "source": {
-     "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+     "path": "backend/src/util/listener_utils.py",
      "lines": [
-      46,
-      46
+      14,
+      26
      ]
     },
-    "link": "feature-crm-external-entity-column-value",
     "kind": "component",
-    "group": "column-queue-workers",
-    "many": false,
+    "group": "column-background-workers",
+    "many": true,
     "details": [
      {
-      "text": "DataControllerSingleColumnRefreshTaskExecutor",
+      "text": "SOR · 1 task types",
       "sources": [
        {
-        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
+        "path": "backend/src/tasks/types.py",
         "lines": [
-         46,
-         46
-        ]
-       }
-      ]
-     },
-     {
-      "text": "Calls into this feature from External Entity Column Value",
-      "sources": [
-       {
-        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-        "lines": [
-         17,
-         17
+         2934,
+         2934
         ]
        }
       ]
@@ -395,47 +372,61 @@
     ]
    },
    {
-    "id": "store-data-controller-column-values-snapshot",
-    "label": "data_controller_column_values_snapshot",
+    "id": "postgres",
+    "label": "PostgreSQL",
     "source": {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py",
+     "path": "backend/docker-compose-infra.yaml",
      "lines": [
-      18,
-      46
+      10,
+      11
      ]
     },
     "kind": "store",
-    "group": "group-database",
+    "group": "column-stores-provider-apis",
     "many": false,
-    "details": []
+    "details": [
+     {
+      "text": "data_controller_column_values_snapshot",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
+        "lines": [
+         287,
+         287
+        ]
+       }
+      ]
+     }
+    ]
    }
   ],
   "edges": [
    {
-    "src": "queue-sorqueuetypev2-data-controller-column-coordinator",
-    "dst": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
-    "label": "consumed by",
+    "src": "data_workers",
+    "dst": "postgres",
+    "label": "writes",
     "source": {
-     "path": "backend/src/tasks/executor_registry.py",
+     "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
      "lines": [
-      695,
-      695
+      287,
+      287
      ]
     }
    },
    {
-    "src": "queue-worker-backend-src-rox-core-api-data-controller-feature-crm-external-entity-column-value",
-    "dst": "store-data-controller-column-values-snapshot",
-    "label": "uses",
+    "src": "sqs",
+    "dst": "data_workers",
+    "label": "long-poll",
     "source": {
-     "path": "backend/src/rox_core/api/entities/column_values/spark_column_diff_computer.py",
+     "path": "backend/src/tasks/executor_registry.py",
      "lines": [
-      1,
-      1
+      709,
+      709
      ]
     }
    }
-  ]
+  ],
+  "unreached_files": []
  },
  "block_figures": [],
  "data": {
