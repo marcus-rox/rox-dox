@@ -153,7 +153,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Agents, chat, workflows & artifacts",
         r"^(conversation|agent_|agentflow|cell_|chat_|skill|prompt|command_config"
         r"|workflow|task_item|domain_agent|app$|app_|shareable|artifact|rox_file"
-        r"|user_artifact)",
+        r"|user_artifact|user_memory)",
         [
             "conversation",
             "agent_cell",
