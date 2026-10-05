@@ -582,7 +582,7 @@ s_chat_persist_hook = S(
 )
 s_chat_spawn_task = S(
     RUNNER,
-    "asyncio.create_task(  # noqa: RUF006",
+    "task = asyncio.create_task(",
 )
 s_chat_runner_run = S(
     RUNNER,
@@ -1164,7 +1164,7 @@ s_persist = S(
     "async def persist_user_turn() -> None:",
     "attached_file_ids=attached_file_ids,",
 )
-s_spawn = S(RUNNER, "asyncio.create_task(  # noqa: RUF006", "return stream_id")
+s_spawn = S(RUNNER, "task = asyncio.create_task(", "return stream_id")
 s_gen = S(RUNNER, "async for event in gen:", span=1)
 s_agent_gen = S(CBUS, "async def agent_event_generator(", span=0)
 s_chat_exec = S(CEXEC, "class ChatAgentExecutor(", span=0)
