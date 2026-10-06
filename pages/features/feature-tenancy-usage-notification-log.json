@@ -2,14 +2,87 @@
  "id": "feature-tenancy-usage-notification-log",
  "title": "Usage Notification Log",
  "kind": "feature",
- "commit": "aa286cb74e163491a6c1b54a1afe2ad51cb3337d",
+ "commit": "c499ff1992cd83360e9a32f2cc9f1b89a44e9742",
  "parent": "domain-tenancy",
  "paths": [
+  "backend/src/rox_core/api/billing/action_usage_alerts.py",
   "backend/src/rox_core/models/usage_notification_log.py"
  ],
- "membership": [],
+ "membership": [
+  {
+   "layer": "Business logic",
+   "rows": [
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/models/usage_notification_log.py; uses usage_notification_log",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+       "lines": [
+        24,
+        24
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "layer": "Models",
+   "rows": [
+    {
+     "path": "backend/src/rox_core/models/usage_notification_log.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/billing/action_usage_alerts.py; uses usage_notification_log",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+       "lines": [
+        24,
+        24
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/models/usage_notification_log.py",
+       "lines": [
+        12,
+        12
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
  "tldr": {
   "summary": [
+   {
+    "text": "Reached from 0 HTTP endpoints and 1 workers in other features: Updatesubscriptions workers.",
+    "sources": [
+     {
+      "path": "backend/src/tasks/executors/update_subscriptions.py",
+      "lines": [
+       21,
+       21
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/update_subscriptions.py",
+      "lines": [
+       6,
+       6
+      ]
+     }
+    ]
+   },
    {
     "text": "Stores data in: usage_notification_log.",
     "sources": [
@@ -26,16 +99,41 @@
     "text": "No HTTP endpoints or background workers; its code is library code used by other features.",
     "sources": [
      {
-      "path": "backend/src/rox_core/models/usage_notification_log.py",
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
       "lines": [
-       12,
-       51
+       1,
+       1
       ]
      }
     ]
    }
   ],
-  "key_points": [],
+  "key_points": [
+   {
+    "text": "Business logic: backend/src/rox_core/api/billing (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Models: backend/src/rox_core/models (1).",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/models/usage_notification_log.py",
+      "lines": [
+       12,
+       12
+      ]
+     }
+    ]
+   }
+  ],
   "table": {
    "columns": [
     "Component",
@@ -43,7 +141,26 @@
     "Tables used",
     "Outside services"
    ],
-   "rows": [],
+   "rows": [
+    [
+     "SQS queues",
+     "queue",
+     "—",
+     "—"
+    ],
+    [
+     "SOR · BATCH · BACKFILL · INTEGRATION",
+     "service(many)",
+     "usage_notification_log",
+     "—"
+    ],
+    [
+     "PostgreSQL",
+     "store",
+     "usage_notification_log",
+     "—"
+    ]
+   ],
    "sources": [
     {
      "path": "backend/src/rox_core/models/usage_notification_log.py",
@@ -51,19 +168,97 @@
       12,
       51
      ]
+    },
+    {
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+     "lines": [
+      7,
+      14
+     ]
+    },
+    {
+     "path": "backend/src/tasks/types.py",
+     "lines": [
+      3094,
+      3094
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      737,
+      737
+     ]
+    },
+    {
+     "path": "backend/src/util/listener_utils.py",
+     "lines": [
+      14,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      214,
+      214
+     ]
+    },
+    {
+     "path": "backend/docker-compose-infra.yaml",
+     "lines": [
+      10,
+      11
+     ]
     }
    ],
    "links": []
   },
   "notes": [
    {
-    "text": "Shares no files with other features.",
+    "text": "Shares 1 files with Organization.",
     "sources": [
      {
-      "path": "backend/src/rox_core/models/usage_notification_log.py",
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
       "lines": [
-       12,
-       51
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Enterprise Subscription.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Auth0 Organization User Roles.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
+    "text": "Shares 1 files with Auth0 Role.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       1,
+       1
       ]
      }
     ]
@@ -71,10 +266,174 @@
   ]
  },
  "block": {
-  "notes": [],
-  "groups": [],
-  "nodes": [],
-  "edges": [],
+  "notes": [
+   {
+    "text": "SOR · BATCH · BACKFILL · INTEGRATION workers long-poll SQS and write PostgreSQL.",
+    "sources": [
+     {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       214,
+       214
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       737,
+       737
+      ]
+     }
+    ]
+   }
+  ],
+  "groups": [
+   {
+    "id": "column-queues",
+    "label": "Queues",
+    "source": {
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+     "lines": [
+      7,
+      14
+     ]
+    }
+   },
+   {
+    "id": "column-background-workers",
+    "label": "Background workers",
+    "source": {
+     "path": "backend/src/util/listener_utils.py",
+     "lines": [
+      14,
+      26
+     ]
+    }
+   },
+   {
+    "id": "column-stores-provider-apis",
+    "label": "Stores & provider APIs",
+    "source": {
+     "path": "backend/docker-compose-infra.yaml",
+     "lines": [
+      10,
+      11
+     ]
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "id": "sqs",
+    "label": "SQS queues",
+    "source": {
+     "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+     "lines": [
+      7,
+      14
+     ]
+    },
+    "kind": "queue",
+    "group": "column-queues",
+    "many": true,
+    "details": [
+     {
+      "text": "BatchQueueTypeV2 · 1 task types",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3094,
+         3094
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "data_workers",
+    "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+    "source": {
+     "path": "backend/src/util/listener_utils.py",
+     "lines": [
+      14,
+      26
+     ]
+    },
+    "kind": "component",
+    "group": "column-background-workers",
+    "many": true,
+    "details": [
+     {
+      "text": "BATCH · 1 task types",
+      "sources": [
+       {
+        "path": "backend/src/tasks/types.py",
+        "lines": [
+         3094,
+         3094
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "postgres",
+    "label": "PostgreSQL",
+    "source": {
+     "path": "backend/docker-compose-infra.yaml",
+     "lines": [
+      10,
+      11
+     ]
+    },
+    "kind": "store",
+    "group": "column-stores-provider-apis",
+    "many": false,
+    "details": [
+     {
+      "text": "usage_notification_log",
+      "sources": [
+       {
+        "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+        "lines": [
+         214,
+         214
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "src": "data_workers",
+    "dst": "postgres",
+    "label": "writes",
+    "source": {
+     "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+     "lines": [
+      214,
+      214
+     ]
+    }
+   },
+   {
+    "src": "sqs",
+    "dst": "data_workers",
+    "label": "long-poll",
+    "source": {
+     "path": "backend/src/tasks/executor_registry.py",
+     "lines": [
+      737,
+      737
+     ]
+    }
+   }
+  ],
   "unreached_files": []
  },
  "block_figures": [],
@@ -87,7 +446,72 @@
   "domains": [],
   "columns": []
  },
- "sequences": [],
+ "sequences": [
+  {
+   "title": "Flow from SQS queues",
+   "participants": [
+    {
+     "id": "sqs",
+     "label": "SQS queues",
+     "source": {
+      "path": "backend/src/shim_layer/queue_shim/queue_abc.py",
+      "lines": [
+       7,
+       14
+      ]
+     }
+    },
+    {
+     "id": "data_workers",
+     "label": "SOR · BATCH · BACKFILL · INTEGRATION",
+     "source": {
+      "path": "backend/src/util/listener_utils.py",
+      "lines": [
+       14,
+       26
+      ]
+     }
+    },
+    {
+     "id": "postgres",
+     "label": "PostgreSQL",
+     "source": {
+      "path": "backend/docker-compose-infra.yaml",
+      "lines": [
+       10,
+       11
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "src": "sqs",
+     "dst": "data_workers",
+     "message": "long-poll",
+     "source": {
+      "path": "backend/src/tasks/executor_registry.py",
+      "lines": [
+       737,
+       737
+      ]
+     }
+    },
+    {
+     "src": "data_workers",
+     "dst": "postgres",
+     "message": "writes",
+     "source": {
+      "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+      "lines": [
+       214,
+       214
+      ]
+     }
+    }
+   ]
+  }
+ ],
  "states": [],
  "related": [
   {
@@ -98,6 +522,50 @@
     "lines": [
      12,
      51
+    ]
+   }
+  },
+  {
+   "label": "Organization",
+   "page": "feature-tenancy-organization",
+   "source": {
+    "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Enterprise Subscription",
+   "page": "feature-tenancy-enterprise-subscription",
+   "source": {
+    "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Auth0 Organization User Roles",
+   "page": "feature-tenancy-auth0-organization-user-roles",
+   "source": {
+    "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "label": "Auth0 Role",
+   "page": "feature-tenancy-auth0-role",
+   "source": {
+    "path": "backend/src/rox_core/api/billing/action_usage_alerts.py",
+    "lines": [
+     1,
+     1
     ]
    }
   }
