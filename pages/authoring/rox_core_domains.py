@@ -122,12 +122,13 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Sequences & outreach",
         r"^(sequence|campaign|user_template|rox_email|rox_linkedin|tracking_domain"
         r"|custom_email_tracking|outbound_agent|voicemail|call_disposition"
-        r"|dial_list|rox_call|twilio|rox_phone|email_ingestion)",
+        r"|dial_list|rox_call|twilio|rox_phone|email_ingestion"
+        r"|cell_sequence_association$)",
         [
             "campaign_request",
             "sequence",
             "sequence_task",
-            "sequence_agent_cell",
+            "cell_sequence_association",
             "campaign_mailbox_assoc",
             "rox_email",
             "rox_call",

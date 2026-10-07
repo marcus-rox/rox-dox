@@ -1516,7 +1516,7 @@ data = {
             ),
         ),
         R(
-            "sequence_agent_cell.cell_id",
+            "cell_sequence_association.cell_id",
             "agent_cell.cell_id",
             "one regen cell per sequence",
             "symbolic",
