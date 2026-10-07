@@ -2,7 +2,7 @@
  "id": "feature-agents-workflow-config",
  "title": "Workflow Config",
  "kind": "feature",
- "commit": "c499ff1992cd83360e9a32f2cc9f1b89a44e9742",
+ "commit": "b3346d2c582d081d2af3356a31ba78633ad35690",
  "parent": "domain-agents",
  "paths": [
   ".agents/skills/how-to-debug-outreach-traces/SKILL.md",
@@ -20,7 +20,9 @@
   "backend/src/tasks/executors/user_deactivation_cleanup.py",
   "backend/src/workflow/agentflow/activities/lifecycle.py",
   "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+  "backend/src/workflow/agentflow/cell/events.py",
   "backend/src/workflow/agentflow/cell/lifecycle_tools.py",
+  "backend/src/workflow/agentflow/cell/sweeper.py",
   "backend/src/workflow/agentflow/meta_tools.py",
   "backend/src/workflow/builder/skill_tools.py",
   "backend/src/workflow/draft_service.py",
@@ -29,8 +31,8 @@
   "backend/src/workflow/inbox/errors.py",
   "backend/src/workflow/inbox/inbox_dto.py",
   "backend/src/workflow/inbox/inbox_service.py",
+  "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
   "backend/src/workflow/router/config.py",
-  "backend/src/workflow/router/debug.py",
   "backend/src/workflow/router/inbox.py",
   "backend/src/workflow/router/run.py",
   "backend/src/workflow/service.py",
@@ -136,27 +138,6 @@
      ]
     },
     {
-     "path": "backend/src/workflow/router/debug.py",
-     "primary": true,
-     "evidence": "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py",
-     "sources": [
-      {
-       "path": "backend/src/workflow/router/debug.py",
-       "lines": [
-        9,
-        9
-       ]
-      },
-      {
-       "path": "backend/src/workflow/router/debug.py",
-       "lines": [
-        18,
-        18
-       ]
-      }
-     ]
-    },
-    {
      "path": "backend/src/workflow/router/inbox.py",
      "primary": true,
      "evidence": "imports backend/src/workflow/inbox/inbox_dto.py; imports backend/src/workflow/inbox/inbox_service.py",
@@ -180,34 +161,41 @@
     {
      "path": "backend/src/workflow/router/run.py",
      "primary": true,
-     "evidence": "imports backend/src/agent_framework/trace_presentation/service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/trace_preparation.py; imports backend/src/workflow/workflow_run/workflow_run_service.py",
+     "evidence": "imports backend/src/agent_framework/trace_presentation/service.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/trace_preparation.py; imports backend/src/workflow/workflow_run/workflow_run_service.py",
      "sources": [
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        3,
-        3
+        5,
+        5
        ]
       },
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        12,
-        12
+        9,
+        9
        ]
       },
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        13,
-        13
+        15,
+        15
        ]
       },
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        20,
-        20
+        16,
+        16
+       ]
+      },
+      {
+       "path": "backend/src/workflow/router/run.py",
+       "lines": [
+        24,
+        24
        ]
       }
      ]
@@ -293,8 +281,8 @@
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        3,
-        3
+        5,
+        5
        ]
       }
      ]
@@ -414,7 +402,7 @@
     {
      "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/agentflow/activities/lifecycle.py; imports backend/src/workflow/workflow_run/workflow_run_service.py; imports backend/src/workflow/agentflow/cell/lifecycle_tools.py",
+     "evidence": "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/agentflow/activities/lifecycle.py; imports backend/src/workflow/agentflow/cell/events.py; imports backend/src/workflow/workflow_run/workflow_run_service.py",
      "sources": [
       {
        "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
@@ -440,15 +428,36 @@
       {
        "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
        "lines": [
-        61,
-        61
+        36,
+        36
        ]
       },
       {
-       "path": "backend/src/workflow/agentflow/cell/lifecycle_tools.py",
+       "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
        "lines": [
-        12,
-        12
+        61,
+        61
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/events.py",
+     "primary": true,
+     "evidence": "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/agentflow/cell/sweeper.py",
+     "sources": [
+      {
+       "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
+       "lines": [
+        36,
+        36
+       ]
+      },
+      {
+       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+       "lines": [
+        26,
+        26
        ]
       }
      ]
@@ -484,6 +493,41 @@
        "lines": [
         31,
         31
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/workflow/agentflow/cell/events.py; uses workflow_run",
+     "sources": [
+      {
+       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+       "lines": [
+        21,
+        21
+       ]
+      },
+      {
+       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+       "lines": [
+        25,
+        25
+       ]
+      },
+      {
+       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
+       "lines": [
+        26,
+        26
        ]
       }
      ]
@@ -575,13 +619,20 @@
     {
      "path": "backend/src/workflow/dto/kind_dto.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "evidence": "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/migrate_legacy_column_tools_backfill_job.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py",
      "sources": [
       {
        "path": "backend/src/rox_core/models/workflow_config.py",
        "lines": [
         26,
         26
+       ]
+      },
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        32,
+        32
        ]
       },
       {
@@ -685,9 +736,51 @@
      ]
     },
     {
+     "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/models/workflow_config.py; imports backend/src/rox_core/models/workflow_config_draft.py; imports backend/src/workflow/dto/kind_dto.py; imports backend/src/workflow/service.py; uses workflow_config",
+     "sources": [
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        18,
+        18
+       ]
+      },
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        19,
+        19
+       ]
+      },
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        32,
+        32
+       ]
+      },
+      {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        33,
+        33
+       ]
+      }
+     ]
+    },
+    {
      "path": "backend/src/workflow/service.py",
      "primary": true,
-     "evidence": "imports backend/src/tasks/executors/user_deactivation_cleanup.py; imports backend/src/workflow/builder/skill_tools.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/router/config.py; imports backend/src/workflow/router/run.py",
+     "evidence": "imports backend/src/tasks/executors/user_deactivation_cleanup.py; imports backend/src/workflow/builder/skill_tools.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/migrate_legacy_column_tools_backfill_job.py; imports backend/src/workflow/router/config.py",
      "sources": [
       {
        "path": "backend/src/tasks/executors/user_deactivation_cleanup.py",
@@ -711,17 +804,17 @@
        ]
       },
       {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        33,
+        33
+       ]
+      },
+      {
        "path": "backend/src/workflow/router/config.py",
        "lines": [
         31,
         31
-       ]
-      },
-      {
-       "path": "backend/src/workflow/router/run.py",
-       "lines": [
-        12,
-        12
        ]
       }
      ]
@@ -832,8 +925,8 @@
       {
        "path": "backend/src/workflow/router/run.py",
        "lines": [
-        13,
-        13
+        16,
+        16
        ]
       }
      ]
@@ -937,34 +1030,6 @@
      ]
     },
     {
-     "path": "backend/src/workflow/agentflow/cell/sweeper.py",
-     "primary": false,
-     "evidence": "imports backend/src/rox_core/models/workflow_run.py; imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; uses cell_agentflow_association; uses workflow_run",
-     "sources": [
-      {
-       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
-       "lines": [
-        1,
-        1
-       ]
-      },
-      {
-       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
-       "lines": [
-        18,
-        18
-       ]
-      },
-      {
-       "path": "backend/src/workflow/agentflow/cell/sweeper.py",
-       "lines": [
-        22,
-        22
-       ]
-      }
-     ]
-    },
-    {
      "path": "backend/src/workflow/config_access.py",
      "primary": false,
      "evidence": "imports backend/src/workflow/agentflow/cell/agentflow_cell_service.py; imports backend/src/rox_core/models/workflow_config.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/workflow_run/workflow_run_service.py",
@@ -993,8 +1058,8 @@
       {
        "path": "backend/src/workflow/service.py",
        "lines": [
-        44,
-        44
+        45,
+        45
        ]
       },
       {
@@ -1056,20 +1121,13 @@
     {
      "path": "backend/src/rox_core/models/workflow_config_draft.py",
      "primary": true,
-     "evidence": "imports backend/src/chat/routes/conversation_link/business.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/service.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py; uses workflow_config_draft",
+     "evidence": "imports backend/src/chat/routes/conversation_link/business.py; imports backend/src/workflow/draft_service.py; imports backend/src/workflow/migrate_legacy_column_tools_backfill_job.py; imports backend/src/workflow/service.py; imports backend/src/workflow/strip_removed_actions_backfill_job.py",
      "sources": [
       {
        "path": "backend/src/chat/routes/conversation_link/business.py",
        "lines": [
         6,
         6
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/models/workflow_config_draft.py",
-       "lines": [
-        24,
-        24
        ]
       },
       {
@@ -1080,10 +1138,17 @@
        ]
       },
       {
+       "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
+       "lines": [
+        19,
+        19
+       ]
+      },
+      {
        "path": "backend/src/workflow/service.py",
        "lines": [
-        29,
-        29
+        30,
+        30
        ]
       },
       {
@@ -1124,8 +1189,8 @@
       {
        "path": "backend/src/workflow/service.py",
        "lines": [
-        33,
-        33
+        34,
+        34
        ]
       }
      ]
@@ -1197,7 +1262,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "Owns 45 HTTP endpoints in 7 API groups: Config, Conversation Link, Debug, Rox Traces, Run, Workflow, Workflow/sysadmin.",
+    "text": "Owns 44 HTTP endpoints in 6 API groups: Config, Conversation Link, Rox Traces, Run, Workflow, Workflow/sysadmin.",
     "sources": [
      {
       "path": "backend/src/workflow/router/config.py",
@@ -1214,13 +1279,6 @@
       ]
      },
      {
-      "path": "backend/src/workflow/router/debug.py",
-      "lines": [
-       27,
-       27
-      ]
-     },
-     {
       "path": "backend/src/chat/routes/eval/rox_traces.py",
       "lines": [
        277,
@@ -1230,8 +1288,8 @@
      {
       "path": "backend/src/workflow/router/run.py",
       "lines": [
-       29,
-       29
+       33,
+       33
       ]
      },
      {
@@ -1251,7 +1309,7 @@
     ]
    },
    {
-    "text": "Reached from 632 HTTP endpoints and 117 workers in other features: Account Research, Addusercompanyassociationpostprocessing + 84 more workers, Admin Mcp Permissions, Agent Actions, Auth0, Auth0 Tasks, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Cells, Columninsightfanout + 6 more workers, Company Processing, Config/{config Id}/draft, Contract Hierarchy, Conversation, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Enrichment workflows, Entity Timers workflows, Eval, Governance, Health, Insight Configs, Intelligence Api, Mention Agent workers, Onboarding, Organization, Prospect Lists, Registry, Research, Sequence, Slack Agent, Task Executors workers, Thinkific, Tiptap, User, User Account Link Preferences, User Profile Template, Webhook Integrations, Workflow.",
+    "text": "Reached from 638 HTTP endpoints and 117 workers in other features: Account Research, Addusercompanyassociationpostprocessing + 84 more workers, Admin Mcp Permissions, Agent Actions, Auth0, Auth0 Tasks, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Cells, Columninsightfanout + 6 more workers, Company Processing, Config/{config Id}/draft, Contract Hierarchy, Conversation, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Debug, Enrichment workflows, Entity Timers workflows, Eval, Governance, Health, Inbound Replies, Insight Configs, Intelligence Api, Mention Agent workers, Onboarding, Organization, Prospect Lists, Registry, Research, Sequence, Slack Agent, Task Executors workers, Thinkific, Tiptap, User, User Account Link Preferences, User Profile Template, Webhook Integrations, Workflow.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/endpoints.py",
@@ -2432,197 +2490,204 @@
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       255,
-       255
+       257,
+       257
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       528,
-       528
+       530,
+       530
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       658,
-       658
+       705,
+       705
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       619,
-       619
+       666,
+       666
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       629,
-       629
+       676,
+       676
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       642,
-       642
+       689,
+       689
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       563,
-       563
+       565,
+       565
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       215,
-       215
+       621,
+       621
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       325,
-       325
+       217,
+       217
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       285,
-       285
+       327,
+       327
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       459,
-       459
+       287,
+       287
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       794,
-       794
+       461,
+       461
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       1088,
-       1088
+       841,
+       841
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       1108,
-       1108
+       1135,
+       1135
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       908,
-       908
+       1155,
+       1155
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       975,
-       975
+       955,
+       955
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       933,
-       933
+       1022,
+       1022
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       1054,
-       1054
+       980,
+       980
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       823,
-       823
+       1101,
+       1101
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       1013,
-       1013
+       870,
+       870
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       169,
-       169
+       1060,
+       1060
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       134,
-       134
+       171,
+       171
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       202,
-       202
+       136,
+       136
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       673,
-       673
+       204,
+       204
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       745,
-       745
+       720,
+       720
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       770,
-       770
+       792,
+       792
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       695,
-       695
+       817,
+       817
       ]
      },
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       719,
-       719
+       742,
+       742
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/conversation/router.py",
+      "lines": [
+       766,
+       766
       ]
      },
      {
@@ -2892,6 +2957,20 @@
       ]
      },
      {
+      "path": "backend/src/workflow/router/debug.py",
+      "lines": [
+       25,
+       25
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/debug.py",
+      "lines": [
+       95,
+       95
+      ]
+     },
+     {
       "path": "backend/src/rox_core/api/alerts/endpoints.py",
       "lines": [
        283,
@@ -2901,92 +2980,92 @@
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       433,
-       433
+       434,
+       434
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       475,
-       475
+       476,
+       476
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       713,
-       713
+       714,
+       714
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       636,
-       636
+       637,
+       637
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       349,
-       349
+       350,
+       350
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       127,
-       127
+       128,
+       128
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       240,
-       240
+       241,
+       241
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       321,
-       321
+       322,
+       322
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       582,
-       582
+       583,
+       583
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       594,
-       594
+       595,
+       595
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       367,
-       367
+       368,
+       368
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       388,
-       388
+       389,
+       389
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       524,
-       524
+       525,
+       525
       ]
      },
      {
@@ -3804,120 +3883,22 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       172,
-       172
+       177,
+       177
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       256,
-       256
+       261,
+       261
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1188,
-       1188
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1293,
-       1293
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1251,
-       1251
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       610,
-       610
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1454,
-       1454
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1485,
-       1485
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1432,
-       1432
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1407,
-       1407
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1742,
-       1742
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1780,
-       1780
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1802,
-       1802
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       572,
-       572
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       681,
-       681
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       524,
-       524
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
-      "lines": [
-       1374,
-       1374
+       1226,
+       1226
       ]
      },
      {
@@ -3930,225 +3911,330 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1335,
-       1335
+       1289,
+       1289
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       648,
-       648
+       615,
+       615
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1571,
-       1571
+       1492,
+       1492
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1601,
-       1601
+       1523,
+       1523
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1514,
-       1514
+       1470,
+       1470
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1544,
-       1544
+       1445,
+       1445
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1685,
-       1685
+       1780,
+       1780
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1715,
-       1715
+       1818,
+       1818
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1628,
-       1628
+       1840,
+       1840
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1658,
-       1658
+       577,
+       577
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       735,
-       735
+       686,
+       686
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       312,
-       312
+       529,
+       529
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       708,
-       708
+       1412,
+       1412
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       461,
-       461
+       1369,
+       1369
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       491,
-       491
+       1373,
+       1373
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       765,
-       765
+       653,
+       653
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       882,
-       882
+       1609,
+       1609
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1130,
-       1130
+       1639,
+       1639
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1160,
-       1160
+       1552,
+       1552
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1034,
-       1034
+       1582,
+       1582
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1064,
-       1064
+       1723,
+       1723
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       1098,
-       1098
+       1753,
+       1753
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       933,
-       933
+       1666,
+       1666
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       853,
-       853
+       1696,
+       1696
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       333,
-       333
+       740,
+       740
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       382,
-       382
+       770,
+       770
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       409,
-       409
+       317,
+       317
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       233,
-       233
+       713,
+       713
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       964,
-       964
+       466,
+       466
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       986,
-       986
+       496,
+       496
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       805,
-       805
+       803,
+       803
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
       "lines": [
-       827,
-       827
+       920,
+       920
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1168,
+       1168
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1198,
+       1198
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1072,
+       1072
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1102,
+       1102
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1136,
+       1136
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       971,
+       971
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       891,
+       891
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       338,
+       338
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       387,
+       387
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       414,
+       414
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       238,
+       238
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1002,
+       1002
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       1024,
+       1024
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       843,
+       843
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
+      "lines": [
+       865,
+       865
       ]
      },
      {
@@ -4408,6 +4494,13 @@
       "lines": [
        757,
        757
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/eval/inbound_replies.py",
+      "lines": [
+       67,
+       67
       ]
      },
      {
@@ -4917,8 +5010,8 @@
      {
       "path": "backend/src/tasks/executors/contacts_csv_upload.py",
       "lines": [
-       4269,
-       4269
+       4258,
+       4258
       ]
      },
      {
@@ -4966,8 +5059,8 @@
      {
       "path": "backend/src/tasks/executors/calendar_future_sync_refresh.py",
       "lines": [
-       223,
-       223
+       225,
+       225
       ]
      },
      {
@@ -4980,8 +5073,8 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       3118,
-       3118
+       3117,
+       3117
       ]
      },
      {
@@ -4994,22 +5087,22 @@
      {
       "path": "backend/src/tasks/executors/company_registration.py",
       "lines": [
-       314,
-       314
+       313,
+       313
       ]
      },
      {
       "path": "backend/src/tasks/executors/contacts_csv_upload.py",
       "lines": [
-       794,
-       794
+       789,
+       789
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1833,
-       1833
+       1834,
+       1834
       ]
      },
      {
@@ -5022,15 +5115,15 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1148,
-       1148
+       1149,
+       1149
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1358,
-       1358
+       1359,
+       1359
       ]
      },
      {
@@ -5106,92 +5199,92 @@
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       272,
-       272
+       273,
+       273
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2253,
-       2253
+       2273,
+       2273
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       521,
-       521
+       522,
+       522
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       901,
-       901
+       904,
+       904
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       692,
-       692
+       695,
+       695
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2932,
-       2932
+       2955,
+       2955
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2798,
-       2798
+       2819,
+       2819
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2896,
-       2896
+       2918,
+       2918
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2970,
-       2970
+       2993,
+       2993
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       3016,
-       3016
+       3035,
+       3035
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2990,
-       2990
+       3013,
+       3013
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2362,
-       2362
+       2383,
+       2383
       ]
      },
      {
       "path": "backend/src/tasks/executors/email.py",
       "lines": [
-       2142,
-       2142
+       2162,
+       2162
       ]
      },
      {
@@ -5218,22 +5311,22 @@
      {
       "path": "backend/src/tasks/executors/org_deletion.py",
       "lines": [
-       3443,
-       3443
+       3439,
+       3439
       ]
      },
      {
       "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
       "lines": [
-       653,
-       653
+       663,
+       663
       ]
      },
      {
       "path": "backend/src/tasks/executors/contacts_csv_upload.py",
       "lines": [
-       2170,
-       2170
+       2165,
+       2165
       ]
      },
      {
@@ -5281,8 +5374,8 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       3083,
-       3083
+       3082,
+       3082
       ]
      },
      {
@@ -5344,15 +5437,15 @@
      {
       "path": "backend/src/tasks/executors/org_provisioning.py",
       "lines": [
-       286,
-       286
+       287,
+       287
       ]
      },
      {
       "path": "backend/src/tasks/executors/org_provisioning.py",
       "lines": [
-       595,
-       595
+       596,
+       596
       ]
      },
      {
@@ -5379,8 +5472,8 @@
      {
       "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
       "lines": [
-       129,
-       129
+       126,
+       126
       ]
      },
      {
@@ -5400,15 +5493,15 @@
      {
       "path": "backend/src/tasks/executors/pre_meeting_briefings.py",
       "lines": [
-       273,
-       273
+       272,
+       272
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1171,
-       1171
+       1172,
+       1172
       ]
      },
      {
@@ -5421,8 +5514,8 @@
      {
       "path": "backend/src/tasks/executors/tabs_propagation.py",
       "lines": [
-       117,
-       117
+       118,
+       118
       ]
      },
      {
@@ -5463,8 +5556,8 @@
      {
       "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
       "lines": [
-       2708,
-       2708
+       2689,
+       2689
       ]
      },
      {
@@ -5484,36 +5577,36 @@
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1292,
-       1292
+       1293,
+       1293
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       934,
-       934
+       935,
+       935
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1152,
-       1152
+       1153,
+       1153
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1040,
-       1040
+       1041,
+       1041
       ]
      },
      {
       "path": "backend/src/tasks/executors/salesforce_import.py",
       "lines": [
-       229,
-       229
+       230,
+       230
       ]
      },
      {
@@ -5624,8 +5717,8 @@
      {
       "path": "backend/src/tasks/executors/org_provisioning.py",
       "lines": [
-       372,
-       372
+       373,
+       373
       ]
      },
      {
@@ -5638,15 +5731,15 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       160,
-       160
+       159,
+       159
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/planning.py",
       "lines": [
-       2512,
-       2512
+       2505,
+       2505
       ]
      },
      {
@@ -5680,15 +5773,15 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       464,
-       464
+       463,
+       463
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       314,
-       314
+       313,
+       313
       ]
      },
      {
@@ -5722,8 +5815,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/planning.py",
       "lines": [
-       3033,
-       3033
+       3026,
+       3026
       ]
      },
      {
@@ -5743,15 +5836,22 @@
      {
       "path": "backend/src/chat/routes/conversation/router.py",
       "lines": [
-       49,
-       49
+       50,
+       50
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/eval/inbound_replies.py",
+      "lines": [
+       22,
+       22
       ]
      },
      {
       "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       37,
-       37
+       38,
+       38
       ]
      },
      {
@@ -6079,8 +6179,8 @@
      {
       "path": "backend/src/tasks/executors/calendar_extract_and_persist_events.py",
       "lines": [
-       792,
-       792
+       798,
+       798
       ]
      },
      {
@@ -6093,8 +6193,8 @@
      {
       "path": "backend/src/tasks/executors/calendar_future_sync_refresh.py",
       "lines": [
-       263,
-       263
+       265,
+       265
       ]
      },
      {
@@ -6121,15 +6221,15 @@
      {
       "path": "backend/src/tasks/executors/contacts_csv_upload.py",
       "lines": [
-       876,
-       876
+       871,
+       871
       ]
      },
      {
       "path": "backend/src/tasks/executors/contacts_csv_upload.py",
       "lines": [
-       1246,
-       1246
+       1242,
+       1242
       ]
      },
      {
@@ -6219,8 +6319,8 @@
      {
       "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
       "lines": [
-       1663,
-       1663
+       1664,
+       1664
       ]
      },
      {
@@ -6303,15 +6403,15 @@
      {
       "path": "backend/src/tasks/executors/org_provisioning.py",
       "lines": [
-       249,
-       249
+       250,
+       250
       ]
      },
      {
       "path": "backend/src/tasks/executors/org_provisioning.py",
       "lines": [
-       359,
-       359
+       360,
+       360
       ]
      },
      {
@@ -6338,15 +6438,15 @@
      {
       "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
       "lines": [
-       1931,
-       1931
+       1758,
+       1758
       ]
      },
      {
       "path": "backend/src/tasks/executors/pre_meeting_briefings.py",
       "lines": [
-       349,
-       349
+       348,
+       348
       ]
      },
      {
@@ -6394,8 +6494,8 @@
      {
       "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
       "lines": [
-       1420,
-       1420
+       1421,
+       1421
       ]
      },
      {
@@ -6415,8 +6515,8 @@
      {
       "path": "backend/src/tasks/executors/salesforce_import.py",
       "lines": [
-       1553,
-       1553
+       1556,
+       1556
       ]
      },
      {
@@ -6548,8 +6648,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/planning.py",
       "lines": [
-       1150,
-       1150
+       1159,
+       1159
       ]
      },
      {
@@ -6571,6 +6671,27 @@
       "lines": [
        7,
        7
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/debug.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/debug.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/debug.py",
+      "lines": [
+       16,
+       16
       ]
      },
      {
@@ -6700,7 +6821,7 @@
   ],
   "key_points": [
    {
-    "text": "HTTP routes: backend/src/workflow/router (4), backend/src/chat/routes/conversation_link (2), backend/src/chat/routes/eval (1).",
+    "text": "HTTP routes: backend/src/workflow/router (3), backend/src/chat/routes/conversation_link (2), backend/src/chat/routes/eval (1).",
     "sources": [
      {
       "path": "backend/src/workflow/router/config.py",
@@ -6738,7 +6859,7 @@
     ]
    },
    {
-    "text": "Business logic: backend/src/workflow (5), backend/src/workflow/agentflow/cell (4), backend/src/workflow/inbox (3).",
+    "text": "Business logic: backend/src/workflow (6), backend/src/workflow/agentflow/cell (5), backend/src/workflow/inbox (3).",
     "sources": [
      {
       "path": "backend/src/workflow/config_access.py",
@@ -7118,10 +7239,10 @@
      ]
     },
     {
-     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
      "lines": [
-      172,
-      172
+      228,
+      228
      ]
     },
     {
@@ -7134,22 +7255,22 @@
     {
      "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
      "lines": [
-      414,
-      414
+      504,
+      504
      ]
     },
     {
-     "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+     "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
      "lines": [
-      164,
-      164
+      220,
+      220
      ]
     },
     {
      "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
      "lines": [
-      268,
-      268
+      270,
+      270
      ]
     },
     {
@@ -7162,8 +7283,8 @@
     {
      "path": "backend/src/workflow/service.py",
      "lines": [
-      2053,
-      2053
+      2052,
+      2052
      ]
     },
     {
@@ -7183,8 +7304,8 @@
     {
      "path": "backend/src/workflow/service.py",
      "lines": [
-      2056,
-      2056
+      2055,
+      2055
      ]
     },
     {
@@ -7197,8 +7318,8 @@
     {
      "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
      "lines": [
-      371,
-      371
+      392,
+      392
      ]
     },
     {
@@ -7225,8 +7346,8 @@
     {
      "path": "backend/src/workflow/agentflow/cell/sweeper.py",
      "lines": [
-      80,
-      80
+      42,
+      42
      ]
     },
     {
@@ -7305,7 +7426,7 @@
     ]
    },
    {
-    "text": "Shares 2 files with Cell Agentflow Association.",
+    "text": "Shares 1 files with Cell Agentflow Association.",
     "sources": [
      {
       "path": "backend/src/workflow/agentflow/cell/lifecycle_tools.py",
@@ -7963,10 +8084,10 @@
         ]
        },
        {
-        "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+        "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
         "lines": [
-         172,
-         172
+         228,
+         228
         ]
        }
       ]
@@ -7984,22 +8105,22 @@
        {
         "path": "backend/src/workflow/agentflow/cell/agentflow_cell_service.py",
         "lines": [
-         414,
-         414
+         504,
+         504
         ]
        },
        {
-        "path": "backend/src/workflow/strip_removed_actions_backfill_job.py",
+        "path": "backend/src/workflow/migrate_legacy_column_tools_backfill_job.py",
         "lines": [
-         164,
-         164
+         220,
+         220
         ]
        },
        {
         "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
         "lines": [
-         268,
-         268
+         270,
+         270
         ]
        }
       ]
@@ -8017,8 +8138,8 @@
        {
         "path": "backend/src/workflow/service.py",
         "lines": [
-         2053,
-         2053
+         2052,
+         2052
         ]
        }
       ]
@@ -8050,8 +8171,8 @@
        {
         "path": "backend/src/workflow/service.py",
         "lines": [
-         2056,
-         2056
+         2055,
+         2055
         ]
        },
        {
@@ -8064,8 +8185,8 @@
        {
         "path": "backend/src/workflow/workflow_run/workflow_run_service.py",
         "lines": [
-         371,
-         371
+         392,
+         392
         ]
        }
       ]
@@ -8157,7 +8278,6 @@
    "backend/src/workflow/inbox/inbox_dto.py",
    "backend/src/workflow/inbox/inbox_service.py",
    "backend/src/workflow/router/config.py",
-   "backend/src/workflow/router/debug.py",
    "backend/src/workflow/router/inbox.py",
    "backend/src/workflow/router/run.py",
    "backend/src/workflow/sysadmin/sysadmin_router.py",
