@@ -139,7 +139,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Activity integrations: email, calendar, meetings, Slack",
         r"^(integration|email_message|calendar|adhoc|unified_|\w+_event_attendee"
         r"|\w+_event_metadata|zoom|ms_teams|transcript|slack|webhook|note$"
-        r"|rox_activity|notification|orgwide_integration)",
+        r"|rox_activity|notification|orgwide_integration|call_recorder_|google_drive)",
         [
             "integration",
             "email_message",
@@ -154,7 +154,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Agents, chat, workflows & artifacts",
         r"^(conversation|agent_|agentflow|cell_|chat_|skill|prompt|command_config"
         r"|workflow|task_item|domain_agent|app$|app_|shareable|artifact|rox_file"
-        r"|user_artifact|user_memory)",
+        r"|user_artifact|user_memory|hotapp$)",
         [
             "conversation",
             "agent_cell",
