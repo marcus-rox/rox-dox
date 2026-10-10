@@ -146,7 +146,6 @@ s_rn_batch = S(
 )
 s_rn_agent = S(RN, 'elif deploy_target == "AGENT":', 'elif deploy_target == "BACKFILL"')
 s_rn_fastapi = S(RN, '    deploy_target == "CHAT"', "# Uses FastAPI")
-s_rn_webhook = S(RN, 'elif deploy_target == "WEBHOOK":', "sequences_tracking_ns, path=")
 s_init_webhook = S(
     INIT,
     'if deploy_target_for_blueprints == "WEBHOOK":',
@@ -733,9 +732,9 @@ nodes = [
         "webhook",
         "WEBHOOK (Flask)",
         "http",
-        s_rn_webhook,
+        s_init_webhook,
         [
-            D("/circleback, /slack_agent, /sequences_tracking", s_rn_webhook),
+            D("Provider webhook blueprints only, no api_bp", s_init_webhook),
             D("Gunicorn 2 × 50 threads, no worker timeout", s_webhook_gunicorn),
         ],
         many=True,
@@ -1020,7 +1019,7 @@ tldr = {
             [
                 "WEBHOOK",
                 "Gunicorn, timeout 0",
-                "circleback, slack_agent, sequence tracking",
+                "Webhooks: Circleback, Teams, Twilio, Auth0, Unipile, tracking",
             ],
             [
                 "AGENT · REALTIMEAGENT · EXTRACTIONAGENT · SOR · BATCH · BACKFILL · INTEGRATION · OUTREACH · WORKFLOWSCHEDULER",
@@ -1040,6 +1039,7 @@ tldr = {
             s_listener_mode,
             s_gunicorn,
             s_rn,
+            s_init_webhook,
             s_qc,
             s_temporal,
             s_temporal_enr,
@@ -1420,13 +1420,6 @@ data = {
             "declared FK",
             "enforced",
             S(DEAL, 'ForeignKey("sub_organization.public_id"', after=T("deal")),
-        ),
-        R(
-            "deal_person.person_id",
-            "rox_person.rox_person_id",
-            "declared FK",
-            "enforced",
-            S(DEAL, 'ForeignKey("rox_person.rox_person_id")', after=T("deal_person")),
         ),
         R(
             "entity_company.rox_id",
@@ -2682,7 +2675,7 @@ component_catalog = [
         "kind": "service",
         "column": "HTTP services",
         "match": {"deploy_targets": ["WEBHOOK"]},
-        "extra_sources": [s_rn_webhook, s_init_webhook],
+        "extra_sources": [s_init_webhook],
     },
     {
         "id": "chat",
