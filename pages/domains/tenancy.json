@@ -2,7 +2,7 @@
  "id": "domain-tenancy",
  "title": "Tenancy: orgs, users, auth & billing",
  "kind": "domain",
- "commit": "7c271a26c9e37617775a9fefb299759e0a9b9860",
+ "commit": "4ad893a45952e452668d1fd5431982a939cd2e24",
  "parent": "rox-core",
  "paths": [
   ".agents/skills/arga-twins/SKILL.md",
@@ -31,7 +31,6 @@
   "backend/src/agent_framework/data_interface/eval_config.py",
   "backend/src/agent_framework/data_interface/eval_invoke_client.py",
   "backend/src/agent_framework/data_interface/org_chart/dto.py",
-  "backend/src/agent_framework/data_interface/org_chart/live.py",
   "backend/src/agent_framework/data_interface/org_user/dto.py",
   "backend/src/agent_framework/data_interface/org_user/live.py",
   "backend/src/agent_framework/httpx/httpx_pool.py",
@@ -96,6 +95,8 @@
   "backend/src/chat/routes/integration/business.py",
   "backend/src/chat/routes/integration/router.py",
   "backend/src/chat/routes/integration/router_dto.py",
+  "backend/src/chat/routes/user_memory/dto.py",
+  "backend/src/chat/routes/user_memory/router.py",
   "backend/src/chat/rox_agents/worker_agents.py",
   "backend/src/chat/server/auth/caller.py",
   "backend/src/chat/server/auth/settings.py",
@@ -312,7 +313,7 @@
   "backend/src/rox_core/api/metering/feature_action_catalog.py",
   "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
   "backend/src/rox_core/api/multiplayer/dto.py",
-  "backend/src/rox_core/api/multiplayer/endpoints.py",
+  "backend/src/rox_core/api/multiplayer/team/service.py",
   "backend/src/rox_core/api/notes/dto.py",
   "backend/src/rox_core/api/notifications/device_service.py",
   "backend/src/rox_core/api/notifications/dto.py",
@@ -500,7 +501,6 @@
   "backend/src/tasks/executors/complete_stale_rox_recorder_transcripts.py",
   "backend/src/tasks/executors/digest_generation.py",
   "backend/src/tasks/executors/embed_user_preferences.py",
-  "backend/src/tasks/executors/enrichment/webhook.py",
   "backend/src/tasks/executors/generate_icp_insight_keywords.py",
   "backend/src/tasks/executors/integration.py",
   "backend/src/tasks/executors/list_member_ttl_cleanup.py",
@@ -616,6 +616,7 @@
   "web/apps/app-platform/sequence-drilldown-app/src/lib/sequenceTypes.ts",
   "web/apps/app-platform/sequences-sysadmin/src/lib/orgUsers.ts",
   "web/apps/app-platform/sirion-forecast/src/routes/index.tsx",
+  "web/apps/app-platform/sirion-sdr-coaching/src/routes/index.tsx",
   "web/apps/app-platform/sirion-sequence-metrics/src/routes/index.tsx",
   "web/apps/app-platform/toi-email-metrics/src/routes/index.tsx",
   "web/apps/app-platform/toi-rox-value/src/routes/index.tsx",
@@ -637,7 +638,6 @@
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/BuyActionsDialog.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/onDemand/onDemand.utils.ts",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/billing/useUserLimitEnforcement.ts",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/useAccountReportEditor.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/AccountsTable.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/components/NewCleverColumnPopover/index.tsx",
@@ -780,7 +780,6 @@
   "web/apps/web/src/app/hooks/react-query/generated/rql/rql.ts",
   "web/apps/web/src/app/hooks/react-query/generated/sequences-settings/sequences-settings.ts",
   "web/apps/web/src/app/hooks/react-query/generated/shareable/shareable.ts",
-  "web/apps/web/src/app/hooks/react-query/generated/team/team.ts",
   "web/apps/web/src/app/hooks/react-query/generated/thinkific/thinkific.ts",
   "web/apps/web/src/app/hooks/react-query/generated/tiptap/tiptap.ts",
   "web/apps/web/src/app/hooks/react-query/generated/traces/traces.ts",
@@ -832,15 +831,12 @@
   "web/apps/web/src/components/billing/useTeamsCancellationState.ts",
   "web/apps/web/src/components/billing/useTeamsSubscription.ts",
   "web/apps/web/src/components/command/attribution/ArtifactAttribution.tsx",
-  "web/apps/web/src/components/command/attribution/ContactAttribution.tsx",
   "web/apps/web/src/components/command/attribution/DocumentAttribution.tsx",
   "web/apps/web/src/components/command/attribution/TranscriptAttribution.tsx",
   "web/apps/web/src/components/command/panel/PDFViewer.tsx",
   "web/apps/web/src/components/command/panel/artifactPanel.registration.tsx",
   "web/apps/web/src/components/command/panel/documentFormPanel.registration.tsx",
   "web/apps/web/src/components/contacts/ContactCampaignIndicator.tsx",
-  "web/apps/web/src/components/contacts/ContactsAssignee.tsx",
-  "web/apps/web/src/components/contacts/ContactsFilters/ContactAssigneeFilter.tsx",
   "web/apps/web/src/components/csvUpload/contactsCSVUpload/contactsCSVUploadSteps/ContactsCSVUploadFileSelectionStep.tsx",
   "web/apps/web/src/components/datatable/filterComponents/AccountOwnerFilter.tsx",
   "web/apps/web/src/components/governance/ShareRecordButton.tsx",
@@ -856,10 +852,10 @@
   "web/apps/web/src/components/onboardingChat/OnboardingChat.tsx",
   "web/apps/web/src/components/onboardingChat/useOnboardingChatExit.ts",
   "web/apps/web/src/components/onboardingChat/useOnboardingChatPersistence.ts",
-  "web/apps/web/src/components/orgChartV3/OrgChartV3Card.tsx",
   "web/apps/web/src/components/orgChartV3/shell/panels/InspectorPanelActivity.tsx",
   "web/apps/web/src/components/orgChartV3/shell/toolbar/chart-title/ChartSelector.tsx",
   "web/apps/web/src/components/orgChartV3/shell/toolbar/chart-title/useCreatorName.ts",
+  "web/apps/web/src/components/outreach/dialer/CallTranscript.tsx",
   "web/apps/web/src/components/outreach/dialer/CallerIdPicker.tsx",
   "web/apps/web/src/components/outreach/dialer/PowerDialerSurface.tsx",
   "web/apps/web/src/components/outreach/dialer/useInboundCalls.ts",
@@ -871,7 +867,6 @@
   "web/apps/web/src/components/sequenceBuilder/emailEditor/EmailTemplateSelectionDropdown.tsx",
   "web/apps/web/src/components/sequenceBuilder/stepEditor/EmailAttachments.tsx",
   "web/apps/web/src/components/sequenceBuilder/stepEditor/EmailCcBccInputs.tsx",
-  "web/apps/web/src/components/table/filters/TableFilterValueOptions.tsx",
   "web/apps/web/src/components/tasks/task-actions.tsx",
   "web/apps/web/src/components/tasks/useTaskActions.ts",
   "web/apps/web/src/components/ui/DevTools/Rql/RqlDevTool.tsx",
@@ -916,7 +911,6 @@
   "web/packages/internal-api/src/generated/core/rql/rql.ts",
   "web/packages/internal-api/src/generated/core/sequences-settings/sequences-settings.ts",
   "web/packages/internal-api/src/generated/core/shareable/shareable.ts",
-  "web/packages/internal-api/src/generated/core/team/team.ts",
   "web/packages/internal-api/src/generated/core/thinkific/thinkific.ts",
   "web/packages/internal-api/src/generated/core/tiptap/tiptap.ts",
   "web/packages/internal-api/src/generated/core/traces/traces.ts",
@@ -932,7 +926,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "25 features with 431 HTTP endpoints, 33 workers and workflows, 368 web screens.",
+    "text": "25 features with 417 HTTP endpoints, 33 workers and workflows, 362 web screens.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/endpoints.py",
@@ -2293,83 +2287,6 @@
       ]
      },
      {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       45,
-       45
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       286,
-       286
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       129,
-       129
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       86,
-       86
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       232,
-       232
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       148,
-       148
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       305,
-       305
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       192,
-       192
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       211,
-       211
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       171,
-       171
-      ]
-     },
-     {
-      "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-      "lines": [
-       256,
-       256
-      ]
-     },
-     {
       "path": "backend/src/rox_core/api/testing/endpoints.py",
       "lines": [
        27,
@@ -2619,6 +2536,13 @@
       "lines": [
        147,
        147
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/user_memory/router.py",
+      "lines": [
+       23,
+       23
       ]
      },
      {
@@ -4029,6 +3953,13 @@
       ]
      },
      {
+      "path": "web/apps/app-platform/sirion-sdr-coaching/src/routes/index.tsx",
+      "lines": [
+       2,
+       2
+      ]
+     },
+     {
       "path": "web/apps/app-platform/sirion-sequence-metrics/src/routes/index.tsx",
       "lines": [
        2,
@@ -4103,13 +4034,6 @@
       "lines": [
        14,
        14
-      ]
-     },
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/[customerId]/customerCards/CustomerOrgChartCard.tsx",
-      "lines": [
-       48,
-       48
       ]
      },
      {
@@ -4925,13 +4849,6 @@
       ]
      },
      {
-      "path": "web/apps/web/src/app/hooks/react-query/generated/team/team.ts",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
       "path": "web/apps/web/src/app/hooks/react-query/generated/thinkific/thinkific.ts",
       "lines": [
        1,
@@ -5149,13 +5066,6 @@
       ]
      },
      {
-      "path": "web/apps/web/src/components/command/attribution/ContactAttribution.tsx",
-      "lines": [
-       11,
-       11
-      ]
-     },
-     {
       "path": "web/apps/web/src/components/command/attribution/DocumentAttribution.tsx",
       "lines": [
        9,
@@ -5195,20 +5105,6 @@
       "lines": [
        9,
        9
-      ]
-     },
-     {
-      "path": "web/apps/web/src/components/contacts/ContactsAssignee.tsx",
-      "lines": [
-       15,
-       15
-      ]
-     },
-     {
-      "path": "web/apps/web/src/components/contacts/ContactsFilters/ContactAssigneeFilter.tsx",
-      "lines": [
-       7,
-       7
       ]
      },
      {
@@ -5310,13 +5206,6 @@
       ]
      },
      {
-      "path": "web/apps/web/src/components/orgChartV3/OrgChartV3Card.tsx",
-      "lines": [
-       13,
-       13
-      ]
-     },
-     {
       "path": "web/apps/web/src/components/orgChartV3/shell/panels/InspectorPanelActivity.tsx",
       "lines": [
        23,
@@ -5335,6 +5224,13 @@
       "lines": [
        1,
        1
+      ]
+     },
+     {
+      "path": "web/apps/web/src/components/outreach/dialer/CallTranscript.tsx",
+      "lines": [
+       6,
+       6
       ]
      },
      {
@@ -5398,13 +5294,6 @@
       "lines": [
        27,
        27
-      ]
-     },
-     {
-      "path": "web/apps/web/src/components/table/filters/TableFilterValueOptions.tsx",
-      "lines": [
-       25,
-       25
       ]
      },
      {
@@ -5661,13 +5550,6 @@
      },
      {
       "path": "web/packages/internal-api/src/generated/core/shareable/shareable.ts",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "web/packages/internal-api/src/generated/core/team/team.ts",
       "lines": [
        1,
        1
@@ -7342,7 +7224,7 @@
   ],
   "key_points": [
    {
-    "text": "Organization: 594 files.",
+    "text": "Organization: 587 files.",
     "sources": [
      {
       "path": ".agents/skills/arga-twins/SKILL.md",
@@ -7390,9 +7272,9 @@
    "rows": [
     [
      "Organization",
-     "437",
+     "423",
      "20",
-     "1551",
+     "1550",
      "5",
      "AWS, Anthropic, Google APIs, LiteLLM, Microsoft identity, OpenAI"
     ],
@@ -7400,7 +7282,7 @@
      "Enterprise Subscription",
      "50",
      "10",
-     "1836",
+     "1821",
      "13",
      "Stripe"
     ],
@@ -7408,7 +7290,7 @@
      "Auth0 Organization User Roles",
      "0",
      "2",
-     "1888",
+     "1873",
      "9",
      "Google APIs, OpenAI"
     ],
@@ -7416,7 +7298,7 @@
      "Api Key",
      "19",
      "0",
-     "1882",
+     "1867",
      "3",
      "—"
     ],
@@ -7424,7 +7306,7 @@
      "Organization Config",
      "5",
      "7",
-     "1887",
+     "1872",
      "4",
      "AWS, LiteLLM, OpenAI"
     ],
@@ -7432,7 +7314,7 @@
      "Organization Deletion Step",
      "0",
      "3",
-     "1807",
+     "1792",
      "2",
      "Google APIs"
     ],
@@ -7440,7 +7322,7 @@
      "Hierarchical Setting",
      "0",
      "0",
-     "1463",
+     "1447",
      "1",
      "—"
     ],
@@ -7448,7 +7330,7 @@
      "Organization Agent Context",
      "3",
      "0",
-     "1022",
+     "1021",
      "1",
      "—"
     ],
@@ -7456,7 +7338,7 @@
      "Org Secret",
      "5",
      "0",
-     "1207",
+     "1206",
      "1",
      "AWS"
     ],
@@ -7464,7 +7346,7 @@
      "Auth0 Role",
      "0",
      "0",
-     "1886",
+     "1871",
      "2",
      "Google APIs"
     ],
@@ -7477,6 +7359,14 @@
      "—"
     ],
     [
+     "User Extra",
+     "0",
+     "0",
+     "1868",
+     "1",
+     "—"
+    ],
+    [
      "Org Default Enrichment Waterfall",
      "0",
      "0",
@@ -7485,18 +7375,10 @@
      "—"
     ],
     [
-     "User Extra",
-     "0",
-     "0",
-     "1883",
-     "1",
-     "—"
-    ],
-    [
      "User Account Link Preferences",
      "0",
      "0",
-     "1460",
+     "1444",
      "3",
      "—"
     ],
@@ -7536,7 +7418,7 @@
      "Rox Feature Actions",
      "0",
      "0",
-     "1881",
+     "1866",
      "1",
      "—"
     ],
@@ -7552,7 +7434,7 @@
      "Workspace Setup Admin Request",
      "0",
      "0",
-     "856",
+     "841",
      "1",
      "—"
     ],
@@ -7593,15 +7475,15 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      312,
-      312
+      315,
+      315
      ]
     },
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      424,
-      424
+      430,
+      430
      ]
     },
     {
@@ -8160,15 +8042,15 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      446,
-      446
+      452,
+      452
      ]
     },
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      492,
-      492
+      498,
+      498
      ]
     },
     {
@@ -10162,8 +10044,8 @@
     {
      "path": "backend/src/rox_core/api/enrichment/webhook_callback.py",
      "lines": [
-      657,
-      657
+      686,
+      686
      ]
     },
     {
@@ -11044,8 +10926,8 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      308,
-      308
+      311,
+      311
      ]
     },
     {
@@ -11996,8 +11878,8 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      520,
-      520
+      526,
+      526
      ]
     },
     {
@@ -12507,36 +12389,190 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      151,
-      151
+      149,
+      149
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      175,
-      175
+      173,
+      173
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1461,
-      1461
+      1428,
+      1428
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      195,
-      195
+      193,
+      193
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      218,
-      218
+      216,
+      216
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      696,
+      696
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      246,
+      246
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      629,
+      629
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      273,
+      273
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1401,
+      1401
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1339,
+      1339
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1366,
+      1366
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      355,
+      355
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1053,
+      1053
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1097,
+      1097
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      888,
+      888
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      841,
+      841
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1141,
+      1141
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      992,
+      992
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1185,
+      1185
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      937,
+      937
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      971,
+      971
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1013,
+      1013
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1457,
+      1457
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1646,
+      1646
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      1596,
+      1596
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/people/endpoints.py",
+     "lines": [
+      576,
+      576
      ]
     },
     {
@@ -12549,190 +12585,50 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      279,
-      279
+      803,
+      803
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      248,
-      248
+      664,
+      664
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      662,
-      662
+      1229,
+      1229
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      306,
-      306
+      432,
+      432
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1434,
-      1434
+      462,
+      462
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1372,
-      1372
+      300,
+      300
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1399,
-      1399
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      388,
-      388
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1086,
-      1086
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1130,
-      1130
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      921,
-      921
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      874,
-      874
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1174,
-      1174
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1025,
-      1025
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1218,
-      1218
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      970,
-      970
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1004,
-      1004
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1046,
-      1046
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1490,
-      1490
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1679,
-      1679
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1629,
-      1629
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      609,
-      609
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      762,
-      762
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      836,
-      836
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      697,
-      697
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1262,
-      1262
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      465,
-      465
+      404,
+      404
      ]
     },
     {
@@ -12745,57 +12641,36 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      333,
-      333
+      519,
+      519
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      437,
-      437
+      1259,
+      1259
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      528,
-      528
+      1695,
+      1695
      ]
     },
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      552,
-      552
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1292,
-      1292
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1728,
-      1728
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/people/endpoints.py",
-     "lines": [
-      1769,
-      1769
+      1736,
+      1736
      ]
     },
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      346,
-      346
+      349,
+      349
      ]
     },
     {
@@ -14691,22 +14566,22 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      316,
-      316
+      319,
+      319
      ]
     },
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      320,
-      320
+      323,
+      323
      ]
     },
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      324,
-      324
+      327,
+      327
      ]
     },
     {
@@ -14915,8 +14790,8 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      596,
-      596
+      602,
+      602
      ]
     },
     {
@@ -16763,8 +16638,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      296,
-      296
+      307,
+      307
      ]
     },
     {
@@ -16924,22 +16799,22 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      253,
-      253
+      264,
+      264
      ]
     },
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      773,
-      773
+      818,
+      818
      ]
     },
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      783,
-      783
+      828,
+      828
      ]
     },
     {
@@ -16952,8 +16827,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      660,
-      660
+      705,
+      705
      ]
     },
     {
@@ -16987,8 +16862,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      792,
-      792
+      837,
+      837
      ]
     },
     {
@@ -17036,8 +16911,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      266,
-      266
+      277,
+      277
      ]
     },
     {
@@ -17071,8 +16946,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      717,
-      717
+      762,
+      762
      ]
     },
     {
@@ -17085,8 +16960,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      872,
-      872
+      917,
+      917
      ]
     },
     {
@@ -17099,8 +16974,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      887,
-      887
+      932,
+      932
      ]
     },
     {
@@ -18492,8 +18367,8 @@
     {
      "path": "backend/src/mock_idp/server.py",
      "lines": [
-      54,
-      54
+      56,
+      56
      ]
     },
     {
@@ -22944,8 +22819,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      23,
-      23
+      25,
+      25
      ]
     },
     {
@@ -24636,83 +24511,6 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      45,
-      45
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      286,
-      286
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      129,
-      129
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      86,
-      86
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      232,
-      232
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      148,
-      148
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      305,
-      305
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      192,
-      192
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      211,
-      211
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      171,
-      171
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      256,
-      256
-     ]
-    },
-    {
      "path": "backend/src/rox_core/api/testing/endpoints.py",
      "lines": [
       27,
@@ -24962,6 +24760,13 @@
      "lines": [
       147,
       147
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      23,
+      23
      ]
     },
     {
@@ -25777,6 +25582,27 @@
      ]
     },
     {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      4,
+      4
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      7,
+      7
+     ]
+    },
+    {
      "path": "backend/src/chat/rox_agents/user_memory_tasks.py",
      "lines": [
       32,
@@ -26579,27 +26405,6 @@
      "lines": [
       17,
       17
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      6,
-      6
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      20,
-      20
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      37,
-      37
      ]
     },
     {
@@ -28061,8 +27866,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/provider_dispatch.py",
      "lines": [
-      211,
-      211
+      212,
+      212
      ]
     },
     {
@@ -28089,15 +27894,15 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      27,
-      27
+      29,
+      29
      ]
     },
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      35,
-      35
+      37,
+      37
      ]
     },
     {
@@ -28294,6 +28099,13 @@
      "lines": [
       18,
       18
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      9,
+      9
      ]
     },
     {
@@ -29566,15 +29378,15 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      29,
-      29
+      31,
+      31
      ]
     },
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      38,
-      38
+      40,
+      40
      ]
     },
     {
@@ -30495,6 +30307,13 @@
      ]
     },
     {
+     "path": "backend/src/chat/routes/user_memory/router.py",
+     "lines": [
+      3,
+      3
+     ]
+    },
+    {
      "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
      "lines": [
       16,
@@ -30723,20 +30542,6 @@
      "lines": [
       14,
       14
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      8,
-      8
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      9,
-      9
      ]
     },
     {
@@ -31246,8 +31051,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      141,
-      141
+      139,
+      139
      ]
     },
     {
@@ -32079,8 +31884,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      104,
-      104
+      108,
+      108
      ]
     },
     {
@@ -32340,13 +32145,6 @@
      "lines": [
       9,
       9
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      7,
-      7
      ]
     },
     {
@@ -32709,8 +32507,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      344,
-      344
+      311,
+      311
      ]
     },
     {
@@ -32856,8 +32654,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      52,
-      52
+      56,
+      56
      ]
     },
     {
@@ -33045,8 +32843,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1306,
-      1306
+      1273,
+      1273
      ]
     },
     {
@@ -33556,8 +33354,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      69,
-      69
+      73,
+      73
      ]
     },
     {
@@ -33593,6 +33391,13 @@
      "lines": [
       54,
       54
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/eval/router.py",
+     "lines": [
+      58,
+      58
      ]
     },
     {
@@ -33892,8 +33697,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      103,
-      103
+      107,
+      107
      ]
     },
     {
@@ -33929,6 +33734,76 @@
      "lines": [
       1161,
       1161
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/model_worker.py",
+     "lines": [
+      51,
+      51
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/slack_integration/share/workers/slack_link_unfurl_executor.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
+     "lines": [
+      26,
+      26
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/campaign_coordinator.py",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/email_domain_resolution.py",
+     "lines": [
+      32,
+      32
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/integration.py",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/refresh_salesforce_credentials.py",
+     "lines": [
+      17,
+      17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
+     "lines": [
+      28,
+      28
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
+     "lines": [
+      56,
+      56
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/writeback/crm_lead_writeback_executor.py",
+     "lines": [
+      13,
+      13
      ]
     },
     {
@@ -34072,76 +33947,6 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/model_worker.py",
-     "lines": [
-      51,
-      51
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/slack_integration/share/workers/slack_link_unfurl_executor.py",
-     "lines": [
-      10,
-      10
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/backfill_rox_call_recordings.py",
-     "lines": [
-      26,
-      26
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/campaign_coordinator.py",
-     "lines": [
-      33,
-      33
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/email_domain_resolution.py",
-     "lines": [
-      32,
-      32
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/integration.py",
-     "lines": [
-      20,
-      20
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/refresh_salesforce_credentials.py",
-     "lines": [
-      17,
-      17
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/sfdc_governance_sync.py",
-     "lines": [
-      28,
-      28
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/sfdc_governance_translation.py",
-     "lines": [
-      56,
-      56
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/writeback/crm_lead_writeback_executor.py",
-     "lines": [
-      13,
-      13
-     ]
-    },
-    {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
       97,
@@ -34249,8 +34054,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      142,
-      142
+      140,
+      140
      ]
     },
     {
@@ -34662,8 +34467,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      1307,
-      1307
+      1274,
+      1274
      ]
     },
     {
@@ -35327,15 +35132,8 @@
     {
      "path": "backend/src/temporal/activities/outbound_agent/prospecting.py",
      "lines": [
-      77,
-      77
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/router.py",
-     "lines": [
-      58,
-      58
+      81,
+      81
      ]
     },
     {
@@ -35343,13 +35141,6 @@
      "lines": [
       81,
       81
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-     "lines": [
-      38,
-      38
      ]
     },
     {
@@ -35362,8 +35153,8 @@
     {
      "path": "backend/src/rox_core/api/people/endpoints.py",
      "lines": [
-      145,
-      145
+      143,
+      143
      ]
     },
     {
@@ -36102,17 +35893,17 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/models/enrichment/org_default_enrichment_waterfall.py",
-     "lines": [
-      22,
-      76
-     ]
-    },
-    {
      "path": "backend/src/rox_core/models/user.py",
      "lines": [
       57,
       94
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/enrichment/org_default_enrichment_waterfall.py",
+     "lines": [
+      22,
+      76
      ]
     },
     {
@@ -36280,12 +36071,12 @@
     {
      "row": 11,
      "column": 0,
-     "page": "feature-tenancy-org-default-enrichment-waterfall"
+     "page": "feature-tenancy-user-extra"
     },
     {
      "row": 12,
      "column": 0,
-     "page": "feature-tenancy-user-extra"
+     "page": "feature-tenancy-org-default-enrichment-waterfall"
     },
     {
      "row": 13,
@@ -36793,6 +36584,18 @@
     ]
    },
    {
+    "text": "Api Key imports code from User Extra (5 imports).",
+    "sources": [
+     {
+      "path": "backend/src/ext_integrations/slack_integration/share/entities/account_share_service.py",
+      "lines": [
+       35,
+       35
+      ]
+     }
+    ]
+   },
+   {
     "text": "Auth0 Organization User Roles imports code from Enterprise Subscription (5 imports).",
     "sources": [
      {
@@ -36829,13 +36632,13 @@
     ]
    },
    {
-    "text": "Api Key imports code from User Extra (4 imports).",
+    "text": "User Extra imports code from Organization Config (4 imports).",
     "sources": [
      {
-      "path": "backend/src/ext_integrations/slack_integration/share/entities/account_share_service.py",
+      "path": "backend/src/rox_core/api/multiplayer/team/service.py",
       "lines": [
-       35,
-       35
+       10,
+       10
       ]
      }
     ]
@@ -36884,18 +36687,6 @@
       "lines": [
        24,
        24
-      ]
-     }
-    ]
-   },
-   {
-    "text": "User Extra imports code from Organization Config (3 imports).",
-    "sources": [
-     {
-      "path": "backend/src/rox_core/api/onboarding/business.py",
-      "lines": [
-       5,
-       5
       ]
      }
     ]
@@ -37712,6 +37503,12 @@
       "user",
       "linkedin_profile",
       "Companies & people",
+      "ID column name"
+     ],
+     [
+      "user",
+      "list_agent_conversation",
+      "Agents, chat, workflows & artifacts",
       "ID column name"
      ],
      [
@@ -39407,6 +39204,13 @@
       ]
      },
      {
+      "path": "backend/src/rox_core/models/conversation/list_agent_conversation.py",
+      "lines": [
+       28,
+       28
+      ]
+     },
+     {
       "path": "backend/src/rox_core/models/people/public_person.py",
       "lines": [
        314,
@@ -39556,8 +39360,8 @@
      {
       "path": "backend/src/rox_core/models/people/rox_person.py",
       "lines": [
-       608,
-       608
+       607,
+       607
       ]
      },
      {
@@ -39815,8 +39619,8 @@
      {
       "path": "backend/src/rox_core/models/rox_call.py",
       "lines": [
-       159,
-       159
+       158,
+       158
       ]
      },
      {
@@ -39913,8 +39717,8 @@
      {
       "path": "backend/src/rox_core/models/people/rox_person.py",
       "lines": [
-       750,
-       750
+       749,
+       749
       ]
      },
      {
@@ -39955,8 +39759,8 @@
      {
       "path": "backend/src/rox_core/models/people/rox_person.py",
       "lines": [
-       713,
-       713
+       712,
+       712
       ]
      },
      {
@@ -41028,12 +40832,12 @@
      {
       "row": 112,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-agents"
      },
      {
       "row": 113,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-people"
      },
      {
       "row": 114,
@@ -41048,12 +40852,12 @@
      {
       "row": 116,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-activity"
      },
      {
       "row": 117,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-lists"
      },
      {
       "row": 118,
@@ -41083,7 +40887,7 @@
      {
       "row": 123,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-activity"
      },
      {
       "row": 124,
@@ -41093,7 +40897,7 @@
      {
       "row": 125,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-people"
      },
      {
       "row": 126,
@@ -41103,32 +40907,32 @@
      {
       "row": 127,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-gov"
      },
      {
       "row": 128,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-tasks"
      },
      {
       "row": 129,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-lists"
      },
      {
       "row": 130,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-crm"
      },
      {
       "row": 131,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-people"
      },
      {
       "row": 132,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-gov"
      },
      {
       "row": 133,
@@ -41153,22 +40957,22 @@
      {
       "row": 137,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-people"
      },
      {
       "row": 138,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-gov"
      },
      {
       "row": 139,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-agents"
      },
      {
       "row": 140,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-activity"
      },
      {
       "row": 141,
@@ -41193,7 +40997,7 @@
      {
       "row": 145,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-lists"
      },
      {
       "row": 146,
@@ -41208,12 +41012,12 @@
      {
       "row": 148,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-tasks"
      },
      {
       "row": 149,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-seq"
      },
      {
       "row": 150,
@@ -41223,17 +41027,17 @@
      {
       "row": 151,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-agents"
      },
      {
       "row": 152,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tasks"
      },
      {
       "row": 153,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-activity"
      },
      {
       "row": 154,
@@ -41243,12 +41047,12 @@
      {
       "row": 155,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-seq"
      },
      {
       "row": 156,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-people"
      },
      {
       "row": 157,
@@ -41258,27 +41062,27 @@
      {
       "row": 158,
       "column": 2,
-      "page": "domain-deals"
+      "page": "domain-tasks"
      },
      {
       "row": 159,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-deals"
      },
      {
       "row": 160,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-gov"
      },
      {
       "row": 161,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-agents"
      },
      {
       "row": 162,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-lists"
      },
      {
       "row": 163,
@@ -41293,7 +41097,7 @@
      {
       "row": 165,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-gov"
      },
      {
       "row": 166,
@@ -41303,12 +41107,12 @@
      {
       "row": 167,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-lists"
      },
      {
       "row": 168,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-gov"
      },
      {
       "row": 169,
@@ -41318,12 +41122,12 @@
      {
       "row": 170,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-crm"
      },
      {
       "row": 171,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-seq"
      },
      {
       "row": 172,
@@ -41338,17 +41142,17 @@
      {
       "row": 174,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-people"
      },
      {
       "row": 175,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-seq"
      },
      {
       "row": 176,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-agents"
      },
      {
       "row": 177,
@@ -41358,7 +41162,7 @@
      {
       "row": 178,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-seq"
      },
      {
       "row": 179,
@@ -41373,7 +41177,7 @@
      {
       "row": 181,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-lists"
      },
      {
       "row": 182,
@@ -41388,7 +41192,7 @@
      {
       "row": 184,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-gov"
      },
      {
       "row": 185,
@@ -41413,27 +41217,27 @@
      {
       "row": 189,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-people"
      },
      {
       "row": 190,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-seq"
      },
      {
       "row": 191,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-people"
      },
      {
       "row": 192,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-lists"
      },
      {
       "row": 193,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-people"
      },
      {
       "row": 194,
@@ -41443,7 +41247,7 @@
      {
       "row": 195,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-gov"
      },
      {
       "row": 196,
@@ -41513,12 +41317,12 @@
      {
       "row": 209,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-seq"
      },
      {
       "row": 210,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-crm"
      },
      {
       "row": 211,
@@ -41543,7 +41347,7 @@
      {
       "row": 215,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-agents"
      },
      {
       "row": 216,
@@ -41573,7 +41377,7 @@
      {
       "row": 221,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-activity"
      },
      {
       "row": 222,
@@ -41628,7 +41432,7 @@
      {
       "row": 232,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-lists"
      },
      {
       "row": 233,
@@ -41648,7 +41452,7 @@
      {
       "row": 236,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-tasks"
      },
      {
       "row": 237,
@@ -41658,27 +41462,27 @@
      {
       "row": 238,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-gov"
      },
      {
       "row": 239,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-seq"
      },
      {
       "row": 240,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-activity"
      },
      {
       "row": 241,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-crm"
      },
      {
       "row": 242,
       "column": 2,
-      "page": "domain-lists"
+      "page": "domain-agents"
      },
      {
       "row": 243,
@@ -41688,12 +41492,12 @@
      {
       "row": 244,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-lists"
      },
      {
       "row": 245,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-agents"
      },
      {
       "row": 246,
@@ -41713,7 +41517,7 @@
      {
       "row": 249,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-tasks"
      },
      {
       "row": 250,
@@ -41728,7 +41532,7 @@
      {
       "row": 252,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-seq"
      },
      {
       "row": 253,
@@ -41777,6 +41581,11 @@
      },
      {
       "row": 262,
+      "column": 2,
+      "page": "domain-agents"
+     },
+     {
+      "row": 263,
       "column": 2,
       "page": "domain-activity"
      }
@@ -41852,13 +41661,6 @@
       ]
      },
      {
-      "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
-      "lines": [
-       80,
-       80
-      ]
-     },
-     {
       "path": "backend/src/agent_framework/data_interface/org_user/live.py",
       "lines": [
        39,
@@ -41912,6 +41714,13 @@
       "lines": [
        156,
        156
+      ]
+     },
+     {
+      "path": "backend/src/chat/routes/chat_user_preferences/service.py",
+      "lines": [
+       49,
+       49
       ]
      },
      {
@@ -42237,8 +42046,8 @@
     "source": {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      283,
-      286
+      281,
+      284
      ]
     }
    }
@@ -42410,7 +42219,7 @@
       ]
      },
      {
-      "text": "+14 more",
+      "text": "+15 more",
       "sources": [
        {
         "path": "backend/src/chat/routes/chat_prompts/router.py",
@@ -42964,6 +42773,13 @@
          70,
          70
         ]
+       },
+       {
+        "path": "backend/src/chat/routes/user_memory/router.py",
+        "lines": [
+         23,
+         23
+        ]
        }
       ]
      }
@@ -42975,8 +42791,8 @@
     "source": {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      147,
-      303
+      146,
+      301
      ]
     },
     "kind": "component",
@@ -43181,7 +42997,7 @@
       ]
      },
      {
-      "text": "+56 more",
+      "text": "+55 more",
       "sources": [
        {
         "path": "backend/src/rox_core/api/agent_state/endpoints.py",
@@ -45879,83 +45695,6 @@
         ]
        },
        {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         45,
-         45
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         86,
-         86
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         129,
-         129
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         148,
-         148
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         171,
-         171
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         192,
-         192
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         211,
-         211
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         232,
-         232
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         256,
-         256
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         286,
-         286
-        ]
-       },
-       {
-        "path": "backend/src/rox_core/api/multiplayer/endpoints.py",
-        "lines": [
-         305,
-         305
-        ]
-       },
-       {
         "path": "backend/src/rox_core/api/notifications/endpoints.py",
         "lines": [
          38,
@@ -47513,8 +47252,8 @@
     "source": {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      147,
-      303
+      146,
+      301
      ]
     },
     "kind": "component",
@@ -47810,8 +47549,8 @@
     "source": {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      283,
-      286
+      281,
+      284
      ]
     },
     "kind": "external",
@@ -47969,17 +47708,17 @@
       "text": "+46 more",
       "sources": [
        {
-        "path": "backend/src/agent_framework/data_interface/org_chart/live.py",
+        "path": "backend/src/agent_framework/data_interface/org_user/live.py",
         "lines": [
-         80,
-         80
+         39,
+         39
         ]
        },
        {
         "path": "backend/src/agent_framework/data_interface/org_user/live.py",
         "lines": [
-         39,
-         39
+         72,
+         72
         ]
        },
        {
@@ -48711,6 +48450,7 @@
    "backend/src/research/tools/notes.py",
    "backend/src/rox_core/api/enrichment/source_integrations/integration_secret.py",
    "backend/src/rox_core/api/metering/model_token_rate_catalog.py",
+   "backend/src/rox_core/api/multiplayer/dto.py",
    "backend/src/rox_core/api/organizations/deletion_reconciler.py",
    "backend/src/rox_customer/graph/v4/trino_cache_service.py",
    "backend/src/rox_db/bootstrap.py",
@@ -48719,7 +48459,6 @@
    "backend/src/secrets_manager/router.py",
    "backend/src/shim_layer/redis_shim/memory_db.py",
    "backend/src/tasks/aurora_capacity_gate.py",
-   "backend/src/tasks/executors/enrichment/webhook.py",
    "backend/src/workflow/builder/workflow_builder_worker_agent.py",
    "backend/src/workflow/router/registry.py",
    "cicd/db-migration-verifier-multi.sh",
@@ -49520,18 +49259,6 @@
     "page": "feature-tenancy-mcp-org-access"
    },
    {
-    "id": "org_default_enrichment_waterfall",
-    "title": "Org Default Enrichment Waterfall",
-    "tables": [
-     "org_default_enrichment_waterfall"
-    ],
-    "key_tables": [
-     "org_default_enrichment_waterfall"
-    ],
-    "notes": [],
-    "page": "feature-tenancy-org-default-enrichment-waterfall"
-   },
-   {
     "id": "user_extra",
     "title": "User Extra",
     "tables": [
@@ -49542,6 +49269,18 @@
     ],
     "notes": [],
     "page": "feature-tenancy-user-extra"
+   },
+   {
+    "id": "org_default_enrichment_waterfall",
+    "title": "Org Default Enrichment Waterfall",
+    "tables": [
+     "org_default_enrichment_waterfall"
+    ],
+    "key_tables": [
+     "org_default_enrichment_waterfall"
+    ],
+    "notes": [],
+    "page": "feature-tenancy-org-default-enrichment-waterfall"
    },
    {
     "id": "user_account_link_preferences",
@@ -49805,8 +49544,8 @@
      "source": {
       "path": "backend/src/rox_core/api/register_namespaces.py",
       "lines": [
-       283,
-       286
+       281,
+       284
       ]
      }
     }
@@ -49954,8 +49693,8 @@
      "source": {
       "path": "backend/src/rox_core/api/register_namespaces.py",
       "lines": [
-       147,
-       303
+       146,
+       301
       ]
      }
     }
@@ -49995,8 +49734,8 @@
      "source": {
       "path": "backend/src/rox_core/api/register_namespaces.py",
       "lines": [
-       147,
-       303
+       146,
+       301
       ]
      }
     },
@@ -50072,8 +49811,8 @@
      "source": {
       "path": "backend/src/rox_core/api/register_namespaces.py",
       "lines": [
-       283,
-       286
+       281,
+       284
       ]
      }
     }
