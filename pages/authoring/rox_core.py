@@ -122,6 +122,8 @@ QABC = "backend/src/shim_layer/queue_shim/queue_abc.py"
 KVF = "backend/src/shim_layer/kv/factory.py"
 TQ = "backend/src/temporal/queues.py"
 TYPES = "backend/src/tasks/types.py"
+ROUTING = "backend/src/tasks/routing.py"
+NAMES = "backend/src/tasks/names.py"
 TWILIO = "backend/src/ext_integrations/twilio_integration/twilio_shim.py"
 AUTH0 = "backend/src/shim_layer/auth0_shim/auth0_shim.py"
 README = "README.md"
@@ -177,7 +179,11 @@ s_qdoc = S(QDOC, "The Queue abstraction provides", "logic.")
 s_kvdoc = S(KVDOC, "The KVStore abstraction provides")
 s_kvf = S(KVF, "def _resolve_kv_provider", 'os.getenv("KV_PROVIDER"')
 s_qabc = S(QABC, "class QueueShim(ABC):", "def send_message(")
-s_router_qr = S(TYPES, "class QueueRouter:", "several physical queues by priority")
+s_router_qr = S(
+    ROUTING,
+    "QUEUE_ROUTES: dict[",
+    "TaskQueueType, QueueCatalogEntry | dict[TaskPriority, QueueCatalogEntry]",
+)
 s_run_chat = S(RUN_CHAT, "from chat.server.fastapi_app import app", "uvicorn.run(")
 s_run_pub = S(RUN_PUB, "from public_api.server.app import app", "uvicorn.run(")
 s_run_mcp = S(
@@ -405,9 +411,9 @@ s_sns_push = S(
     "class SnsPushShim(PushShim):",
 )
 s_google_workspace_queue_type = S(
-    TYPES,
-    "queue_type=IntegrationQueueType.INTEGRATION",
-    after='name="GOOGLE_WORKSPACE_ADMIN_CREATE"',
+    NAMES,
+    "GOOGLE_WORKSPACE_ADMIN_CREATE_TASK = TaskCatalogEntry(",
+    '"GOOGLE_WORKSPACE_ADMIN_CREATE", IntegrationQueueType.INTEGRATION',
 )
 s_integrations_route = S(
     "backend/src/rox_core/api/integrations/endpoints.py",
@@ -496,19 +502,20 @@ s_task_executor_execute = S(
 )
 s_executor_dispatch = S(
     "backend/src/tasks/executor_registry.py",
-    "return TASK_EXECUTORS[task_type](task)",
+    "return TASK_EXECUTORS[task_type.task_type](task)",
 )
 s_task_queue_task = S(
-    "backend/src/rox_core/api/tasks/business.py",
+    "backend/src/tasks/producer.py",
     "def queue_task(",
 )
 s_task_type_queue = S(
-    TYPES,
-    "queue_type=IntegrationQueueType.INTEGRATION",
+    NAMES,
+    "class TaskCatalogEntry(NamedTuple):",
+    "queue_type: TaskQueueType",
 )
 s_task_queue_spec = S(
     "backend/src/tasks/queue_registry.py",
-    '"CALENDAR_EXTRACTION_COORDINATOR_TASK": QueueSpec(',
+    '"CALENDAR_EXTRACTION_COORDINATOR_TASK": QueueCatalogEntry(',
 )
 s_task_listener_run = S(
     "backend/src/tasks/listeners/base.py",
@@ -854,7 +861,7 @@ nodes = [
         s_qabc,
         [
             D("App code never calls boto3 SQS directly", s_qdoc),
-            D("QueueRouter fans one queue type out by priority", s_router_qr),
+            D("QUEUE_ROUTES fans one queue type out by priority", s_router_qr),
             D("Local stand-in: LocalStack", s_localstack),
         ],
         kind="queue",
@@ -1065,7 +1072,9 @@ tldr = {
     ],
 }
 
-BUS = "backend/src/rox_core/api/tasks/business.py"
+BUS = "backend/src/tasks/run_queries.py"
+PRODUCER = "backend/src/tasks/producer.py"
+RUNSVC = "backend/src/tasks/run_service.py"
 TH = "backend/src/tasks/task_handler.py"
 TASKM = "backend/src/rox_core/models/task.py"
 CONVM = "backend/src/rox_core/models/conversation/conversation.py"
@@ -1081,15 +1090,16 @@ BGREADME = "backend/src/chat/background_execution/README.md"
 
 # --- background task over SQS -------------------------------------------
 s_queue_task = S(
-    BUS,
+    PRODUCER,
     "def queue_task(",
     ") -> TaskRunDto | UserTaskRunResponseDto:",
-    after="return task_run_dto",
 )
 s_create_queued = S(
-    BUS, "current_state = TaskState.QUEUED", after="def create_task_run_with_session("
+    RUNSVC,
+    "current_state = TaskState.QUEUED",
+    after="def create_task_run_with_session(",
 )
-s_send = S(BUS, "get_queue_shim().send_message(queue_url, json.dumps(task_json))")
+s_send = S(PRODUCER, "get_queue_shim().send_message(queue_url, json.dumps(task_json))")
 s_running = S(TH, "to_state=TaskState.RUNNING,", 'message="Task is running",')
 s_execute = S(TH, 'results["execute"] = self.get_traced_execute(task_executor)()')
 s_completed = S(TH, "to_state = TaskState.COMPLETED", 'message = "Task is completed"')
@@ -1232,7 +1242,7 @@ s_candidate = S(
 )
 s_exec_act = S(
     WF,
-    "uri = await self.execute_activity(",
+    "uri: str | None = await self.execute_activity(",
     "retry_policy=params.execution_policy.retry_policy,",
 )
 s_activities = S(ACT, "class AsyncJobActivities:", span=1)
@@ -1780,7 +1790,7 @@ block_figures = [
                     s_task_queue_spec,
                     [
                         D(
-                            "QueueSpec: queue URL env var + listener limits",
+                            "QueueCatalogEntry: queue URL env var + listener limits",
                             s_task_queue_spec,
                         )
                     ],
@@ -1820,7 +1830,7 @@ block_figures = [
                     s_executor_registry,
                     [
                         D(
-                            "TASK_EXECUTORS[task_type](task)",
+                            "TASK_EXECUTORS[task_type.task_type](task)",
                             s_executor_dispatch,
                         )
                     ],

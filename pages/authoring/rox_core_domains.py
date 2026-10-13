@@ -72,7 +72,8 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         r"|user_limit|payment_|purchased_|starter_action|auto_reload|downgrade"
         r"|delete_user|usage_notification|hierarchical_setting|workspace_setup"
         r"|feature_waitlist|mcp_org|push_device|rox_customer$|rox_feature_actions"
-        r"|remaining_agents|model_token_rate|chat_user_preferences|user_account)",
+        r"|remaining_agents|model_token_rate|chat_user_preferences|user_account"
+        r"|email_screening_rules$)",
         [
             "organization",
             "user",
