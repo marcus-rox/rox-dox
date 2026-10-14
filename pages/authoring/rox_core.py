@@ -489,8 +489,8 @@ s_new_integration_fanout_call = S(
     after="def fan_out_tasks_for_new_integrations(",
 )
 s_gcal_callback = S(
-    "backend/src/ext_integrations/calendar_integration/google_calendar.py",
-    "/api/integrations/gcal/callback",
+    "web/apps/web/src/app/api/integrations/gcal/callback/page.tsx",
+    "async function runCallback(",
 )
 s_calendar_refresh_schedule = S(
     "backend/src/rox_core/api/tasks/services.py",

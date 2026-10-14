@@ -2,7 +2,7 @@
  "id": "domain-lists",
  "title": "Lists, tabs, columns & insights",
  "kind": "domain",
- "commit": "0eb3f040017eac1b718e584f88ab07b2d3d8c6b1",
+ "commit": "49948968ef653f0cb82adab2d2d82701a8d61614",
  "parent": "rox-core",
  "paths": [
   ".agents/skills/crm-writeback-harness/SKILL.md",
@@ -130,7 +130,6 @@
   "backend/src/rox_core/api/prospect_lists/csv_exports_business.py",
   "backend/src/rox_core/api/prospect_lists/csv_manual_columns.py",
   "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
-  "backend/src/rox_core/api/prospect_lists/csv_upload_dto.py",
   "backend/src/rox_core/api/prospect_lists/default_view_alerts.py",
   "backend/src/rox_core/api/prospect_lists/dto.py",
   "backend/src/rox_core/api/prospect_lists/endpoints.py",
@@ -202,6 +201,7 @@
   "backend/src/rox_core/rox_lists/member_scope.py",
   "backend/src/rox_core/rox_lists/module.py",
   "backend/src/rox_core/rox_lists/opportunity_view_manager.py",
+  "backend/src/rox_core/rox_lists/repositories/column_mapping.py",
   "backend/src/rox_core/rox_lists/summary.py",
   "backend/src/rox_customer/real_time/models/enrichment/salesforce_import_request.py",
   "backend/src/rox_customer/real_time/models/rox_list/rox_list_column_value.py",
@@ -309,16 +309,13 @@
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/ProspectListActionsDialog.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListDelete.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useProspectListsTableState.ts",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useSalesforceListIds.ts",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddContactDialog.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddLeadDialog.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadChooseListStep.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/prospectListCSVUploadSteps/ProspectListCSVUploadMapColumnsStep.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/csvUpload/useProspectListCsvUpload.ts",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/SalesforceIntegrationRow.tsx",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/index.ts",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
-  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/steps/SalesforceImportMapColumnsStep.tsx",
+  "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/useSalesforceImportSubmit.ts",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/ConfigureWebhooksModal.tsx",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/webhookModal/index.ts",
   "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/page.tsx",
@@ -427,7 +424,7 @@
  "tldr": {
   "summary": [
    {
-    "text": "26 features with 135 HTTP endpoints, 42 workers and workflows, 174 web screens.",
+    "text": "26 features with 135 HTTP endpoints, 43 workers and workflows, 171 web screens.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/prospect_lists/endpoints.py",
@@ -1251,15 +1248,15 @@
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
-       58,
-       58
+       60,
+       60
       ]
      },
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
-       151,
-       151
+       153,
+       153
       ]
      },
      {
@@ -1307,8 +1304,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/planning.py",
       "lines": [
-       2521,
-       2521
+       2519,
+       2519
       ]
      },
      {
@@ -1328,8 +1325,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/planning.py",
       "lines": [
-       3042,
-       3042
+       3040,
+       3040
       ]
      },
      {
@@ -1342,15 +1339,15 @@
      {
       "path": "backend/src/temporal/workflows/csv_import_workflow.py",
       "lines": [
-       76,
-       76
+       82,
+       82
       ]
      },
      {
       "path": "backend/src/temporal/workflows/csv_import_workflow.py",
       "lines": [
-       192,
-       192
+       201,
+       201
       ]
      },
      {
@@ -1391,36 +1388,36 @@
      {
       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
       "lines": [
-       267,
-       267
+       276,
+       276
       ]
      },
      {
       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
       "lines": [
-       186,
-       186
+       352,
+       352
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       159,
-       159
+       203,
+       203
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       463,
-       463
+       513,
+       513
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       313,
-       313
+       363,
+       363
       ]
      },
      {
@@ -1428,6 +1425,13 @@
       "lines": [
        88,
        88
+      ]
+     },
+     {
+      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+      "lines": [
+       122,
+       122
       ]
      },
      {
@@ -1489,8 +1493,8 @@
      {
       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/(app)/v3/AccountsTable.tsx",
       "lines": [
-       33,
-       33
+       32,
+       32
       ]
      },
      {
@@ -1648,6 +1652,13 @@
       ]
      },
      {
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/components/hooks/useSalesforceListIds.ts",
+      "lines": [
+       8,
+       8
+      ]
+     },
+     {
       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/AddContactDialog.tsx",
       "lines": [
        34,
@@ -1683,38 +1694,10 @@
       ]
      },
      {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/ConfigureSalesforceModal.tsx",
+      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/useSalesforceImportSubmit.ts",
       "lines": [
-       13,
-       13
-      ]
-     },
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/SalesforceIntegrationRow.tsx",
-      "lines": [
-       11,
-       11
-      ]
-     },
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceConfigModal/index.ts",
-      "lines": [
-       1,
-       1
-      ]
-     },
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/SalesforceImportDialog.tsx",
-      "lines": [
-       26,
-       26
-      ]
-     },
-     {
-      "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/components/salesforceImport/steps/SalesforceImportMapColumnsStep.tsx",
-      "lines": [
-       11,
-       11
+       5,
+       5
       ]
      },
      {
@@ -1748,8 +1731,8 @@
      {
       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/people/PeopleTable.tsx",
       "lines": [
-       68,
-       68
+       78,
+       78
       ]
      },
      {
@@ -1790,8 +1773,8 @@
      {
       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/prospects/lists/[list_id]/v2/ProspectListPageHeader.tsx",
       "lines": [
-       46,
-       46
+       45,
+       45
       ]
      },
      {
@@ -2525,8 +2508,8 @@
      {
       "path": "web/apps/web/src/app/(session)/(organization)/(provisioned)/(workspace)/(onboarded)/customers/v4/AccountsTable.tsx",
       "lines": [
-       41,
-       41
+       40,
+       40
       ]
      },
      {
@@ -2932,7 +2915,7 @@
       "path": "backend/src/rox_core/models/lists/rox_default_view.py",
       "lines": [
        17,
-       69
+       78
       ]
      },
      {
@@ -3183,7 +3166,7 @@
   ],
   "key_points": [
    {
-    "text": "Rox List Column Metadata: 129 files.",
+    "text": "Rox List Column Metadata: 126 files.",
     "sources": [
      {
       "path": ".agents/skills/rox-lists-migration/SKILL.md",
@@ -3195,7 +3178,7 @@
     ]
    },
    {
-    "text": "Column Metadata: 105 files.",
+    "text": "Column Metadata: 106 files.",
     "sources": [
      {
       "path": ".agents/skills/crm-writeback-harness/SKILL.md",
@@ -3233,7 +3216,7 @@
      "Rox List Column Metadata",
      "88",
      "0",
-     "1345",
+     "1349",
      "6",
      "—"
     ],
@@ -3241,7 +3224,7 @@
      "Column Metadata",
      "18",
      "10",
-     "1354",
+     "1361",
      "2",
      "Salesforce"
     ],
@@ -3249,7 +3232,7 @@
      "Insight",
      "20",
      "4",
-     "1642",
+     "1647",
      "4",
      "Slack"
     ],
@@ -3257,7 +3240,7 @@
      "Column Alert",
      "25",
      "10",
-     "1160",
+     "1167",
      "2",
      "—"
     ],
@@ -3265,7 +3248,7 @@
      "List Runs",
      "0",
      "14",
-     "1274",
+     "1282",
      "1",
      "—"
     ],
@@ -3273,7 +3256,7 @@
      "Prospect Source Integration",
      "0",
      "3",
-     "375",
+     "376",
      "4",
      "—"
     ],
@@ -3281,15 +3264,15 @@
      "Tab Column",
      "0",
      "8",
-     "1227",
+     "1234",
      "7",
      "—"
     ],
     [
      "Prospect List Csv Upload Request",
      "0",
-     "6",
-     "759",
+     "7",
+     "760",
      "1",
      "—"
     ],
@@ -3297,7 +3280,7 @@
      "Data Source",
      "0",
      "0",
-     "1169",
+     "1173",
      "1",
      "Salesforce"
     ],
@@ -3305,7 +3288,7 @@
      "Source",
      "0",
      "1",
-     "911",
+     "915",
      "1",
      "Salesforce"
     ],
@@ -3313,7 +3296,7 @@
      "Contacts Csv Upload Task",
      "0",
      "3",
-     "310",
+     "313",
      "2",
      "—"
     ],
@@ -3321,7 +3304,7 @@
      "Column Request",
      "0",
      "7",
-     "879",
+     "886",
      "3",
      "—"
     ],
@@ -3329,7 +3312,7 @@
      "Folder",
      "0",
      "0",
-     "701",
+     "704",
      "1",
      "—"
     ],
@@ -3345,7 +3328,7 @@
      "Insight Config",
      "0",
      "0",
-     "524",
+     "527",
      "1",
      "—"
     ],
@@ -3353,7 +3336,7 @@
      "Rox Default View",
      "0",
      "0",
-     "915",
+     "948",
      "2",
      "—"
     ],
@@ -3361,7 +3344,7 @@
      "Clever Column Attribution",
      "0",
      "0",
-     "207",
+     "210",
      "1",
      "—"
     ],
@@ -3369,7 +3352,7 @@
      "Custom Data Store",
      "0",
      "0",
-     "495",
+     "498",
      "1",
      "—"
     ],
@@ -3377,7 +3360,7 @@
      "Insight Feedback",
      "0",
      "0",
-     "1561",
+     "1565",
      "1",
      "—"
     ],
@@ -3385,7 +3368,7 @@
      "Rox List Column Value State",
      "0",
      "0",
-     "1044",
+     "1077",
      "1",
      "—"
     ],
@@ -4891,211 +4874,211 @@
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      258,
-      258
+      259,
+      259
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      532,
-      532
+      533,
+      533
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      707,
-      707
+      714,
+      714
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      668,
-      668
+      675,
+      675
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      678,
-      678
+      685,
+      685
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      691,
-      691
+      698,
+      698
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      567,
-      567
+      574,
+      574
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      623,
-      623
+      630,
+      630
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      218,
-      218
+      219,
+      219
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      329,
-      329
+      330,
+      330
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      289,
-      289
+      290,
+      290
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      463,
-      463
+      464,
+      464
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      840,
-      840
+      848,
+      848
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1179,
-      1179
+      1187,
+      1187
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1199,
-      1199
+      1207,
+      1207
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      999,
-      999
+      1007,
+      1007
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1066,
-      1066
+      1074,
+      1074
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1024,
-      1024
+      1032,
+      1032
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1145,
-      1145
+      1153,
+      1153
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      869,
-      869
+      877,
+      877
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      918,
-      918
+      926,
+      926
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      1104,
-      1104
+      1112,
+      1112
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      172,
-      172
+      173,
+      173
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      137,
-      137
+      138,
+      138
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      205,
-      205
+      206,
+      206
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      722,
-      722
+      729,
+      729
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      791,
-      791
+      798,
+      798
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      816,
-      816
+      824,
+      824
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      744,
-      744
+      751,
+      751
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      768,
-      768
+      775,
+      775
      ]
     },
     {
@@ -5486,323 +5469,330 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      168,
-      168
+      171,
+      171
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      186,
-      186
+      189,
+      189
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1097,
-      1097
+      1120,
+      1120
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1374,
-      1374
+      1397,
+      1397
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1398,
-      1398
+      1421,
+      1421
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1343,
-      1343
+      1366,
+      1366
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1416,
-      1416
+      1439,
+      1439
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1360,
-      1360
+      1383,
+      1383
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      492,
-      492
+      495,
+      495
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      561,
-      561
+      584,
+      584
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      679,
-      679
+      702,
+      702
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      627,
-      627
+      650,
+      650
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      652,
-      652
+      675,
+      675
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      333,
-      333
+      336,
+      336
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1135,
-      1135
+      1158,
+      1158
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1164,
-      1164
+      1187,
+      1187
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1226,
-      1226
+      1249,
+      1249
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1205,
-      1205
+      1228,
+      1228
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1250,
-      1250
+      1273,
+      1273
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1295,
-      1295
+      1318,
+      1318
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1323,
-      1323
+      1346,
+      1346
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      727,
-      727
+      750,
+      750
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      870,
-      870
+      893,
+      893
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      770,
-      770
+      793,
+      793
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      822,
-      822
+      845,
+      845
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      846,
-      846
+      869,
+      869
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      798,
-      798
+      821,
+      821
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      264,
-      264
+      564,
+      564
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      456,
-      456
+      267,
+      267
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      218,
-      218
+      459,
+      459
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      242,
-      242
+      221,
+      221
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      432,
-      432
+      245,
+      245
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      409,
-      409
+      435,
+      435
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      892,
-      892
+      412,
+      412
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      920,
-      920
+      915,
+      915
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      317,
-      317
+      943,
+      943
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      959,
-      959
+      320,
+      320
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      941,
-      941
+      982,
+      982
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      361,
-      361
+      964,
+      964
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      701,
-      701
+      364,
+      364
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      385,
-      385
+      724,
+      724
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      535,
-      535
+      388,
+      388
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      977,
-      977
+      538,
+      538
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1041,
-      1041
+      1000,
+      1000
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1067,
-      1067
+      1064,
+      1064
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      1020,
-      1020
+      1090,
+      1090
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
+     "lines": [
+      1043,
+      1043
      ]
     },
     {
@@ -8426,8 +8416,8 @@
     {
      "path": "backend/src/public_api/routes/prospects/router.py",
      "lines": [
-      190,
-      190
+      193,
+      193
      ]
     },
     {
@@ -8713,127 +8703,113 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      144,
-      144
+      146,
+      146
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      274,
-      274
+      276,
+      276
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      467,
-      467
+      469,
+      469
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      520,
-      520
+      522,
+      522
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      545,
-      545
+      547,
+      547
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      602,
-      602
+      604,
+      604
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      632,
-      632
+      634,
+      634
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      836,
-      836
+      838,
+      838
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      239,
-      239
+      241,
+      241
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      305,
-      305
+      307,
+      307
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      711,
-      711
+      713,
+      713
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      667,
-      667
+      669,
+      669
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      394,
-      394
+      396,
+      396
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      352,
-      352
+      354,
+      354
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      428,
-      428
+      430,
+      430
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      189,
-      189
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
-     "lines": [
-      1020,
-      1020
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
-     "lines": [
-      981,
-      981
+      191,
+      191
      ]
     },
     {
@@ -8846,15 +8822,36 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      1100,
-      1100
+      1084,
+      1084
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      758,
-      758
+      1013,
+      1013
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      1118,
+      1118
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      1166,
+      1166
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      760,
+      760
      ]
     },
     {
@@ -8867,43 +8864,50 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      916,
-      916
+      918,
+      918
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      214,
-      214
+      948,
+      948
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      946,
-      946
+      216,
+      216
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      883,
-      883
+      978,
+      978
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      1135,
-      1135
+      885,
+      885
      ]
     },
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      796,
-      796
+      1201,
+      1201
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+     "lines": [
+      798,
+      798
      ]
     },
     {
@@ -10281,8 +10285,8 @@
     {
      "path": "backend/src/tasks/executors/graph.py",
      "lines": [
-      814,
-      814
+      819,
+      819
      ]
     },
     {
@@ -10484,8 +10488,8 @@
     {
      "path": "backend/src/tasks/executors/graph.py",
      "lines": [
-      897,
-      897
+      902,
+      902
      ]
     },
     {
@@ -10519,8 +10523,8 @@
     {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
      "lines": [
-      11,
-      11
+      14,
+      14
      ]
     },
     {
@@ -10547,8 +10551,8 @@
     {
      "path": "backend/src/tasks/executors/graph.py",
      "lines": [
-      704,
-      704
+      709,
+      709
      ]
     },
     {
@@ -10575,8 +10579,8 @@
     {
      "path": "backend/src/tasks/executors/graph.py",
      "lines": [
-      781,
-      781
+      786,
+      786
      ]
     },
     {
@@ -10771,22 +10775,22 @@
     {
      "path": "backend/src/tasks/executors/orum_schema_sync.py",
      "lines": [
-      226,
-      226
+      224,
+      224
      ]
     },
     {
      "path": "backend/src/tasks/executors/orum_schema_sync.py",
      "lines": [
-      289,
-      289
+      287,
+      287
      ]
     },
     {
      "path": "backend/src/tasks/executors/orum_schema_sync.py",
      "lines": [
-      362,
-      362
+      360,
+      360
      ]
     },
     {
@@ -10869,15 +10873,15 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      267,
-      267
+      276,
+      276
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      186,
-      186
+      352,
+      352
      ]
     },
     {
@@ -10890,15 +10894,15 @@
     {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      58,
-      58
+      60,
+      60
      ]
     },
     {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      151,
-      151
+      153,
+      153
      ]
     },
     {
@@ -10939,8 +10943,8 @@
     {
      "path": "backend/src/tasks/executors/graph.py",
      "lines": [
-      645,
-      645
+      650,
+      650
      ]
     },
     {
@@ -11331,8 +11335,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      159,
-      159
+      203,
+      203
      ]
     },
     {
@@ -11345,8 +11349,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/planning.py",
      "lines": [
-      2521,
-      2521
+      2519,
+      2519
      ]
     },
     {
@@ -11380,8 +11384,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      463,
-      463
+      513,
+      513
      ]
     },
     {
@@ -11415,8 +11419,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      313,
-      313
+      363,
+      363
      ]
     },
     {
@@ -11483,6 +11487,13 @@
      ]
     },
     {
+     "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+     "lines": [
+      122,
+      122
+     ]
+    },
+    {
      "path": "backend/src/temporal/activities/enrichment/provider_dispatch.py",
      "lines": [
       152,
@@ -11513,8 +11524,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/planning.py",
      "lines": [
-      3042,
-      3042
+      3040,
+      3040
      ]
     },
     {
@@ -11620,6 +11631,13 @@
      "lines": [
       15,
       15
+     ]
+    },
+    {
+     "path": "backend/src/chat/routes/conversation/router.py",
+     "lines": [
+      96,
+      96
      ]
     },
     {
@@ -11856,8 +11874,8 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      35,
-      35
+      36,
+      36
      ]
     },
     {
@@ -12584,15 +12602,15 @@
     {
      "path": "backend/src/tasks/executors/company_registration.py",
      "lines": [
-      17,
-      17
+      16,
+      16
      ]
     },
     {
      "path": "backend/src/tasks/executors/company_registration.py",
      "lines": [
-      20,
-      20
+      19,
+      19
      ]
     },
     {
@@ -12871,8 +12889,8 @@
     {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
      "lines": [
-      24,
-      24
+      27,
+      27
      ]
     },
     {
@@ -13193,15 +13211,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      25,
-      25
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
-     "lines": [
-      34,
-      34
+      26,
+      26
      ]
     },
     {
@@ -13209,6 +13220,13 @@
      "lines": [
       35,
       35
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
+     "lines": [
+      36,
+      36
      ]
     },
     {
@@ -13228,15 +13246,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      29,
-      29
-     ]
-    },
-    {
-     "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
-     "lines": [
-      35,
-      35
+      30,
+      30
      ]
     },
     {
@@ -13244,6 +13255,13 @@
      "lines": [
       36,
       36
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
+     "lines": [
+      37,
+      37
      ]
     },
     {
@@ -13291,8 +13309,8 @@
     {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      11,
-      11
+      13,
+      13
      ]
     },
     {
@@ -13823,15 +13841,15 @@
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      123,
-      123
+      167,
+      167
      ]
     },
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      409,
-      409
+      459,
+      459
      ]
     },
     {
@@ -14822,6 +14840,13 @@
      ]
     },
     {
+     "path": "backend/src/tasks/executors/conversation_summary.py",
+     "lines": [
+      13,
+      13
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/data_extraction_s3_event_executor.py",
      "lines": [
       36,
@@ -14971,15 +14996,22 @@
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      52,
-      52
+      231,
+      231
      ]
     },
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      126,
-      126
+      59,
+      59
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/linkedin_extraction.py",
+     "lines": [
+      133,
+      133
      ]
     },
     {
@@ -15078,6 +15110,13 @@
      "lines": [
       8,
       8
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/rox_file_thumbnail.py",
+     "lines": [
+      9,
+      9
      ]
     },
     {
@@ -15208,6 +15247,13 @@
     },
     {
      "path": "backend/src/tasks/executors/snowflake_graph_template_upgrade.py",
+     "lines": [
+      11,
+      11
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/swv2_pdf_render.py",
      "lines": [
       11,
       11
@@ -15872,6 +15918,13 @@
      ]
     },
     {
+     "path": "backend/src/tasks/executors/conversation_summary.py",
+     "lines": [
+      10,
+      10
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/crm_write_back.py",
      "lines": [
       9,
@@ -16049,8 +16102,8 @@
     {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
      "lines": [
-      8,
-      8
+      11,
+      11
      ]
     },
     {
@@ -16140,15 +16193,15 @@
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      18,
-      18
+      19,
+      19
      ]
     },
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      38,
-      38
+      45,
+      45
      ]
     },
     {
@@ -16336,8 +16389,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      48,
-      48
+      56,
+      56
      ]
     },
     {
@@ -16350,15 +16403,15 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      50,
-      50
+      51,
+      51
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      55,
-      55
+      62,
+      62
      ]
     },
     {
@@ -16378,8 +16431,8 @@
     {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      40,
-      40
+      42,
+      42
      ]
     },
     {
@@ -16436,6 +16489,13 @@
      "lines": [
       27,
       27
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/rox_file_thumbnail.py",
+     "lines": [
+      6,
+      6
      ]
     },
     {
@@ -16576,6 +16636,13 @@
      "lines": [
       13,
       13
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/swv2_pdf_render.py",
+     "lines": [
+      8,
+      8
      ]
     },
     {
@@ -18142,8 +18209,8 @@
     {
      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
      "lines": [
-      76,
-      76
+      82,
+      82
      ]
     },
     {
@@ -18163,8 +18230,8 @@
     {
      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
      "lines": [
-      192,
-      192
+      201,
+      201
      ]
     },
     {
@@ -18401,8 +18468,8 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      161,
-      161
+      164,
+      164
      ]
     },
     {
@@ -18429,8 +18496,8 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
      "lines": [
-      99,
-      99
+      101,
+      101
      ]
     },
     {
@@ -19157,8 +19224,8 @@
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      24,
-      24
+      28,
+      28
      ]
     },
     {
@@ -19213,8 +19280,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      346,
-      346
+      512,
+      512
      ]
     },
     {
@@ -19353,8 +19420,8 @@
     {
      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
      "lines": [
-      47,
-      47
+      51,
+      51
      ]
     },
     {
@@ -19507,15 +19574,15 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      40,
-      40
+      41,
+      41
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      46,
-      46
+      47,
+      47
      ]
     },
     {
@@ -19892,13 +19959,6 @@
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      98,
-      98
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/conversation/router.py",
-     "lines": [
       99,
       99
      ]
@@ -19906,8 +19966,8 @@
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      107,
-      107
+      100,
+      100
      ]
     },
     {
@@ -20459,8 +20519,8 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
      "lines": [
-      110,
-      110
+      113,
+      113
      ]
     },
     {
@@ -20779,6 +20839,13 @@
      ]
     },
     {
+     "path": "backend/src/tasks/executors/conversation_summary.py",
+     "lines": [
+      6,
+      6
+     ]
+    },
+    {
      "path": "backend/src/tasks/executors/custom_column_refresh_dispatch.py",
      "lines": [
       26,
@@ -20998,8 +21065,8 @@
     {
      "path": "backend/src/tasks/executors/finalize_realtime_transcript.py",
      "lines": [
-      5,
-      5
+      7,
+      7
      ]
     },
     {
@@ -21131,22 +21198,22 @@
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      17,
-      17
+      18,
+      18
      ]
     },
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      29,
-      29
+      33,
+      33
      ]
     },
     {
      "path": "backend/src/tasks/executors/linkedin_extraction.py",
      "lines": [
-      30,
-      30
+      34,
+      34
      ]
     },
     {
@@ -21432,8 +21499,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      44,
-      44
+      52,
+      52
      ]
     },
     {
@@ -21504,6 +21571,13 @@
      "lines": [
       17,
       17
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/rox_file_thumbnail.py",
+     "lines": [
+      1,
+      1
      ]
     },
     {
@@ -21665,6 +21739,13 @@
      "lines": [
       9,
       9
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/swv2_pdf_render.py",
+     "lines": [
+      2,
+      2
      ]
     },
     {
@@ -22370,22 +22451,22 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      66,
-      66
+      74,
+      74
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      75,
-      75
+      82,
+      82
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      952,
-      952
+      1065,
+      1065
      ]
     },
     {
@@ -22615,8 +22696,8 @@
     {
      "path": "backend/src/temporal/workflows/csv_import_workflow.py",
      "lines": [
-      34,
-      34
+      36,
+      36
      ]
     },
     {
@@ -23000,22 +23081,22 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      53,
-      53
+      61,
+      61
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      21,
-      21
+      22,
+      22
      ]
     },
     {
      "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
      "lines": [
-      62,
-      62
+      69,
+      69
      ]
     },
     {
@@ -23028,8 +23109,8 @@
     {
      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
      "lines": [
-      191,
-      191
+      235,
+      235
      ]
     },
     {
@@ -23056,8 +23137,8 @@
     {
      "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
      "lines": [
-      1670,
-      1670
+      1667,
+      1667
      ]
     },
     {
@@ -23084,8 +23165,8 @@
     {
      "path": "backend/src/tasks/executors/people_search_outreach_coordinator.py",
      "lines": [
-      1798,
-      1798
+      1796,
+      1796
      ]
     },
     {
@@ -23175,8 +23256,15 @@
     {
      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
      "lines": [
-      16,
-      16
+      18,
+      18
+     ]
+    },
+    {
+     "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+     "lines": [
+      19,
+      19
      ]
     },
     {
@@ -23371,15 +23459,15 @@
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      96,
-      96
+      97,
+      97
      ]
     },
     {
      "path": "backend/src/chat/routes/conversation/router.py",
      "lines": [
-      97,
-      97
+      98,
+      98
      ]
     },
     {
@@ -23420,8 +23508,8 @@
     {
      "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
      "lines": [
-      1132,
-      1132
+      1298,
+      1298
      ]
     },
     {
@@ -23792,7 +23880,7 @@
      "path": "backend/src/rox_core/models/lists/rox_default_view.py",
      "lines": [
       17,
-      69
+      78
      ]
     },
     {
@@ -24210,7 +24298,7 @@
       "path": "backend/src/rox_core/models/lists/rox_default_view.py",
       "lines": [
        17,
-       69
+       78
       ]
      },
      {
@@ -24641,6 +24729,24 @@
      ],
      [
       "column_metadata",
+      "source_mapping",
+      "CRM mirror (entity_*, sfdc_*, graph)",
+      "query join"
+     ],
+     [
+      "column_metadata",
+      "source_mapping",
+      "CRM mirror (entity_*, sfdc_*, graph)",
+      "model ForeignKey"
+     ],
+     [
+      "column_metadata",
+      "source_mapping",
+      "CRM mirror (entity_*, sfdc_*, graph)",
+      "ID column name"
+     ],
+     [
+      "column_metadata",
       "user",
       "Tenancy: orgs, users, auth & billing",
       "model ForeignKey"
@@ -24764,6 +24870,12 @@
       "deal_stage",
       "Deals, quotes & contracts",
       "ID column name"
+     ],
+     [
+      "data_source",
+      "erd_mapping",
+      "CRM mirror (entity_*, sfdc_*, graph)",
+      "query join"
      ],
      [
       "data_source",
@@ -25319,6 +25431,27 @@
       ]
      },
      {
+      "path": "backend/src/rox_core/column_mapping/dao.py",
+      "lines": [
+       172,
+       172
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/source_mapping.py",
+      "lines": [
+       52,
+       52
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/models/source_mapping.py",
+      "lines": [
+       50,
+       50
+      ]
+     },
+     {
       "path": "backend/src/rox_core/models/column_metadata.py",
       "lines": [
        130,
@@ -25382,10 +25515,10 @@
       ]
      },
      {
-      "path": "backend/src/rox_core/models/column_metadata.py",
+      "path": "backend/src/rox_core/column_mapping/dao.py",
       "lines": [
-       615,
-       615
+       161,
+       161
       ]
      },
      {
@@ -25466,6 +25599,13 @@
       ]
      },
      {
+      "path": "backend/src/rox_core/column_mapping/dao.py",
+      "lines": [
+       132,
+       132
+      ]
+     },
+     {
       "path": "backend/src/rox_core/models/erd_mapping.py",
       "lines": [
        57,
@@ -25503,8 +25643,8 @@
      {
       "path": "backend/src/rox_core/api/entities/event_v2/service.py",
       "lines": [
-       1612,
-       1612
+       1611,
+       1611
       ]
      },
      {
@@ -25818,8 +25958,8 @@
      {
       "path": "backend/src/rox_core/models/lists/rox_default_view.py",
       "lines": [
-       60,
-       60
+       69,
+       69
       ]
      },
      {
@@ -25993,8 +26133,8 @@
      {
       "path": "backend/src/rox_core/api/data_extraction/business.py",
       "lines": [
-       2920,
-       2920
+       2904,
+       2904
       ]
      },
      {
@@ -26064,17 +26204,17 @@
      {
       "row": 11,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 12,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 13,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-crm"
      },
      {
       "row": 14,
@@ -26089,37 +26229,37 @@
      {
       "row": 16,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-gov"
      },
      {
       "row": 17,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-tenancy"
      },
      {
       "row": 18,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-tenancy"
      },
      {
       "row": 19,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-people"
      },
      {
       "row": 20,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-people"
      },
      {
       "row": 21,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-tasks"
      },
      {
       "row": 22,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-tenancy"
      },
      {
       "row": 23,
@@ -26139,47 +26279,47 @@
      {
       "row": 26,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-crm"
      },
      {
       "row": 27,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 28,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-crm"
      },
      {
       "row": 29,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-tasks"
      },
      {
       "row": 30,
       "column": 2,
-      "page": "domain-agents"
+      "page": "domain-tenancy"
      },
      {
       "row": 31,
       "column": 2,
-      "page": "domain-deals"
+      "page": "domain-people"
      },
      {
       "row": 32,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-tenancy"
      },
      {
       "row": 33,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-agents"
      },
      {
       "row": 34,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-deals"
      },
      {
       "row": 35,
@@ -26219,17 +26359,17 @@
      {
       "row": 42,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-crm"
      },
      {
       "row": 43,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-crm"
      },
      {
       "row": 44,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-crm"
      },
      {
       "row": 45,
@@ -26239,42 +26379,42 @@
      {
       "row": 46,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-activity"
      },
      {
       "row": 47,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-gov"
      },
      {
       "row": 48,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-gov"
      },
      {
       "row": 49,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 50,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 51,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 52,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tasks"
      },
      {
       "row": 53,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tenancy"
      },
      {
       "row": 54,
@@ -26284,17 +26424,17 @@
      {
       "row": 55,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-tenancy"
      },
      {
       "row": 56,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-activity"
      },
      {
       "row": 57,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-activity"
      },
      {
       "row": 58,
@@ -26304,17 +26444,17 @@
      {
       "row": 59,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-people"
      },
      {
       "row": 60,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-people"
      },
      {
       "row": 61,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-tenancy"
      },
      {
       "row": 62,
@@ -26324,17 +26464,17 @@
      {
       "row": 63,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-gov"
      },
      {
       "row": 64,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-tasks"
      },
      {
       "row": 65,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-tasks"
      },
      {
       "row": 66,
@@ -26349,7 +26489,7 @@
      {
       "row": 68,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-tenancy"
      },
      {
       "row": 69,
@@ -26369,17 +26509,17 @@
      {
       "row": 72,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tasks"
      },
      {
       "row": 73,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tenancy"
      },
      {
       "row": 74,
       "column": 2,
-      "page": "domain-activity"
+      "page": "domain-tenancy"
      },
      {
       "row": 75,
@@ -26389,17 +26529,17 @@
      {
       "row": 76,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-activity"
      },
      {
       "row": 77,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-activity"
      },
      {
       "row": 78,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-activity"
      },
      {
       "row": 79,
@@ -26419,7 +26559,7 @@
      {
       "row": 82,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-tenancy"
      },
      {
       "row": 83,
@@ -26429,17 +26569,17 @@
      {
       "row": 84,
       "column": 2,
-      "page": "domain-gov"
+      "page": "domain-tenancy"
      },
      {
       "row": 85,
       "column": 2,
-      "page": "domain-tasks"
+      "page": "domain-tenancy"
      },
      {
       "row": 86,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-seq"
      },
      {
       "row": 87,
@@ -26449,52 +26589,52 @@
      {
       "row": 88,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-gov"
      },
      {
       "row": 89,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-tasks"
      },
      {
       "row": 90,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-tenancy"
      },
      {
       "row": 91,
       "column": 2,
-      "page": "domain-people"
+      "page": "domain-tenancy"
      },
      {
       "row": 92,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-people"
      },
      {
       "row": 93,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-people"
      },
      {
       "row": 94,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-people"
      },
      {
       "row": 95,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-people"
      },
      {
       "row": 96,
       "column": 2,
-      "page": "domain-seq"
+      "page": "domain-tenancy"
      },
      {
       "row": 97,
       "column": 2,
-      "page": "domain-crm"
+      "page": "domain-tenancy"
      },
      {
       "row": 98,
@@ -26509,12 +26649,12 @@
      {
       "row": 100,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-seq"
      },
      {
       "row": 101,
       "column": 2,
-      "page": "domain-tenancy"
+      "page": "domain-crm"
      },
      {
       "row": 102,
@@ -26558,6 +26698,26 @@
      },
      {
       "row": 110,
+      "column": 2,
+      "page": "domain-tenancy"
+     },
+     {
+      "row": 111,
+      "column": 2,
+      "page": "domain-tenancy"
+     },
+     {
+      "row": 112,
+      "column": 2,
+      "page": "domain-tenancy"
+     },
+     {
+      "row": 113,
+      "column": 2,
+      "page": "domain-tenancy"
+     },
+     {
+      "row": 114,
       "column": 2,
       "page": "domain-tenancy"
      }
@@ -26670,15 +26830,15 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/business.py",
       "lines": [
-       6003,
-       6003
+       5998,
+       5998
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
       "lines": [
-       90,
-       90
+       91,
+       91
       ]
      }
     ]
@@ -29462,14 +29622,14 @@
        {
         "path": "backend/src/temporal/workflows/csv_import_workflow.py",
         "lines": [
-         76,
-         76
+         82,
+         82
         ]
        }
       ]
      },
      {
-      "text": "+13 more",
+      "text": "+14 more",
       "sources": [
        {
         "path": "backend/src/temporal/activities/enrichment/company_preflight.py",
@@ -29495,22 +29655,29 @@
        {
         "path": "backend/src/temporal/activities/enrichment/csv_import.py",
         "lines": [
-         159,
-         159
+         122,
+         122
         ]
        },
        {
         "path": "backend/src/temporal/activities/enrichment/csv_import.py",
         "lines": [
-         313,
-         313
+         203,
+         203
         ]
        },
        {
         "path": "backend/src/temporal/activities/enrichment/csv_import.py",
         "lines": [
-         463,
-         463
+         363,
+         363
+        ]
+       },
+       {
+        "path": "backend/src/temporal/activities/enrichment/csv_import.py",
+        "lines": [
+         513,
+         513
         ]
        },
        {
@@ -29523,15 +29690,15 @@
        {
         "path": "backend/src/temporal/activities/enrichment/planning.py",
         "lines": [
-         2521,
-         2521
+         2519,
+         2519
         ]
        },
        {
         "path": "backend/src/temporal/activities/enrichment/planning.py",
         "lines": [
-         3042,
-         3042
+         3040,
+         3040
         ]
        },
        {
@@ -29551,8 +29718,8 @@
        {
         "path": "backend/src/temporal/workflows/csv_import_workflow.py",
         "lines": [
-         192,
-         192
+         201,
+         201
         ]
        },
        {
@@ -29899,8 +30066,8 @@
        {
         "path": "backend/src/rox_core/api/prospect_lists/csv_upload_business.py",
         "lines": [
-         166,
-         166
+         168,
+         168
         ]
        },
        {
@@ -29920,15 +30087,15 @@
        {
         "path": "backend/src/rox_core/api/salesforce_enrichment/business.py",
         "lines": [
-         460,
-         460
+         461,
+         461
         ]
        },
        {
         "path": "backend/src/rox_core/api/salesforce_enrichment/business.py",
         "lines": [
-         907,
-         907
+         908,
+         908
         ]
        },
        {
