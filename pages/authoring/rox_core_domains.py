@@ -53,7 +53,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "CRM mirror (entity_*, sfdc_*, graph)",
         r"^(entity_|external_entity|external_column|sfdc_|crm_|graph|erd_"
         r"|unified_catalog|resolved_entity|archived_entity|data_controller"
-        r"|relationships$|explicit_name)",
+        r"|relationships$|explicit_name|source_mapping$)",
         [
             "entity_company",
             "entity_person",
