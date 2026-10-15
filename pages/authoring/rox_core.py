@@ -460,12 +460,12 @@ s_google_workspace_user_integrations = S(
 )
 s_integration_fanout = S(
     "backend/src/ext_integrations/integration/admin_integration_fanout.py",
-    "def fan_out_tasks_for_integrations(",
+    "def fan_out_email_cal_tasks_for_integrations(",
 )
 s_initialize_calendar_integrations = S(
     "backend/src/ext_integrations/integration/admin_integration_fanout.py",
     "initialize_calendar_integrations(",
-    after="def fan_out_tasks_for_integrations(",
+    after="def fan_out_email_cal_tasks_for_integrations(",
 )
 s_temporal_calendar_start = S(
     "backend/src/ext_integrations/integration/admin_integration_fanout.py",
@@ -485,7 +485,7 @@ s_sqs_calendar_tasks = S(
 )
 s_new_integration_fanout_call = S(
     "backend/src/ext_integrations/integration/workspace_integration/google_workspace_fanout.py",
-    "fan_out_tasks_for_integrations(",
+    "fan_out_email_cal_tasks_for_integrations(",
     after="def fan_out_tasks_for_new_integrations(",
 )
 s_gcal_callback = S(
@@ -2364,7 +2364,7 @@ block_figures = [
                 ),
                 N(
                     "fanout",
-                    "fan_out_tasks_for_integrations()",
+                    "fan_out_email_cal_tasks_for_integrations()",
                     "fanout_col",
                     s_integration_fanout,
                     [
