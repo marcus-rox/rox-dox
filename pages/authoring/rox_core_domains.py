@@ -38,7 +38,8 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Governance & permissions",
         r"^(security_entity|permission|profile_permission|pod|record_access"
         r"|resource_access|governance|governed|org_wide_default|validation_rule"
-        r"|team|provisioning_profile|rox_organization_user_roles|impersonation)",
+        r"|team|provisioning_profile|rox_organization_user_roles|impersonation"
+        r"|salesforce_governance)",
         [
             "security_entity",
             "permission_set",
