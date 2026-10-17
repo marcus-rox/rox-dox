@@ -1,11 +1,12 @@
 {
- "commit": "a5538774d35ffec0900fe714726c908d69aa0c88",
+ "commit": "fe0dc99ac2434d6cb665239af9dcc4508c82768e",
  "domain": "crm",
  "threshold": 0.25,
  "tables": [
   "archived_entity_column_value",
   "crm_field",
   "crm_people_list_run",
+  "crm_pipeline",
   "crm_writeback_audit_log",
   "crm_writeback_entity_snapshot",
   "crm_writeback_graph_staging",
@@ -113,6 +114,7 @@
     "entity_company",
     "entity_lead",
     "entity_link",
+    "entity_person",
     "graph"
    ],
    "files": [
@@ -134,6 +136,12 @@
      "primary": true,
      "reason": "calls",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/data_store/graph/v4/build_hooks.py",
+       "line": 22,
+       "to": "backend/src/data_store/graph/v4/graph_phone_sync.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/build_hooks.py",
@@ -229,6 +237,37 @@
      ]
     },
     {
+     "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/data_store/graph/v4/build_hooks.py",
+       "line": 22,
+       "to": "backend/src/data_store/graph/v4/build_hooks.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+       "line": 31,
+       "to": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+       "line": 40,
+       "to": "backend/src/rox_customer/graph/spark_graph.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+       "line": 1,
+       "table": "entity_person"
+      }
+     ]
+    },
+    {
      "path": "backend/src/data_store/graph/v4/raw_foreign_keys.py",
      "primary": true,
      "reason": "calls",
@@ -255,25 +294,25 @@
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 102,
+       "line": 103,
        "to": "backend/src/rox_customer/batch/models/v4/entity/data_sources/calendar_source.py"
       },
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 107,
+       "line": 108,
        "to": "backend/src/rox_customer/batch/models/v4/entity/data_sources/call_recorder_event.py"
       },
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 116,
+       "line": 117,
        "to": "backend/src/rox_customer/batch/models/v4/entity/data_sources/call_recorder_event_attendee.py"
       },
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 125,
+       "line": 126,
        "to": "backend/src/rox_customer/batch/models/v4/entity/data_sources/email_source.py"
       }
      ]
@@ -316,6 +355,75 @@
      ]
     },
     {
+     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
+       "line": 10,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 19,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
+     "primary": true,
+     "reason": "called_by",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
+       "line": 3,
+       "to": "backend/src/ext_integrations/integration/crm/dto.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 13,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/dto.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
+       "line": 3,
+       "to": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 14,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
+       "line": 9,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+       "line": 15,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
+      }
+     ]
+    },
+    {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
      "primary": true,
      "reason": "tables",
@@ -325,6 +433,12 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
        "line": 7,
        "to": "backend/src/rox_core/api/graph/data_source_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 23,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
       },
       {
        "kind": "table",
@@ -343,12 +457,6 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
        "line": 1,
        "table": "entity_link"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_entity_resolver.py",
-       "line": 1,
-       "table": "entity_person"
       }
      ]
     },
@@ -379,6 +487,18 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
+       "line": 10,
+       "to": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
+       "line": 31,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
        "line": 38,
        "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
       },
@@ -393,20 +513,26 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
        "line": 1,
        "table": "entity_lead"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
-       "line": 1,
-       "table": "graph"
       }
      ]
     },
     {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-     "primary": false,
+     "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 13,
+       "to": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 14,
+       "to": "backend/src/ext_integrations/integration/crm/dto.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
@@ -416,26 +542,14 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 40,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
        "line": 47,
        "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 63,
-       "to": "backend/src/rox_core/api/data_controller/reference_resolution.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 76,
-       "to": "backend/src/rox_core/api/people/graph_dao.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 1,
-       "table": "crm_field"
       }
      ]
     },
@@ -449,6 +563,12 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
        "line": 17,
        "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 25,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
       },
       {
        "kind": "call",
@@ -467,20 +587,20 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
        "line": 17,
        "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
-       "line": 1,
-       "table": "crm_field"
       }
      ]
     },
     {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-     "primary": false,
+     "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 19,
+       "to": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
@@ -490,26 +610,20 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 43,
+       "line": 39,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 44,
        "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 84,
+       "line": 85,
        "to": "backend/src/rox_core/api/people/graph_dao.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 1,
-       "table": "crm_field"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 1,
-       "table": "entity_deal"
       }
      ]
     },
@@ -518,6 +632,18 @@
      "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 33,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
+       "line": 9,
+       "to": "backend/src/ext_integrations/integration/crm/dto.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
@@ -535,18 +661,37 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
        "line": 1,
        "table": "crm_writeback_graph_staging"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py",
+       "line": 31,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_lead_writeback_engine.py"
       },
       {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
-       "line": 1,
-       "table": "entity_company"
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 40,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
       },
       {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_engine_query_generator.py",
-       "line": 1,
-       "table": "entity_deal"
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 39,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py",
+       "line": 8,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
       }
      ]
     },
@@ -563,27 +708,64 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
-       "line": 20,
-       "to": "backend/src/rox_core/models/crm_writeback_graph_staging.py"
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 47,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 44,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py",
+       "line": 8,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
-       "line": 528,
+       "line": 15,
+       "to": "backend/src/ext_integrations/integration/crm/dto.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 12,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 26,
        "to": "backend/src/rox_core/api/graph/data_source_service.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/tasks/executors/crm_people_list_import.py",
-       "line": 22,
-       "to": "backend/src/tasks/executors/crm_people_list_import.py"
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 35,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
       },
       {
-       "kind": "call",
-       "path": "backend/src/tasks/executors/salesforce_import.py",
-       "line": 23,
-       "to": "backend/src/tasks/executors/salesforce_import.py"
+       "kind": "table",
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 1,
+       "table": "entity_company"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 1,
+       "table": "entity_person"
       }
      ]
     },
@@ -699,6 +881,18 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 60,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+       "line": 10,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
        "line": 13,
        "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
@@ -710,16 +904,10 @@
        "to": "backend/src/rox_core/api/graph/data_source_service.py"
       },
       {
-       "kind": "table",
+       "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 1,
-       "table": "external_column_mapping"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 1,
-       "table": "graph"
+       "line": 91,
+       "to": "backend/src/rox_core/api/entities/deal/service.py"
       }
      ]
     },
@@ -733,6 +921,25 @@
        "path": "backend/src/rox_core/api/column_metadata/org_wide_rox_list_column_service.py",
        "line": 17,
        "to": "backend/src/unified_data/resolved_column_value_store.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/crm_campaigns/business.py",
+     "primary": false,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/crm_campaigns/business.py",
+       "line": 1,
+       "table": "entity_lead"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/crm_campaigns/business.py",
+       "line": 1,
+       "table": "entity_person"
       }
      ]
     },
@@ -774,6 +981,12 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 63,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/reference_resolution.py",
        "line": 6,
        "to": "backend/src/rox_core/api/graph/data_source_service.py"
@@ -800,10 +1013,35 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/entities/column_values/dto.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 64,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+       "line": 494,
+       "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
+      }
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/entities/deal/service.py",
-     "primary": false,
+     "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 36,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/entities/deal/service.py",
@@ -827,12 +1065,6 @@
        "path": "backend/src/rox_core/api/entities/deal/service.py",
        "line": 1141,
        "to": "backend/src/ext_integrations/integration/crm_writeback_utils.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "entity_company"
       }
      ]
     },
@@ -880,6 +1112,12 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 71,
+       "to": "backend/src/rox_core/api/entities/deal/service.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/entities/event_v2/activity_counts.py",
        "line": 31,
        "to": "backend/src/rox_core/api/entities/event_v2/activity_counts.py"
@@ -901,20 +1139,26 @@
        "path": "backend/src/rox_core/api/entities/event_v2/service.py",
        "line": 55,
        "to": "backend/src/rox_core/api/governance/ownership/event_ownership_resolver.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/event_v2/service.py",
-       "line": 67,
-       "to": "backend/src/rox_core/api/graph/data_source_service.py"
       }
      ]
     },
     {
      "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-     "primary": false,
+     "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+       "line": 31,
+       "to": "backend/src/data_store/graph/v4/graph_phone_sync.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
+       "line": 17,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+      },
       {
        "kind": "table",
        "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
@@ -1087,6 +1331,19 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/governance/record_display/person.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/governance/record_display/person.py",
+       "line": 1,
+       "table": "entity_person"
+      }
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
      "primary": false,
      "reason": "tables",
@@ -1142,9 +1399,9 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/rox_core/api/account/service.py",
-       "line": 36,
-       "to": "backend/src/rox_core/api/account/service.py"
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 26,
+       "to": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py"
       }
      ]
     },
@@ -1182,6 +1439,19 @@
        "path": "backend/src/rox_customer/real_time/auto_register.py",
        "line": 19,
        "to": "backend/src/rox_customer/real_time/auto_register.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/leads/provider_source.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/leads/provider_source.py",
+       "line": 1,
+       "table": "entity_person"
       }
      ]
     },
@@ -1260,6 +1530,18 @@
       },
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 76,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 85,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/people/graph_dao.py",
        "line": 7,
        "to": "backend/src/rox_core/api/graph/data_source_service.py"
@@ -1269,18 +1551,6 @@
        "path": "backend/src/rox_core/api/people/graph_dao.py",
        "line": 9,
        "to": "backend/src/rox_core/models/crm_writeback_graph_staging.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_customer/real_time/auto_register.py",
-       "line": 21,
-       "to": "backend/src/rox_customer/real_time/auto_register.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/tasks/executors/entity_data_added.py",
-       "line": 2,
-       "to": "backend/src/tasks/executors/entity_data_added.py"
       }
      ]
     },
@@ -1752,6 +2022,25 @@
      ]
     },
     {
+     "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+       "line": 7,
+       "to": "backend/src/rox_customer/batch/models/__init__.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+       "line": 1,
+       "table": "entity_person"
+      }
+     ]
+    },
+    {
      "path": "backend/src/rox_customer/graph/registry/generated_index.py",
      "primary": true,
      "reason": "called_by",
@@ -1845,6 +2134,12 @@
       },
       {
        "kind": "call",
+       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
+       "line": 40,
+       "to": "backend/src/data_store/graph/v4/graph_phone_sync.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_customer/graph/spark_graph.py",
        "line": 21,
        "to": "backend/src/rox_customer/graph/snowflake_auth.py"
@@ -1860,12 +2155,6 @@
        "path": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py",
        "line": 58,
        "to": "backend/src/rox_customer/graph/v4/entity_creator/deletion_pruning.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_customer/graph/v4/entity_creator/generic_creator.py",
-       "line": 23,
-       "to": "backend/src/rox_customer/graph/v4/entity_creator/generic_creator.py"
       }
      ]
     },
@@ -2291,7 +2580,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_customer/graph/v4/rox_graph_creator.py",
-       "line": 35,
+       "line": 36,
        "to": "backend/src/rox_customer/graph/v4/rox_graph_creator.py"
       }
      ]
@@ -2723,6 +3012,12 @@
        "to": "backend/src/rox_core/api/account/service.py"
       },
       {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 101,
+       "to": "backend/src/rox_core/api/entities/deal/service.py"
+      },
+      {
        "kind": "table",
        "path": "backend/src/rox_customer/real_time/models/entity/account_dao.py",
        "line": 1,
@@ -2740,6 +3035,68 @@
        "path": "backend/src/rox_customer/graph/registry/generated_index.py",
        "line": 56,
        "to": "backend/src/rox_customer/graph/registry/generated_index.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/person.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 101,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 126,
+       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
+       "line": 35,
+       "to": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
+       "line": 17,
+       "to": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/people/graph_dao.py",
+       "line": 31,
+       "to": "backend/src/rox_core/api/people/graph_dao.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/task_items/entity_resolution.py",
+     "primary": false,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/task_items/entity_resolution.py",
+       "line": 1,
+       "table": "entity_deal"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/task_items/entity_resolution.py",
+       "line": 1,
+       "table": "entity_event"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/task_items/entity_resolution.py",
+       "line": 1,
+       "table": "entity_person"
       }
      ]
     },
@@ -2949,6 +3306,12 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 17,
+       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
        "line": 49,
        "to": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py"
@@ -3006,6 +3369,12 @@
       {
        "kind": "call",
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
+       "line": 35,
+       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 38,
        "to": "backend/src/unified_data/renderers/source_renderers/person/display_waterfall.py"
       },
@@ -3014,12 +3383,6 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 41,
        "to": "backend/src/unified_data/renderers/source_renderers/person/graph_fields.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
-       "line": 44,
-       "to": "backend/src/unified_data/renderers/source_renderers/person/public_fields.py"
       }
      ]
     },
@@ -3033,6 +3396,12 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 28,
        "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/lead/field_renderers.py",
+       "line": 9,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
       },
       {
        "kind": "table",
@@ -3052,6 +3421,49 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 32,
        "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/company_fields.py",
+       "line": 5,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
+       "line": 35,
+       "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 6,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 17,
+       "to": "backend/src/unified_data/renderers/identifiers.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 24,
+       "to": "backend/src/unified_data/renderers/sqlglot_utils.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 30,
+       "to": "backend/src/unified_data/reserved_fields/person/contact_preferences.py"
       }
      ]
     },
@@ -3065,6 +3477,12 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 38,
        "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/display_waterfall.py",
+       "line": 12,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
       }
      ]
     },
@@ -3078,6 +3496,12 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 41,
        "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/graph_fields.py",
+       "line": 5,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
       }
      ]
     },
@@ -3091,6 +3515,12 @@
        "path": "backend/src/unified_data/renderers/registry/field_renderer_registry.py",
        "line": 44,
        "to": "backend/src/unified_data/renderers/registry/field_renderer_registry.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/public_fields.py",
+       "line": 12,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
       }
      ]
     },
@@ -3150,6 +3580,12 @@
       },
       {
        "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 24,
+       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py",
        "line": 62,
        "to": "backend/src/unified_data/renderers/source_renderers/shared/last_events.py"
@@ -3191,6 +3627,51 @@
        "path": "backend/src/unified_data/reserved_fields/company/last_events.py",
        "line": 1,
        "table": "entity_link"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/person/contact_preferences.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "line": 30,
+       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/reserved_fields/person/contact_preferences.py",
+       "line": 2,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/person/display_waterfall.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/reserved_fields/person/display_waterfall.py",
+       "line": 6,
+       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+       "line": 1,
+       "table": "entity_person"
       }
      ]
     },
@@ -3319,6 +3800,13 @@
     },
     {
      "a": "crm_writeback_graph_staging",
+     "b": "entity_person",
+     "signal": "comparison",
+     "path": "backend/src/rox_core/api/people/graph_dao.py",
+     "line": 280
+    },
+    {
+     "a": "crm_writeback_graph_staging",
      "b": "graph",
      "signal": "comparison",
      "path": "backend/src/rox_core/api/entities/people/staging_crm_people.py",
@@ -3347,10 +3835,24 @@
     },
     {
      "a": "entity_link",
+     "b": "entity_person",
+     "signal": "comparison",
+     "path": "backend/src/ext_integrations/integration/common/matcher.py",
+     "line": 407
+    },
+    {
+     "a": "entity_link",
      "b": "graph",
      "signal": "comparison",
      "path": "backend/src/rox_core/api/entities/event_v2/service.py",
      "line": 1072
+    },
+    {
+     "a": "entity_person",
+     "b": "graph",
+     "signal": "comparison",
+     "path": "backend/src/rox_core/api/graph/data_source_service.py",
+     "line": 273
     }
    ]
   },
@@ -3655,7 +4157,7 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 1240,
+       "line": 1251,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
@@ -3754,59 +4256,39 @@
      ]
     },
     {
-     "path": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py",
+     "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
      "primary": true,
-     "reason": "calls",
+     "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 19,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
-     "primary": true,
-     "reason": "called_by",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
-       "line": 3,
-       "to": "backend/src/ext_integrations/integration/crm/dto.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 13,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm/dto.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py",
-       "line": 3,
-       "to": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dto.py",
-       "line": 9,
-       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
        "line": 14,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 17,
+       "to": "backend/src/rox_core/api/graph/erd/service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 20,
+       "to": "backend/src/rox_core/crm_profiles/profile.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 21,
+       "to": "backend/src/rox_core/models/crm_field.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 23,
+       "to": "backend/src/rox_core/models/erd_mapping.py"
       }
      ]
     },
@@ -3818,31 +4300,68 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 37,
-       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+       "line": 16,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 39,
-       "to": "backend/src/rox_core/api/graph/erd/service.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 41,
+       "line": 44,
        "to": "backend/src/rox_core/crm_profiles/dynamics.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 51,
-       "to": "backend/src/rox_core/models/crm_field.py"
+       "line": 54,
+       "to": "backend/src/rox_core/models/erd_mapping.py"
       },
       {
        "kind": "call",
+       "path": "backend/src/rox_core/crm_profiles/registry.py",
+       "line": 3,
+       "to": "backend/src/rox_core/crm_profiles/registry.py"
+      },
+      {
+       "kind": "table",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 53,
+       "line": 1,
+       "table": "erd_mapping"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 21,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 32,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/parser.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 39,
+       "to": "backend/src/rox_core/api/crm_field/sync.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 46,
+       "to": "backend/src/rox_core/crm_profiles/hubspot.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 57,
        "to": "backend/src/rox_core/models/erd_mapping.py"
       }
      ]
@@ -3854,40 +4373,15 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 32,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/crm_field/sync.py",
        "line": 9,
        "to": "backend/src/rox_core/api/crm_field/sync.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/activity_writeback_constants.py",
-     "primary": true,
-     "reason": "called_by",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 29,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 24,
-       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 9,
-       "to": "backend/src/rox_core/api/data_controller/business.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
-       "line": 5,
-       "to": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py"
       }
      ]
     },
@@ -3905,28 +4399,16 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/crm_profiles/registry.py",
-       "line": 6,
+       "line": 9,
        "to": "backend/src/rox_core/crm_profiles/registry.py"
       }
      ]
     },
     {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-     "primary": true,
+     "primary": false,
      "reason": "tables",
      "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 13,
-       "to": "backend/src/ext_integrations/integration/crm/crm_writeback_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 14,
-       "to": "backend/src/ext_integrations/integration/crm/dto.py"
-      },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
@@ -3936,14 +4418,26 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 40,
-       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
+       "line": 51,
+       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 51,
-       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
+       "line": 60,
+       "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 62,
+       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
+       "line": 77,
+       "to": "backend/src/rox_core/models/column_data_fetcher_mapping.py"
       }
      ]
     },
@@ -3952,12 +4446,6 @@
      "primary": true,
      "reason": "tables",
      "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 25,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
@@ -3981,12 +4469,18 @@
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "line": 1,
        "table": "crm_field"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+       "line": 1,
+       "table": "external_column_mapping"
       }
      ]
     },
     {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-     "primary": true,
+     "primary": false,
      "reason": "tables",
      "evidence": [
       {
@@ -3998,45 +4492,26 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 19,
-       "to": "backend/src/ext_integrations/integration/crm/audit_log/audit_logger.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 29,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/activity_writeback_constants.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 38,
-       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 50,
+       "line": 51,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 40,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 38,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "line": 70,
+       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 80,
+       "to": "backend/src/rox_core/api/graph/erd/service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
+       "line": 92,
+       "to": "backend/src/rox_core/models/column_data_fetcher_mapping.py"
       }
      ]
     },
@@ -4047,33 +4522,33 @@
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 47,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 43,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py",
-       "line": 8,
-       "to": "backend/src/ext_integrations/integration/crm_writeback_dependency_graph.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
-       "line": 15,
-       "to": "backend/src/ext_integrations/integration/crm/dto.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
        "line": 18,
        "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+       "line": 19,
+       "to": "backend/src/rox_core/models/column_metadata.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+       "line": 13,
+       "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+       "line": 1,
+       "table": "crm_writeback_graph_staging"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/ext_integrations/integration/crm_writeback_utils.py",
+       "line": 1,
+       "table": "external_column_mapping"
       }
      ]
     },
@@ -4085,7 +4560,7 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 28,
+       "line": 29,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       }
      ]
@@ -4103,27 +4578,27 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dto.py",
-       "line": 9,
-       "to": "backend/src/ext_integrations/integration/crm/dto.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/crm_metadata_shim.py",
        "line": 4,
        "to": "backend/src/ext_integrations/integration/crm/salesforce/crm_metadata_shim.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 51,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+       "line": 23,
+       "to": "backend/src/data_ingestion/fivetran_naming.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 50,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+       "line": 29,
+       "to": "backend/src/ext_integrations/integration/salesforce_country_state_mapping.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+       "line": 71,
+       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
       }
      ]
     },
@@ -4515,12 +4990,6 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 60,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/outreach/unified_column_data.py",
        "line": 19,
        "to": "backend/src/outreach/unified_column_data.py"
@@ -4528,14 +4997,20 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 10,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "line": 14,
+       "to": "backend/src/orchestrator/customer_cache.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 14,
-       "to": "backend/src/orchestrator/customer_cache.py"
+       "line": 23,
+       "to": "backend/src/rox_core/api/graph/erd/service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+       "line": 26,
+       "to": "backend/src/rox_core/api/query/dto.py"
       }
      ]
     },
@@ -4583,26 +5058,14 @@
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 37,
-       "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 62,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 69,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 14,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 70,
+       "line": 71,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
@@ -4610,6 +5073,18 @@
        "path": "backend/src/rox_core/api/account/filter_compiler.py",
        "line": 19,
        "to": "backend/src/rox_core/api/account/filter_compiler.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+       "line": 26,
+       "to": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/crm_field/business.py",
+       "line": 7,
+       "to": "backend/src/rox_core/api/crm_field/business.py"
       }
      ]
     },
@@ -4639,6 +5114,12 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 39,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/crm_field/endpoints.py",
        "line": 12,
        "to": "backend/src/rox_core/api/crm_field/endpoints.py"
@@ -4660,12 +5141,6 @@
        "path": "backend/src/rox_core/api/crm_field/sync.py",
        "line": 12,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/crm_field/sync.py",
-       "line": 13,
-       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
       }
      ]
     },
@@ -4677,32 +5152,32 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 9,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/activity_writeback_constants.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 14,
+       "line": 15,
        "to": "backend/src/research/clever_column/column_config_dtos.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 15,
+       "line": 16,
        "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 24,
+       "line": 25,
        "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 25,
+       "line": 26,
        "to": "backend/src/rox_core/api/data_controller/campaign_member_fields.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/data_controller/business.py",
+       "line": 48,
+       "to": "backend/src/rox_core/api/graph/erd/service.py"
       }
      ]
     },
@@ -4714,7 +5189,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 25,
+       "line": 26,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
@@ -4751,13 +5226,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 23,
+       "line": 26,
        "to": "backend/src/rox_core/api/graph/erd/service.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 24,
+       "line": 27,
        "to": "backend/src/rox_core/models/erd_mapping.py"
       },
       {
@@ -4765,25 +5240,6 @@
        "path": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py",
        "line": 4,
        "to": "backend/src/rox_customer/graph/v4/jobs/graph_refresh_job.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/entities/column_values/dto.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 64,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 206,
-       "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
       }
      ]
     },
@@ -4855,9 +5311,9 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 78,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 16,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
       }
      ]
     },
@@ -4979,6 +5435,12 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 129,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py",
        "line": 22,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_mapping_inference_service.py"
@@ -5029,7 +5491,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 46,
+       "line": 47,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
@@ -5059,21 +5521,21 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 39,
-       "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 79,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 17,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
       },
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 73,
+       "line": 74,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
+       "line": 29,
+       "to": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py"
       }
      ]
     },
@@ -5082,12 +5544,6 @@
      "primary": true,
      "reason": "tables",
      "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
-       "line": 5,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/activity_writeback_constants.py"
-      },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
@@ -5111,6 +5567,12 @@
        "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
        "line": 29,
        "to": "backend/src/rox_core/models/crm_field.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/integrations/salesforce_writeback_service.py",
+       "line": 1,
+       "table": "crm_field"
       }
      ]
     },
@@ -5149,43 +5611,6 @@
        "path": "backend/src/rox_core/api/rqlplusplus/entity_column_upsert.py",
        "line": 10,
        "to": "backend/src/unified_data/column_value_updater.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-       "line": 14,
-       "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-       "line": 15,
-       "to": "backend/src/rox_core/models/column_data_fetcher_mapping.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-       "line": 19,
-       "to": "backend/src/rox_core/models/column_metadata.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-       "line": 20,
-       "to": "backend/src/rox_core/models/crm_field.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-       "line": 1,
-       "table": "crm_field"
       }
      ]
     },
@@ -5234,32 +5659,69 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 84,
+       "line": 85,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
        "kind": "call",
+       "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
+       "line": 27,
+       "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 52,
+       "line": 53,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 6,
+       "line": 9,
        "to": "backend/src/rox_core/column_mapping/dao.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 8,
-       "to": "backend/src/rox_core/column_mapping/errors.py"
+       "line": 10,
+       "to": "backend/src/rox_core/column_mapping/crm_option_sync.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/column_mapping/crm_option_sync.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/data_controller/business.py",
+       "line": 55,
+       "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 12,
-       "to": "backend/src/rox_core/column_mapping/types.py"
+       "line": 10,
+       "to": "backend/src/rox_core/column_mapping/business.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/column_mapping/crm_option_sync.py",
+       "line": 5,
+       "to": "backend/src/rox_core/models/column_metadata.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/column_mapping/crm_option_sync.py",
+       "line": 6,
+       "to": "backend/src/rox_core/models/crm_field.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/column_mapping/crm_option_sync.py",
+       "line": 1,
+       "table": "crm_field"
       }
      ]
     },
@@ -5271,13 +5733,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 53,
+       "line": 54,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 6,
+       "line": 9,
        "to": "backend/src/rox_core/column_mapping/business.py"
       },
       {
@@ -5308,7 +5770,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 8,
+       "line": 12,
        "to": "backend/src/rox_core/column_mapping/business.py"
       }
      ]
@@ -5346,13 +5808,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 54,
+       "line": 60,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 12,
+       "line": 16,
        "to": "backend/src/rox_core/column_mapping/business.py"
       }
      ]
@@ -5365,7 +5827,7 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 41,
+       "line": 44,
        "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
       },
       {
@@ -5383,7 +5845,38 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/crm_profiles/registry.py",
-       "line": 10,
+       "line": 13,
+       "to": "backend/src/rox_core/crm_profiles/registry.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/crm_profiles/hubspot.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 46,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/crm_profiles/hubspot.py",
+       "line": 1,
+       "to": "backend/src/rox_core/api/account/dto.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/crm_profiles/hubspot.py",
+       "line": 3,
+       "to": "backend/src/rox_core/crm_profiles/profile.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/crm_profiles/registry.py",
+       "line": 14,
        "to": "backend/src/rox_core/crm_profiles/registry.py"
       }
      ]
@@ -5393,6 +5886,12 @@
      "primary": true,
      "reason": "tables",
      "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 20,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
+      },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/account/persisted_account_assignment_preview_service.py",
@@ -5414,14 +5913,8 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/service.py",
-       "line": 9,
+       "line": 10,
        "to": "backend/src/rox_core/api/graph/erd/service.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/crm_profiles/dynamics.py",
-       "line": 3,
-       "to": "backend/src/rox_core/crm_profiles/dynamics.py"
       }
      ]
     },
@@ -5432,8 +5925,14 @@
      "evidence": [
       {
        "kind": "call",
+       "path": "backend/src/rox_core/api/account/filter_compiler.py",
+       "line": 310,
+       "to": "backend/src/rox_core/api/account/filter_compiler.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/business.py",
-       "line": 55,
+       "line": 61,
        "to": "backend/src/rox_core/api/data_controller/business.py"
       },
       {
@@ -5453,12 +5952,6 @@
        "path": "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py",
        "line": 11,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_template_loader.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/crm_profiles/registry.py",
-       "line": 3,
-       "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
       }
      ]
     },
@@ -5470,7 +5963,7 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 85,
+       "line": 86,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
@@ -5482,7 +5975,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/crm_profiles/registry.py",
-       "line": 12,
+       "line": 16,
        "to": "backend/src/rox_core/crm_profiles/registry.py"
       },
       {
@@ -5506,33 +5999,33 @@
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 77,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "line": 21,
        "to": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 91,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 86,
+       "line": 87,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 28,
+       "line": 29,
        "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/crm_field/crm_field_service.py",
+       "line": 9,
+       "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/data_controller/business.py",
+       "line": 63,
+       "to": "backend/src/rox_core/api/data_controller/business.py"
       }
      ]
     },
@@ -5543,33 +6036,33 @@
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 81,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "line": 22,
        "to": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 92,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
-      },
-      {
-       "kind": "call",
        "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 87,
+       "line": 88,
        "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/crm_field/crm_field_service.py",
-       "line": 7,
+       "line": 10,
        "to": "backend/src/rox_core/api/crm_field/crm_field_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/column_mapping/backfill.py",
+       "line": 7,
+       "to": "backend/src/rox_core/column_mapping/backfill.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/column_mapping/business.py",
+       "line": 30,
+       "to": "backend/src/rox_core/column_mapping/business.py"
       }
      ]
     },
@@ -5580,15 +6073,9 @@
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 51,
-       "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 82,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py"
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 21,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
       },
       {
        "kind": "call",
@@ -5598,15 +6085,21 @@
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 93,
-       "to": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py"
+       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
+       "line": 89,
+       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 88,
-       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
+       "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
+       "line": 41,
+       "to": "backend/src/rox_core/api/account/account_assignment_preview_service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/account/dto.py",
+       "line": 14,
+       "to": "backend/src/rox_core/api/account/dto.py"
       }
      ]
     },
@@ -5629,21 +6122,21 @@
       },
       {
        "kind": "call",
+       "path": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py",
+       "line": 23,
+       "to": "backend/src/ext_integrations/integration/crm/crm_metadata_sync.py"
+      },
+      {
+       "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py",
-       "line": 53,
+       "line": 54,
        "to": "backend/src/ext_integrations/integration/crm/dynamics/crm_metadata_shim.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/salesforce_shim.py",
-       "line": 91,
-       "to": "backend/src/ext_integrations/integration/salesforce_shim.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/account/account_assignment_preview_service.py",
-       "line": 42,
-       "to": "backend/src/rox_core/api/account/account_assignment_preview_service.py"
+       "path": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py",
+       "line": 57,
+       "to": "backend/src/ext_integrations/integration/crm/hubspot/crm_metadata_shim.py"
       }
      ]
     },
@@ -5655,7 +6148,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/service.py",
-       "line": 14,
+       "line": 15,
        "to": "backend/src/rox_core/api/graph/erd/service.py"
       },
       {
@@ -5692,7 +6185,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/column_mapping/business.py",
-       "line": 30,
+       "line": 34,
        "to": "backend/src/rox_core/column_mapping/business.py"
       },
       {
@@ -5780,7 +6273,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/agents/column_data_fetcher.py",
-       "line": 34,
+       "line": 35,
        "to": "backend/src/rox_core/api/agents/column_data_fetcher.py"
       },
       {
@@ -5899,15 +6392,15 @@
      "a": "crm_field",
      "b": "external_column_mapping",
      "signal": "comparison",
-     "path": "backend/src/rox_core/api/salesforce_enrichment/org_field_mapping.py",
-     "line": 79
+     "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
+     "line": 471
     },
     {
      "a": "erd_mapping",
      "b": "external_column_mapping",
      "signal": "comparison",
      "path": "backend/src/rox_core/models/column_metadata.py",
-     "line": 607
+     "line": 578
     },
     {
      "a": "erd_mapping",
@@ -5948,7 +6441,7 @@
       {
        "kind": "reference",
        "path": ".agents/skills/preview-envs/SKILL.md",
-       "line": 296,
+       "line": 317,
        "target": "backend/src/chat/server/fastapi_app.py"
       }
      ]
@@ -5986,7 +6479,7 @@
       {
        "kind": "call",
        "path": "backend/src/chat/routes/conversation/router.py",
-       "line": 84,
+       "line": 81,
        "to": "backend/src/chat/routes/conversation/static_site_grant.py"
       },
       {
@@ -6011,7 +6504,7 @@
       {
        "kind": "call",
        "path": "backend/src/chat/routes/conversation/router.py",
-       "line": 84,
+       "line": 81,
        "to": "backend/src/chat/routes/conversation/router.py"
       }
      ]
@@ -6071,6 +6564,31 @@
        "path": "backend/src/chat/server/fastapi_app.py",
        "line": 23,
        "to": "backend/src/chat/routes/conversation/router.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/chat/server/fastapi_app.py",
+       "line": 27,
+       "to": "backend/src/common/fastapi_request_validation.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/chat/server/fastapi_app.py",
+       "line": 305,
+       "to": "backend/src/shim_layer/observability/transports/otel/__init__.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/common/fastapi_request_validation.py",
+     "primary": true,
+     "reason": "called_by",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/chat/server/fastapi_app.py",
+       "line": 27,
+       "to": "backend/src/chat/server/fastapi_app.py"
       }
      ]
     },
@@ -6913,6 +7431,19 @@
      ]
     },
     {
+     "path": "backend/src/shim_layer/observability/transports/otel/__init__.py",
+     "primary": true,
+     "reason": "called_by",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/chat/server/fastapi_app.py",
+       "line": 305,
+       "to": "backend/src/chat/server/fastapi_app.py"
+      }
+     ]
+    },
+    {
      "path": "backend/src/tasks/contracts/views.py",
      "primary": true,
      "reason": "called_by",
@@ -7024,37 +7555,6 @@
        "path": "backend/src/temporal/workers/interceptors.py",
        "line": 33,
        "to": "backend/src/util/org_cache.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 18,
-       "to": "backend/src/temporal/workers/workflow_worker.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/temporal/workers/workflow_worker.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 18,
-       "to": "backend/src/temporal/workers/interceptors.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 23,
-       "to": "backend/src/workflow/agentflow/activities/run_agent.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 26,
-       "to": "backend/src/workflow/execution_graph/utils/temporal.py"
       }
      ]
     },
@@ -7105,19 +7605,6 @@
        "path": "backend/src/temporal/workers/interceptors.py",
        "line": 33,
        "to": "backend/src/temporal/workers/interceptors.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/workflow/agentflow/activities/run_agent.py",
-     "primary": true,
-     "reason": "called_by",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 23,
-       "to": "backend/src/temporal/workers/workflow_worker.py"
       }
      ]
     },
@@ -7189,12 +7676,6 @@
      "primary": true,
      "reason": "calls",
      "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/temporal/workers/workflow_worker.py",
-       "line": 26,
-       "to": "backend/src/temporal/workers/workflow_worker.py"
-      },
       {
        "kind": "call",
        "path": "backend/src/workflow/execution_graph/utils/temporal.py",
@@ -8018,19 +8499,6 @@
        "kind": "call",
        "path": "backend/src/rox_core/api/health/dao.py",
        "line": 3,
-       "to": "backend/src/util/trx_mgr.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/metering/conversation_run_mapping_backfill_job.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/metering/conversation_run_mapping_backfill_job.py",
-       "line": 23,
        "to": "backend/src/util/trx_mgr.py"
       }
      ]
@@ -11375,6 +11843,12 @@
        "path": "backend/src/data_store/graph/v4/generic_sync.py",
        "line": 8,
        "to": "backend/src/data_store/graph/v4/sync_hooks.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/graph/business.py",
+       "line": 13,
+       "to": "backend/src/rox_core/api/graph/business.py"
       }
      ]
     },
@@ -11411,7 +11885,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/business.py",
-       "line": 41,
+       "line": 13,
+       "to": "backend/src/data_store/graph/v4/generic_sync.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/graph/business.py",
+       "line": 42,
        "to": "backend/src/rox_core/models/graph_version.py"
       },
       {
@@ -11425,12 +11905,6 @@
        "path": "backend/src/rox_core/api/graph/business.py",
        "line": 1,
        "table": "entity_organization"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/graph/business.py",
-       "line": 1,
-       "table": "graph_cdc"
       }
      ]
     },
@@ -11517,7 +11991,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/business.py",
-       "line": 41,
+       "line": 42,
        "to": "backend/src/rox_core/api/graph/business.py"
       },
       {
@@ -13098,7 +13572,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/service.py",
-       "line": 13,
+       "line": 9,
+       "to": "backend/src/rox_core/api/graph/erd/dto.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/graph/erd/service.py",
+       "line": 14,
        "to": "backend/src/rox_core/models/erd_onboarding_proposal.py"
       },
       {
@@ -13112,12 +13592,6 @@
        "path": "backend/src/rox_core/api/graph/erd/service.py",
        "line": 1,
        "table": "erd_mapping"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/graph/erd/service.py",
-       "line": 1,
-       "table": "erd_onboarding_proposal"
       }
      ]
     },
@@ -13302,7 +13776,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-       "line": 157,
+       "line": 159,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py"
       },
       {
@@ -13333,7 +13807,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-       "line": 160,
+       "line": 162,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py"
       },
       {
@@ -13376,7 +13850,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-       "line": 163,
+       "line": 165,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py"
       },
       {
@@ -13401,7 +13875,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-       "line": 164,
+       "line": 166,
        "to": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py"
       },
       {
@@ -13497,481 +13971,6 @@
    ]
   },
   {
-   "id": "entity_deal",
-   "tables": [
-    "entity_deal",
-    "entity_deal_cdc",
-    "entity_deal_staging",
-    "entity_tag"
-   ],
-   "files": [
-    {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 36,
-       "to": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 98,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 1,
-       "table": "entity_company"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 117,
-       "to": "backend/src/rox_customer/real_time/models/entity/deal_dao.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 118,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 36,
-       "to": "backend/src/rox_core/api/entities/deal/service.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
-       "line": 24,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/entities/deal/service.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 94,
-       "to": "backend/src/rox_core/models/entities/tags.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 113,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "entity_link"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "entity_tag"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
-       "line": 1,
-       "table": "entity_link"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
-       "line": 32,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
-       "line": 1,
-       "table": "entity_link"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/governance/record_display/deal.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
-       "line": 10,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/models/entities/tags.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 94,
-       "to": "backend/src/rox_core/api/entities/deal/service.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
-       "line": 6,
-       "to": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/models/entities/tags.py",
-       "line": 81,
-       "table": "entity_tag"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_customer/graph/v4/entity_creator/deal_resolution.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/rox_customer/graph/v4/entity_creator/deal_resolution.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_customer/graph/v4/entity_creator/deal_resolution.py",
-       "line": 1,
-       "table": "graph"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
-       "line": 3,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
-       "line": 24,
-       "to": "backend/src/rox_core/api/data_controller/entity_ids.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 113,
-       "to": "backend/src/rox_core/api/entities/deal/service.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
-       "line": 32,
-       "to": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
-       "line": 10,
-       "to": "backend/src/rox_core/api/governance/record_display/deal.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
-       "line": 3,
-       "to": "backend/src/rox_customer/real_time/models/entity/deal_dao.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/task_items/entity_resolution.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/task_items/entity_resolution.py",
-       "line": 1,
-       "table": "entity_deal"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/task_items/entity_resolution.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
-       "line": 8,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
-       "line": 11,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
-       "line": 6,
-       "to": "backend/src/rox_core/models/entities/tags.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
-       "line": 1,
-       "table": "entity_tag"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/reserved_fields/deal/display_waterfall.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/reserved_fields/deal/display_waterfall.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/workflow/triggers/handlers/deal.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "table",
-       "path": "backend/src/workflow/triggers/handlers/deal.py",
-       "line": 1,
-       "table": "entity_deal"
-      }
-     ]
-    }
-   ],
-   "table_links": [
-    {
-     "a": "entity_deal",
-     "b": "entity_deal_cdc",
-     "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
-     "line": 73
-    },
-    {
-     "a": "entity_deal",
-     "b": "entity_deal_staging",
-     "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
-     "line": 68
-    },
-    {
-     "a": "entity_deal",
-     "b": "entity_tag",
-     "signal": "primaryjoin:ambiguous",
-     "path": "backend/src/rox_core/models/entities/deal.py",
-     "line": 216
-    },
-    {
-     "a": "entity_deal_cdc",
-     "b": "entity_deal_staging",
-     "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
-     "line": 68
-    }
-   ]
-  },
-  {
    "id": "external_entity_column_value",
    "tables": [
     "external_entity_column_value",
@@ -13980,25 +13979,6 @@
     "external_entity_column_version"
    ],
    "files": [
-    {
-     "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 91,
-       "to": "backend/src/rox_customer/real_time/models/entity/column_value.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/crm/salesforce/salesforce_writeback_engine.py",
-       "line": 1,
-       "table": "external_entity_column_value"
-      }
-     ]
-    },
     {
      "path": "backend/src/rox_core/api/column_value_mirror/dao.py",
      "primary": true,
@@ -14138,13 +14118,13 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-       "line": 17,
+       "line": 20,
        "to": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-       "line": 32,
+       "line": 35,
        "to": "backend/src/rox_customer/real_time/models/entity/column_value.py"
       },
       {
@@ -14175,19 +14155,19 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 14,
+       "line": 17,
        "to": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 20,
+       "line": 23,
        "to": "backend/src/rox_core/api/entities/column_values/spark_data_controller_transporter.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 29,
+       "line": 32,
        "to": "backend/src/rox_customer/real_time/models/entity/column_value.py"
       },
       {
@@ -14212,19 +14192,19 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-       "line": 17,
+       "line": 20,
        "to": "backend/src/rox_core/api/data_controller/single_column_refresh.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 14,
+       "line": 17,
        "to": "backend/src/rox_core/api/data_controller/spark_executor.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
-       "line": 54,
+       "line": 55,
        "to": "backend/src/rox_customer/real_time/models/entity/column_value.py"
       },
       {
@@ -14249,7 +14229,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 20,
+       "line": 23,
        "to": "backend/src/rox_core/api/data_controller/spark_executor.py"
       },
       {
@@ -14292,19 +14272,19 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/single_column_refresh.py",
-       "line": 32,
+       "line": 35,
        "to": "backend/src/rox_core/api/data_controller/single_column_refresh.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/data_controller/spark_executor.py",
-       "line": 29,
+       "line": 32,
        "to": "backend/src/rox_core/api/data_controller/spark_executor.py"
       },
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
-       "line": 54,
+       "line": 55,
        "to": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py"
       },
       {
@@ -14471,37 +14451,6 @@
        "to": "backend/src/unified_data/renderers/eav_value_tables.py"
       }
      ]
-    },
-    {
-     "path": "backend/src/unified_data/resolved_column_value_store.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/column_value_mirror/service.py",
-       "line": 51,
-       "to": "backend/src/rox_core/api/column_value_mirror/service.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/resolved_column_value_store.py",
-       "line": 104,
-       "to": "backend/src/rox_customer/real_time/models/entity/column_value.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/resolved_column_value_store.py",
-       "line": 122,
-       "to": "backend/src/unified_data/renderers/value_columns.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/resolved_column_value_store.py",
-       "line": 1,
-       "table": "external_entity_column_value"
-      }
-     ]
     }
    ],
    "table_links": [
@@ -14550,235 +14499,231 @@
    ]
   },
   {
-   "id": "entity_person",
+   "id": "entity_deal",
    "tables": [
-    "entity_person",
-    "entity_person_cdc",
-    "entity_person_staging"
+    "entity_deal",
+    "entity_deal_cdc",
+    "entity_deal_staging",
+    "entity_tag"
    ],
    "files": [
     {
-     "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
-       "line": 31,
-       "to": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-       "line": 27,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-       "line": 28,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/data_store/graph/v4/graph_phone_sync.py",
-       "line": 31,
-       "to": "backend/src/data_store/graph/v4/graph_phone_sync.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-       "line": 16,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-       "line": 17,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-       "line": 1,
-       "table": "entity_person"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/governance/record_display/person.py",
+     "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "table",
-       "path": "backend/src/rox_core/api/governance/record_display/person.py",
+       "path": "backend/src/ext_integrations/integration/crm/writeback_delay_metric.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
       }
      ]
     },
     {
-     "path": "backend/src/rox_core/api/leads/provider_source.py",
+     "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+       "line": 24,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
+      },
+      {
        "kind": "table",
-       "path": "backend/src/rox_core/api/leads/provider_source.py",
+       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
       }
      ]
     },
     {
-     "path": "backend/src/rox_core/api/people/graph_dao.py",
+     "path": "backend/src/rox_core/api/entities/deal/service.py",
      "primary": false,
      "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/rox_core/api/people/graph_dao.py",
-       "line": 22,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 94,
+       "to": "backend/src/rox_core/models/entities/tags.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/rox_core/api/people/graph_dao.py",
-       "line": 31,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 113,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
       },
       {
        "kind": "table",
-       "path": "backend/src/rox_core/api/people/graph_dao.py",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
+       "line": 1,
+       "table": "entity_deal"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
        "line": 1,
        "table": "entity_link"
       },
       {
        "kind": "table",
-       "path": "backend/src/rox_core/api/people/graph_dao.py",
+       "path": "backend/src/rox_core/api/entities/deal/service.py",
        "line": 1,
-       "table": "entity_person"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/people/graph_dao.py",
-       "line": 1,
-       "table": "entity_person_cdc"
+       "table": "entity_tag"
       }
      ]
     },
     {
-     "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+     "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "table",
-       "path": "backend/src/rox_customer/batch/models/v4/entity/person.py",
+       "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/governance/cascade/account_to_deal_cascade_resolver.py",
+       "line": 1,
+       "table": "entity_link"
       }
      ]
     },
     {
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
+     "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-       "line": 27,
-       "to": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py"
+       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+       "line": 32,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
       },
       {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-       "line": 16,
-       "to": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py"
+       "kind": "table",
+       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+       "line": 1,
+       "table": "entity_deal"
       },
       {
-       "kind": "call",
-       "path": "backend/src/rox_customer/real_time/models/entity/person.py",
-       "line": 23,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      },
+       "kind": "table",
+       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+       "line": 1,
+       "table": "entity_link"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/governance/record_display/deal.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
-       "line": 5,
-       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
        "line": 10,
-       "to": "backend/src/unified_data/reserved_fields/person/graph_fields.py"
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
+       "line": 1,
+       "table": "entity_deal"
       }
      ]
     },
     {
-     "path": "backend/src/rox_customer/real_time/models/entity/person.py",
+     "path": "backend/src/rox_core/models/entities/tags.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py",
-       "line": 28,
-       "to": "backend/src/ext_integrations/integration/hubspot/contact_upsert.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py",
-       "line": 17,
-       "to": "backend/src/rox_core/api/entities/people/interfaces/graph_person_interface.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_customer/real_time/models/entity/person.py",
-       "line": 23,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
        "line": 6,
-       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
+       "to": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/models/entities/tags.py",
+       "line": 81,
+       "table": "entity_tag"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/graph/v4/entity_creator/deal_resolution.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/rox_customer/graph/v4/entity_creator/deal_resolution.py",
+       "line": 1,
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+       "line": 3,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+       "line": 1,
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/data_controller/entity_ids.py",
+       "line": 24,
+       "to": "backend/src/rox_core/api/data_controller/entity_ids.py"
       },
       {
        "kind": "call",
-       "path": "backend/src/unified_data/reserved_fields/person/contact_preferences.py",
-       "line": 2,
-       "to": "backend/src/unified_data/reserved_fields/person/contact_preferences.py"
+       "path": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py",
+       "line": 32,
+       "to": "backend/src/rox_core/api/governance/ownership/deal_ownership_resolver.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/governance/record_display/deal.py",
+       "line": 10,
+       "to": "backend/src/rox_core/api/governance/record_display/deal.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_customer/real_time/models/entity/deal_dao.py",
+       "line": 3,
+       "to": "backend/src/rox_customer/real_time/models/entity/deal_dao.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
+       "line": 8,
+       "to": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py"
       }
      ]
     },
@@ -14791,114 +14736,148 @@
        "kind": "table",
        "path": "backend/src/task_items/entity_resolution.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
       }
      ]
     },
     {
-     "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+     "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
-       "line": 5,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
-       "line": 6,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
-       "line": 30,
-       "to": "backend/src/unified_data/reserved_fields/person/contact_preferences.py"
+       "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
+       "line": 8,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
       },
       {
        "kind": "table",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
+       "path": "backend/src/unified_data/renderers/source_renderers/deal/display_waterfall.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
       }
      ]
     },
     {
-     "path": "backend/src/unified_data/reserved_fields/person/contact_preferences.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py",
-       "line": 30,
-       "to": "backend/src/unified_data/renderers/source_renderers/person/contact_preferences.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/reserved_fields/person/contact_preferences.py",
-       "line": 2,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/reserved_fields/person/display_waterfall.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/reserved_fields/person/display_waterfall.py",
-       "line": 6,
-       "to": "backend/src/rox_customer/real_time/models/entity/person.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
      "primary": true,
      "reason": "tables",
      "evidence": [
       {
        "kind": "call",
-       "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
-       "line": 10,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/person.py"
+       "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
+       "line": 11,
+       "to": "backend/src/rox_customer/real_time/models/entity/generated/deal.py"
       },
       {
        "kind": "table",
-       "path": "backend/src/unified_data/reserved_fields/person/graph_fields.py",
+       "path": "backend/src/unified_data/renderers/source_renderers/shared/associated_opportunities.py",
        "line": 1,
-       "table": "entity_person"
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
+       "line": 6,
+       "to": "backend/src/rox_core/models/entities/tags.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/unified_data/renderers/source_renderers/shared/entity_tags.py",
+       "line": 1,
+       "table": "entity_tag"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/unified_data/reserved_fields/company/associated_opportunities.py",
+       "line": 1,
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/display_waterfall.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/unified_data/reserved_fields/deal/display_waterfall.py",
+       "line": 1,
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/unified_data/reserved_fields/deal/stage_name.py",
+       "line": 1,
+       "table": "entity_deal"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/workflow/triggers/handlers/deal.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "table",
+       "path": "backend/src/workflow/triggers/handlers/deal.py",
+       "line": 1,
+       "table": "entity_deal"
       }
      ]
     }
    ],
    "table_links": [
     {
-     "a": "entity_person",
-     "b": "entity_person_cdc",
+     "a": "entity_deal",
+     "b": "entity_deal_cdc",
      "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
-     "line": 150
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
+     "line": 73
     },
     {
-     "a": "entity_person",
-     "b": "entity_person_staging",
+     "a": "entity_deal",
+     "b": "entity_deal_staging",
      "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
-     "line": 116
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
+     "line": 68
     },
     {
-     "a": "entity_person_cdc",
-     "b": "entity_person_staging",
+     "a": "entity_deal",
+     "b": "entity_tag",
+     "signal": "primaryjoin:ambiguous",
+     "path": "backend/src/rox_core/models/entities/deal.py",
+     "line": 244
+    },
+    {
+     "a": "entity_deal_cdc",
+     "b": "entity_deal_staging",
      "signal": "same_file",
-     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
-     "line": 116
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/deal.py",
+     "line": 68
     }
    ]
   },
@@ -15812,13 +15791,13 @@
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 190,
+       "line": 191,
        "to": "backend/src/rox_customer/real_time/models/entity/entity_link.py"
       },
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 197,
+       "line": 198,
        "to": "backend/src/rox_customer/real_time/models/entity/graph.py"
       },
       {
@@ -15837,7 +15816,7 @@
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 190,
+       "line": 191,
        "to": "backend/src/data_store/graph/v4/rox_source_ingestor.py"
       },
       {
@@ -15862,7 +15841,7 @@
       {
        "kind": "call",
        "path": "backend/src/data_store/graph/v4/rox_source_ingestor.py",
-       "line": 197,
+       "line": 198,
        "to": "backend/src/data_store/graph/v4/rox_source_ingestor.py"
       },
       {
@@ -16045,6 +16024,109 @@
    ]
   },
   {
+   "id": "crm_people_list_run",
+   "tables": [
+    "crm_people_list_run"
+   ],
+   "files": [
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+       "line": 5,
+       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+       "line": 13,
+       "to": "backend/src/rox_core/models/lists/crm_people_list_run.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+       "line": 1,
+       "table": "crm_people_list_run"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+       "line": 5,
+       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py",
+       "line": 10,
+       "to": "backend/src/rox_core/models/lists/crm_people_list_run.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
+       "line": 12,
+       "to": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py",
+       "line": 1,
+       "table": "crm_people_list_run"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
+     "primary": true,
+     "reason": "calls",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
+       "line": 12,
+       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py"
+      }
+     ]
+    },
+    {
+     "path": "backend/src/rox_core/models/lists/crm_people_list_run.py",
+     "primary": true,
+     "reason": "tables",
+     "evidence": [
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py",
+       "line": 13,
+       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs/business.py"
+      },
+      {
+       "kind": "call",
+       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py",
+       "line": 10,
+       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs/service.py"
+      },
+      {
+       "kind": "table",
+       "path": "backend/src/rox_core/models/lists/crm_people_list_run.py",
+       "line": 30,
+       "table": "crm_people_list_run"
+      }
+     ]
+    }
+   ],
+   "table_links": []
+  },
+  {
    "id": "crm_writeback_audit_log",
    "tables": [
     "crm_writeback_audit_log",
@@ -16096,7 +16178,7 @@
       {
        "kind": "call",
        "path": "backend/src/ext_integrations/integration/crm/salesforce/writeback_and_refresh_engine.py",
-       "line": 98,
+       "line": 99,
        "to": "backend/src/rox_core/models/public_crm_writeback_audit_log.py"
       },
       {
@@ -16264,72 +16346,6 @@
        "path": "backend/src/rox_core/models/governance/integrations/sfdc/sfdc_reconciliation.py",
        "line": 12,
        "table": "sfdc_governance_reconciliation_staging"
-      }
-     ]
-    }
-   ],
-   "table_links": []
-  },
-  {
-   "id": "crm_people_list_run",
-   "tables": [
-    "crm_people_list_run"
-   ],
-   "files": [
-    {
-     "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py",
-       "line": 9,
-       "to": "backend/src/rox_core/models/lists/crm_people_list_run.py"
-      },
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
-       "line": 12,
-       "to": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py",
-       "line": 1,
-       "table": "crm_people_list_run"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
-     "primary": true,
-     "reason": "calls",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/prospect_lists/dynamics/dto.py",
-       "line": 12,
-       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/models/lists/crm_people_list_run.py",
-     "primary": true,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py",
-       "line": 9,
-       "to": "backend/src/rox_core/api/prospect_lists/crm_list_runs.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/models/lists/crm_people_list_run.py",
-       "line": 30,
-       "table": "crm_people_list_run"
       }
      ]
     }
@@ -16546,7 +16562,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/graph/erd/service.py",
-       "line": 14,
+       "line": 15,
        "to": "backend/src/rox_core/models/erd_relationship.py"
       },
       {
@@ -16636,7 +16652,7 @@
       {
        "kind": "call",
        "path": "backend/src/rox_core/api/entities/column_values/spark_data_controller_computer.py",
-       "line": 37,
+       "line": 38,
        "to": "backend/src/rox_customer/batch/models/v4/entity/data_controller.py"
       },
       {
@@ -16687,31 +16703,6 @@
        "path": "backend/src/data_store/graph/v4/endpoint_resolution.py",
        "line": 1,
        "table": "entity_opportunity_contact_role"
-      }
-     ]
-    },
-    {
-     "path": "backend/src/rox_core/api/entities/deal/service.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 114,
-       "to": "backend/src/rox_customer/real_time/models/entity/generated/opportunity_contact_role.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "entity_opportunity_contact_role"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/rox_core/api/entities/deal/service.py",
-       "line": 1,
-       "table": "graph"
       }
      ]
     },
@@ -16859,27 +16850,16 @@
        "table": "resolved_entity_column_value"
       }
      ]
-    },
-    {
-     "path": "backend/src/unified_data/resolved_column_value_store.py",
-     "primary": false,
-     "reason": "tables",
-     "evidence": [
-      {
-       "kind": "call",
-       "path": "backend/src/unified_data/resolved_column_value_store.py",
-       "line": 98,
-       "to": "backend/src/rox_core/models/public_resolved_entity_column_value.py"
-      },
-      {
-       "kind": "table",
-       "path": "backend/src/unified_data/resolved_column_value_store.py",
-       "line": 1,
-       "table": "resolved_entity_column_value"
-      }
-     ]
     }
    ],
+   "table_links": []
+  },
+  {
+   "id": "crm_pipeline",
+   "tables": [
+    "crm_pipeline"
+   ],
+   "files": [],
    "table_links": []
   },
   {
@@ -16998,6 +16978,23 @@
    ]
   },
   {
+   "id": "entity_person_cdc",
+   "tables": [
+    "entity_person_cdc",
+    "entity_person_staging"
+   ],
+   "files": [],
+   "table_links": [
+    {
+     "a": "entity_person_cdc",
+     "b": "entity_person_staging",
+     "signal": "same_file",
+     "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
+     "line": 116
+    }
+   ]
+  },
+  {
    "id": "entity_rox_company_data",
    "tables": [
     "entity_rox_company_data"
@@ -17023,13 +17020,6 @@
   }
  ],
  "cross_links": [
-  {
-   "a": "crm_writeback_graph_staging",
-   "b": "entity_person",
-   "signal": "comparison",
-   "path": "backend/src/rox_core/api/people/graph_dao.py",
-   "line": 280
-  },
   {
    "a": "entity_campaign",
    "b": "graph",
@@ -17059,20 +17049,6 @@
    "line": 972
   },
   {
-   "a": "entity_link",
-   "b": "entity_person",
-   "signal": "comparison",
-   "path": "backend/src/ext_integrations/integration/common/matcher.py",
-   "line": 407
-  },
-  {
-   "a": "entity_person",
-   "b": "graph",
-   "signal": "comparison",
-   "path": "backend/src/rox_core/api/graph/data_source_service.py",
-   "line": 273
-  },
-  {
    "a": "entity_user",
    "b": "graph",
    "signal": "comparison",
@@ -17084,7 +17060,7 @@
    "b": "erd_relationship",
    "signal": "comparison",
    "path": "backend/src/rox_core/api/graph/erd/service.py",
-   "line": 559
+   "line": 595
   },
   {
    "a": "erd_mapping",
@@ -17173,6 +17149,48 @@
    "line": 43
   },
   {
+   "a": "crm_pipeline",
+   "b": "data_source",
+   "signal": "id_column",
+   "path": "backend/src/rox_core/models/entities/crm_pipeline.py",
+   "line": 55
+  },
+  {
+   "a": "crm_pipeline",
+   "b": "deal",
+   "signal": "fk",
+   "path": "backend/src/rox_core/models/entities/deal.py",
+   "line": 252
+  },
+  {
+   "a": "crm_pipeline",
+   "b": "deal_stage",
+   "signal": "fk",
+   "path": "backend/src/rox_core/models/entities/deal.py",
+   "line": 117
+  },
+  {
+   "a": "crm_pipeline",
+   "b": "integration",
+   "signal": "fk",
+   "path": "backend/src/rox_core/models/entities/crm_pipeline.py",
+   "line": 44
+  },
+  {
+   "a": "crm_pipeline",
+   "b": "integration",
+   "signal": "id_column",
+   "path": "backend/src/rox_core/models/entities/crm_pipeline.py",
+   "line": 43
+  },
+  {
+   "a": "crm_pipeline",
+   "b": "organization",
+   "signal": "fk",
+   "path": "backend/src/rox_core/models/entities/crm_pipeline.py",
+   "line": 40
+  },
+  {
    "a": "crm_writeback_audit_log",
    "b": "data_source",
    "signal": "id_column",
@@ -17247,7 +17265,7 @@
    "b": "erd_onboarding_proposal",
    "signal": "comparison",
    "path": "backend/src/rox_core/api/graph/erd/onboarding_proposal_service.py",
-   "line": 484
+   "line": 495
   },
   {
    "a": "data_source",
@@ -17422,7 +17440,7 @@
    "b": "rox_person",
    "signal": "comparison",
    "path": "backend/src/rox_core/api/people/dao.py",
-   "line": 1092
+   "line": 1091
   },
   {
    "a": "entity_rox_company_data",
@@ -17592,6 +17610,10 @@
    "reason": "no shared table or call in its feature"
   },
   {
+   "path": "backend/src/rox_core/models/entities/crm_pipeline.py",
+   "reason": "no shared table or call in its feature"
+  },
+  {
    "path": "backend/src/rox_core/models/public_rox_company_data.py",
    "reason": "no shared table or call in its feature"
   },
@@ -17614,6 +17636,10 @@
   {
    "path": "backend/src/rox_customer/real_time/models/entity/generated/lead.py",
    "reason": "no shared table or call in its feature"
+  },
+  {
+   "path": "backend/src/rox_customer/real_time/models/entity/generated/person.py",
+   "reason": "no shared table or call in its feature"
   }
  ],
  "unmapped_tags": [
@@ -17631,10 +17657,10 @@
   "utils"
  ],
  "counts": {
-  "domain_files": 488,
-  "primary_placed": 515,
-  "shared": 77,
-  "uncovered": 7,
+  "domain_files": 491,
+  "primary_placed": 516,
+  "shared": 70,
+  "uncovered": 9,
   "web": 25,
   "deployment": 1,
   "skills": 8,
