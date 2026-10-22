@@ -141,7 +141,8 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "Activity integrations: email, calendar, meetings, Slack",
         r"^(integration|email_message|calendar|adhoc|unified_|\w+_event_attendee"
         r"|\w+_event_metadata|zoom|ms_teams|transcript|slack|webhook|note$"
-        r"|rox_activity|notification|orgwide_integration|call_recorder_|google_drive)",
+        r"|rox_activity|notification|orgwide_integration|call_recorder_|google_drive"
+        r"|seismic_)",
         [
             "integration",
             "email_message",
