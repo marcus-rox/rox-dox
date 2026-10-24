@@ -54,7 +54,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
         "CRM mirror (entity_*, sfdc_*, graph)",
         r"^(entity_|external_entity|external_column|sfdc_|crm_|graph|erd_"
         r"|unified_catalog|resolved_entity|archived_entity|data_controller"
-        r"|relationships$|explicit_name|source_mapping$)",
+        r"|relationships$|explicit_name|source_mapping$|change_events$)",
         [
             "entity_company",
             "entity_person",
@@ -67,7 +67,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
     (
         "tenancy",
         "Tenancy: orgs, users, auth & billing",
-        r"^(provider_credit|organization|org_extra|org_secret|org_default"
+        r"^(provider_credit|organization|org_extra|org_secret|org_default|org_feature_flag"
         r"|sub_organization|user$|user_extra|user_profile|user_preferences"
         r"|user_platform|auth0|api_key|plan$|subscription|enterprise_sub"
         r"|user_limit|payment_|purchased_|starter_action|auto_reload|downgrade"

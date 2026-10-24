@@ -154,7 +154,7 @@ s_init_webhook = S(
     "app.register_blueprint(twilio_webhook_v2_bp)",
 )
 s_rn_unknown = S(RN, 'raise ValueError(f"DEPLOY_TARGET', span=0)
-s_rn_sf = S(RN, "salesforce_enrichment_ns, path=", "hubspot_enrichment_ns, path=")
+s_rn_sf = S(RN, "salesforce_enrichment_ns, path=", "hubspot_lists_ns, path=")
 s_rn_dialer = S(
     RN, 'api.add_namespace(dialer_ns, path="/dialer"', "twilio_webhook_v2_ns, path="
 )
@@ -907,9 +907,9 @@ nodes = [
         "providers",
         s_rn_sf,
         [
-            D("Salesforce and HubSpot enrichment routes", s_rn_sf),
+            D("Salesforce enrichment, Dynamics and HubSpot list routes", s_rn_sf),
             D("Google, Slack, Microsoft APIs", s_ascii_int),
-            D("INTERACTION calls: enrichment", s_rn_sf),
+            D("INTERACTION calls: enrichment, CRM lists", s_rn_sf),
         ],
         kind="external",
     ),
