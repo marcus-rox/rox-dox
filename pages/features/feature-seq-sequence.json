@@ -2,7 +2,7 @@
  "id": "feature-seq-sequence",
  "title": "Sequences, tasks & email sending",
  "kind": "feature",
- "commit": "ed302e846279faac5e803ea3ae450f756b889d2c",
+ "commit": "4c7afae059a200d4defea8236c3a69d350a35da3",
  "parent": "domain-seq",
  "paths": [
   ".agents/skills/crm-writeback-harness/SKILL.md",
@@ -25,6 +25,7 @@
   "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
   "backend/src/outreach/auto_reply_agent_dto.py",
   "backend/src/outreach/auto_reply_agent_executor.py",
+  "backend/src/outreach/auto_reply_utils.py",
   "backend/src/outreach/context_utils.py",
   "backend/src/outreach/dto.py",
   "backend/src/outreach/outreach_agent_dto.py",
@@ -54,7 +55,6 @@
   "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
   "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
   "backend/src/rox_core/api/agents/outreach/sequence/service.py",
-  "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
   "backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py",
   "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py",
   "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/sequence_status.py",
@@ -118,7 +118,6 @@
   "web/apps/web/src/app/hooks/react-query/sequences/sequences.ts",
   "web/apps/web/src/app/hooks/react-query/sequences/useAdvanceStepTasks.ts",
   "web/apps/web/src/components/email/outreach/OutreachGhostsDevModal.tsx",
-  "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
   "web/apps/web/src/components/homeV3/hooks/useOutboundSection.ts",
   "web/apps/web/src/components/homeV3/hooks/useSequenceSummaryStats.ts",
   "web/apps/web/src/components/outreach/OutreachLinkedInGenerationTaskEditor.tsx",
@@ -749,27 +748,6 @@
      ]
     },
     {
-     "path": "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
-     "primary": true,
-     "evidence": "route tag sequence",
-     "sources": [
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
-       "lines": [
-        118,
-        118
-       ]
-      },
-      {
-       "path": "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
-       "lines": [
-        6,
-        6
-       ]
-      }
-     ]
-    },
-    {
      "path": "web/apps/web/src/components/homeV3/hooks/useOutboundSection.ts",
      "primary": true,
      "evidence": "route tag sequence",
@@ -1169,6 +1147,27 @@
      ]
     },
     {
+     "path": "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
+     "primary": false,
+     "evidence": "route tag sequence",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
+       "lines": [
+        118,
+        118
+       ]
+      },
+      {
+       "path": "web/apps/web/src/components/email/outreach/OutreachPolicyFailureCTA.tsx",
+       "lines": [
+        14,
+        14
+       ]
+      }
+     ]
+    },
+    {
      "path": "web/apps/web/src/components/homeV4/components/widgets/OutreachStats.tsx",
      "primary": false,
      "evidence": "route tag sequence",
@@ -1517,7 +1516,7 @@
     {
      "path": "backend/src/tasks/executors/email.py",
      "primary": true,
-     "evidence": "imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py",
+     "evidence": "imports backend/src/ext_integrations/email_integration/email_types.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py",
      "sources": [
       {
        "path": "backend/src/tasks/executors/email.py",
@@ -1536,13 +1535,6 @@
       {
        "path": "backend/src/tasks/executors/email.py",
        "lines": [
-        50,
-        50
-       ]
-      },
-      {
-       "path": "backend/src/tasks/executors/email.py",
-       "lines": [
         82,
         82
        ]
@@ -1552,6 +1544,13 @@
        "lines": [
         95,
         95
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/email.py",
+       "lines": [
+        100,
+        100
        ]
       }
      ]
@@ -1564,15 +1563,15 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_service.py",
        "lines": [
-        121,
-        121
+        120,
+        120
        ]
       },
       {
        "path": "backend/src/tasks/executors/email.py",
        "lines": [
-        3113,
-        3113
+        3112,
+        3112
        ]
       },
       {
@@ -1643,20 +1642,13 @@
     {
      "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py",
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/utils/rox_person_utils.py",
      "sources": [
       {
        "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
        "lines": [
         10,
         10
-       ]
-      },
-      {
-       "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
-       "lines": [
-        17,
-        17
        ]
       },
       {
@@ -1678,6 +1670,13 @@
        "lines": [
         68,
         68
+       ]
+      },
+      {
+       "path": "backend/src/tasks/executors/enrich_email_and_phone.py",
+       "lines": [
+        85,
+        85
        ]
       }
      ]
@@ -1755,41 +1754,41 @@
     {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/rox_core/api/agents/outreach/dto.py",
+     "evidence": "imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py",
      "sources": [
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        17,
-        17
+        15,
+        15
        ]
       },
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        26,
-        26
+        21,
+        21
        ]
       },
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        29,
-        29
+        24,
+        24
        ]
       },
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        36,
-        36
+        34,
+        34
        ]
       },
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        41,
-        41
+        39,
+        39
        ]
       }
      ]
@@ -2220,8 +2219,8 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
        "lines": [
-        17,
-        17
+        18,
+        18
        ]
       }
      ]
@@ -2318,8 +2317,8 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
        "lines": [
-        32,
-        32
+        33,
+        33
        ]
       },
       {
@@ -2402,15 +2401,15 @@
       {
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "lines": [
-        29,
-        29
+        31,
+        31
        ]
       },
       {
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "lines": [
-        30,
-        30
+        32,
+        32
        ]
       }
      ]
@@ -2418,7 +2417,7 @@
     {
      "path": "backend/src/outreach/auto_reply_agent_dto.py",
      "primary": true,
-     "evidence": "imports backend/src/chat/routes/eval/dto.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+     "evidence": "imports backend/src/chat/routes/eval/dto.py; imports backend/src/rox_core/models/sequence_email_reply.py; imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/seqregen_cell/auto_reply.py",
      "sources": [
       {
        "path": "backend/src/chat/routes/eval/dto.py",
@@ -2442,17 +2441,17 @@
        ]
       },
       {
-       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+       "path": "backend/src/outreach/auto_reply_utils.py",
        "lines": [
-        26,
-        26
+        6,
+        6
        ]
       },
       {
-       "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
+       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        22,
-        22
+        19,
+        19
        ]
       }
      ]
@@ -2460,7 +2459,7 @@
     {
      "path": "backend/src/outreach/auto_reply_agent_executor.py",
      "primary": true,
-     "evidence": "imports backend/src/agent_framework/modules/calendar_availability/availability.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/outreach_agent_executor.py",
+     "evidence": "imports backend/src/agent_framework/modules/calendar_availability/availability.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_dto.py",
      "sources": [
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
@@ -2486,15 +2485,57 @@
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
-        47,
-        47
+        43,
+        43
        ]
       },
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
-        51,
-        51
+        48,
+        48
+       ]
+      }
+     ]
+    },
+    {
+     "path": "backend/src/outreach/auto_reply_utils.py",
+     "primary": true,
+     "evidence": "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "sources": [
+      {
+       "path": "backend/src/outreach/auto_reply_agent_executor.py",
+       "lines": [
+        42,
+        42
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        6,
+        6
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        11,
+        11
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        19,
+        19
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        22,
+        22
        ]
       }
      ]
@@ -2507,8 +2548,8 @@
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
-        42,
-        42
+        43,
+        43
        ]
       },
       {
@@ -2528,8 +2569,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        29,
-        29
+        35,
+        35
        ]
       },
       {
@@ -2572,13 +2613,20 @@
     {
      "path": "backend/src/outreach/outreach_agent_dto.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/outreach/outreach_agent_executor.py; imports backend/src/outreach/reward_model.py",
+     "evidence": "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/outreach/outreach_agent_executor.py",
      "sources": [
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
-        47,
-        47
+        48,
+        48
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        11,
+        11
        ]
       },
       {
@@ -2600,13 +2648,6 @@
        "lines": [
         40,
         40
-       ]
-      },
-      {
-       "path": "backend/src/outreach/reward_model.py",
-       "lines": [
-        15,
-        15
        ]
       }
      ]
@@ -2668,8 +2709,8 @@
       {
        "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
        "lines": [
-        1031,
-        1031
+        1028,
+        1028
        ]
       }
      ]
@@ -2677,13 +2718,20 @@
     {
      "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/reply_business.py; imports backend/src/rox_core/api/sequence_policy/policy_utils.py",
+     "evidence": "imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
      "sources": [
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        26,
-        26
+        19,
+        19
+       ]
+      },
+      {
+       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+       "lines": [
+        24,
+        24
        ]
       },
       {
@@ -2696,22 +2744,15 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        46,
-        46
+        42,
+        42
        ]
       },
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        59,
-        59
-       ]
-      },
-      {
-       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
-       "lines": [
-        72,
-        72
+        54,
+        54
        ]
       }
      ]
@@ -2719,13 +2760,13 @@
     {
      "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/agent_framework/modules/calendar_availability/availability.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/context_utils.py; imports backend/src/outreach/outreach_agent_executor.py",
+     "evidence": "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/agent_framework/modules/calendar_availability/availability.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/context_utils.py",
      "sources": [
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        715,
-        715
+        393,
+        393
        ]
       },
       {
@@ -2752,8 +2793,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        33,
-        33
+        35,
+        35
        ]
       }
      ]
@@ -2766,8 +2807,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        53,
-        53
+        55,
+        55
        ]
       },
       {
@@ -2997,8 +3038,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        70,
-        70
+        72,
+        72
        ]
       },
       {
@@ -3118,13 +3159,20 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dto.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/finalize.py; imports backend/src/outreach/seqregen_cell/policy.py",
+     "evidence": "imports backend/src/outreach/auto_reply_agent_executor.py; imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/finalize.py",
      "sources": [
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
         65,
         65
+       ]
+      },
+      {
+       "path": "backend/src/outreach/auto_reply_utils.py",
+       "lines": [
+        19,
+        19
        ]
       },
       {
@@ -3137,8 +3185,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        46,
-        46
+        42,
+        42
        ]
       },
       {
@@ -3146,13 +3194,6 @@
        "lines": [
         32,
         32
-       ]
-      },
-      {
-       "path": "backend/src/outreach/seqregen_cell/policy.py",
-       "lines": [
-        11,
-        11
        ]
       }
      ]
@@ -3207,8 +3248,8 @@
       {
        "path": "backend/src/tasks/executors/email.py",
        "lines": [
-        2193,
-        2193
+        2192,
+        2192
        ]
       },
       {
@@ -3342,7 +3383,7 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_service.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/listing_business.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/service.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/listing_business.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/service.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_business.py",
@@ -3375,8 +3416,8 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_service.py",
        "lines": [
-        47,
-        47
+        50,
+        50
        ]
       }
      ]
@@ -3396,8 +3437,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        59,
-        59
+        54,
+        54
        ]
       },
       {
@@ -3410,15 +3451,15 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
        "lines": [
-        17,
-        17
+        18,
+        18
        ]
       },
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
        "lines": [
-        32,
-        32
+        33,
+        33
        ]
       }
      ]
@@ -3426,7 +3467,7 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/endpoints.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/service.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py",
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/endpoints.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/service.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py; imports backend/src/rox_core/models/sequence.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
@@ -3452,15 +3493,15 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
        "lines": [
-        30,
-        30
+        35,
+        35
        ]
       },
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
        "lines": [
-        35,
-        35
+        58,
+        58
        ]
       }
      ]
@@ -3508,48 +3549,6 @@
      ]
     },
     {
-     "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
-     "primary": true,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/listing_service.py; imports backend/src/rox_core/api/agents/outreach/sequence/sending_business.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py; imports backend/src/rox_core/models/sequence.py",
-     "sources": [
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_service.py",
-       "lines": [
-        47,
-        47
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
-       "lines": [
-        30,
-        30
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
-       "lines": [
-        6,
-        6
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
-       "lines": [
-        10,
-        10
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
-       "lines": [
-        17,
-        17
-       ]
-      }
-     ]
-    },
-    {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py",
      "primary": true,
      "evidence": "imports backend/src/chat/routes/eval/inbound_replies.py; imports backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py; imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/rox_core/api/agents/outreach/sequence/listing_service.py; imports backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
@@ -3571,8 +3570,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        362,
-        362
+        216,
+        216
        ]
       },
       {
@@ -3678,7 +3677,7 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py; imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py; uses campaign_request",
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/abstract.py; imports backend/src/rox_core/models/sequence.py; uses campaign_request; uses sequence",
      "sources": [
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
@@ -3706,13 +3705,6 @@
        "lines": [
         44,
         44
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/sequence_build/campaign_regen/update_contact.py",
-       "lines": [
-        698,
-        698
        ]
       }
      ]
@@ -3797,13 +3789,13 @@
     {
      "path": "backend/src/rox_core/api/sequence_policy/policy_utils.py",
      "primary": true,
-     "evidence": "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/tasks/executors/regenerate_sequence_task.py",
+     "evidence": "imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/models/sequence_task.py",
      "sources": [
       {
-       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+       "path": "backend/src/outreach/auto_reply_utils.py",
        "lines": [
-        72,
-        72
+        22,
+        22
        ]
       },
       {
@@ -3825,13 +3817,6 @@
        "lines": [
         9,
         9
-       ]
-      },
-      {
-       "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
-       "lines": [
-        81,
-        81
        ]
       }
      ]
@@ -3858,8 +3843,8 @@
       {
        "path": "backend/src/rox_core/api/writeback/business.py",
        "lines": [
-        44,
-        44
+        46,
+        46
        ]
       }
      ]
@@ -3872,8 +3857,8 @@
       {
        "path": "backend/src/outreach/auto_reply_agent_executor.py",
        "lines": [
-        73,
-        73
+        72,
+        72
        ]
       },
       {
@@ -3886,8 +3871,8 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        92,
-        92
+        94,
+        94
        ]
       },
       {
@@ -4049,7 +4034,7 @@
     {
      "path": "backend/src/rox_core/api/agents/outreach/dialer/ai_call_business.py",
      "primary": false,
-     "evidence": "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py; uses rox_call; uses sequence",
+     "evidence": "imports backend/src/rox_core/models/sequence.py; imports backend/src/rox_core/models/sequence_task.py; uses rox_call; uses sequence; uses sequence_build_step",
      "sources": [
       {
        "path": "backend/src/rox_core/api/agents/outreach/dialer/ai_call_business.py",
@@ -4070,13 +4055,6 @@
        "lines": [
         54,
         54
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/agents/outreach/dialer/ai_call_business.py",
-       "lines": [
-        231,
-        231
        ]
       }
      ]
@@ -4222,15 +4200,15 @@
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
        "lines": [
-        54,
-        54
+        49,
+        49
        ]
       },
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        75,
-        75
+        77,
+        77
        ]
       },
       {
@@ -4257,9 +4235,51 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+     "primary": false,
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/listing_service.py; imports backend/src/rox_core/api/agents/outreach/sequence/sending_business.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py; imports backend/src/rox_core/models/sequence.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/listing_service.py",
+       "lines": [
+        47,
+        47
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
+       "lines": [
+        30,
+        30
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+       "lines": [
+        9,
+        9
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+       "lines": [
+        13,
+        13
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+       "lines": [
+        20,
+        20
+       ]
+      }
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/agents/outreach/sequence/task_business.py",
      "primary": false,
-     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/endpoints.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/status_rules.py",
+     "evidence": "imports backend/src/rox_core/api/agents/outreach/sequence/endpoints.py; imports backend/src/outreach/outreach_agent_dto.py; imports backend/src/rox_core/api/agents/outreach/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/dto.py; imports backend/src/rox_core/api/agents/outreach/sequence/task_ordering.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
@@ -4292,8 +4312,8 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/task_business.py",
        "lines": [
-        37,
-        37
+        43,
+        43
        ]
       }
      ]
@@ -4399,20 +4419,20 @@
     {
      "path": "backend/src/rox_core/api/email_integration/business.py",
      "primary": false,
-     "evidence": "imports backend/src/outreach/seqregen_cell/auto_reply.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py; imports backend/src/rox_core/api/agents/outreach/sequence/reply_business.py; imports backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
+     "evidence": "imports backend/src/outreach/auto_reply_utils.py; imports backend/src/outreach/seqregen_cell/auto_reply_tools.py; imports backend/src/outreach/seqregen_cell/context.py; imports backend/src/rox_core/api/agents/outreach/sequence/reply_business.py; imports backend/src/rox_core/api/agents/outreach/sequence/sending_business.py",
      "sources": [
       {
-       "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+       "path": "backend/src/outreach/auto_reply_utils.py",
        "lines": [
-        69,
-        69
+        20,
+        20
        ]
       },
       {
        "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
        "lines": [
-        76,
-        76
+        78,
+        78
        ]
       },
       {
@@ -4425,8 +4445,8 @@
       {
        "path": "backend/src/rox_core/api/agents/outreach/sequence/reply_business.py",
        "lines": [
-        54,
-        54
+        58,
+        58
        ]
       },
       {
@@ -4614,7 +4634,7 @@
     {
      "path": "backend/src/rox_core/models/sequence_email_reply.py",
      "primary": true,
-     "evidence": "imports backend/src/chat/routes/eval/dto.py; imports backend/src/chat/routes/eval/inbound_replies.py; imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_agent_executor.py",
+     "evidence": "imports backend/src/chat/routes/eval/dto.py; imports backend/src/chat/routes/eval/inbound_replies.py; imports backend/src/ext_integrations/integration/crm/salesforce/contact_stage.py; imports backend/src/outreach/auto_reply_agent_dto.py; imports backend/src/outreach/auto_reply_utils.py",
      "sources": [
       {
        "path": "backend/src/chat/routes/eval/dto.py",
@@ -4645,10 +4665,10 @@
        ]
       },
       {
-       "path": "backend/src/outreach/auto_reply_agent_executor.py",
+       "path": "backend/src/outreach/auto_reply_utils.py",
        "lines": [
-        70,
-        70
+        23,
+        23
        ]
       }
      ]
@@ -4836,8 +4856,8 @@
       {
        "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
        "lines": [
-        28,
-        28
+        30,
+        30
        ]
       }
      ]
@@ -4928,8 +4948,8 @@
      {
       "path": "backend/src/chat/routes/eval/inbound_replies.py",
       "lines": [
-       282,
-       282
+       279,
+       279
       ]
      },
      {
@@ -4949,7 +4969,7 @@
     ]
    },
    {
-    "text": "Reached from 1312 HTTP endpoints and 199 workers in other features: Account Plan, Account Research, Addusercompanyassociationpostprocessing + 113 more workers, Admin Mcp Permissions, Agent Actions, Agent Products/outbound, Agentflow workflows, Agents, Ai Call Webhook, Artifact, Auth0, Auth0 Tasks, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Cells, Circleback, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Contract Hierarchy, Conversation, Conversation Ticket, Crm Campaigns, Csv Upload, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Email Integration, Email Sync workflows, Emailinitialsync + 2 more workflows, Enrichment, Enrichment Webhook Callbacks, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Google Drive Integration workers, Governance, Governance workers, Graph Erd, Health, Insight Configs, Integration Health workflows, Integrations, Intelligence Api, Leads, Linkedin, Mcp, Meetings By Customers, Mention Agent workers, Notifications, Onboarding, Org Chart, Org Chart Staged People, Organization, Outbound Agent workflows, Outreach, People, Priorities, Prospect Lists, Prospects, Registry, Research, Rox Traces, Rql, Run, Runs, Seismic workers, Self Serve, Sequence Build, Sequence Policy, Sequences, Slack Agent, Slack Ingest workers, Slack Integration workers, Snipe Area Code Numbers workflows, Tabs V2, Task Executors workers, Tasks Integration, Tasks Internal Integrations, Thinkific, Tiptap, Traces, Transcripts V2, Twilio Webhook V2, Unified Data, User, User Account Link Preferences, User Profile Template, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
+    "text": "Reached from 1312 HTTP endpoints and 198 workers in other features: Account Plan, Account Research, Addusercompanyassociationpostprocessing + 113 more workers, Admin Mcp Permissions, Agent Actions, Agent Products/outbound, Agentflow workflows, Agents, Ai Call Webhook, Artifact, Auth0, Auth0 Tasks, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Cells, Circleback, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Contract Hierarchy, Conversation, Conversation Ticket, Crm Campaigns, Csv Upload, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Extraction, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Email Integration, Email Sync workflows, Emailinitialsync + 2 more workflows, Enrichment, Enrichment Webhook Callbacks, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Google Drive Integration workers, Governance, Governance workers, Graph Erd, Health, Insight Configs, Integration Health workflows, Integrations, Intelligence Api, Leads, Linkedin, Mcp, Meetings By Customers, Mention Agent workers, Notifications, Onboarding, Org Chart, Org Chart Staged People, Organization, Outbound Agent workflows, Outreach, People, Priorities, Prospect Lists, Prospects, Registry, Research, Rox Traces, Rql, Run, Runs, Seismic workers, Self Serve, Sequence Build, Sequence Policy, Sequences, Slack Agent, Slack Ingest workers, Slack Integration workers, Snipe Area Code Numbers workflows, Tabs V2, Task Executors workers, Tasks Integration, Tasks Internal Integrations, Thinkific, Tiptap, Traces, Transcripts V2, Twilio Webhook V2, Unified Data, User, User Account Link Preferences, User Profile Template, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/endpoints.py",
@@ -13074,22 +13094,22 @@
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       409,
-       409
+       416,
+       416
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       468,
-       468
+       475,
+       475
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       609,
-       609
+       616,
+       616
       ]
      },
      {
@@ -13137,15 +13157,15 @@
      {
       "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/conversation_task_executor.py",
       "lines": [
-       16,
-       16
+       17,
+       17
       ]
      },
      {
       "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/installation_task_executor.py",
       "lines": [
-       30,
-       30
+       31,
+       31
       ]
      },
      {
@@ -13312,15 +13332,15 @@
      {
       "path": "backend/src/tasks/executors/prospect_list_csv_upload.py",
       "lines": [
-       316,
-       316
+       319,
+       319
       ]
      },
      {
       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
       "lines": [
-       355,
-       355
+       371,
+       371
       ]
      },
      {
@@ -13536,29 +13556,29 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1561,
-       1561
+       1607,
+       1607
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1460,
-       1460
+       1503,
+       1503
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       1666,
-       1666
+       1715,
+       1715
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2905,
-       2905
+       3058,
+       3058
       ]
      },
      {
@@ -13578,8 +13598,8 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2032,
-       2032
+       2114,
+       2114
       ]
      },
      {
@@ -13599,8 +13619,8 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       3100,
-       3100
+       3267,
+       3267
       ]
      },
      {
@@ -13627,8 +13647,8 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       2838,
-       2838
+       2988,
+       2988
       ]
      },
      {
@@ -13760,8 +13780,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       188,
-       188
+       193,
+       193
       ]
      },
      {
@@ -13809,8 +13829,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       468,
-       468
+       473,
+       473
       ]
      },
      {
@@ -13858,8 +13878,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       348,
-       348
+       353,
+       353
       ]
      },
      {
@@ -13872,8 +13892,8 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       86,
-       86
+       87,
+       87
       ]
      },
      {
@@ -13930,13 +13950,6 @@
       "lines": [
        101,
        101
-      ]
-     },
-     {
-      "path": "backend/src/temporal/activities/enrichment/csv_import.py",
-      "lines": [
-       103,
-       103
       ]
      },
      {
@@ -14299,12 +14312,19 @@
      {
       "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/conversation_task_executor.py",
       "lines": [
-       9,
-       9
+       10,
+       10
       ]
      },
      {
       "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/conversation_task_executor.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/installation_task_executor.py",
       "lines": [
        11,
        11
@@ -14313,15 +14333,8 @@
      {
       "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/installation_task_executor.py",
       "lines": [
-       10,
-       10
-      ]
-     },
-     {
-      "path": "backend/src/ext_integrations/ms_teams/bot/task_executors/installation_task_executor.py",
-      "lines": [
-       15,
-       15
+       16,
+       16
       ]
      },
      {
@@ -14362,22 +14375,22 @@
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       19,
-       19
+       18,
+       18
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       22,
-       22
+       21,
+       21
       ]
      },
      {
       "path": "backend/src/ext_integrations/slack_integration/mention_agent/task_executors.py",
       "lines": [
-       76,
-       76
+       75,
+       75
       ]
      },
      {
@@ -15825,22 +15838,22 @@
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       34,
-       34
+       41,
+       41
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       44,
-       44
+       51,
+       51
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       49,
-       49
+       56,
+       56
       ]
      },
      {
@@ -16056,15 +16069,15 @@
      {
       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
       "lines": [
-       51,
-       51
+       52,
+       52
       ]
      },
      {
       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
       "lines": [
-       55,
-       55
+       56,
+       56
       ]
      },
      {
@@ -16665,15 +16678,15 @@
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       53,
-       53
+       54,
+       54
       ]
      },
      {
       "path": "backend/src/temporal/activities/enrichment/csv_import.py",
       "lines": [
-       152,
-       152
+       157,
+       157
       ]
      },
      {
@@ -17023,8 +17036,8 @@
      {
       "path": "backend/src/rox_core/models/sequence.py",
       "lines": [
-       520,
-       1174
+       526,
+       1180
       ]
      },
      {
@@ -17124,7 +17137,7 @@
     ]
    },
    {
-    "text": "Business logic: backend/src/rox_core/api/agents/outreach/sequence (12), backend/src/outreach/seqregen_cell (9), backend/src/outreach (8).",
+    "text": "Business logic: backend/src/rox_core/api/agents/outreach/sequence (12), backend/src/outreach (9), backend/src/outreach/seqregen_cell (9).",
     "sources": [
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/business.py",
@@ -17134,17 +17147,17 @@
       ]
      },
      {
-      "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
-      "lines": [
-       26,
-       26
-      ]
-     },
-     {
       "path": "backend/src/outreach/auto_reply_agent_dto.py",
       "lines": [
        16,
        16
+      ]
+     },
+     {
+      "path": "backend/src/outreach/seqregen_cell/auto_reply.py",
+      "lines": [
+       19,
+       19
       ]
      }
     ]
@@ -17323,8 +17336,8 @@
     {
      "path": "backend/src/rox_core/models/sequence.py",
      "lines": [
-      520,
-      1174
+      526,
+      1180
      ]
     },
     {
@@ -17379,8 +17392,8 @@
     {
      "path": "backend/src/chat/routes/eval/inbound_replies.py",
      "lines": [
-      282,
-      282
+      279,
+      279
      ]
     },
     {
@@ -17414,8 +17427,8 @@
     {
      "path": "backend/src/chat/routes/eval/inbound_replies.py",
      "lines": [
-      261,
-      261
+      258,
+      258
      ]
     },
     {
@@ -18457,8 +18470,8 @@
     {
      "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
      "lines": [
-      107,
-      107
+      109,
+      109
      ]
     },
     {
@@ -18555,29 +18568,29 @@
     {
      "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
      "lines": [
-      995,
-      995
+      994,
+      994
      ]
     },
     {
      "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
      "lines": [
-      1069,
-      1069
+      1068,
+      1068
      ]
     },
     {
      "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
      "lines": [
-      1052,
-      1052
+      1051,
+      1051
      ]
     },
     {
      "path": "backend/src/agent_evals_v2/crm_writeback_seed.py",
      "lines": [
-      1079,
-      1079
+      1078,
+      1078
      ]
     },
     {
@@ -18737,22 +18750,22 @@
     {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
-      200,
-      200
+      197,
+      197
      ]
     },
     {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
-      1528,
-      1528
+      1321,
+      1321
      ]
     },
     {
      "path": "backend/src/tasks/executors/regenerate_sequence_task.py",
      "lines": [
-      332,
-      332
+      329,
+      329
      ]
     },
     {
@@ -18968,6 +18981,18 @@
     ]
    },
    {
+    "text": "Shares 5 files with Sequence agent actions.",
+    "sources": [
+     {
+      "path": "backend/src/chat/routes/eval/inbound_replies.py",
+      "lines": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   {
     "text": "Shares 4 files with Auto-replies.",
     "sources": [
      {
@@ -18984,18 +19009,6 @@
     "sources": [
      {
       "path": "backend/src/tasks/executors/orum_pull_sync.py",
-      "lines": [
-       1,
-       1
-      ]
-     }
-    ]
-   },
-   {
-    "text": "Shares 5 files with Sequence agent actions.",
-    "sources": [
-     {
-      "path": "backend/src/chat/routes/eval/inbound_replies.py",
       "lines": [
        1,
        1
@@ -19271,8 +19284,8 @@
        {
         "path": "backend/src/chat/routes/eval/inbound_replies.py",
         "lines": [
-         282,
-         282
+         279,
+         279
         ]
        }
       ]
@@ -19323,8 +19336,8 @@
        {
         "path": "backend/src/chat/routes/eval/inbound_replies.py",
         "lines": [
-         261,
-         261
+         258,
+         258
         ]
        }
       ]
@@ -20460,8 +20473,8 @@
        {
         "path": "backend/src/outreach/seqregen_cell/auto_reply_tools.py",
         "lines": [
-         107,
-         107
+         109,
+         109
         ]
        },
        {
@@ -20745,8 +20758,8 @@
     "source": {
      "path": "backend/src/ext_integrations/integration/crm/salesforce/sequence_writeback.py",
      "lines": [
-      114,
-      114
+      116,
+      116
      ]
     },
     "kind": "symbolic"
@@ -21029,8 +21042,8 @@
    "source": {
     "path": "backend/src/rox_core/models/sequence.py",
     "lines": [
-     520,
-     1174
+     526,
+     1180
     ]
    }
   },
@@ -21123,6 +21136,17 @@
    }
   },
   {
+   "label": "Sequence agent actions",
+   "page": "feature-seq-sequence-agent-action",
+   "source": {
+    "path": "backend/src/chat/routes/eval/inbound_replies.py",
+    "lines": [
+     1,
+     1
+    ]
+   }
+  },
+  {
    "label": "Auto-replies",
    "page": "feature-seq-sequence-auto-reply-task",
    "source": {
@@ -21138,17 +21162,6 @@
    "page": "feature-seq-sequences-export-log",
    "source": {
     "path": "backend/src/tasks/executors/orum_pull_sync.py",
-    "lines": [
-     1,
-     1
-    ]
-   }
-  },
-  {
-   "label": "Sequence agent actions",
-   "page": "feature-seq-sequence-agent-action",
-   "source": {
-    "path": "backend/src/chat/routes/eval/inbound_replies.py",
     "lines": [
      1,
      1
