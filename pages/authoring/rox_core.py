@@ -370,7 +370,7 @@ s_dynamo_client = S(
 )
 s_s3_client = S(
     "backend/src/shim_layer/s3_shim/s3_shim.py",
-    "client = boto3.client(",
+    "client: S3Client = boto3.client(",
     '"s3",',
 )
 s_redis_sdk = S(
