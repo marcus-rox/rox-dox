@@ -30,7 +30,7 @@ DOMAINS: list[tuple[str, str, str, list[str]]] = [
     (
         "deals",
         "Deals, quotes & contracts",
-        r"^(deal|product|quote|contract)",
+        r"^(deal|product|quote|contract|currency)",
         ["deal", "deal_person", "deal_stage", "contract", "quote", "product"],
     ),
     (

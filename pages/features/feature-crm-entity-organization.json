@@ -2,7 +2,7 @@
  "id": "feature-crm-entity-organization",
  "title": "Entity Organization",
  "kind": "feature",
- "commit": "1f44c755f1ce9b5addd79f1656c02c1e4888735d",
+ "commit": "812db6c2f9520ce01de4c54d660eef51d0df9f65",
  "parent": "domain-crm",
  "paths": [
   ".agents/skills/modernization-migration/SKILL.md",
@@ -23,6 +23,7 @@
   "backend/src/rox_core/api/column_metadata/module.py",
   "backend/src/rox_core/api/column_metadata/org_wide_rox_list_column_backfill_job.py",
   "backend/src/rox_core/api/column_metadata/org_wide_rox_list_column_service.py",
+  "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
   "backend/src/rox_core/api/column_value_mirror/hooks.py",
   "backend/src/rox_core/api/column_value_mirror/module.py",
   "backend/src/rox_core/api/column_value_mirror/service.py",
@@ -45,6 +46,7 @@
   "backend/src/tasks/executors/list_member_ttl_cleanup.py",
   "backend/src/tasks/executors/reenrich_person_phone.py",
   "backend/src/tasks/executors/single_person_enrich.py",
+  "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
   "backend/src/tasks/generic_backfill/org_backfill_job.py",
   "backend/src/tasks/generic_backfill/org_sharded_to_public_verify/parity.py",
   "backend/src/tasks/generic_backfill/sequences/unified_thread_id_backfill_job.py",
@@ -58,7 +60,6 @@
   "backend/src/unified_data/fetchers/postgres.py",
   "backend/src/unified_data/fetchers/registry.py",
   "backend/src/unified_data/metrics.py",
-  "backend/src/unified_data/models/enums.py",
   "backend/src/unified_data/module.py",
   "backend/src/unified_data/org_wide_column_resolver.py",
   "backend/src/unified_data/sql_validators/errors.py",
@@ -221,10 +222,52 @@
      ]
     },
     {
+     "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+     "primary": true,
+     "evidence": "imports backend/src/tasks/generic_backfill/org_backfill_job.py; imports backend/src/util/trx_mgr.py; uses entity_organization",
+     "sources": [
+      {
+       "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+       "lines": [
+        1,
+        1
+       ]
+      },
+      {
+       "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+       "lines": [
+        8,
+        8
+       ]
+      },
+      {
+       "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+       "lines": [
+        17,
+        17
+       ]
+      }
+     ]
+    },
+    {
      "path": "backend/src/tasks/generic_backfill/org_backfill_job.py",
      "primary": true,
-     "evidence": "imports backend/src/util/trx_mgr.py; imports backend/src/tasks/generic_backfill/sharded_rox_org_id_backfill_job.py; uses entity_organization",
+     "evidence": "imports backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py; imports backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py; imports backend/src/util/trx_mgr.py; imports backend/src/tasks/generic_backfill/sharded_rox_org_id_backfill_job.py; uses entity_organization",
      "sources": [
+      {
+       "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+       "lines": [
+        81,
+        81
+       ]
+      },
+      {
+       "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+       "lines": [
+        8,
+        8
+       ]
+      },
       {
        "path": "backend/src/tasks/generic_backfill/org_backfill_job.py",
        "lines": [
@@ -737,6 +780,34 @@
      ]
     },
     {
+     "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+     "primary": true,
+     "evidence": "imports backend/src/rox_core/api/column_value_mirror/module.py; imports backend/src/tasks/generic_backfill/org_backfill_job.py; imports backend/src/util/trx_mgr.py",
+     "sources": [
+      {
+       "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+       "lines": [
+        56,
+        56
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+       "lines": [
+        81,
+        81
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+       "lines": [
+        90,
+        90
+       ]
+      }
+     ]
+    },
+    {
      "path": "backend/src/rox_core/api/column_value_mirror/hooks.py",
      "primary": true,
      "evidence": "imports backend/src/rox_core/api/column_value_mirror/module.py; imports backend/src/rox_core/api/column_value_mirror/service.py",
@@ -760,13 +831,20 @@
     {
      "path": "backend/src/rox_core/api/column_value_mirror/module.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/column_metadata/module.py; imports backend/src/rox_core/api/column_value_mirror/hooks.py; imports backend/src/rox_core/api/column_value_mirror/service.py; imports backend/src/unified_data/module.py; imports backend/src/unified_data/org_wide_column_resolver.py",
+     "evidence": "imports backend/src/rox_core/api/column_metadata/module.py; imports backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py; imports backend/src/rox_core/api/column_value_mirror/hooks.py; imports backend/src/rox_core/api/column_value_mirror/service.py; imports backend/src/unified_data/module.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/column_metadata/module.py",
        "lines": [
         8,
         8
+       ]
+      },
+      {
+       "path": "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
+       "lines": [
+        56,
+        56
        ]
       },
       {
@@ -788,13 +866,6 @@
        "lines": [
         7,
         7
-       ]
-      },
-      {
-       "path": "backend/src/rox_core/api/column_value_mirror/module.py",
-       "lines": [
-        9,
-        9
        ]
       }
      ]
@@ -921,7 +992,7 @@
     {
      "path": "backend/src/rox_core/api/rql/business.py",
      "primary": true,
-     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/fetchers/postgres.py; imports backend/src/unified_data/models/enums.py; imports backend/src/unified_data/module.py",
+     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/fetchers/postgres.py; imports backend/src/unified_data/module.py; imports backend/src/unified_data/sql_validators/errors.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/rql/business.py",
@@ -947,15 +1018,15 @@
       {
        "path": "backend/src/rox_core/api/rql/business.py",
        "lines": [
-        41,
-        41
+        50,
+        50
        ]
       },
       {
        "path": "backend/src/rox_core/api/rql/business.py",
        "lines": [
-        50,
-        50
+        52,
+        52
        ]
       }
      ]
@@ -1152,7 +1223,7 @@
     {
      "path": "backend/src/unified_data/catalog_entry_executor.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/catalog_entry_planner.py; imports backend/src/unified_data/fetchers/registry.py; imports backend/src/unified_data/metrics.py; imports backend/src/unified_data/models/enums.py",
+     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/catalog_entry_planner.py; imports backend/src/unified_data/fetchers/registry.py; imports backend/src/unified_data/metrics.py; imports backend/src/util/trx_mgr.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/rql/business.py",
@@ -1185,8 +1256,8 @@
       {
        "path": "backend/src/unified_data/catalog_entry_executor.py",
        "lines": [
-        15,
-        15
+        22,
+        22
        ]
       }
      ]
@@ -1194,20 +1265,13 @@
     {
      "path": "backend/src/unified_data/catalog_entry_planner.py",
      "primary": true,
-     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/models/enums.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/module.py",
+     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/module.py",
      "sources": [
       {
        "path": "backend/src/unified_data/catalog_entry_executor.py",
        "lines": [
         10,
         10
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/catalog_entry_planner.py",
-       "lines": [
-        26,
-        26
        ]
       },
       {
@@ -1229,7 +1293,7 @@
     {
      "path": "backend/src/unified_data/catalog_entry_router.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_planner.py; imports backend/src/unified_data/models/enums.py; imports backend/src/util/trx_mgr.py",
+     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_planner.py; imports backend/src/util/trx_mgr.py; imports backend/src/unified_data/module.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/rql/business.py",
@@ -1255,15 +1319,15 @@
       {
        "path": "backend/src/unified_data/catalog_entry_router.py",
        "lines": [
-        14,
-        14
+        21,
+        21
        ]
       },
       {
-       "path": "backend/src/unified_data/catalog_entry_router.py",
+       "path": "backend/src/unified_data/module.py",
        "lines": [
-        21,
-        21
+        24,
+        24
        ]
       }
      ]
@@ -1271,20 +1335,13 @@
     {
      "path": "backend/src/unified_data/fetchers/postgres.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/models/enums.py; imports backend/src/util/trx_mgr.py; imports backend/src/unified_data/module.py",
+     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/util/trx_mgr.py; imports backend/src/unified_data/module.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/rql/business.py",
        "lines": [
         34,
         34
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/fetchers/postgres.py",
-       "lines": [
-        13,
-        13
        ]
       },
       {
@@ -1306,20 +1363,13 @@
     {
      "path": "backend/src/unified_data/fetchers/registry.py",
      "primary": true,
-     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/models/enums.py; imports backend/src/unified_data/module.py",
+     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/module.py",
      "sources": [
       {
        "path": "backend/src/unified_data/catalog_entry_executor.py",
        "lines": [
         12,
         12
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/fetchers/registry.py",
-       "lines": [
-        4,
-        4
        ]
       },
       {
@@ -1334,20 +1384,13 @@
     {
      "path": "backend/src/unified_data/metrics.py",
      "primary": true,
-     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/models/enums.py",
+     "evidence": "imports backend/src/unified_data/catalog_entry_executor.py",
      "sources": [
       {
        "path": "backend/src/unified_data/catalog_entry_executor.py",
        "lines": [
         13,
         13
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/metrics.py",
-       "lines": [
-        4,
-        4
        ]
       }
      ]
@@ -1397,7 +1440,7 @@
     {
      "path": "backend/src/unified_data/org_wide_column_resolver.py",
      "primary": true,
-     "evidence": "imports backend/src/rox_core/api/column_value_mirror/module.py; imports backend/src/rox_core/api/column_value_mirror/service.py; imports backend/src/unified_data/module.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/models/enums.py",
+     "evidence": "imports backend/src/rox_core/api/column_value_mirror/module.py; imports backend/src/rox_core/api/column_value_mirror/service.py; imports backend/src/unified_data/module.py; imports backend/src/unified_data/catalog_entry_router.py",
      "sources": [
       {
        "path": "backend/src/rox_core/api/column_value_mirror/module.py",
@@ -1425,13 +1468,6 @@
        "lines": [
         30,
         30
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/org_wide_column_resolver.py",
-       "lines": [
-        33,
-        33
        ]
       }
      ]
@@ -1806,48 +1842,6 @@
      ]
     },
     {
-     "path": "backend/src/unified_data/models/enums.py",
-     "primary": true,
-     "evidence": "imports backend/src/rox_core/api/rql/business.py; imports backend/src/unified_data/catalog_entry_executor.py; imports backend/src/unified_data/catalog_entry_planner.py; imports backend/src/unified_data/catalog_entry_router.py; imports backend/src/unified_data/fetchers/postgres.py",
-     "sources": [
-      {
-       "path": "backend/src/rox_core/api/rql/business.py",
-       "lines": [
-        41,
-        41
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/catalog_entry_executor.py",
-       "lines": [
-        15,
-        15
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/catalog_entry_planner.py",
-       "lines": [
-        26,
-        26
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/catalog_entry_router.py",
-       "lines": [
-        14,
-        14
-       ]
-      },
-      {
-       "path": "backend/src/unified_data/fetchers/postgres.py",
-       "lines": [
-        13,
-        13
-       ]
-      }
-     ]
-    },
-    {
      "path": "backend/src/rox_core/models/erd_onboarding_proposal.py",
      "primary": false,
      "evidence": "uses entity_organization",
@@ -1987,7 +1981,7 @@
     ]
    },
    {
-    "text": "Reached from 1595 HTTP endpoints and 252 workers in other features: Account Plan, Account Research, Addusercompanyassociationpostprocessing + 149 more workers, Admin Mcp Permissions, Admin/chat Prompts, Agent Products/apps, Agent Products/outbound, Agent State, Agentflow Ideas, Agentflow workflows, Agents, Ai Call Webhook, Api Keys, Artifact, Async Jobs workflows, Auth0, Auth0 Events, Auth0 Tasks, Batch + 8 more workflows, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Cells, Chat Models, Chat User Preferences, Chrome Extension, Circleback, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Config/{config Id}/draft, Contract Hierarchy, Conversation, Conversation Link, Conversation Ticket, Conversation/realtime, Cost Meter, Cost Metering workflows, Crm Campaigns, Crm Field, Csv Upload, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Dictation, Digests, Dynamics, Email Integration, Email Sync workflows, Enrich, Enrichment, Enrichment Webhook Callbacks, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Feature Flags, Governance, Governance workers, Graph, Graph Erd, Health, Hotapp, Hubspot, Identity Screening, Identity Screening Rules, Impersonation Admin, Inbound Replies, Insight Configs, Insightsvisibility, Integration, Integration Health workflows, Integrations, Intelligence Api, Internal, Leads, Linkedin, Management Api, Mcp, Meetings By Customers, Mention Agent workers, Mixrank, Mixrank Sync workflows, Msteams Agent, Notes, Notifications, Onboarding, Org Chart, Org Chart Staged People, Org Feature Flags Admin, Organization, Outbound Agent workflows, Outreach, People, Places, Priorities, Priority Jobs, Prospect Lists, Prospecting, Prospects, Registry, Research, Rox Agents workers, Rox File, Rox Files, Rox Traces, Rql, Run, Runs, Salesforce Enrichment, Schema Router Admin, Secrets, Seismic workers, Self Serve, Sequence, Sequence Build, Sequence Policy, Sequences, Share workers, Shareable, Skills, Slack Agent, Slack Ingest workers, Slack Integration workers, Snipe Area Code Numbers workflows, Tabs V2, Task Executors workers, Task Items, Tasks Integration, Tasks Internal Integrations, Tasks Sor, Testing, Thinkific, Tiptap, Traces, Transcripts V2, Twilio Webhook V2, Unified Data, Unipile, User, User Account Link Preferences, User Extra, User Memory, User Profile Template, User Task, Utils, Webhook Health, Webhook Integrations, Webhook Receiver, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
+    "text": "Reached from 1609 HTTP endpoints and 259 workers in other features: Account Plan, Account Research, Addusercompanyassociationpostprocessing + 151 more workers, Admin Mcp Permissions, Admin/chat Prompts, Agent Products/apps, Agent Products/outbound, Agent State, Agentflow Ideas, Agentflow workflows, Agents, Ai Call Webhook, Api Keys, Artifact, Async Jobs workflows, Auth0, Auth0 Events, Auth0 Tasks, Batch + 8 more workflows, Batch Tasks, Billing, Calendar Events, Calendar Sync workflows, Campaigns, Cells, Chat Models, Chat User Preferences, Chrome Extension, Circleback, Column Metadata, Columninsightfanout + 6 more workers, Company Processing, Config, Config/{config Id}/draft, Contract Hierarchy, Conversation, Conversation Link, Conversation Ticket, Conversation/realtime, Cost Meter, Cost Metering workflows, Crm Campaigns, Crm Field, Csv Upload, Custom Apps, Custom Tracking Domain, Data Controller, Data Controller workers, Data Mock, Db Migration Sysadmin, Deal, Debug, Dialer, Dictation, Digests, Dynamics, Email Integration, Email Sync workflows, Enrich, Enrichment, Enrichment Webhook Callbacks, Enrichment workflows, Entities, Entity Account, Entity Tags, Entity Timers workflows, Eval, Feature Flags, Governance, Governance workers, Graph, Graph Erd, Health, Hotapp, Hubspot, Identity Screening, Identity Screening Rules, Impersonation Admin, Inbound Replies, Insight Configs, Insightsvisibility, Instruction Generators, Integration, Integration Health workflows, Integrations, Intelligence Api, Internal, Leads, Linkedin, Management Api, Mcp, Meetings By Customers, Mention Agent workers, Mixrank, Mixrank Sync workflows, Msteams Agent, Notes, Notifications, Onboarding, Org Chart, Org Chart Staged People, Org Feature Flags Admin, Organization, Outbound Agent workflows, Outreach, People, Places, Priorities, Priority Jobs, Prospect Lists, Prospecting, Prospects, Registry, Research, Rox Agents workers, Rox File, Rox Files, Rox Traces, Rql, Run, Runs, Salesforce Enrichment, Schema Router Admin, Secrets, Seismic workers, Self Serve, Sequence, Sequence Build, Sequence Policy, Sequences, Share workers, Shareable, Skills, Slack Agent, Slack Ingest workers, Slack Integration workers, Snipe Area Code Numbers workflows, Tabs V2, Task Executors workers, Task Items, Tasks Integration, Tasks Internal Integrations, Tasks Sor, Testing, Thinkific, Tiptap, Traces, Transcripts V2, Twilio Webhook V2, Unified Data, Unipile, User, User Account Link Preferences, User Extra, User Memory, User Profile Template, User Task, Utils, Webhook Health, Webhook Integrations, Webhook Receiver, Workflow, Workflow/sysadmin, Writeback, Writeback workers.",
     "sources": [
      {
       "path": "backend/src/rox_core/api/account/endpoints.py",
@@ -2818,190 +2812,190 @@
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       547,
-       547
+       549,
+       549
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       564,
-       564
+       566,
+       566
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       437,
-       437
+       439,
+       439
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       918,
-       918
+       920,
+       920
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       318,
-       318
+       320,
+       320
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       375,
-       375
+       377,
+       377
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       345,
-       345
+       347,
+       347
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       693,
-       693
+       695,
+       695
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       672,
-       672
+       674,
+       674
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       248,
-       248
+       250,
+       250
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       716,
-       716
+       718,
+       718
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       827,
-       827
+       829,
+       829
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       464,
-       464
+       466,
+       466
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       842,
-       842
+       844,
+       844
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       641,
-       641
+       643,
+       643
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       602,
-       602
+       604,
+       604
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       295,
-       295
+       297,
+       297
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       197,
-       197
+       199,
+       199
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       782,
-       782
+       784,
+       784
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       215,
-       215
+       217,
+       217
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       758,
-       758
+       760,
+       760
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       409,
-       409
+       411,
+       411
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       738,
-       738
+       740,
+       740
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       888,
-       888
+       890,
+       890
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       861,
-       861
+       863,
+       863
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       530,
-       530
+       532,
+       532
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       809,
-       809
+       811,
+       811
       ]
      },
      {
@@ -4267,36 +4261,36 @@
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       37,
-       37
+       38,
+       38
       ]
      },
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       127,
-       127
+       128,
+       128
       ]
      },
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       60,
-       60
+       61,
+       61
       ]
      },
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       86,
-       86
+       87,
+       87
       ]
      },
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       104,
-       104
+       105,
+       105
       ]
      },
      {
@@ -4652,22 +4646,22 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       191,
-       191
+       190,
+       190
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       209,
-       209
+       208,
+       208
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       618,
-       618
+       619,
+       619
       ]
      },
      {
@@ -4722,15 +4716,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       575,
-       575
+       576,
+       576
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       717,
-       717
+       718,
+       718
       ]
      },
      {
@@ -4743,22 +4737,22 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       783,
-       783
+       784,
+       784
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       808,
-       808
+       809,
+       809
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       416,
-       416
+       415,
+       415
       ]
      },
      {
@@ -4869,57 +4863,57 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       697,
-       697
+       698,
+       698
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       646,
-       646
+       647,
+       647
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       347,
-       347
+       346,
+       346
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       539,
-       539
+       540,
+       540
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       241,
-       241
+       240,
+       240
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       265,
-       265
+       264,
+       264
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       515,
-       515
+       516,
+       516
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       492,
-       492
+       493,
+       493
       ]
      },
      {
@@ -4939,22 +4933,22 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       287,
-       287
+       286,
+       286
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       319,
-       319
+       318,
+       318
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       400,
-       400
+       399,
+       399
       ]
      },
      {
@@ -4974,8 +4968,8 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       444,
-       444
+       443,
+       443
       ]
      },
      {
@@ -4988,15 +4982,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       468,
-       468
+       467,
+       467
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/dialer/endpoints.py",
       "lines": [
-       671,
-       671
+       672,
+       672
       ]
      },
      {
@@ -5051,71 +5045,78 @@
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       170,
-       170
+       173,
+       173
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       48,
-       48
+       51,
+       51
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       63,
-       63
+       66,
+       66
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       90,
-       90
+       93,
+       93
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       105,
-       105
+       108,
+       108
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       155,
-       155
+       158,
+       158
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       142,
-       142
+       145,
+       145
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       185,
-       185
+       188,
+       188
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       204,
-       204
+       207,
+       207
       ]
      },
      {
       "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
       "lines": [
-       221,
-       221
+       224,
+       224
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/prospect_lists/dynamics/endpoints.py",
+      "lines": [
+       242,
+       242
       ]
      },
      {
@@ -6701,6 +6702,13 @@
       ]
      },
      {
+      "path": "backend/src/workflow/router/instruction_generators.py",
+      "lines": [
+       17,
+       17
+      ]
+     },
+     {
       "path": "backend/src/chat/routes/integration/router.py",
       "lines": [
        30,
@@ -6717,232 +6725,267 @@
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       199,
-       199
+       218,
+       218
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       462,
-       462
+       481,
+       481
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       754,
-       754
+       773,
+       773
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       433,
-       433
+       452,
+       452
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       408,
-       408
+       2234,
+       2234
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2080,
-       2080
+       2290,
+       2290
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       379,
-       379
+       2257,
+       2257
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1230,
-       1230
+       2332,
+       2332
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       352,
-       352
+       2165,
+       2165
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1156,
-       1156
+       2189,
+       2189
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1205,
-       1205
+       427,
+       427
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1173,
-       1173
+       2099,
+       2099
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       273,
-       273
+       398,
+       398
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1480,
-       1480
+       1249,
+       1249
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       298,
-       298
+       371,
+       371
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       324,
-       324
+       1175,
+       1175
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       731,
-       731
+       1224,
+       1224
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1512,
-       1512
+       1192,
+       1192
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       544,
-       544
+       292,
+       292
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2058,
-       2058
+       1499,
+       1499
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2040,
-       2040
+       317,
+       317
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1435,
-       1435
+       343,
+       343
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1452,
-       1452
+       750,
+       750
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1573,
-       1573
+       1531,
+       1531
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2011,
-       2011
+       563,
+       563
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1908,
-       1908
+       2077,
+       2077
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1963,
-       1963
+       2059,
+       2059
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1936,
-       1936
+       1454,
+       1454
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1991,
-       1991
+       1471,
+       1471
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       643,
-       643
+       1592,
+       1592
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       570,
-       570
+       2030,
+       2030
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       610,
-       610
+       1927,
+       1927
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1356,
-       1356
+       1982,
+       1982
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       1955,
+       1955
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       2010,
+       2010
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       662,
+       662
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       589,
+       589
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       629,
+       629
       ]
      },
      {
@@ -6962,211 +7005,218 @@
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1420,
-       1420
+       1413,
+       1413
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1258,
-       1258
+       1439,
+       1439
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1310,
-       1310
+       1277,
+       1277
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1278,
-       1278
+       1329,
+       1329
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1335,
-       1335
+       1297,
+       1297
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2100,
-       2100
+       1354,
+       1354
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       2123,
-       2123
+       2119,
+       2119
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       812,
-       812
+       2142,
+       2142
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1068,
-       1068
+       831,
+       831
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1100,
-       1100
+       1087,
+       1087
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1001,
-       1001
+       1119,
+       1119
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       967,
-       967
+       1020,
+       1020
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       947,
-       947
+       986,
+       986
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       859,
-       859
+       966,
+       966
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       901,
-       901
+       878,
+       878
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1022,
-       1022
+       920,
+       920
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       923,
-       923
+       1041,
+       1041
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1044,
-       1044
+       942,
+       942
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1129,
-       1129
+       1063,
+       1063
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       792,
-       792
+       1148,
+       1148
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1660,
-       1660
+       811,
+       811
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1686,
-       1686
+       1679,
+       1679
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1800,
-       1800
+       1705,
+       1705
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1851,
-       1851
+       1819,
+       1819
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1712,
-       1712
+       1870,
+       1870
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1738,
-       1738
+       1731,
+       1731
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1765,
-       1765
+       1757,
+       1757
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1601,
-       1601
+       1784,
+       1784
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1627,
-       1627
+       1620,
+       1620
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       1544,
-       1544
+       1646,
+       1646
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/integrations/endpoints.py",
+      "lines": [
+       1563,
+       1563
       ]
      },
      {
@@ -7221,8 +7271,8 @@
      {
       "path": "backend/src/rox_core/api/internal/endpoints.py",
       "lines": [
-       171,
-       171
+       173,
+       173
       ]
      },
      {
@@ -7235,8 +7285,8 @@
      {
       "path": "backend/src/rox_core/api/internal/endpoints.py",
       "lines": [
-       141,
-       141
+       142,
+       142
       ]
      },
      {
@@ -8857,6 +8907,13 @@
       ]
      },
      {
+      "path": "backend/src/rox_core/api/tasks/endpoints.py",
+      "lines": [
+       1059,
+       1059
+      ]
+     },
+     {
       "path": "backend/src/workflow/router/registry.py",
       "lines": [
        27,
@@ -9951,29 +10008,29 @@
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3621,
-       3621
+       3634,
+       3634
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       679,
-       679
+       680,
+       680
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3662,
-       3662
+       3685,
+       3685
       ]
      },
      {
       "path": "backend/src/rox_core/api/slack_agent/endpoints.py",
       "lines": [
-       3703,
-       3703
+       3736,
+       3736
       ]
      },
      {
@@ -10133,15 +10190,15 @@
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       107,
-       107
+       109,
+       109
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       177,
-       177
+       179,
+       179
       ]
      },
      {
@@ -10154,330 +10211,344 @@
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       124,
-       124
+       126,
+       126
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       149,
-       149
+       151,
+       151
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       1020,
-       1020
+       1093,
+       1093
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       112,
-       112
+       116,
+       116
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       673,
-       673
+       677,
+       677
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       398,
-       398
+       402,
+       402
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1321,
-       1321
+       1369,
+       1369
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       535,
-       535
+       539,
+       539
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       414,
-       414
+       418,
+       418
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       857,
-       857
+       905,
+       905
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       219,
-       219
+       223,
+       223
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1242,
-       1242
+       1290,
+       1290
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       880,
-       880
+       928,
+       928
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       508,
-       508
+       512,
+       512
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       582,
-       582
+       586,
+       586
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       922,
-       922
+       970,
+       970
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       347,
-       347
+       351,
+       351
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       267,
-       267
+       271,
+       271
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1003,
-       1003
+       756,
+       756
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       650,
-       650
+       735,
+       735
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1359,
-       1359
+       1051,
+       1051
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1304,
-       1304
+       654,
+       654
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       471,
-       471
+       1407,
+       1407
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       486,
-       486
+       1352,
+       1352
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1070,
-       1070
+       475,
+       475
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       323,
-       323
+       490,
+       490
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       962,
-       962
+       1118,
+       1118
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1021,
-       1021
+       327,
+       327
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1170,
-       1170
+       1010,
+       1010
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1415,
-       1415
+       1069,
+       1069
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1439,
-       1439
+       1218,
+       1218
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       693,
-       693
+       1463,
+       1463
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       180,
-       180
+       1487,
+       1487
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1471,
-       1471
+       697,
+       697
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       710,
-       710
+       184,
+       184
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1492,
-       1492
+       1519,
+       1519
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1109,
-       1109
+       714,
+       714
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1140,
-       1140
+       1540,
+       1540
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1052,
-       1052
+       1157,
+       1157
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1036,
-       1036
+       1188,
+       1188
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       158,
-       158
+       1100,
+       1100
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       131,
-       131
+       1084,
+       1084
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       612,
-       612
+       162,
+       162
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       731,
-       731
+       135,
+       135
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1197,
-       1197
+       616,
+       616
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       630,
-       630
+       779,
+       779
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       1387,
-       1387
+       1245,
+       1245
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       634,
+       634
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
+      "lines": [
+       1435,
+       1435
       ]
      },
      {
@@ -10497,15 +10568,15 @@
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       1087,
-       1087
+       1112,
+       1112
       ]
      },
      {
       "path": "backend/src/rox_core/api/tasks/endpoints.py",
       "lines": [
-       969,
-       969
+       971,
+       971
       ]
      },
      {
@@ -11260,85 +11331,92 @@
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       65,
-       65
+       69,
+       69
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       190,
-       190
+       194,
+       194
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       417,
-       417
+       447,
+       447
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       396,
-       396
+       421,
+       421
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       226,
-       226
+       400,
+       400
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       365,
-       365
+       230,
+       230
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       93,
-       93
+       369,
+       369
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       302,
-       302
+       97,
+       97
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       276,
-       276
+       306,
+       306
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       250,
-       250
+       280,
+       280
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       117,
-       117
+       254,
+       254
       ]
      },
      {
       "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
       "lines": [
-       154,
-       154
+       121,
+       121
+      ]
+     },
+     {
+      "path": "backend/src/workflow/sysadmin/sysadmin_router.py",
+      "lines": [
+       158,
+       158
       ]
      },
      {
@@ -11582,8 +11660,8 @@
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       775,
-       775
+       776,
+       776
       ]
      },
      {
@@ -11659,22 +11737,22 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       3135,
-       3135
+       3134,
+       3134
       ]
      },
      {
       "path": "backend/src/tasks/executors/company_registration.py",
       "lines": [
-       65,
-       65
+       66,
+       66
       ]
      },
      {
       "path": "backend/src/tasks/executors/company_registration.py",
       "lines": [
-       315,
-       315
+       316,
+       316
       ]
      },
      {
@@ -11687,15 +11765,15 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       967,
-       967
+       976,
+       976
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1841,
-       1841
+       1831,
+       1831
       ]
      },
      {
@@ -11708,22 +11786,22 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       381,
-       381
+       380,
+       380
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1163,
-       1163
+       1153,
+       1153
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1372,
-       1372
+       1362,
+       1362
       ]
      },
      {
@@ -11757,8 +11835,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       852,
-       852
+       861,
+       861
       ]
      },
      {
@@ -11925,8 +12003,8 @@
      {
       "path": "backend/src/tasks/executors/enrichment_custom_cell_generation.py",
       "lines": [
-       47,
-       47
+       48,
+       48
       ]
      },
      {
@@ -11958,10 +12036,24 @@
       ]
      },
      {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_coordinator.py",
+      "lines": [
+       44,
+       44
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_worker.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       938,
-       938
+       947,
+       947
       ]
      },
      {
@@ -11990,6 +12082,41 @@
       "lines": [
        28,
        28
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_directory_sync_task.py",
+      "lines": [
+       39,
+       39
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_drive_sync_task.py",
+      "lines": [
+       61,
+       61
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_cleanup_task.py",
+      "lines": [
+       16,
+       16
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_sync_task.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_member_sync_task.py",
+      "lines": [
+       52,
+       52
       ]
      },
      {
@@ -12023,36 +12150,36 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       727,
-       727
+       736,
+       736
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       843,
-       843
+       844,
+       844
       ]
      },
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       97,
-       97
+       100,
+       100
       ]
      },
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       245,
-       245
+       248,
+       248
       ]
      },
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       816,
-       816
+       825,
+       825
       ]
      },
      {
@@ -12065,36 +12192,36 @@
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       3097,
-       3097
+       3096,
+       3096
       ]
      },
      {
       "path": "backend/src/tasks/executors/lead_registration.py",
       "lines": [
-       81,
-       81
+       100,
+       100
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       416,
-       416
+       409,
+       409
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       475,
-       475
+       468,
+       468
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       616,
-       616
+       609,
+       609
       ]
      },
      {
@@ -12310,8 +12437,8 @@
      {
       "path": "backend/src/tasks/executors/people_registration.py",
       "lines": [
-       36,
-       36
+       38,
+       38
       ]
      },
      {
@@ -12324,29 +12451,29 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       498,
-       498
+       501,
+       501
       ]
      },
      {
       "path": "backend/src/tasks/task_executor.py",
       "lines": [
-       1189,
-       1189
+       1179,
+       1179
       ]
      },
      {
       "path": "backend/src/tasks/executors/tabs_propagation.py",
       "lines": [
-       35,
-       35
+       37,
+       37
       ]
      },
      {
       "path": "backend/src/tasks/executors/tabs_propagation.py",
       "lines": [
-       128,
-       128
+       130,
+       130
       ]
      },
      {
@@ -12380,15 +12507,15 @@
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
-       60,
-       60
+       63,
+       63
       ]
      },
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
-       156,
-       156
+       159,
+       159
       ]
      },
      {
@@ -12408,8 +12535,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       665,
-       665
+       674,
+       674
       ]
      },
      {
@@ -12443,22 +12570,22 @@
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1327,
-       1327
+       1328,
+       1328
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       960,
-       960
+       961,
+       961
       ]
      },
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1184,
-       1184
+       1185,
+       1185
       ]
      },
      {
@@ -12471,8 +12598,8 @@
      {
       "path": "backend/src/tasks/executors/crm_write_back.py",
       "lines": [
-       1069,
-       1069
+       1070,
+       1070
       ]
      },
      {
@@ -12548,36 +12675,36 @@
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       99,
-       99
+       89,
+       89
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       710,
-       710
+       596,
+       596
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       642,
-       642
+       532,
+       532
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       303,
-       303
+       293,
+       293
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       588,
-       588
+       478,
+       478
       ]
      },
      {
@@ -12751,8 +12878,8 @@
      {
       "path": "backend/src/tasks/executors/graph.py",
       "lines": [
-       616,
-       616
+       625,
+       625
       ]
      },
      {
@@ -13514,8 +13641,15 @@
      {
       "path": "backend/src/agent_products/outbound/router/agents.py",
       "lines": [
-       4,
-       4
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/agent_products/outbound/router/agents.py",
+      "lines": [
+       26,
+       26
       ]
      },
      {
@@ -13526,10 +13660,10 @@
       ]
      },
      {
-      "path": "backend/src/agent_products/outbound/router/agents.py",
+      "path": "backend/src/agent_products/outbound/router/runs.py",
       "lines": [
-       28,
-       28
+       26,
+       26
       ]
      },
      {
@@ -13544,13 +13678,6 @@
       "lines": [
        28,
        28
-      ]
-     },
-     {
-      "path": "backend/src/agent_products/outbound/router/runs.py",
-      "lines": [
-       29,
-       29
       ]
      },
      {
@@ -13927,13 +14054,6 @@
      {
       "path": "backend/src/chat/routes/eval/sequences.py",
       "lines": [
-       12,
-       12
-      ]
-     },
-     {
-      "path": "backend/src/chat/routes/eval/sequences.py",
-      "lines": [
        18,
        18
       ]
@@ -14100,6 +14220,97 @@
       ]
      },
      {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_directory_sync_task.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_directory_sync_task.py",
+      "lines": [
+       22,
+       22
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_directory_sync_task.py",
+      "lines": [
+       30,
+       30
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_drive_sync_task.py",
+      "lines": [
+       9,
+       9
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_drive_sync_task.py",
+      "lines": [
+       10,
+       10
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_drive_sync_task.py",
+      "lines": [
+       34,
+       34
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_cleanup_task.py",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_cleanup_task.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_sync_task.py",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_file_sync_task.py",
+      "lines": [
+       4,
+       4
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_member_sync_task.py",
+      "lines": [
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_member_sync_task.py",
+      "lines": [
+       6,
+       6
+      ]
+     },
+     {
+      "path": "backend/src/ext_integrations/google_drive_integration/task_executors/google_drive_member_sync_task.py",
+      "lines": [
+       26,
+       26
+      ]
+     },
+     {
       "path": "backend/src/ext_integrations/integration/crm/salesforce/governance/model_worker.py",
       "lines": [
        5,
@@ -14200,22 +14411,22 @@
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       20,
-       20
+       13,
+       13
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       21,
-       21
+       14,
+       14
       ]
      },
      {
       "path": "backend/src/ext_integrations/seismic/task_executors.py",
       "lines": [
-       54,
-       54
+       44,
+       44
       ]
      },
      {
@@ -14606,15 +14817,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/campaigns/endpoints.py",
       "lines": [
-       36,
-       36
+       93,
+       93
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/campaigns/endpoints.py",
       "lines": [
-       93,
-       93
+       113,
+       113
       ]
      },
      {
@@ -14634,8 +14845,8 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/custom_tracking_domain/endpoints.py",
       "lines": [
-       32,
-       32
+       33,
+       33
       ]
      },
      {
@@ -14725,15 +14936,15 @@
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       48,
-       48
+       80,
+       80
       ]
      },
      {
       "path": "backend/src/rox_core/api/agents/outreach/sequence/endpoints.py",
       "lines": [
-       80,
-       80
+       86,
+       86
       ]
      },
      {
@@ -14795,8 +15006,8 @@
      {
       "path": "backend/src/rox_core/api/api_access/agent_action_apis/agent_account_intelligence_apis/endpoints.py",
       "lines": [
-       13,
-       13
+       20,
+       20
       ]
      },
      {
@@ -14991,6 +15202,13 @@
      {
       "path": "backend/src/rox_core/api/chrome_extension/endpoints.py",
       "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/rox_core/api/chrome_extension/endpoints.py",
+      "lines": [
        13,
        13
       ]
@@ -15082,8 +15300,8 @@
      {
       "path": "backend/src/rox_core/api/crm_field/endpoints.py",
       "lines": [
-       22,
-       22
+       23,
+       23
       ]
      },
      {
@@ -15558,15 +15776,15 @@
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       10,
-       10
+       26,
+       26
       ]
      },
      {
       "path": "backend/src/rox_core/api/integrations/endpoints.py",
       "lines": [
-       17,
-       17
+       29,
+       29
       ]
      },
      {
@@ -16118,8 +16336,8 @@
      {
       "path": "backend/src/rox_core/api/tasks/integrations/endpoints.py",
       "lines": [
-       9,
-       9
+       12,
+       12
       ]
      },
      {
@@ -16531,15 +16749,15 @@
      {
       "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
       "lines": [
-       12,
-       12
+       16,
+       16
       ]
      },
      {
       "path": "backend/src/tasks/executors/auto_unpause_sequences.py",
       "lines": [
-       16,
-       16
+       20,
+       20
       ]
      },
      {
@@ -16636,15 +16854,15 @@
      {
       "path": "backend/src/tasks/executors/campaign_coordinator.py",
       "lines": [
-       13,
-       13
+       31,
+       31
       ]
      },
      {
       "path": "backend/src/tasks/executors/campaign_coordinator.py",
       "lines": [
-       31,
-       31
+       35,
+       35
       ]
      },
      {
@@ -16944,8 +17162,8 @@
      {
       "path": "backend/src/tasks/executors/email_domain_resolution.py",
       "lines": [
-       25,
-       25
+       29,
+       29
       ]
      },
      {
@@ -17075,6 +17293,34 @@
       ]
      },
      {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_coordinator.py",
+      "lines": [
+       11,
+       11
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_coordinator.py",
+      "lines": [
+       12,
+       12
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_coordinator.py",
+      "lines": [
+       18,
+       18
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/entity_service_graph_sync_worker.py",
+      "lines": [
+       1,
+       1
+      ]
+     },
+     {
       "path": "backend/src/tasks/executors/generate_icp_insight_keywords.py",
       "lines": [
        17,
@@ -17182,13 +17428,6 @@
      {
       "path": "backend/src/tasks/executors/lead_registration.py",
       "lines": [
-       3,
-       3
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/lead_registration.py",
-      "lines": [
        4,
        4
       ]
@@ -17196,8 +17435,15 @@
      {
       "path": "backend/src/tasks/executors/lead_registration.py",
       "lines": [
-       11,
-       11
+       5,
+       5
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/lead_registration.py",
+      "lines": [
+       12,
+       12
       ]
      },
      {
@@ -17224,22 +17470,22 @@
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       41,
-       41
+       64,
+       64
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       71,
-       71
+       68,
+       68
       ]
      },
      {
       "path": "backend/src/tasks/executors/linkedin_scheduler.py",
       "lines": [
-       75,
-       75
+       116,
+       116
       ]
      },
      {
@@ -17532,8 +17778,8 @@
      {
       "path": "backend/src/tasks/executors/prospect_list_contact_csv_upload.py",
       "lines": [
-       34,
-       34
+       35,
+       35
       ]
      },
      {
@@ -17553,8 +17799,8 @@
      {
       "path": "backend/src/tasks/executors/prospect_list_csv_export.py",
       "lines": [
-       20,
-       20
+       23,
+       23
       ]
      },
      {
@@ -17602,6 +17848,13 @@
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
+       7,
+       7
+      ]
+     },
+     {
+      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
+      "lines": [
        8,
        8
       ]
@@ -17609,15 +17862,8 @@
      {
       "path": "backend/src/tasks/executors/public_data_account_refresh.py",
       "lines": [
-       9,
-       9
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/public_data_account_refresh.py",
-      "lines": [
-       10,
-       10
+       13,
+       13
       ]
      },
      {
@@ -17868,13 +18114,6 @@
      {
       "path": "backend/src/tasks/executors/seed_sample_data.py",
       "lines": [
-       12,
-       12
-      ]
-     },
-     {
-      "path": "backend/src/tasks/executors/seed_sample_data.py",
-      "lines": [
        28,
        28
       ]
@@ -17917,8 +18156,8 @@
      {
       "path": "backend/src/tasks/executors/selection_change_backfill_worker.py",
       "lines": [
-       30,
-       30
+       40,
+       40
       ]
      },
      {
@@ -18057,15 +18296,15 @@
      {
       "path": "backend/src/tasks/executors/tabs_propagation.py",
       "lines": [
-       8,
-       8
+       7,
+       7
       ]
      },
      {
       "path": "backend/src/tasks/executors/tabs_propagation.py",
       "lines": [
-       12,
-       12
+       11,
+       11
       ]
      },
      {
@@ -18360,13 +18599,6 @@
       "lines": [
        44,
        44
-      ]
-     },
-     {
-      "path": "backend/src/temporal/activities/email_sync/enqueue_chunk.py",
-      "lines": [
-       16,
-       16
       ]
      },
      {
@@ -18701,13 +18933,6 @@
      {
       "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
       "lines": [
-       11,
-       11
-      ]
-     },
-     {
-      "path": "backend/src/temporal/workflows/webhook_column_backfill_workflow.py",
-      "lines": [
        12,
        12
       ]
@@ -18864,6 +19089,20 @@
       "lines": [
        11,
        11
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/instruction_generators.py",
+      "lines": [
+       3,
+       3
+      ]
+     },
+     {
+      "path": "backend/src/workflow/router/instruction_generators.py",
+      "lines": [
+       4,
+       4
       ]
      },
      {
@@ -19047,7 +19286,7 @@
     ]
    },
    {
-    "text": "Background workers: backend/src/tasks/executors (7), backend/src/tasks/generic_backfill (2), backend/src/tasks/generic_backfill/sequences (2).",
+    "text": "Background workers: backend/src/tasks/executors (7), backend/src/tasks/generic_backfill (3), backend/src/tasks/generic_backfill/sequences (2).",
     "sources": [
      {
       "path": "backend/src/tasks/executors/complete_stale_rox_recorder_transcripts.py",
@@ -19057,7 +19296,7 @@
       ]
      },
      {
-      "path": "backend/src/tasks/generic_backfill/org_backfill_job.py",
+      "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
       "lines": [
        1,
        1
@@ -19073,7 +19312,7 @@
     ]
    },
    {
-    "text": "Business logic: backend/src/unified_data (6), backend/src/rox_core/api/column_metadata (3), backend/src/rox_core/api/column_value_mirror (3).",
+    "text": "Business logic: backend/src/unified_data (6), backend/src/rox_core/api/column_metadata (4), backend/src/rox_core/api/column_value_mirror (3).",
     "sources": [
      {
       "path": "backend/src/unified_data/catalog_entry_executor.py",
@@ -19346,10 +19585,10 @@
      ]
     },
     {
-     "path": "backend/src/chat/routes/eval/inbound_replies.py",
+     "path": "backend/src/chat/routes/eval/router.py",
      "lines": [
-      92,
-      92
+      79,
+      79
      ]
     },
     {
@@ -19364,20 +19603,6 @@
      "lines": [
       5,
       17
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/inbound_replies.py",
-     "lines": [
-      279,
-      279
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/router.py",
-     "lines": [
-      79,
-      79
      ]
     },
     {
@@ -19458,38 +19683,10 @@
      ]
     },
     {
-     "path": "backend/src/chat/routes/eval/inbound_replies.py",
-     "lines": [
-      258,
-      258
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/sequences.py",
-     "lines": [
-      291,
-      291
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/sequences.py",
-     "lines": [
-      342,
-      342
-     ]
-    },
-    {
-     "path": "backend/src/chat/routes/eval/sequences.py",
-     "lines": [
-      352,
-      352
-     ]
-    },
-    {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      150,
-      307
+      154,
+      316
      ]
     },
     {
@@ -21754,6 +21951,27 @@
      ]
     },
     {
+     "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+     "lines": [
+      1,
+      1
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+     "lines": [
+      76,
+      76
+     ]
+    },
+    {
+     "path": "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
+     "lines": [
+      63,
+      63
+     ]
+    },
+    {
      "path": "backend/src/tasks/generic_backfill/org_backfill_job.py",
      "lines": [
       1,
@@ -21836,7 +22054,7 @@
     ]
    },
    {
-    "text": "Shares 1 files with Graph Cdc.",
+    "text": "Shares 1 files with Entity Link Cdc.",
     "sources": [
      {
       "path": ".agents/skills/graph-test-harness/SKILL.md",
@@ -21867,10 +22085,10 @@
     "text": "HTTP clients make REST calls to CHAT (FastAPI) and make REST calls to INTERACTION (Flask).",
     "sources": [
      {
-      "path": "backend/src/chat/routes/eval/inbound_replies.py",
+      "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       92,
-       92
+       79,
+       79
       ]
      },
      {
@@ -22014,18 +22232,6 @@
     "many": false,
     "details": [
      {
-      "text": "/calendar: 1 endpoints",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/eval/inbound_replies.py",
-        "lines": [
-         279,
-         279
-        ]
-       }
-      ]
-     },
-     {
       "text": "/eval: 12 endpoints",
       "sources": [
        {
@@ -22113,46 +22319,6 @@
         ]
        }
       ]
-     },
-     {
-      "text": "/sequences: 5 endpoints",
-      "sources": [
-       {
-        "path": "backend/src/chat/routes/eval/inbound_replies.py",
-        "lines": [
-         92,
-         92
-        ]
-       },
-       {
-        "path": "backend/src/chat/routes/eval/inbound_replies.py",
-        "lines": [
-         258,
-         258
-        ]
-       },
-       {
-        "path": "backend/src/chat/routes/eval/sequences.py",
-        "lines": [
-         291,
-         291
-        ]
-       },
-       {
-        "path": "backend/src/chat/routes/eval/sequences.py",
-        "lines": [
-         342,
-         342
-        ]
-       },
-       {
-        "path": "backend/src/chat/routes/eval/sequences.py",
-        "lines": [
-         352,
-         352
-        ]
-       }
-      ]
      }
     ]
    },
@@ -22162,8 +22328,8 @@
     "source": {
      "path": "backend/src/rox_core/api/register_namespaces.py",
      "lines": [
-      150,
-      307
+      154,
+      316
      ]
     },
     "kind": "component",
@@ -24125,10 +24291,10 @@
     "dst": "chat",
     "label": "REST calls",
     "source": {
-     "path": "backend/src/chat/routes/eval/inbound_replies.py",
+     "path": "backend/src/chat/routes/eval/router.py",
      "lines": [
-      92,
-      92
+      79,
+      79
      ]
     }
    },
@@ -24186,6 +24352,7 @@
    "backend/src/ext_integrations/email_integration/email_content_orphan_cleanup_backfill_job.py",
    "backend/src/research/tracing/braintrust.py",
    "backend/src/rox_core/api/column_metadata/org_wide_rox_list_column_backfill_job.py",
+   "backend/src/rox_core/api/column_metadata/rox_list_column_bridge_backfill_job.py",
    "backend/src/rox_core/api/data_mock/business.py",
    "backend/src/rox_core/api/governance/security_entity_backfill_job.py",
    "backend/src/rox_core/api/people/bounce_tagged_contact_cleanup_backfill_job.py",
@@ -24203,6 +24370,7 @@
    "backend/src/tasks/executors/pre_meeting_briefings.py",
    "backend/src/tasks/executors/reenrich_person_phone.py",
    "backend/src/tasks/executors/single_person_enrich.py",
+   "backend/src/tasks/generic_backfill/is_sharded_seed_backfill_job.py",
    "backend/src/tasks/generic_backfill/org_backfill_job.py",
    "backend/src/tasks/generic_backfill/org_sharded_to_public_verify/parity.py",
    "backend/src/tasks/generic_backfill/sequences/sequence_email_reply_colleague_origin_backfill_job.py",
@@ -24254,8 +24422,8 @@
      "source": {
       "path": "backend/src/rox_core/api/register_namespaces.py",
       "lines": [
-       150,
-       307
+       154,
+       316
       ]
      }
     },
@@ -24288,10 +24456,10 @@
      "dst": "chat",
      "message": "REST calls",
      "source": {
-      "path": "backend/src/chat/routes/eval/inbound_replies.py",
+      "path": "backend/src/chat/routes/eval/router.py",
       "lines": [
-       92,
-       92
+       79,
+       79
       ]
      }
     },
@@ -24381,8 +24549,8 @@
    }
   },
   {
-   "label": "Graph Cdc",
-   "page": "feature-crm-graph-cdc",
+   "label": "Entity Link Cdc",
+   "page": "feature-crm-entity-link-cdc",
    "source": {
     "path": ".agents/skills/graph-test-harness/SKILL.md",
     "lines": [
